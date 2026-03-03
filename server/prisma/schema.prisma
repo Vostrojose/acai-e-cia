@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Produto {
+  id            String   @id @default(uuid())
+  nome          String
+  descricao     String?
+  preco         Float
+  ativo         Boolean  @default(true)
+  criadoEm      DateTime @default(now())
+  atualizadoEm  DateTime @updatedAt
+
+  itensPedido   ItemPedido[]
+}
+
+model Pedido {
+  id            String        @id @default(uuid())
+  status        StatusPedido  @default(RECEBIDO)
+  total         Float
+  telefone      String?       // ✅ NOVO CAMPO
+  criadoEm      DateTime      @default(now())
+  atualizadoEm  DateTime      @updatedAt
+
+  itens         ItemPedido[]
+}
+
+model ItemPedido {
+  id         String   @id @default(uuid())
+  quantidade Int
+  precoUnit  Float
+
+  pedido     Pedido   @relation(fields: [pedidoId], references: [id])
+  pedidoId   String
+
+  produto    Produto  @relation(fields: [produtoId], references: [id])
+  produtoId  String
+}
+
+model Usuario {
+  id        String   @id @default(uuid())
+  nome      String
+  email     String   @unique
+  senha     String
+  role      Role     @default(ADMIN)
+  criadoEm  DateTime @default(now())
+}
+
+enum StatusPedido {
+  RECEBIDO
+  EM_PREPARO
+  PRONTO
+  ENTREGUE
+  CANCELADO
+}
+
+enum Role {
+  ADMIN
+}

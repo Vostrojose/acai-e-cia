@@ -1,0 +1,38 @@
+import prisma from '../lib/prisma'
+
+interface CriarProdutoDTO {
+  nome: string
+  descricao?: string
+  preco: number
+  ativo?: boolean
+}
+
+class ProdutoService {
+  async criarProduto(data: CriarProdutoDTO) {
+    return await prisma.produto.create({
+      data: {
+        nome: data.nome,
+        descricao: data.descricao,
+        preco: data.preco,
+        ativo: data.ativo ?? true,
+      },
+    })
+  }
+
+  async listarProdutos() {
+    return await prisma.produto.findMany({
+      orderBy: {
+        criadoEm: 'desc',
+      },
+    })
+  }
+  async alterarStatus(id: string, ativo: boolean) {
+  return await prisma.produto.update({
+    where: { id },
+    data: { ativo },
+  })
+}
+
+}
+
+export default new ProdutoService()
