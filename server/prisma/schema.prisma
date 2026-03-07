@@ -13,6 +13,14 @@ model Produto {
   descricao     String?
   preco         Float
   ativo         Boolean  @default(true)
+  disponivelSeg Boolean @default(true)
+  disponivelTer Boolean @default(true)
+  disponivelQua Boolean @default(true)
+  disponivelQui Boolean @default(true)
+  disponivelSex Boolean @default(true)
+  disponivelSab Boolean @default(true)
+  disponivelDom Boolean @default(true)
+
   criadoEm      DateTime @default(now())
   atualizadoEm  DateTime @updatedAt
 

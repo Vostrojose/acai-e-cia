@@ -8,8 +8,7 @@ const router = Router()
 router.get('/produtos', produtoController.listar)
 
 // 🔐 Apenas admin autenticado
-router.post('/produto', ensureAuthenticated, produtoController.criar)
-router.patch('/produto/:id/status', ensureAuthenticated, produtoController.alterarStatus)
+router.post('/produtos', produtoController.criar)
+router.patch('/produtos/:id/status', produtoController.alterarStatus)
 
 export default router
-
