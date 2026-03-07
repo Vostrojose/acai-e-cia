@@ -32,6 +32,11 @@ class ProdutoService {
     data: { ativo },
   })
 }
+async removerProduto(id: string) {
+  return await prisma.produto.delete({
+    where: { id }
+  })
+}
 
 }
 

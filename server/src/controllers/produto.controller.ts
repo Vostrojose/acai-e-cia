@@ -41,6 +41,16 @@ class ProdutoController {
   })
 })
 
+remover = asyncHandler(async (request: Request, response: Response) => {
+  const { id } = request.params
+
+  await produtoService.removerProduto(id)
+
+  return response.json({
+    success: true
+  })
+})
+
 }
 
 

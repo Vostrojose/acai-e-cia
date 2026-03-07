@@ -10,5 +10,6 @@ router.get('/produtos', produtoController.listar)
 // 🔐 Apenas admin autenticado
 router.post('/produtos', produtoController.criar)
 router.patch('/produtos/:id/status', produtoController.alterarStatus)
+router.delete('/produto/:id', ensureAuthenticated, produtoController.remover)
 
 export default router
