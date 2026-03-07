@@ -5,6 +5,7 @@ import Checkout from '../pages/Checkout'
 import Acompanhamento from '../pages/Acompanhamento'
 import Pagamento from '../pages/Pagamento'
 import Cozinha from "../pages/Cozinha"
+import QRCodes from "../pages/QRCodes"
 
 export default function AppRoutes() {
   return (
@@ -16,6 +17,7 @@ export default function AppRoutes() {
       <Route path="/pagamento/:id" element={<Pagamento />} />
       <Route path="/acompanhamento/:id" element={<Acompanhamento />} />
       <Route path="/cozinha" element={<Cozinha />} />
+      <Route path="/qr" element={<QRCodes />} />
       
     </Routes>
   )
