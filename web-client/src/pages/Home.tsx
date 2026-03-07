@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api'
 import { useCart } from '../context/CartContext'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 interface Produto {
   id: string
@@ -12,7 +12,7 @@ interface Produto {
 
 export default function Home() {
   console.log('HOME ESTÁ RENDERIZANDO')
-
+  const { origem } = useParams()
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -25,6 +25,7 @@ export default function Home() {
     0
   )
 
+  // Carrega produtos da API
   useEffect(() => {
     async function loadProdutos() {
       try {
@@ -49,6 +50,13 @@ export default function Home() {
 
     loadProdutos()
   }, [])
+
+  // Salva origem no localStorage
+  useEffect(() => {
+    if (origem) {
+      localStorage.setItem("origemPedido", origem)
+    }
+  }, [origem])
 
   if (loading) {
     return <p style={{ padding: 20 }}>Carregando produtos...</p>
