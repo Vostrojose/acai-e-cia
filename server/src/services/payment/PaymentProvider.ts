@@ -7,11 +7,12 @@ let provider: any
 
 if (mode === 'mock') {
   provider = new MockProvider()
-} else if (mode === 'mercadopago') {
+} 
+else if (mode === 'mercadopago') {
   provider = new MercadoPagoProvider()
-} else {
+} 
+else {
   throw new Error('Provider de pagamento inválido.')
 }
 
-
-export default new MercadoPagoProvider()
+export default provider
