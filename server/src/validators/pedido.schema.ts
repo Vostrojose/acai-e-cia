@@ -31,6 +31,11 @@ export const criarPedidoSchema = z
       .min(10, 'telefone inválido.')
       .max(20, 'telefone inválido.')
       .optional(),
+
+    origem: z
+      .string()
+      .trim()
+      .optional()
   })
   .strict()
 
@@ -49,6 +54,3 @@ export const atualizarStatusSchema = z
     ]),
   })
   .strict()
-
-
-
