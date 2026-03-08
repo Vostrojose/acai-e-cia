@@ -9,6 +9,8 @@ export default function Checkout() {
 
   const [telefone, setTelefone] = useState('')
   const [loading, setLoading] = useState(false)
+  const [endereco, setEndereco] = useState('')
+  const [tipoPedido, setTipoPedido] = useState('retirada')
 
   async function finalizarPedido() {
     try {
@@ -26,17 +28,18 @@ export default function Checkout() {
 
       if (telefoneLimpo.length < 10) {
         alert('Digite um WhatsApp válido.')
-        return
+        return 
       }
 
-      const payload = {
-        telefone: telefoneLimpo,
-        origem,
-        itens: itens.map((item: any) => ({
-          produtoId: item.id,
-          quantidade: item.quantidade
-        }))
-      }
+   const payload = {
+  telefone: telefoneLimpo,
+  origem,
+  endereco: tipoPedido === "entrega" ? endereco : null,
+  itens: itens.map((item) => ({
+    produtoId: item.id,
+    quantidade: item.quantidade
+  }))
+}
 
       const pedidoResponse = await api.post('/pedido', payload)
 

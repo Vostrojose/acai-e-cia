@@ -1,7 +1,10 @@
-import Produtos from "./pages/Produtos";
+import { BrowserRouter } from "react-router-dom"
+import AppRoutes from "./routes/AppRoutes"
 
-function App() {
-  return <Produtos />;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  )
 }
-
-export default App;

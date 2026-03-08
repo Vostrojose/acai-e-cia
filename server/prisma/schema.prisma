@@ -33,11 +33,15 @@ model Pedido {
 
   status        StatusPedido  @default(RECEBIDO)
 
+  tipo          TipoPedido    @default(ONLINE)
+
   total         Float
 
   telefone      String?
 
   origem        String?       // ✅ origem do pedido (mesa, QR, panfleto, etc)
+
+   endereco      String?
 
   criadoEm      DateTime      @default(now())
   atualizadoEm  DateTime      @updatedAt
@@ -77,4 +81,10 @@ enum StatusPedido {
 
 enum Role {
   ADMIN
+}
+enum TipoPedido {
+  MESA
+  RETIRADA
+  ENTREGA
+  ONLINE
 }

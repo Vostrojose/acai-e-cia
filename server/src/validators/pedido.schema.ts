@@ -35,7 +35,18 @@ export const criarPedidoSchema = z
     origem: z
       .string()
       .trim()
-      .optional()
+      .optional(),
+
+       endereco: z
+      .string()
+      .optional(),
+      
+      tipo: z.enum([
+  "MESA",
+  "RETIRADA",
+  "ENTREGA",
+  "ONLINE"
+]).optional(),
   })
   .strict()
 

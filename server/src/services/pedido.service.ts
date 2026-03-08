@@ -15,6 +15,7 @@ class PedidoService {
     }[]
     telefone?: string
     origem?: string
+    endereco?: string
   }) {
     /* ---------- valida itens ---------- */
 
@@ -120,15 +121,15 @@ class PedidoService {
 
     const pedidoCriado = await prisma.$transaction(async (tx) => {
       const pedido = await tx.pedido.create({
-        data: {
-          total: totalCalculado,
-          telefone: telefoneLimpo,
-          origem: data.origem,
-          status: StatusPedido.RECEBIDO,
-          itens: {
-            create: itensParaCriar,
-          },
-        },
+     data: {
+  total: totalCalculado,
+  telefone: data.telefone,
+  origem: data.origem,
+  endereco: data.endereco,
+  itens: {
+    create: itensParaCriar,
+  },
+},
         include: {
           itens: true,
         },
