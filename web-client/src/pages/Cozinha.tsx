@@ -9,18 +9,22 @@ export default function Cozinha() {
 
   useEffect(() => {
 
-    async function carregarPedidos() {
-      const res = await api.get("/pedido")
-      setPedidos(res.data.data)
-    }
+  async function carregarPedidos() {
+    const res = await api.get("/pedidos")
+    setPedidos(res.data.data)
+  }
 
-    carregarPedidos()
+  carregarPedidos()
 
-    socket.on("novo_pedido", (pedido) => {
-      setPedidos((prev) => [pedido, ...prev])
-    })
+  socket.on("novo_pedido", (pedido) => {
+    setPedidos((prev) => [pedido, ...prev])
+  })
 
-  }, [])
+  return () => {
+    socket.off("novo_pedido")
+  }
+
+}, [])
 
   return (
     <div style={{ padding: 20 }}>
