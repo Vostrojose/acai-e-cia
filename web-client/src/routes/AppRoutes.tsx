@@ -4,8 +4,7 @@ import Carrinho from '../pages/Carrinho'
 import Checkout from '../pages/Checkout'
 import Acompanhamento from '../pages/Acompanhamento'
 import Pagamento from '../pages/Pagamento'
-import Cozinha from "../pages/Cozinha"
-import QRCodes from "../pages/QRCodes"
+
 
 
 export default function AppRoutes() {
@@ -17,8 +16,6 @@ export default function AppRoutes() {
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/pagamento/:id" element={<Pagamento />} />
       <Route path="/acompanhamento/:id" element={<Acompanhamento />} />
-      <Route path="/cozinha" element={<Cozinha />} />
-      <Route path="/qr" element={<QRCodes />} />
       <Route path="*" element={<Home />} />
       
     </Routes>
