@@ -1,46 +1,23 @@
-import { Request, Response, NextFunction } from 'express'
-import { verifyToken } from '../utils/jwt'
-import { AppError } from '../utils/AppError'
-
-interface TokenPayload {
-  id: string
-  role: string
-}
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 
 export function ensureAuthenticated(
-  request: Request,
-  _response: Response,
+  req: Request,
+  res: Response,
   next: NextFunction
 ) {
-  const authHeader = request.headers.authorization
+  const authHeader = req.headers.authorization;
 
   if (!authHeader) {
-    throw new AppError('Token não informado.', 401)
+    return res.status(401).json({ message: "Token não informado" });
   }
 
-  const parts = authHeader.split(' ')
-
-  if (parts.length !== 2) {
-    throw new AppError('Token mal formatado.', 401)
-  }
-
-  const [scheme, token] = parts
-
-  if (!/^Bearer$/i.test(scheme)) {
-    throw new AppError('Token mal formatado.', 401)
-  }
+  const [, token] = authHeader.split(" ");
 
   try {
-    const decoded = verifyToken(token) as TokenPayload
-
-    // 🔥 Garantir que request.user exista antes de atribuir
-    ;(request as any).user = {
-      id: decoded.id,
-      role: decoded.role,
-    }
-
-    return next()
-  } catch (err) {
-    throw new AppError('Token inválido.', 401)
+    jwt.verify(token, process.env.JWT_SECRET as string);
+    next();
+  } catch {
+    return res.status(401).json({ message: "Token inválido" });
   }
 }

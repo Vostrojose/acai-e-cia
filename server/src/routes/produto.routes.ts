@@ -1,15 +1,16 @@
-import { Router } from 'express'
-import produtoController from '../controllers/produto.controller'
-import { ensureAuthenticated } from '../middlewares/auth.middleware'
+import { Router } from "express";
+import produtoController from "../controllers/produto.controller";
+import { ensureAuthenticated } from "../middlewares/auth.middleware";
 
-const router = Router()
+const router = Router();
 
-// 🔓 Público (client precisa listar produtos)
-router.get('/produtos', produtoController.listar)
+// 🔓 Público (clientes podem listar produtos)
+router.get("/produtos", produtoController.listar);
 
 // 🔐 Apenas admin autenticado
-router.post('/produtos', produtoController.criar)
-router.patch('/produtos/:id/status', produtoController.alterarStatus)
-router.delete('/produto/:id', ensureAuthenticated, produtoController.remover)
+router.post("/produtos", ensureAuthenticated, produtoController.criar);
+router.put("/produtos/:id", ensureAuthenticated, produtoController.atualizar);
+router.patch("/produtos/:id/status", ensureAuthenticated, produtoController.alterarStatus);
+router.delete("/produtos/:id", ensureAuthenticated, produtoController.deletar);
 
-export default router
+export default router;
