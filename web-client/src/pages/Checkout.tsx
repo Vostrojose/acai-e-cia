@@ -12,30 +12,46 @@ export default function Checkout() {
 
   async function finalizarPedido() {
     try {
-      if (!telefone) {
+      if (!telefone || telefone.trim() === '') {
         alert('Informe seu WhatsApp para confirmação do pedido.')
         return
       }
 
       setLoading(true)
 
-      const origem = localStorage.getItem('origemPedido')
+      const origem = localStorage.getItem('origemPedido') ?? "1"
 
-      const pedidoResponse = await api.post('/pedido', {
-        telefone,
+      // remove caracteres não numéricos
+      const telefoneLimpo = telefone.replace(/\D/g, '')
+
+      if (telefoneLimpo.length < 10) {
+        alert('Digite um WhatsApp válido.')
+        return
+      }
+
+      const payload = {
+        telefone: telefoneLimpo,
         origem,
-        itens: itens.map((item) => ({
+        itens: itens.map((item: any) => ({
           produtoId: item.id,
-          quantidade: item.quantidade,
-        })),
-      })
+          quantidade: item.quantidade
+        }))
+      }
 
-      const pedidoId = pedidoResponse.data.data.id
+      const pedidoResponse = await api.post('/pedido', payload)
+
+      const pedidoId = pedidoResponse?.data?.data?.id
+
+      if (!pedidoId) {
+        console.error('Resposta inesperada da API:', pedidoResponse.data)
+        alert('Erro ao criar pedido')
+        return
+      }
 
       navigate(`/pagamento/${pedidoId}`)
 
-    } catch (error) {
-      console.error('Erro ao finalizar pedido:', error)
+    } catch (error: any) {
+      console.error('Erro ao finalizar pedido:', error?.response?.data || error)
       alert('Erro ao processar pedido')
     } finally {
       setLoading(false)
@@ -47,7 +63,7 @@ export default function Checkout() {
       <h1>💳 Checkout</h1>
 
       <p>Total do pedido:</p>
-      <h2>R$ {total.toFixed(2)}</h2>
+      <h2>R$ {(total ?? 0).toFixed(2)}</h2>
 
       <div style={{ marginTop: 20 }}>
         <label>WhatsApp para confirmação</label>
