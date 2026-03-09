@@ -90,22 +90,26 @@ export default function Home() {
 
       </div>
 
-     {totalQuantidade > 0 && (
+    {totalQuantidade > 0 && (
   <button
     onClick={() => navigate('/carrinho')}
     style={{
       position: 'fixed',
-      bottom: 'env(safe-area-inset-bottom, 20px)',
-      right: 20,
-      padding: '15px 20px',
-      borderRadius: 50,
+      bottom: '20px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      padding: '15px 25px',
+      borderRadius: '40px',
       backgroundColor: '#00c853',
       color: 'white',
       border: 'none',
       fontWeight: 'bold',
+      fontSize: '16px',
       cursor: 'pointer',
-      boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
-      zIndex: 9999
+      boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+      zIndex: 9999,
+      maxWidth: '90%',
+      width: '400px'
     }}
   >
     🛒 {totalQuantidade} item{totalQuantidade > 1 ? 's' : ''} • R$ {total.toFixed(2)}
