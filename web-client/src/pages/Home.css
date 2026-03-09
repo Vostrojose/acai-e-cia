@@ -9,6 +9,8 @@
   align-items: center;
 
   padding: 30px 20px;
+
+  overflow-x: hidden;
 }
 
 /* TÍTULO */
@@ -85,4 +87,31 @@
 
 .add-btn:hover {
   background: #4A148C;
+}
+.carrinho-fixo {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: calc(100% - 40px);
+  max-width: 500px;
+
+  background: #00c853;
+  color: white;
+
+  border-radius: 40px;
+
+  padding: 16px;
+
+  font-weight: bold;
+  font-size: 16px;
+
+  border: none;
+
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+
+  z-index: 9999;
+
+  cursor: pointer;
 }
