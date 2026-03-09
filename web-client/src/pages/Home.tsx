@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import api from '../services/api'
 import { useCart } from '../context/CartContext'
 import { useNavigate, useParams } from 'react-router-dom'
+import './Home.css'
 
 interface Produto {
   id: string
@@ -11,7 +12,7 @@ interface Produto {
 }
 
 export default function Home() {
-  console.log('HOME ESTÁ RENDERIZANDO')
+
   const { origem } = useParams()
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [loading, setLoading] = useState(true)
@@ -19,39 +20,27 @@ export default function Home() {
   const { adicionarItem, itens, total } = useCart()
   const navigate = useNavigate()
 
-  // 🔢 Calcula quantidade total de unidades
   const totalQuantidade = itens.reduce(
     (acc, item) => acc + item.quantidade,
     0
   )
 
-  // Carrega produtos da API
   useEffect(() => {
     async function loadProdutos() {
-      try {
-        console.log('ENTROU NO LOADPRODUTOS')
 
-        const response = await api.get('/produtos')
+      const response = await api.get('/produtos')
 
-        console.log('RESPOSTA DA API:', response.data)
+      const produtosAtivos = response.data.data.filter(
+        (produto: Produto) => produto.ativo
+      )
 
-        // Apenas produtos ativos
-        const produtosAtivos = response.data.data.filter(
-          (produto: Produto) => produto.ativo
-        )
-
-        setProdutos(produtosAtivos)
-      } catch (error) {
-        console.error('ERRO NA REQUISIÇÃO:', error)
-      } finally {
-        setLoading(false)
-      }
+      setProdutos(produtosAtivos)
+      setLoading(false)
     }
 
     loadProdutos()
   }, [])
 
-  // Salva origem no localStorage
   useEffect(() => {
     if (origem) {
       localStorage.setItem("origemPedido", origem)
@@ -63,39 +52,43 @@ export default function Home() {
   }
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>🍧 Cardápio</h1>
+    <div className="page">
 
-      {produtos.length === 0 && <p>Nenhum produto disponível.</p>}
+      <h1 className="title">Cardápio</h1>
 
-      {produtos.map((produto) => (
-        <div
-          key={produto.id}
-          style={{
-            border: '1px solid #ddd',
-            borderRadius: 8,
-            padding: 15,
-            marginBottom: 10,
-          }}
-        >
-          <h3>{produto.nome}</h3>
-          <p>R$ {produto.preco.toFixed(2)}</p>
+      <div className="cardapio-list">
 
-          <button
-            onClick={() =>
-              adicionarItem({
-                id: produto.id,
-                nome: produto.nome,
-                preco: produto.preco,
-              })
-            }
-          >
-            Adicionar
-          </button>
-        </div>
-      ))}
+        {produtos.map((produto) => (
 
-      {/* 🔥 Botão flutuante inteligente */}
+          <div key={produto.id} className="produto-card">
+
+            <div className="produto-nome">
+              {produto.nome}
+            </div>
+
+            <div className="produto-preco">
+              R$ {produto.preco.toFixed(2)}
+            </div>
+
+            <button
+              className="add-btn"
+              onClick={() =>
+                adicionarItem({
+                  id: produto.id,
+                  nome: produto.nome,
+                  preco: produto.preco,
+                })
+              }
+            >
+              Adicionar
+            </button>
+
+          </div>
+
+        ))}
+
+      </div>
+
       {totalQuantidade > 0 && (
         <button
           onClick={() => navigate('/carrinho')}
@@ -116,6 +109,7 @@ export default function Home() {
           🛒 {totalQuantidade} item{totalQuantidade > 1 ? 's' : ''} • R$ {total.toFixed(2)}
         </button>
       )}
+
     </div>
   )
 }

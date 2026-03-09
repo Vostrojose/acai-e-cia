@@ -1,0 +1,52 @@
+.page {
+  min-height: 100vh;
+  background: #4A148C;
+  padding: 20px;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #f3f2f4;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.cardapio-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.produto-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+}
+
+.produto-nome {
+  font-size: 20px;
+  color: #555652;
+  margin-bottom: 4px;
+}
+
+.produto-preco {
+  font-size: 18px;
+  font-weight: 600;
+  color: #6A1B9A;
+}
+
+.add-btn {
+  margin-top: 10px;
+  background: #6A1B9A;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.add-btn:hover {
+  background: #4A148C;
+}
