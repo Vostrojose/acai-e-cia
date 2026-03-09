@@ -53,10 +53,10 @@ export default function Home() {
 
   return (
     <div className="page">
+      <h1 className="title">Açaí & Cia</h1>
+
       <div className="cardapio-container"></div>
-
-      <h1 className="title">Cardápio</h1>
-
+      
       <div className="cardapio-list">
 
         {produtos.map((produto) => (

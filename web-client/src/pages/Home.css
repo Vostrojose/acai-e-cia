@@ -1,51 +1,60 @@
 /* FUNDO DA PÁGINA */
 .page {
   min-height: 100vh;
+  width: 100%;
   background: #4A148C;
 
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
 
-  padding: 20px;
-}
-
-/* CONTAINER CENTRAL */
-.cardapio-container {
-  width: 100%;
-  max-width: 600px;
+  padding: 30px 20px;
 }
 
 /* TÍTULO */
 .title {
-  font-size: 34px;
+  font-size: 36px;
   font-weight: 700;
   color: #f3f2f4;
   text-align: center;
-  margin-bottom: 25px;
+
+  margin-bottom: 30px;
+}
+
+/* CONTAINER DO CARDÁPIO */
+.cardapio-container {
+  width: 100%;
+  max-width: 900px;
 }
 
 /* LISTA */
 .cardapio-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
 }
 
-/* CARD DO PRODUTO */
+/* CARD */
 .produto-card {
   background: #ffffff;
   border-radius: 14px;
   padding: 18px;
 
-  box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
 
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  transition: transform 0.15s ease;
 }
 
-/* TEXTO DO PRODUTO */
+/* Efeito hover */
+.produto-card:hover {
+  transform: translateY(-2px);
+}
+
+/* INFORMAÇÕES */
 .produto-info {
   display: flex;
   flex-direction: column;
@@ -53,8 +62,8 @@
 
 .produto-nome {
   font-size: 20px;
-  color: #555652;
-  margin-bottom: 4px;
+  color: #444;
+  margin-bottom: 5px;
 }
 
 .produto-preco {
