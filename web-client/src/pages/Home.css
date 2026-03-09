@@ -1,28 +1,54 @@
+/* FUNDO DA PÁGINA */
 .page {
   min-height: 100vh;
   background: #4A148C;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
   padding: 20px;
 }
 
+/* CONTAINER CENTRAL */
+.cardapio-container {
+  width: 100%;
+  max-width: 600px;
+}
+
+/* TÍTULO */
 .title {
-  font-size: 32px;
+  font-size: 34px;
   font-weight: 700;
   color: #f3f2f4;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 
+/* LISTA */
 .cardapio-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
+/* CARD DO PRODUTO */
 .produto-card {
   background: #ffffff;
   border-radius: 14px;
-  padding: 16px;
+  padding: 18px;
+
   box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* TEXTO DO PRODUTO */
+.produto-info {
+  display: flex;
+  flex-direction: column;
 }
 
 .produto-nome {
@@ -37,14 +63,15 @@
   color: #6A1B9A;
 }
 
+/* BOTÃO */
 .add-btn {
-  margin-top: 10px;
   background: #6A1B9A;
   color: white;
   border: none;
   padding: 10px 14px;
   border-radius: 8px;
   cursor: pointer;
+  font-weight: bold;
 }
 
 .add-btn:hover {

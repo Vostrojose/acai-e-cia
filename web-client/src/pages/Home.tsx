@@ -53,6 +53,7 @@ export default function Home() {
 
   return (
     <div className="page">
+      <div className="cardapio-container"></div>
 
       <h1 className="title">Cardápio</h1>
 
