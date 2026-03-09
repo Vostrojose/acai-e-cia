@@ -56,7 +56,7 @@ export default function Home() {
       <h1 className="title">Açaí & Cia</h1>
 
       <div className="cardapio-container"></div>
-      
+
       <div className="cardapio-list">
 
         {produtos.map((produto) => (
@@ -90,26 +90,27 @@ export default function Home() {
 
       </div>
 
-      {totalQuantidade > 0 && (
-        <button
-          onClick={() => navigate('/carrinho')}
-          style={{
-            position: 'fixed',
-            bottom: 20,
-            right: 20,
-            padding: '15px 20px',
-            borderRadius: 50,
-            backgroundColor: '#00c853',
-            color: 'white',
-            border: 'none',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
-          }}
-        >
-          🛒 {totalQuantidade} item{totalQuantidade > 1 ? 's' : ''} • R$ {total.toFixed(2)}
-        </button>
-      )}
+     {totalQuantidade > 0 && (
+  <button
+    onClick={() => navigate('/carrinho')}
+    style={{
+      position: 'fixed',
+      bottom: 'env(safe-area-inset-bottom, 20px)',
+      right: 20,
+      padding: '15px 20px',
+      borderRadius: 50,
+      backgroundColor: '#00c853',
+      color: 'white',
+      border: 'none',
+      fontWeight: 'bold',
+      cursor: 'pointer',
+      boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
+      zIndex: 9999
+    }}
+  >
+    🛒 {totalQuantidade} item{totalQuantidade > 1 ? 's' : ''} • R$ {total.toFixed(2)}
+  </button>
+)}
 
     </div>
   )
