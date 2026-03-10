@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api'
 import { useCart } from '../context/CartContext'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import './Home.css'
 
 interface Produto {
@@ -14,10 +14,12 @@ interface Produto {
 export default function Home() {
 
   const { origem } = useParams()
+  const navigate = useNavigate()
+
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [loading, setLoading] = useState(true)
 
-  const { adicionarItem, removerItem, itens } = useCart()
+  const { adicionarItem, itens } = useCart()
 
   useEffect(() => {
     async function loadProdutos() {
@@ -92,33 +94,18 @@ export default function Home() {
 
                 ) : (
 
-                  <div className="quantidade-control">
-
-                    <button
-                      className="qtd-btn"
-                      onClick={() => removerItem(produto.id)}
-                    >
-                      -
-                    </button>
-
-                    <span className="qtd-num">
-                      {quantidade}
-                    </span>
-
-                    <button
-                      className="qtd-btn"
-                      onClick={() =>
-                        adicionarItem({
-                          id: produto.id,
-                          nome: produto.nome,
-                          preco: produto.preco,
-                        })
-                      }
-                    >
-                      +
-                    </button>
-
-                  </div>
+                  <button
+                    className="add-btn-added"
+                    onClick={() =>
+                      adicionarItem({
+                        id: produto.id,
+                        nome: produto.nome,
+                        preco: produto.preco,
+                      })
+                    }
+                  >
+                    ✔ {quantidade} no pedido
+                  </button>
 
                 )}
 
@@ -130,6 +117,21 @@ export default function Home() {
         </div>
 
       </div>
+
+      {itens.length > 0 && (
+
+        <div className="checkout-bar">
+
+          <button
+            className="checkout-btn"
+            onClick={() => navigate('/carrinho')}
+          >
+            Ver pedido ({itens.length})
+          </button>
+
+        </div>
+
+      )}
 
     </div>
   )

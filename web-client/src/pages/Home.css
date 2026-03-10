@@ -7,13 +7,14 @@
   flex-direction: column;
   align-items: center;
 
-  padding: 30px 20px;
+  padding: 30px 20px 120px 20px;
   box-sizing: border-box;
 }
 
 .title {
   color: white;
   margin-bottom: 25px;
+  font-size: 28px;
 }
 
 .cardapio-container {
@@ -25,6 +26,12 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .cardapio-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .produto-card {
@@ -39,6 +46,11 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
+.produto-info {
+  display: flex;
+  flex-direction: column;
+}
+
 .produto-nome {
   font-size: 18px;
   font-weight: 600;
@@ -47,8 +59,10 @@
 .produto-preco {
   color: #6A1B9A;
   font-weight: bold;
+  margin-top: 4px;
 }
 
+/* botão adicionar */
 .add-btn {
   background: #6A1B9A;
   color: white;
@@ -58,22 +72,47 @@
   cursor: pointer;
 }
 
-.quantidade-control {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.qtd-btn {
-  background: #6A1B9A;
+/* botão quando já tem item */
+.add-btn-added {
+  background: #00c853;
   color: white;
   border: none;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: bold;
   cursor: pointer;
 }
 
-.qtd-num {
+/* barra inferior */
+.checkout-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+
+  background: white;
+  padding: 16px;
+
+  box-shadow: 0 -4px 10px rgba(0,0,0,0.15);
+}
+
+.checkout-btn {
+  width: 100%;
+  max-width: 700px;
+
+  margin: auto;
+  display: block;
+
+  padding: 14px;
+
+  background: #00c853;
+  color: white;
+
+  border: none;
+  border-radius: 10px;
+
+  font-size: 16px;
   font-weight: bold;
+
+  cursor: pointer;
 }
