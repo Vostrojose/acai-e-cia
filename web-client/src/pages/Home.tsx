@@ -8,6 +8,7 @@ interface Produto {
   id: string
   nome: string
   preco: number
+  descricao?: string
   ativo: boolean
 }
 
@@ -51,6 +52,7 @@ export default function Home() {
     <div className="page">
 
       <h1 className="title">Açaí & Cia</h1>
+      <h2 className="subtitle">Faça seu Pedido e Aguarde a Mensagem Para Ir Retirar </h2>
 
       <div className="cardapio-container">
 
