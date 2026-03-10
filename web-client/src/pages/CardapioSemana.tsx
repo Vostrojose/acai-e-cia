@@ -7,6 +7,7 @@ interface Produto {
   nome: string
   descricao?: string
   preco: number
+  destaque: boolean
 
   disponivelSeg: boolean
   disponivelTer: boolean
@@ -22,6 +23,7 @@ export default function CardapioSemana() {
   const [produtos, setProdutos] = useState<Produto[]>([])
 
   const hoje = new Date().getDay()
+  const destaque = produtos.find(p => p.destaque)
 
   useEffect(() => {
 
@@ -54,6 +56,31 @@ export default function CardapioSemana() {
       <h1 className="titulo-semana">
         Cardápio da Semana
       </h1>
+      {destaque && (
+
+  <div className="destaque-card">
+
+    <div className="destaque-label">
+       Especial da Semana
+    </div>
+
+    <div className="destaque-nome">
+      {destaque.nome}
+    </div>
+
+    {destaque.descricao && (
+      <div className="destaque-desc">
+        {destaque.descricao}
+      </div>
+    )}
+
+    <div className="destaque-preco">
+      R$ {destaque.preco.toFixed(2)}
+    </div>
+
+  </div>
+
+)}
 
       {dias.map((dia) => {
 

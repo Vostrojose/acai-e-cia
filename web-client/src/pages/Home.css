@@ -42,25 +42,38 @@
 }
 
 .produto-card {
+
   background: white;
   border-radius: 14px;
+
   padding: 16px;
 
   display: flex;
   justify-content: space-between;
   align-items: center;
 
+  gap: 15px;
+
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+
 }
 
 .produto-info {
+
   display: flex;
   flex-direction: column;
+
+  flex: 1;
+
 }
 
 .produto-nome {
+
   font-size: 18px;
   font-weight: 600;
+
+  color: #333;
+
 }
 
 .produto-preco {
@@ -125,8 +138,10 @@
 }
 
 .produto-descricao {
+
   font-size: 14px;
-  color: #666;
+  color: #777;
+
   margin-top: 4px;
-  margin-bottom: 4px;
+
 }

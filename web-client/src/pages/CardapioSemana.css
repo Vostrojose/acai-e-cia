@@ -108,3 +108,52 @@
   font-weight: bold;
 
 }
+
+.destaque-card {
+
+  width: 100%;
+  max-width: 700px;
+
+  background: linear-gradient(135deg,#FFD700,#FFC107);
+
+  border-radius: 14px;
+
+  padding: 20px;
+  margin-bottom: 25px;
+
+  color: black;
+
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+
+}
+
+.destaque-label {
+
+  font-size: 12px;
+  font-weight: bold;
+
+  margin-bottom: 6px;
+
+}
+
+.destaque-nome {
+
+  font-size: 22px;
+  font-weight: bold;
+
+}
+
+.destaque-desc {
+
+  margin-top: 6px;
+
+}
+
+.destaque-preco {
+
+  margin-top: 10px;
+
+  font-size: 20px;
+  font-weight: bold;
+
+}
