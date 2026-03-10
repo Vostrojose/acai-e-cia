@@ -52,7 +52,7 @@ export default function Home() {
     <div className="page">
 
       <h1 className="title">Açaí & Cia</h1>
-      <h2 className="subtitle">Faça seu Pedido e Aguarde a Mensagem Para Ir Retirar </h2>
+      <h2 className="subtitle">Faça seu Pedido e Aguarde a Mensagem no WhatsApp Informado Para Ir Retirar </h2>
 
       <div className="cardapio-container">
 
@@ -69,15 +69,21 @@ export default function Home() {
 
                 <div className="produto-info">
 
-                  <div className="produto-nome">
-                    {produto.nome}
+                <div className="produto-nome">
+                 {produto.nome}
                   </div>
 
-                  <div className="produto-preco">
-                    R$ {produto.preco.toFixed(2)}
-                  </div>
+                  {produto.descricao && (
+               <div className="produto-descricao">
+              {produto.descricao}
+                 </div>
+              )}
 
+               <div className="produto-preco">
+                R$ {produto.preco.toFixed(2)}
                 </div>
+
+                 </div>
 
                 {quantidade === 0 ? (
 

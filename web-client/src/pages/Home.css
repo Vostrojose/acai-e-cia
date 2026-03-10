@@ -123,3 +123,10 @@
 
   cursor: pointer;
 }
+
+.produto-descricao {
+  font-size: 14px;
+  color: #666;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
