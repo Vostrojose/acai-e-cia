@@ -1,60 +1,71 @@
 body {
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background: linear-gradient(135deg, #5a2ea6, #7b3ff2);
+  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+  background: linear-gradient(135deg, #4b2e83, #7b3ff2);
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100vh;
-  color: white;
+  color: #fff;
 }
 
 .container {
   text-align: center;
-  max-width: 400px;
-  padding: 20px;
+  max-width: 450px;
+  padding: 40px 30px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
 h1 {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
 .subtitle {
-  margin-bottom: 30px;
-  opacity: 0.9;
+  margin-bottom: 35px;
+  font-size: 1rem;
+  opacity: 0.85;
 }
 
 .buttons {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 18px;
 }
 
 .btn {
   text-decoration: none;
-  padding: 15px;
-  border-radius: 10px;
-  font-weight: bold;
-  transition: 0.3s;
+  padding: 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .primary {
-  background: #dedb07b3;
-  color: rgb(255, 252, 252);
+  background: linear-gradient(135deg, #f9d423, #ff4e50);
+  color: #fff;
 }
 
 .secondary {
-  background: #e38787;
- color: rgb(255, 252, 252);
+  background: linear-gradient(135deg, #ff6a88, #ff99ac);
+  color: #fff;
 }
 
 .download {
-  background: #ff9800;
-  color: white;
+  background: linear-gradient(135deg, #ff9800, #ff5722);
+  color: #fff;
 }
 
 .btn:hover {
-  transform: scale(1.05);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
 }
 
 .hidden {
@@ -62,7 +73,7 @@ h1 {
 }
 
 .footer {
-  margin-top: 25px;
-  font-size: 14px;
-  opacity: 0.8;
+  margin-top: 30px;
+  font-size: 0.9rem;
+  opacity: 0.7;
 }
