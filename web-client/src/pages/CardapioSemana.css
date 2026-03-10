@@ -1,0 +1,110 @@
+.cardapio-semana-page {
+
+  min-height: 100vh;
+  background: #4A148C;
+
+  padding: 30px 20px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+}
+
+.titulo-semana {
+
+  color: white;
+  font-size: 32px;
+  margin-bottom: 30px;
+
+}
+
+.dia-card {
+
+  width: 100%;
+  max-width: 700px;
+
+  background: rgba(255,255,255,0.1);
+
+  border-radius: 12px;
+
+  padding: 20px;
+  margin-bottom: 20px;
+
+}
+
+.dia-hoje {
+
+  border: 2px solid #FFD700;
+
+}
+
+.dia-titulo {
+
+  color: white;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin-bottom: 15px;
+
+}
+
+.badge-hoje {
+
+  background: #FFD700;
+  color: black;
+
+  font-size: 12px;
+
+  padding: 4px 8px;
+
+  border-radius: 6px;
+
+}
+
+.produtos-dia {
+
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+
+}
+
+.produto-card-semana {
+
+  background: white;
+
+  border-radius: 10px;
+
+  padding: 14px;
+
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+
+}
+
+.produto-nome {
+
+  font-weight: 600;
+  font-size: 18px;
+
+}
+
+.produto-descricao {
+
+  font-size: 14px;
+  color: #666;
+
+  margin-top: 4px;
+
+}
+
+.produto-preco {
+
+  margin-top: 6px;
+
+  color: #6A1B9A;
+  font-weight: bold;
+
+}

@@ -4,6 +4,7 @@ import Carrinho from '../pages/Carrinho'
 import Checkout from '../pages/Checkout'
 import Acompanhamento from '../pages/Acompanhamento'
 import Pagamento from '../pages/Pagamento'
+import CardapioSemana from "../pages/CardapioSemana"
 
 
 
@@ -17,6 +18,7 @@ export default function AppRoutes() {
       <Route path="/pagamento/:id" element={<Pagamento />} />
       <Route path="/acompanhamento/:id" element={<Acompanhamento />} />
       <Route path="*" element={<Home />} />
+      <Route path="/cardapio" element={<CardapioSemana />} />
       
     </Routes>
   )

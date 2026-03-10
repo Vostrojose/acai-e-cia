@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api'
-import './Home.css'
+import './CardapioSemana.css'
 
 interface Produto {
   id: string
@@ -21,6 +21,8 @@ export default function CardapioSemana() {
 
   const [produtos, setProdutos] = useState<Produto[]>([])
 
+  const hoje = new Date().getDay()
+
   useEffect(() => {
 
     async function loadProdutos() {
@@ -36,78 +38,81 @@ export default function CardapioSemana() {
   }, [])
 
   const dias = [
-    { nome: "Segunda", key: "disponivelSeg" },
-    { nome: "Terça", key: "disponivelTer" },
-    { nome: "Quarta", key: "disponivelQua" },
-    { nome: "Quinta", key: "disponivelQui" },
-    { nome: "Sexta", key: "disponivelSex" },
-    { nome: "Sábado", key: "disponivelSab" },
-    { nome: "Domingo", key: "disponivelDom" }
+    { nome: "Segunda", key: "disponivelSeg", numero: 1 },
+    { nome: "Terça", key: "disponivelTer", numero: 2 },
+    { nome: "Quarta", key: "disponivelQua", numero: 3 },
+    { nome: "Quinta", key: "disponivelQui", numero: 4 },
+    { nome: "Sexta", key: "disponivelSex", numero: 5 },
+    { nome: "Sábado", key: "disponivelSab", numero: 6 },
+    { nome: "Domingo", key: "disponivelDom", numero: 0 }
   ]
 
   return (
 
-    <div className="page">
+    <div className="cardapio-semana-page">
 
-      <h1 className="title">
+      <h1 className="titulo-semana">
         Cardápio da Semana
       </h1>
 
-      <div className="cardapio-container">
+      {dias.map((dia) => {
 
-        {dias.map((dia) => {
+        const produtosDoDia = produtos.filter(
+          (produto: any) => produto[dia.key]
+        )
 
-          const produtosDoDia = produtos.filter(
-            (produto: any) => produto[dia.key]
-          )
+        if (produtosDoDia.length === 0) return null
 
-          if (produtosDoDia.length === 0) return null
+        return (
 
-          return (
+          <div
+            key={dia.nome}
+            className={`dia-card ${hoje === dia.numero ? 'dia-hoje' : ''}`}
+          >
 
-            <div key={dia.nome} style={{ marginBottom: 30 }}>
+            <h2 className="dia-titulo">
 
-              <h2 style={{ color: "white", marginBottom: 10 }}>
-                {dia.nome}
-              </h2>
+              {dia.nome}
 
-              <div className="cardapio-list">
+              {hoje === dia.numero && (
+                <span className="badge-hoje">
+                  HOJE
+                </span>
+              )}
 
-                {produtosDoDia.map((produto) => (
+            </h2>
 
-                  <div key={produto.id} className="produto-card">
+            <div className="produtos-dia">
 
-                    <div className="produto-info">
+              {produtosDoDia.map(produto => (
 
-                      <div className="produto-nome">
-                        {produto.nome}
-                      </div>
+                <div key={produto.id} className="produto-card-semana">
 
-                      {produto.descricao && (
-                        <div className="produto-descricao">
-                          {produto.descricao}
-                        </div>
-                      )}
-
-                      <div className="produto-preco">
-                        R$ {produto.preco.toFixed(2)}
-                      </div>
-
-                    </div>
-
+                  <div className="produto-nome">
+                    {produto.nome}
                   </div>
 
-                ))}
+                  {produto.descricao && (
+                    <div className="produto-descricao">
+                      {produto.descricao}
+                    </div>
+                  )}
 
-              </div>
+                  <div className="produto-preco">
+                    R$ {produto.preco.toFixed(2)}
+                  </div>
+
+                </div>
+
+              ))}
 
             </div>
 
-          )
+          </div>
 
-        })}
+        )
 
-      </div>
+      })}
 
     </div>
 
