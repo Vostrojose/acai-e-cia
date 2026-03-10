@@ -7,12 +7,22 @@ import './Home.css'
 interface Produto {
   id: string
   nome: string
-  preco: number
   descricao?: string
+  preco: number
   ativo: boolean
+
+  disponivelSeg: boolean
+  disponivelTer: boolean
+  disponivelQua: boolean
+  disponivelQui: boolean
+  disponivelSex: boolean
+  disponivelSab: boolean
+  disponivelDom: boolean
 }
 
 export default function Home() {
+
+  const hoje = new Date().getDay()
 
   const { origem } = useParams()
   const navigate = useNavigate()
@@ -48,17 +58,55 @@ export default function Home() {
     return <p style={{ padding: 20 }}>Carregando produtos...</p>
   }
 
+  /* ============================= */
+  /* FILTRO DE DISPONIBILIDADE    */
+  /* ============================= */
+
+  const produtosDisponiveis = produtos.filter((produto: Produto) => {
+
+    switch (hoje) {
+
+      case 0:
+        return produto.disponivelDom
+
+      case 1:
+        return produto.disponivelSeg
+
+      case 2:
+        return produto.disponivelTer
+
+      case 3:
+        return produto.disponivelQua
+
+      case 4:
+        return produto.disponivelQui
+
+      case 5:
+        return produto.disponivelSex
+
+      case 6:
+        return produto.disponivelSab
+
+      default:
+        return true
+    }
+
+  })
+
   return (
     <div className="page">
 
       <h1 className="title">Açaí & Cia</h1>
-      <h2 className="subtitle">Faça seu Pedido e Aguarde a Mensagem no WhatsApp Informado Para Ir Retirar </h2>
+
+      <h2 className="subtitle">
+        Faça seu Pedido e Aguarde a Mensagem no WhatsApp Informado Para Ir Retirar
+      </h2>
 
       <div className="cardapio-container">
 
         <div className="cardapio-list">
 
-          {produtos.map((produto) => {
+          {produtosDisponiveis.map((produto) => {
 
             const item = itens.find(i => i.id === produto.id)
             const quantidade = item?.quantidade || 0
@@ -69,21 +117,21 @@ export default function Home() {
 
                 <div className="produto-info">
 
-                <div className="produto-nome">
-                 {produto.nome}
+                  <div className="produto-nome">
+                    {produto.nome}
                   </div>
 
                   {produto.descricao && (
-               <div className="produto-descricao">
-              {produto.descricao}
-                 </div>
-              )}
+                    <div className="produto-descricao">
+                      {produto.descricao}
+                    </div>
+                  )}
 
-               <div className="produto-preco">
-                R$ {produto.preco.toFixed(2)}
+                  <div className="produto-preco">
+                    R$ {produto.preco.toFixed(2)}
+                  </div>
+
                 </div>
-
-                 </div>
 
                 {quantidade === 0 ? (
 
