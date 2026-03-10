@@ -77,3 +77,16 @@ h1 {
   font-size: 0.9rem;
   opacity: 0.7;
 }
+
+.developer-info {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  opacity: 0.6;
+  color: #fff;
+  font-weight: 300;
+  text-align: center;
+}
