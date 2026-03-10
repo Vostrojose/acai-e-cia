@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api'
 import { useCart } from '../context/CartContext'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import './Home.css'
 
 interface Produto {
@@ -17,13 +17,7 @@ export default function Home() {
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [loading, setLoading] = useState(true)
 
-  const { adicionarItem, itens, total } = useCart()
-  const navigate = useNavigate()
-
-  const totalQuantidade = itens.reduce(
-    (acc, item) => acc + item.quantidade,
-    0
-  )
+  const { adicionarItem, removerItem, itens } = useCart()
 
   useEffect(() => {
     async function loadProdutos() {
@@ -53,51 +47,90 @@ export default function Home() {
 
   return (
     <div className="page">
+
       <h1 className="title">Açaí & Cia</h1>
 
-      <div className="cardapio-container"></div>
+      <div className="cardapio-container">
 
-      <div className="cardapio-list">
+        <div className="cardapio-list">
 
-        {produtos.map((produto) => (
+          {produtos.map((produto) => {
 
-          <div key={produto.id} className="produto-card">
+            const item = itens.find(i => i.id === produto.id)
+            const quantidade = item?.quantidade || 0
 
-            <div className="produto-nome">
-              {produto.nome}
-            </div>
+            return (
 
-            <div className="produto-preco">
-              R$ {produto.preco.toFixed(2)}
-            </div>
+              <div key={produto.id} className="produto-card">
 
-            <button
-              className="add-btn"
-              onClick={() =>
-                adicionarItem({
-                  id: produto.id,
-                  nome: produto.nome,
-                  preco: produto.preco,
-                })
-              }
-            >
-              Adicionar
-            </button>
+                <div className="produto-info">
 
-          </div>
+                  <div className="produto-nome">
+                    {produto.nome}
+                  </div>
 
-        ))}
+                  <div className="produto-preco">
+                    R$ {produto.preco.toFixed(2)}
+                  </div>
+
+                </div>
+
+                {quantidade === 0 ? (
+
+                  <button
+                    className="add-btn"
+                    onClick={() =>
+                      adicionarItem({
+                        id: produto.id,
+                        nome: produto.nome,
+                        preco: produto.preco,
+                      })
+                    }
+                  >
+                    Adicionar
+                  </button>
+
+                ) : (
+
+                  <div className="quantidade-control">
+
+                    <button
+                      className="qtd-btn"
+                      onClick={() => removerItem(produto.id)}
+                    >
+                      -
+                    </button>
+
+                    <span className="qtd-num">
+                      {quantidade}
+                    </span>
+
+                    <button
+                      className="qtd-btn"
+                      onClick={() =>
+                        adicionarItem({
+                          id: produto.id,
+                          nome: produto.nome,
+                          preco: produto.preco,
+                        })
+                      }
+                    >
+                      +
+                    </button>
+
+                  </div>
+
+                )}
+
+              </div>
+
+            )
+          })}
+
+        </div>
 
       </div>
 
-    {totalQuantidade > 0 && (
-  <button
-    className="carrinho-fixo"
-    onClick={() => navigate('/carrinho')}
-  >
-    🛒 {totalQuantidade} item{totalQuantidade > 1 ? 's' : ''} • R$ {total.toFixed(2)}
-  </button>
-)}
     </div>
   )
 }
