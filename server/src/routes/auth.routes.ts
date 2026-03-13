@@ -3,8 +3,14 @@ import jwt from "jsonwebtoken";
 
 const router = Router();
 
-router.post("/login", (req: Request, res: Response) => {
-  const { email, senha } = req.body as { email: string; senha: string };
+router.post("/login", (req, res) => {
+
+  console.log("ADMIN_EMAIL:", process.env.ADMIN_EMAIL)
+  console.log("ADMIN_PASSWORD:", process.env.ADMIN_PASSWORD)
+  console.log("JWT_SECRET:", process.env.JWT_SECRET)
+
+  const { email, senha } = req.body
+  
 
   if (
     email !== process.env.ADMIN_EMAIL ||
