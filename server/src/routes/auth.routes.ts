@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 
 const router = Router();
 
-router.post("/auth/login", (req: Request, res: Response) => {
+router.post("/login", (req: Request, res: Response) => {
   const { email, senha } = req.body as { email: string; senha: string };
 
   if (

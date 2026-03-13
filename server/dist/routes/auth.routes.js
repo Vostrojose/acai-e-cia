@@ -4,7 +4,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const auth_controller_1 = __importDefault(require("../controllers/auth.controller"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const router = (0, express_1.Router)();
-router.post('/auth/login', auth_controller_1.default.login);
+router.post("/login", (req, res) => {
+    const { email, senha } = req.body;
+    if (email !== process.env.ADMIN_EMAIL ||
+        senha !== process.env.ADMIN_PASSWORD) {
+        return res.status(401).json({
+            message: "Credenciais inválidas",
+        });
+    }
+    const token = jsonwebtoken_1.default.sign({ role: "ADMIN" }, process.env.JWT_SECRET, { expiresIn: "12h" });
+    return res.json({ token });
+});
 exports.default = router;

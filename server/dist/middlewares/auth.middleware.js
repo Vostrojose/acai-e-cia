@@ -1,30 +1,21 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ensureAuthenticated = ensureAuthenticated;
-const jwt_1 = require("../utils/jwt");
-const AppError_1 = require("../utils/AppError");
-function ensureAuthenticated(request, _response, next) {
-    const authHeader = request.headers.authorization;
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+function ensureAuthenticated(req, res, next) {
+    const authHeader = req.headers.authorization;
     if (!authHeader) {
-        throw new AppError_1.AppError('Token não informado.', 401);
+        return res.status(401).json({ message: "Token não informado" });
     }
-    const parts = authHeader.split(' ');
-    if (parts.length !== 2) {
-        throw new AppError_1.AppError('Token mal formatado.', 401);
-    }
-    const [scheme, token] = parts;
-    if (!/^Bearer$/i.test(scheme)) {
-        throw new AppError_1.AppError('Token mal formatado.', 401);
-    }
+    const [, token] = authHeader.split(" ");
     try {
-        const decoded = (0, jwt_1.verifyToken)(token);
-        request.user = {
-            id: decoded.id,
-            role: decoded.role,
-        };
-        return next();
+        jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+        next();
     }
-    catch (err) {
-        throw new AppError_1.AppError('Token inválido.', 401);
+    catch {
+        return res.status(401).json({ message: "Token inválido" });
     }
 }

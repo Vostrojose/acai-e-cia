@@ -28,6 +28,19 @@ exports.criarPedidoSchema = zod_1.z
         .min(10, 'telefone inválido.')
         .max(20, 'telefone inválido.')
         .optional(),
+    origem: zod_1.z
+        .string()
+        .trim()
+        .optional(),
+    endereco: zod_1.z
+        .string()
+        .optional(),
+    tipo: zod_1.z.enum([
+        "MESA",
+        "RETIRADA",
+        "ENTREGA",
+        "ONLINE"
+    ]).optional(),
 })
     .strict();
 /* ============================= */

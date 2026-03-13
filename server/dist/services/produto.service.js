@@ -28,5 +28,10 @@ class ProdutoService {
             data: { ativo },
         });
     }
+    async removerProduto(id) {
+        return await prisma_1.default.produto.delete({
+            where: { id }
+        });
+    }
 }
 exports.default = new ProdutoService();

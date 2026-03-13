@@ -7,32 +7,60 @@ const produto_service_1 = __importDefault(require("../services/produto.service")
 const asyncHandler_1 = require("../utils/asyncHandler");
 const produto_schema_1 = require("../validators/produto.schema");
 const AppError_1 = require("../utils/AppError");
+const prisma_1 = __importDefault(require("../services/prisma")); // ✅ precisa importar o prisma
 class ProdutoController {
-    criar = (0, asyncHandler_1.asyncHandler)(async (request, response) => {
-        const data = produto_schema_1.criarProdutoSchema.parse(request.body);
+    criar = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+        const data = produto_schema_1.criarProdutoSchema.parse(req.body);
         const produto = await produto_service_1.default.criarProduto(data);
-        return response.status(201).json({
+        return res.status(201).json({
             success: true,
             data: produto,
         });
     });
-    listar = (0, asyncHandler_1.asyncHandler)(async (request, response) => {
+    listar = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
         const produtos = await produto_service_1.default.listarProdutos();
-        return response.json({
+        return res.json({
             success: true,
             data: produtos,
         });
     });
-    alterarStatus = (0, asyncHandler_1.asyncHandler)(async (request, response) => {
-        const { id } = request.params;
-        const { ativo } = request.body;
+    alterarStatus = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+        const { id } = req.params;
+        const { ativo } = req.body;
         if (typeof ativo !== 'boolean') {
             throw new AppError_1.AppError('O campo "ativo" deve ser boolean.', 400);
         }
         const produto = await produto_service_1.default.alterarStatus(id, ativo);
-        return response.json({
+        return res.json({
             success: true,
             data: produto,
+        });
+    });
+    remover = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+        const { id } = req.params;
+        await produto_service_1.default.removerProduto(id);
+        return res.json({
+            success: true,
+        });
+    });
+    atualizar = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+        const { id } = req.params;
+        const produto = await prisma_1.default.produto.update({
+            where: { id },
+            data: req.body,
+        });
+        return res.json({
+            success: true,
+            data: produto,
+        });
+    });
+    deletar = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+        const { id } = req.params;
+        await prisma_1.default.produto.delete({
+            where: { id },
+        });
+        return res.json({
+            success: true,
         });
     });
 }

@@ -7,27 +7,26 @@ export default function Login() {
   const [email, setEmail] = useState("")
   const [senha, setSenha] = useState("")
   const navigate = useNavigate()
+async function entrar() {
 
-  async function entrar() {
+  try {
 
-    try {
+    const res = await api.post("/login", {
+      email,
+      senha
+    })
 
-      const res = await api.post("/auth/login", {
-        email,
-        senha
-      })
+    localStorage.setItem("token", res.data.token)
 
-      localStorage.setItem("token", res.data.token)
+    navigate("/dashboard")
 
-      navigate("/")
+  } catch {
 
-    } catch {
-
-      alert("Login inválido")
-
-    }
+    alert("Login inválido")
 
   }
+
+}
 
   return (
 

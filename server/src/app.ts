@@ -7,6 +7,6 @@ const app: Application = express();
 app.use(express.json());
 
 // rotas
-app.use("/api", authRoutes);
+app.use("/api/auth", authRoutes);
 
 export default app;

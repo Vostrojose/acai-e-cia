@@ -11,11 +11,40 @@ class PedidoService {
     /* CRIAR PEDIDO (BLINDADO) */
     /* ============================= */
     async criarPedido(data) {
-        if (!data.itens || data.itens.length === 0) {
+        /* ---------- valida itens ---------- */
+        if (!Array.isArray(data.itens) || data.itens.length === 0) {
             throw new AppError_1.AppError('Pedido precisa conter ao menos um item.', 400);
         }
-        // 🔒 Buscar todos os produtos válidos e ativos
-        const produtosIds = data.itens.map((item) => item.produtoId);
+        /* ---------- proteção contra duplicação ---------- */
+        const idsDuplicados = new Set();
+        data.itens.forEach((i) => {
+            if (idsDuplicados.has(i.produtoId)) {
+                throw new AppError_1.AppError('Produto duplicado no pedido.', 400);
+            }
+            idsDuplicados.add(i.produtoId);
+        });
+        /* ---------- valida quantidade ---------- */
+        data.itens.forEach((item) => {
+            if (!item.produtoId || item.produtoId.length < 10) {
+                throw new AppError_1.AppError('produtoId inválido.', 400);
+            }
+            if (!Number.isInteger(item.quantidade) || item.quantidade <= 0) {
+                throw new AppError_1.AppError('Quantidade inválida.', 400);
+            }
+            if (item.quantidade > 50) {
+                throw new AppError_1.AppError('Quantidade máxima por item excedida.', 400);
+            }
+        });
+        /* ---------- normaliza telefone ---------- */
+        let telefoneLimpo;
+        if (data.telefone) {
+            telefoneLimpo = data.telefone.replace(/\D/g, '');
+            if (telefoneLimpo.length < 10 || telefoneLimpo.length > 15) {
+                throw new AppError_1.AppError('Telefone inválido.', 400);
+            }
+        }
+        /* ---------- busca produtos ---------- */
+        const produtosIds = data.itens.map((i) => i.produtoId);
         const produtos = await prisma_1.default.produto.findMany({
             where: {
                 id: { in: produtosIds },
@@ -26,29 +55,39 @@ class PedidoService {
             throw new AppError_1.AppError('Um ou mais produtos são inválidos ou estão inativos.', 400);
         }
         const produtosMap = new Map(produtos.map((p) => [p.id, p]));
+        /* ---------- recalcula total ---------- */
         let totalCalculado = 0;
         const itensParaCriar = data.itens.map((item) => {
-            if (!Number.isInteger(item.quantidade) || item.quantidade <= 0) {
-                throw new AppError_1.AppError('Quantidade inválida.', 400);
-            }
             const produto = produtosMap.get(item.produtoId);
             if (!produto) {
                 throw new AppError_1.AppError('Produto não encontrado.', 400);
             }
             const subtotal = produto.preco * item.quantidade;
+            if (!Number.isFinite(subtotal)) {
+                throw new AppError_1.AppError('Erro no cálculo do pedido.', 400);
+            }
             totalCalculado += subtotal;
             return {
                 produtoId: produto.id,
                 quantidade: item.quantidade,
-                precoUnit: produto.preco, // 🔒 preço sempre vindo do banco
+                precoUnit: produto.preco,
             };
         });
-        // 🔐 Transação atômica para garantir consistência
+        /* ---------- valida total ---------- */
+        if (totalCalculado <= 0) {
+            throw new AppError_1.AppError('Total do pedido inválido.', 400);
+        }
+        if (totalCalculado > 10000) {
+            throw new AppError_1.AppError('Total do pedido excede limite permitido.', 400);
+        }
+        /* ---------- cria pedido ---------- */
         const pedidoCriado = await prisma_1.default.$transaction(async (tx) => {
-            return await tx.pedido.create({
+            const pedido = await tx.pedido.create({
                 data: {
-                    total: totalCalculado, // 🔒 total recalculado no backend
+                    total: totalCalculado,
                     telefone: data.telefone,
+                    origem: data.origem,
+                    endereco: data.endereco,
                     itens: {
                         create: itensParaCriar,
                     },
@@ -57,8 +96,9 @@ class PedidoService {
                     itens: true,
                 },
             });
+            return pedido;
         });
-        // 🔌 Emitir evento WebSocket (dados mínimos necessários)
+        /* ---------- websocket ---------- */
         try {
             const io = (0, socket_1.getIO)();
             io.emit('novo_pedido', {
@@ -68,10 +108,34 @@ class PedidoService {
                 criadoEm: pedidoCriado.criadoEm,
             });
         }
-        catch (error) {
+        catch {
             console.warn('⚠️ WebSocket ainda não inicializado.');
         }
         return pedidoCriado;
+    }
+    /* ============================= */
+    /* BUSCAR PEDIDO POR ID */
+    /* ============================= */
+    async buscarPorId(id) {
+        return prisma_1.default.pedido.findUnique({
+            where: { id },
+            include: { itens: true },
+        });
+    }
+    /* ============================= */
+    /* BUSCAR PEDIDO COM PRODUTOS */
+    /* ============================= */
+    async buscarPorIdComProdutos(id) {
+        return prisma_1.default.pedido.findUnique({
+            where: { id },
+            include: {
+                itens: {
+                    include: {
+                        produto: true,
+                    },
+                },
+            },
+        });
     }
     /* ============================= */
     /* ATUALIZAR STATUS */
@@ -83,7 +147,6 @@ class PedidoService {
         if (!pedido) {
             throw new AppError_1.AppError('Pedido não encontrado.', 404);
         }
-        const statusAtual = pedido.status;
         const regras = {
             RECEBIDO: ['EM_PREPARO', 'CANCELADO'],
             EM_PREPARO: ['PRONTO', 'CANCELADO'],
@@ -91,49 +154,33 @@ class PedidoService {
             ENTREGUE: [],
             CANCELADO: [],
         };
-        const transicoesPermitidas = regras[statusAtual];
-        if (!transicoesPermitidas.includes(novoStatus)) {
-            throw new AppError_1.AppError(`Transição inválida de ${statusAtual} para ${novoStatus}.`, 400);
+        const permitidos = regras[pedido.status];
+        if (!permitidos.includes(novoStatus)) {
+            throw new AppError_1.AppError(`Transição inválida de ${pedido.status} para ${novoStatus}.`, 400);
         }
         const pedidoAtualizado = await prisma_1.default.pedido.update({
             where: { id },
             data: { status: novoStatus },
-            include: {
-                itens: true,
-            },
+            include: { itens: true },
         });
         try {
             const io = (0, socket_1.getIO)();
             io.emit('pedido_atualizado', pedidoAtualizado);
         }
-        catch (error) {
+        catch {
             console.warn('⚠️ WebSocket ainda não inicializado.');
         }
         return pedidoAtualizado;
     }
     /* ============================= */
-    /* LISTAR PEDIDOS (COM FILTRO) */
+    /* LISTAR PEDIDOS */
     /* ============================= */
     async listarPedidos(status) {
-        const where = status
-            ? { status: status }
-            : undefined;
-        return await prisma_1.default.pedido.findMany({
+        const where = status ? { status: status } : undefined;
+        return prisma_1.default.pedido.findMany({
             where,
-            include: {
-                itens: true,
-            },
-            orderBy: {
-                criadoEm: 'desc',
-            },
-        });
-    }
-    async buscarPorId(id) {
-        return prisma_1.default.pedido.findUnique({
-            where: { id },
-            include: {
-                itens: true,
-            },
+            include: { itens: true },
+            orderBy: { criadoEm: 'desc' },
         });
     }
     /* ============================= */
@@ -142,9 +189,7 @@ class PedidoService {
     async dashboardPedidos() {
         const pedidos = await prisma_1.default.pedido.groupBy({
             by: ['status'],
-            _count: {
-                status: true,
-            },
+            _count: { status: true },
         });
         const base = {
             RECEBIDO: 0,
