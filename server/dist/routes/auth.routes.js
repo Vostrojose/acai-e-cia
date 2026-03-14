@@ -7,6 +7,9 @@ const express_1 = require("express");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const router = (0, express_1.Router)();
 router.post("/login", (req, res) => {
+    console.log("ADMIN_EMAIL:", process.env.ADMIN_EMAIL);
+    console.log("ADMIN_PASSWORD:", process.env.ADMIN_PASSWORD);
+    console.log("JWT_SECRET:", process.env.JWT_SECRET);
     const { email, senha } = req.body;
     if (email !== process.env.ADMIN_EMAIL ||
         senha !== process.env.ADMIN_PASSWORD) {
