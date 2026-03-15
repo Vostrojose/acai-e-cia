@@ -20,16 +20,28 @@ body {
 }
 
 h1 {
-  margin-bottom: 15px;
-  font-size: 2.2rem;
-  font-weight: 700;
+  margin-bottom: 10px;
+  font-size: 3rem;          /* maior impacto */
+  font-weight: 800;         /* bem forte */
+  letter-spacing: 2px;      /* espaçamento para dar sofisticação */
+  text-transform: uppercase;/* título em caixa alta */
+  color: #4B0082;           /* roxo profundo, cor do açaí */
+}
+
+h2 {
+  margin-bottom: 20px;
+  font-size: 1.5rem;        /* menor que o h1 */
+  font-weight: 400;         /* leve, contraste com o h1 */
   letter-spacing: 1px;
+  color: #d46b0f;           /* verde natural, remete à energia */
+  font-style: italic;       /* dá suavidade ao slogan */
 }
 
 .subtitle {
   margin-bottom: 35px;
   font-size: 1rem;
   opacity: 0.85;
+    color: #d46b0f;  
 }
 
 .buttons {
