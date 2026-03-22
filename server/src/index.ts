@@ -22,7 +22,15 @@ MIDDLEWARES GLOBAIS
 =================================
 */
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://acai-e-cia-admin-fy6kdh17d-jose-m-da-silvas-projects.vercel.app",
+      "https://pedido.acaiecompanhia.com.br"
+    ],
+    credentials: true
+  })
+);
 app.use(express.json());
 app.use(httpLogger);
 
