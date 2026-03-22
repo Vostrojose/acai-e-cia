@@ -18,6 +18,13 @@ export default function Cozinha() {
     carregarPedidos()
 
     socket.on("novo_pedido", (pedido) => {
+
+      // 🔔 som quando chega pedido
+      try {
+        const audio = new Audio("/som-pedido.mp3")
+        audio.play()
+      } catch {}
+
       setPedidos((prev) => [pedido, ...prev])
     })
 
@@ -36,14 +43,32 @@ export default function Cozinha() {
 
   }, [])
 
-  const novos = pedidos.filter((p) => p.status === "RECEBIDO")
-  const preparo = pedidos.filter((p) => p.status === "EM_PREPARO")
-  const prontos = pedidos.filter((p) => p.status === "PRONTO")
+  // ordenar pedidos por data
+  function ordenar(lista: any[]) {
+    return lista.sort(
+      (a, b) =>
+        new Date(a.createdAt).getTime() -
+        new Date(b.createdAt).getTime()
+    )
+  }
+
+  const novos = ordenar(
+    pedidos.filter((p) => p.status === "RECEBIDO")
+  )
+
+  const preparo = ordenar(
+    pedidos.filter((p) => p.status === "EM_PREPARO")
+  )
+
+  const prontos = ordenar(
+    pedidos.filter((p) => p.status === "PRONTO")
+  )
 
   return (
-    <div style={{ padding: 20 }}>
 
-      <h1>🍧 Painel da Cozinha</h1>
+    <div style={{ padding: 20, background: "#f5f5f5", minHeight: "100vh" }}>
+
+      <h1 style={{ marginBottom: 30 }}>🍧 Painel da Cozinha</h1>
 
       <div style={{
         display: "grid",
@@ -58,15 +83,25 @@ export default function Cozinha() {
       </div>
 
     </div>
+
   )
 }
 
 function Coluna({ titulo, pedidos }: any) {
 
   return (
-    <div>
+    <div style={{
+      background: "#ffffff",
+      borderRadius: 10,
+      padding: 20,
+      minHeight: 400
+    }}>
 
       <h2 style={{ marginBottom: 20 }}>{titulo}</h2>
+
+      {pedidos.length === 0 && (
+        <p style={{ color: "#777" }}>Nenhum pedido</p>
+      )}
 
       {pedidos.map((pedido: any) => (
         <PedidoCard key={pedido.id} pedido={pedido} />
@@ -78,9 +113,25 @@ function Coluna({ titulo, pedidos }: any) {
 
 function PedidoCard({ pedido }: any) {
 
+  async function atualizarStatus(status: string) {
+
+    try {
+
+      await api.put(`/pedidos/${pedido.id}/status`, {
+        status
+      })
+
+    } catch {
+
+      alert("Erro ao atualizar pedido")
+
+    }
+
+  }
+
   return (
     <div style={{
-      border: "1px solid #ccc",
+      border: "1px solid #ddd",
       borderRadius: 10,
       padding: 15,
       marginBottom: 15,
@@ -110,7 +161,45 @@ function PedidoCard({ pedido }: any) {
         <p>🏠 {pedido.endereco}</p>
       )}
 
-      <p><strong>Total:</strong> R$ {pedido.total}</p>
+      <p>
+        <strong>Total:</strong> R$ {pedido.total}
+      </p>
+
+      <div style={{ marginTop: 10 }}>
+
+        {pedido.status === "RECEBIDO" && (
+          <button
+            onClick={() => atualizarStatus("EM_PREPARO")}
+            style={{
+              padding: "8px 12px",
+              borderRadius: 5,
+              border: "none",
+              background: "#ff9800",
+              color: "#fff",
+              cursor: "pointer"
+            }}
+          >
+            Iniciar preparo
+          </button>
+        )}
+
+        {pedido.status === "EM_PREPARO" && (
+          <button
+            onClick={() => atualizarStatus("PRONTO")}
+            style={{
+              padding: "8px 12px",
+              borderRadius: 5,
+              border: "none",
+              background: "#4caf50",
+              color: "#fff",
+              cursor: "pointer"
+            }}
+          >
+            Marcar pronto
+          </button>
+        )}
+
+      </div>
 
     </div>
   )
