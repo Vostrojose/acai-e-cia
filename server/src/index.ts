@@ -1,59 +1,86 @@
-import express from 'express'
-import cors from 'cors'
-import dotenv from 'dotenv'
-import http from 'http'
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import http from "http";
 
-import pedidoRoutes from './routes/pedido.routes'
-import produtoRoutes from './routes/produto.routes'
-import authRoutes from './routes/auth.routes'
-import pagamentoRoutes from './routes/pagamento.routes'
+import pedidoRoutes from "./routes/pedido.routes";
+import produtoRoutes from "./routes/produto.routes";
+import authRoutes from "./routes/auth.routes";
+import pagamentoRoutes from "./routes/pagamento.routes";
 
-import { errorMiddleware } from './middlewares/error.middleware'
-import { httpLogger } from './middlewares/logger.middleware'
-import { initSocket } from './websocket/socket'
+import { errorMiddleware } from "./middlewares/error.middleware";
+import { httpLogger } from "./middlewares/logger.middleware";
+import { initSocket } from "./websocket/socket";
 
-dotenv.config()
+dotenv.config();
 
-const app = express()
+const app = express();
 
-// Middlewares globais
-app.use(cors())
-app.use(express.json())
-app.use(httpLogger)
+/*
+=================================
+MIDDLEWARES GLOBAIS
+=================================
+*/
 
-// Rotas principais
-app.use('/api', pedidoRoutes)
-app.use('/api', produtoRoutes)
-app.use('/api', authRoutes)
-app.use('/api', pagamentoRoutes)
+app.use(cors());
+app.use(express.json());
+app.use(httpLogger);
 
-// Rota de teste
-app.get('/', (req, res) => {
+/*
+=================================
+ROTAS PRINCIPAIS
+=================================
+*/
+
+app.use("/api", pedidoRoutes);
+app.use("/api", produtoRoutes);
+app.use("/api", authRoutes);
+app.use("/api", pagamentoRoutes);
+
+/*
+=================================
+ROTA DE TESTE
+=================================
+*/
+
+app.get("/", (req, res) => {
   return res.json({
-    message: 'API Açaí & Cia funcionando 🚀',
-    version: "LOGIN_DEBUG_1"
-  })
-})
-app.get('/env', (req, res) => {
-  res.json({
-    ADMIN_EMAIL: process.env.ADMIN_EMAIL,
-    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
-    JWT_SECRET: process.env.JWT_SECRET
-  })
-})
+    message: "API Açaí & Cia funcionando 🚀"
+  });
+});
 
-// Middleware de erro (sempre por último)
-app.use(errorMiddleware)
+/*
+=================================
+MIDDLEWARE DE ERRO
+=================================
+*/
 
-const PORT = process.env.PORT || 3000
+app.use(errorMiddleware);
 
-// 🔌 Criar servidor HTTP uma única vez
-const server = http.createServer(app)
+/*
+=================================
+SERVIDOR HTTP
+=================================
+*/
 
-// 🔌 Inicializar WebSocket
-initSocket(server)
+const PORT = process.env.PORT || 3000;
 
-// 🚀 Subir servidor
+const server = http.createServer(app);
+
+/*
+=================================
+WEBSOCKET
+=================================
+*/
+
+initSocket(server);
+
+/*
+=================================
+INICIAR SERVIDOR
+=================================
+*/
+
 server.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando na porta ${PORT}`)
-})
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
+});
