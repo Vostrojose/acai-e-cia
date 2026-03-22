@@ -34,6 +34,13 @@ app.get('/', (req, res) => {
     version: "LOGIN_DEBUG_1"
   })
 })
+app.get('/env', (req, res) => {
+  res.json({
+    ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
+    JWT_SECRET: process.env.JWT_SECRET
+  })
+})
 
 // Middleware de erro (sempre por último)
 app.use(errorMiddleware)
