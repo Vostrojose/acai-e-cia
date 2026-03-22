@@ -7,26 +7,29 @@ export default function Login() {
   const [email, setEmail] = useState("")
   const [senha, setSenha] = useState("")
   const navigate = useNavigate()
-async function entrar() {
 
-  try {
+  async function entrar(e: any) {
 
-    const res = await api.post("/login", {
-      email,
-      senha
-    })
+    e.preventDefault()
 
-    localStorage.setItem("token", res.data.token)
+    try {
 
-   navigate("/")
+      const res = await api.post("/login", {
+        email,
+        senha
+      })
 
-  } catch {
+      localStorage.setItem("token", res.data.token)
 
-    alert("Login inválido")
+      navigate("/dashboard")
+
+    } catch {
+
+      alert("Login inválido")
+
+    }
 
   }
-
-}
 
   return (
 
@@ -34,22 +37,30 @@ async function entrar() {
 
       <h1>Painel Admin</h1>
 
-      <input
-        placeholder="Email"
-        value={email}
-        onChange={(e)=>setEmail(e.target.value)}
-      />
+      <form onSubmit={entrar}>
 
-      <input
-        type="password"
-        placeholder="Senha"
-        value={senha}
-        onChange={(e)=>setSenha(e.target.value)}
-      />
+        <input
+          placeholder="Email"
+          value={email}
+          onChange={(e)=>setEmail(e.target.value)}
+        />
 
-      <button onClick={entrar}>
-        Entrar
-      </button>
+        <br /><br />
+
+        <input
+          type="password"
+          placeholder="Senha"
+          value={senha}
+          onChange={(e)=>setSenha(e.target.value)}
+        />
+
+        <br /><br />
+
+        <button type="submit">
+          Entrar
+        </button>
+
+      </form>
 
     </div>
 
