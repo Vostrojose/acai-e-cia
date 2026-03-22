@@ -1,16 +1,17 @@
-import { Router, Request, Response } from "express";
-import jwt from "jsonwebtoken";
+import { Router, Request, Response } from "express"
+import jwt from "jsonwebtoken"
 
-const router = Router();
+const router = Router()
 
-router.post("/login", (req, res) => {
+router.post("/login", (req: Request, res: Response) => {
 
+  console.log("BODY:", req.body)
   console.log("ADMIN_EMAIL:", process.env.ADMIN_EMAIL)
   console.log("ADMIN_PASSWORD:", process.env.ADMIN_PASSWORD)
   console.log("JWT_SECRET:", process.env.JWT_SECRET)
 
-  const { email, senha } = req.body
-  
+  const email = req.body.email?.trim()
+  const senha = req.body.senha?.trim()
 
   if (
     email !== process.env.ADMIN_EMAIL ||
@@ -18,16 +19,22 @@ router.post("/login", (req, res) => {
   ) {
     return res.status(401).json({
       message: "Credenciais inválidas",
-    });
+      debug: {
+        emailRecebido: email,
+        senhaRecebida: senha,
+        envEmail: process.env.ADMIN_EMAIL,
+        envSenha: process.env.ADMIN_PASSWORD
+      }
+    })
   }
 
   const token = jwt.sign(
     { role: "ADMIN" },
     process.env.JWT_SECRET as string,
     { expiresIn: "12h" }
-  );
+  )
 
-  return res.json({ token });
-});
+  return res.json({ token })
+})
 
-export default router;
+export default router
