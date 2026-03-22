@@ -45,7 +45,7 @@ ROTA DE TESTE
 
 app.get("/", (req, res) => {
   return res.json({
-    message: "API Açaí & Cia funcionando 🚀"
+    message: "API Açaí & Cia funcionando corretamente! "
   });
 });
 
