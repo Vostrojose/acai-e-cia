@@ -1,19 +1,16 @@
-import { Routes, Route } from "react-router-dom"
+import { Routes, Route } from 'react-router-dom'
 
-import Dashboard from "../pages/Dashboard"
-import Produtos from "../pages/Produtos"
-import Pedidos from "../pages/Pedidos"
-import Cozinha from "../pages/Cozinha"
-import Login from "../pages/Login"
+import Dashboard from '../pages/Dashboard'
+import Produtos from '../pages/Produtos'
+import Pedidos from '../pages/Pedidos'
+import Cozinha from '../pages/Cozinha'
+import Login from '../pages/Login'
 
-import PrivateRoute from "./PrivateRoute"
+import PrivateRoute from './PrivateRoute'
 
 export default function AppRoutes() {
-
   return (
-
     <Routes>
-
       <Route path="/login" element={<Login />} />
 
       <Route
@@ -55,13 +52,11 @@ export default function AppRoutes() {
       <Route
         path="/dashboard"
         element={
-           <PrivateRoute>
-              <Dashboard />
-           </PrivateRoute>
-  }
-/>
-
+          <PrivateRoute>
+            <Dashboard />
+          </PrivateRoute>
+        }
+      />
     </Routes>
-
   )
 }
