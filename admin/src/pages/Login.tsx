@@ -18,7 +18,7 @@ async function entrar() {
 
     localStorage.setItem("token", res.data.token)
 
-    navigate("/dashboard")
+   navigate("/")
 
   } catch {
 
