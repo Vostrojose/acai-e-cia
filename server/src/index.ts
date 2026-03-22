@@ -31,6 +31,7 @@ app.use('/api', pagamentoRoutes)
 app.get('/', (req, res) => {
   return res.json({
     message: 'API Açaí & Cia funcionando 🚀',
+    version: "LOGIN_DEBUG_1"
   })
 })
 
