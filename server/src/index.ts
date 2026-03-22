@@ -26,12 +26,12 @@ app.use(
     origin: [
       "https://acai-e-cia-admin-fy6kdh17d-jose-m-da-silvas-projects.vercel.app",
       "https://pedido.acaiecompanhia.com.br",
-      "http://localhost:5173",      // front-end local
-      "http://127.0.0.1:5173",      // suporte para IP local
+      "http://localhost:5173",   // front-end local
+      "http://127.0.0.1:5173",   // suporte IP local
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
+    credentials: true, // permite cookies/autenticação
   })
 );
 
@@ -45,9 +45,9 @@ app.use(httpLogger);
    ROTAS PRINCIPAIS
 ================================= */
 
-// Todas as rotas com prefixo /api
+// Prefixo correto /api + rota plural se o frontend espera
 app.use("/api/pedido", pedidoRoutes);
-app.use("/api/produtos", produtoRoutes); // ⚠️ corrigido para plural
+app.use("/api/produtos", produtoRoutes); // ⚠️ importante: plural deve bater com frontend
 app.use("/api/auth", authRoutes);
 app.use("/api/pagamento", pagamentoRoutes);
 
@@ -56,7 +56,7 @@ app.use("/api/pagamento", pagamentoRoutes);
 ================================= */
 app.get("/", (req, res) => {
   return res.json({
-    message: "API Açaí & Cia funcionando corretamente! 🚀"
+    message: "API Açaí & Cia funcionando corretamente! 🚀",
   });
 });
 
