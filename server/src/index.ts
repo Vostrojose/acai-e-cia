@@ -22,17 +22,24 @@ MIDDLEWARES GLOBAIS
 =================================
 */
 
+// Configuração do CORS
 app.use(
   cors({
     origin: [
       "https://acai-e-cia-admin-fy6kdh17d-jose-m-da-silvas-projects.vercel.app",
-      "https://pedido.acaiecompanhia.com.br"
+      "https://pedido.acaiecompanhia.com.br",
+      "http://localhost:5173", // para testes locais do client/admin
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"]
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   })
-)
+);
+
+// Receber JSON
 app.use(express.json());
+
+// Logger de requisições HTTP
 app.use(httpLogger);
 
 /*
@@ -41,10 +48,11 @@ ROTAS PRINCIPAIS
 =================================
 */
 
-app.use("/api", pedidoRoutes);
-app.use("/api", produtoRoutes);
-app.use("/api", authRoutes);
-app.use("/api", pagamentoRoutes);
+// Todas as rotas com prefixo /api
+app.use("/api/pedido", pedidoRoutes);
+app.use("/api/produto", produtoRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/pagamento", pagamentoRoutes);
 
 /*
 =================================
@@ -54,7 +62,7 @@ ROTA DE TESTE
 
 app.get("/", (req, res) => {
   return res.json({
-    message: "API Açaí & Cia funcionando corretamente! "
+    message: "API Açaí & Cia funcionando corretamente! 🚀"
   });
 });
 
@@ -73,7 +81,6 @@ SERVIDOR HTTP
 */
 
 const PORT = process.env.PORT || 3000;
-
 const server = http.createServer(app);
 
 /*
