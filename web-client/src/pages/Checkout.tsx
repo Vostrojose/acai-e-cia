@@ -7,8 +7,16 @@ export default function Checkout() {
 
   const [telefone, setTelefone] = useState('')
   const [loading, setLoading] = useState(false)
-  const [endereco, setEndereco] = useState('')
-  const [tipoPedido, setTipoPedido] = useState('retirada')
+  const [tipoPedido, setTipoPedido] = useState<'retirada' | 'entrega'>('retirada')
+
+  // Endereço como objeto
+  const [endereco, setEndereco] = useState({
+    rua: '',
+    numero: '',
+    bairro: '',
+    cidade: '',
+    cep: ''
+  })
 
   async function finalizarPedido() {
     try {
@@ -80,7 +88,6 @@ export default function Checkout() {
 
       <div style={{ marginTop: 20 }}>
         <label>WhatsApp para confirmação</label>
-
         <input
           type="tel"
           placeholder="(11) 99999-9999"
@@ -95,6 +102,65 @@ export default function Checkout() {
           }}
         />
       </div>
+
+      <div style={{ marginTop: 20 }}>
+        <label>Tipo de pedido</label>
+        <select
+          value={tipoPedido}
+          onChange={(e) => setTipoPedido(e.target.value as 'retirada' | 'entrega')}
+          style={{
+            width: '100%',
+            padding: 10,
+            marginTop: 5,
+            borderRadius: 6,
+            border: '1px solid #ccc'
+          }}
+        >
+          <option value="retirada">Retirada no local</option>
+          <option value="entrega">Entrega</option>
+        </select>
+      </div>
+
+      {tipoPedido === 'entrega' && (
+        <div style={{ marginTop: 20 }}>
+          <label>Endereço de entrega</label>
+          <input
+            type="text"
+            placeholder="Rua"
+            value={endereco.rua}
+            onChange={(e) => setEndereco({ ...endereco, rua: e.target.value })}
+            style={{ width: '100%', padding: 10, marginTop: 5 }}
+          />
+          <input
+            type="text"
+            placeholder="Número"
+            value={endereco.numero}
+            onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })}
+            style={{ width: '100%', padding: 10, marginTop: 5 }}
+          />
+          <input
+            type="text"
+            placeholder="Bairro"
+            value={endereco.bairro}
+            onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })}
+            style={{ width: '100%', padding: 10, marginTop: 5 }}
+          />
+          <input
+            type="text"
+            placeholder="Cidade"
+            value={endereco.cidade}
+            onChange={(e) => setEndereco({ ...endereco, cidade: e.target.value })}
+            style={{ width: '100%', padding: 10, marginTop: 5 }}
+          />
+          <input
+            type="text"
+            placeholder="CEP"
+            value={endereco.cep}
+            onChange={(e) => setEndereco({ ...endereco, cep: e.target.value })}
+            style={{ width: '100%', padding: 10, marginTop: 5 }}
+          />
+        </div>
+      )}
 
       <button
         onClick={finalizarPedido}
