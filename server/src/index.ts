@@ -40,7 +40,7 @@ app.use(httpLogger);
 /* =================================
    ROTAS PRINCIPAIS
 ================================= */
-app.use("/api/pedido", pedidoRoutes);
+app.use("/api/pedidos", pedidoRoutes);
 app.use("/api/produtos", produtoRoutes);
 app.use("/api", authRoutes);
 app.use("/api/pagamento", pagamentoRoutes);
