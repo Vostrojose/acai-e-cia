@@ -16,45 +16,67 @@ dotenv.config();
 
 const app = express();
 
-/* ================================= MIDDLEWARES GLOBAIS ================================= */
+/* =================================
+   MIDDLEWARES GLOBAIS
+================================= */
+
+// Configuração do CORS
 app.use(
   cors({
     origin: [
       "https://acai-e-cia-admin-fy6kdh17d-jose-m-da-silvas-projects.vercel.app",
       "https://pedido.acaiecompanhia.com.br",
+      "http://localhost:5173",   // front-end local
+      "http://127.0.0.1:5173",   // suporte IP local
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true, // apenas se usar cookies/sessão
   })
 );
 
 app.use(express.json());
 app.use(httpLogger);
 
-/* ================================= ROTAS PRINCIPAIS ================================= */
-app.use("/api", pedidoRoutes);
-app.use("/api", produtoRoutes);
-app.use("/api", authRoutes);
-app.use("/api", pagamentoRoutes);
+/* =================================
+   ROTAS PRINCIPAIS
+================================= */
 
-/* ================================= ROTA DE TESTE ================================= */
+// Aqui usamos prefixos específicos, então dentro dos arquivos de rotas
+// os caminhos devem ser relativos ("/", "/:id", etc.)
+app.use("/api/pedido", pedidoRoutes);
+app.use("/api/produtos", produtoRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/pagamento", pagamentoRoutes);
+
+/* =================================
+   ROTA DE TESTE
+================================= */
 app.get("/", (req, res) => {
   return res.json({
-    message: "API Açaí & Cia funcionando corretamente!",
+    message: "API Açaí & Cia funcionando corretamente! 🚀",
   });
 });
 
-/* ================================= MIDDLEWARE DE ERRO ================================= */
+/* =================================
+   MIDDLEWARE DE ERRO
+================================= */
 app.use(errorMiddleware);
 
-/* ================================= SERVIDOR HTTP ================================= */
+/* =================================
+   SERVIDOR HTTP
+================================= */
 const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 
-/* ================================= WEBSOCKET ================================= */
+/* =================================
+   WEBSOCKET
+================================= */
 initSocket(server);
 
-/* ================================= INICIAR SERVIDOR ================================= */
+/* =================================
+   INICIAR SERVIDOR
+================================= */
 server.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
