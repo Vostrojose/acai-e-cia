@@ -113,21 +113,15 @@ function Coluna({ titulo, pedidos }: any) {
 
 function PedidoCard({ pedido }: any) {
 
-  async function atualizarStatus(status: string) {
-
-    try {
-
-      await api.put(`/pedidos/${pedido.id}/status`, {
-        status
-      })
-
-    } catch {
-
-      alert("Erro ao atualizar pedido")
-
-    }
-
+ async function atualizarStatus(status: string) {
+  try {
+    await api.patch(`/pedidos/${pedido.id}/status`, {
+      status
+    })
+  } catch {
+    alert("Erro ao atualizar pedido")
   }
+}
 
   return (
     <div style={{
