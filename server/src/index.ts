@@ -19,19 +19,17 @@ const app = express();
 /* =================================
    MIDDLEWARES GLOBAIS
 ================================= */
-
-// Configuração do CORS
 app.use(
   cors({
     origin: [
       "https://acai-e-cia-admin-fy6kdh17d-jose-m-da-silvas-projects.vercel.app",
       "https://pedido.acaiecompanhia.com.br",
-      "http://localhost:5173",   // front-end local
-      "http://127.0.0.1:5173",   // suporte IP local
+      "http://localhost:5173",
+      "http://127.0.0.1:5173",
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true, // apenas se usar cookies/sessão
+    credentials: true,
   })
 );
 
@@ -41,9 +39,6 @@ app.use(httpLogger);
 /* =================================
    ROTAS PRINCIPAIS
 ================================= */
-
-// Aqui usamos prefixos específicos, então dentro dos arquivos de rotas
-// os caminhos devem ser relativos ("/", "/:id", etc.)
 app.use("/api/pedido", pedidoRoutes);
 app.use("/api/produtos", produtoRoutes);
 app.use("/api/auth", authRoutes);

@@ -1,25 +1,23 @@
-import { Router } from 'express'
-import { z } from 'zod'
-import PaymentProvider from '../services/payment/PaymentProvider'
-import PedidoService from '../services/pedido.service'
-import { StatusPedido } from '@prisma/client'
-import { AppError } from '../utils/AppError'
-import { getIO } from '../websocket/socket'
+import { Router } from "express";
+import { z } from "zod";
+import PaymentProvider from "../services/payment/PaymentProvider";
+import PedidoService from "../services/pedido.service";
+import { StatusPedido } from "@prisma/client";
+import { AppError } from "../utils/AppError";
+import { getIO } from "../websocket/socket";
 
-const router = Router()
+const router = Router();
 
 /* ============================= */
 /* SCHEMA CHECKOUT               */
 /* ============================= */
-
 const pagamentoSchema = z.object({
   pedidoId: z.string().uuid(),
-})
+});
 
 /* ============================= */
 /* SCHEMA WEBHOOK                */
 /* ============================= */
-
 const webhookSchema = z.object({
   type: z.string().optional(),
   data: z
@@ -27,131 +25,124 @@ const webhookSchema = z.object({
       id: z.string(),
     })
     .optional(),
-})
+});
 
 /* ============================= */
 /* CRIAR CHECKOUT (PREFERENCE)   */
 /* ============================= */
-
-router.post('/pagamento/checkout', async (req, res) => {
+// POST /api/pagamento/checkout
+router.post("/checkout", async (req, res) => {
   try {
-    const { pedidoId } = pagamentoSchema.parse(req.body)
+    const { pedidoId } = pagamentoSchema.parse(req.body);
 
-    const pedido =
-      await PedidoService.buscarPorIdComProdutos(pedidoId)
+    const pedido = await PedidoService.buscarPorIdComProdutos(pedidoId);
 
     if (!pedido) {
-      throw new AppError('Pedido não encontrado.', 404)
+      throw new AppError("Pedido não encontrado.", 404);
     }
 
     if (pedido.status !== StatusPedido.RECEBIDO) {
       throw new AppError(
-        'Pagamento só pode ser realizado para pedidos RECEBIDO.',
+        "Pagamento só pode ser realizado para pedidos RECEBIDO.",
         400
-      )
+      );
     }
 
-    const checkout =
-      await PaymentProvider.criarCheckoutPreference(pedido)
+    const checkout = await PaymentProvider.criarCheckoutPreference(pedido);
 
     return res.status(200).json({
       success: true,
       data: checkout,
-    })
-
+    });
   } catch (error: any) {
-    console.error('🔥 ERRO CHECKOUT:', error)
+    console.error("🔥 ERRO CHECKOUT:", error);
 
     if (error instanceof AppError) {
       return res.status(error.statusCode).json({
         success: false,
         message: error.message,
-      })
+      });
     }
 
     return res.status(500).json({
       success: false,
-      message: 'Erro ao gerar checkout.',
-    })
+      message: "Erro ao gerar checkout.",
+    });
   }
-})
+});
 
 /* ============================= */
 /* WEBHOOK MERCADO PAGO          */
 /* ============================= */
-
-router.post('/pagamento/webhook', async (req, res) => {
+// POST /api/pagamento/webhook
+router.post("/webhook", async (req, res) => {
   try {
-    const parsed = webhookSchema.safeParse(req.body)
+    const parsed = webhookSchema.safeParse(req.body);
 
     if (!parsed.success) {
-      return res.sendStatus(200)
+      return res.sendStatus(200);
     }
 
-    const paymentId = parsed.data.data?.id
-
+    const paymentId = parsed.data.data?.id;
     if (!paymentId) {
-      return res.sendStatus(200)
+      return res.sendStatus(200);
     }
 
-    const pagamento =
-      await PaymentProvider.buscarPagamento(paymentId)
-
+    const pagamento = await PaymentProvider.buscarPagamento(paymentId);
     if (!pagamento) {
-      return res.sendStatus(200)
+      return res.sendStatus(200);
     }
 
-    if (pagamento.status !== 'approved') {
-      return res.sendStatus(200)
+    if (pagamento.status !== "approved") {
+      return res.sendStatus(200);
     }
 
     // 🔐 PROTEÇÃO contra external_reference null
     if (!pagamento.pedidoId) {
-      console.error('Pagamento sem external_reference')
-      return res.sendStatus(200)
+      console.error("Pagamento sem external_reference");
+      return res.sendStatus(200);
     }
 
-    const pedido =
-      await PedidoService.buscarPorId(pagamento.pedidoId)
-
+    const pedido = await PedidoService.buscarPorId(pagamento.pedidoId);
     if (!pedido) {
-      return res.sendStatus(200)
+      return res.sendStatus(200);
     }
 
     // 🔐 Validação de valor
     if (Number(pedido.total) !== Number(pagamento.transaction_amount)) {
-      console.error('🚨 Divergência de valor detectada')
-      return res.sendStatus(200)
+      console.error("🚨 Divergência de valor detectada");
+      return res.sendStatus(200);
     }
 
     // 🔐 Só processa se ainda RECEBIDO
     if (pedido.status !== StatusPedido.RECEBIDO) {
-      return res.sendStatus(200)
+      return res.sendStatus(200);
     }
 
-    const pedidoAtualizado =
-      await PedidoService.atualizarStatus(
-        pedido.id,
-        StatusPedido.EM_PREPARO
-      )
+    const pedidoAtualizado = await PedidoService.atualizarStatus(
+      pedido.id,
+      StatusPedido.EM_PREPARO
+    );
 
     // 🔌 WebSocket opcional
     try {
-      getIO().emit('pedido_atualizado', {
+      getIO().emit("pedido_atualizado", {
         id: pedidoAtualizado.id,
         status: pedidoAtualizado.status,
         total: pedidoAtualizado.total,
-      })
+      });
     } catch {
-      console.warn('⚠️ WebSocket não inicializado.')
+      console.warn("⚠️ WebSocket não inicializado.");
     }
 
-    return res.sendStatus(200)
-
+    return res.sendStatus(200);
   } catch (error) {
-    console.error('🔥 ERRO WEBHOOK:', error)
-    return res.sendStatus(200)
+    console.error("🔥 ERRO WEBHOOK:", error);
+    return res.sendStatus(200);
   }
-})
+});
 
-export default router
+/* ============================= */
+/* EXPORTAÇÃO DAS ROTAS          */
+/* ============================= */
+export default router;

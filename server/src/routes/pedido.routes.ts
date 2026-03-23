@@ -1,12 +1,30 @@
-import { Router } from 'express'
-import pedidoController from '../controllers/pedido.controller'
+import { Router } from "express";
+import pedidoController from "../controllers/pedido.controller";
 
-const router = Router()
+const router = Router();
 
-router.post('/pedido', pedidoController.criar)
-router.get('/pedidos', pedidoController.listar)
-router.patch('/pedido/:id/status', pedidoController.atualizarStatus)
-router.get('/dashboard/pedidos', pedidoController.dashboard)
+/**
+ * Criar novo pedido
+ * POST /api/pedido
+ */
+router.post("/", pedidoController.criar);
 
-export default router
+/**
+ * Listar todos os pedidos
+ * GET /api/pedido
+ */
+router.get("/", pedidoController.listar);
 
+/**
+ * Atualizar status de um pedido
+ * PATCH /api/pedido/:id/status
+ */
+router.patch("/:id/status", pedidoController.atualizarStatus);
+
+/**
+ * Dashboard de pedidos
+ * GET /api/pedido/dashboard
+ */
+router.get("/dashboard", pedidoController.dashboard);
+
+export default router;

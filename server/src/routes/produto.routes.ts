@@ -11,8 +11,8 @@ ROTAS PÚBLICAS (CLIENTES)
 Clientes podem listar os produtos disponíveis no cardápio
 */
 
-router.get("/produtos", produtoController.listar);
-
+// GET /api/produtos
+router.get("/", produtoController.listar);
 
 /*
 =================================
@@ -22,35 +22,21 @@ Apenas usuários autenticados podem criar,
 editar, alterar status ou remover produtos
 */
 
-router.post(
-  "/produtos",
-  ensureAuthenticated,
-  produtoController.criar
-);
+// POST /api/produtos
+router.post("/", ensureAuthenticated, produtoController.criar);
 
-router.put(
-  "/produtos/:id",
-  ensureAuthenticated,
-  produtoController.atualizar
-);
+// PUT /api/produtos/:id
+router.put("/:id", ensureAuthenticated, produtoController.atualizar);
 
-router.patch(
-  "/produtos/:id/status",
-  ensureAuthenticated,
-  produtoController.alterarStatus
-);
+// PATCH /api/produtos/:id/status
+router.patch("/:id/status", ensureAuthenticated, produtoController.alterarStatus);
 
-router.delete(
-  "/produtos/:id",
-  ensureAuthenticated,
-  produtoController.deletar
-);
-
+// DELETE /api/produtos/:id
+router.delete("/:id", ensureAuthenticated, produtoController.deletar);
 
 /*
 =================================
 EXPORTAÇÃO DAS ROTAS
 =================================
 */
-
 export default router;
