@@ -1,11 +1,9 @@
 import { useCart } from '../context/CartContext'
 import api from '../services/api'
-import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 
 export default function Checkout() {
   const { itens, total } = useCart()
-  const navigate = useNavigate()
 
   const [telefone, setTelefone] = useState('')
   const [loading, setLoading] = useState(false)
@@ -31,18 +29,18 @@ export default function Checkout() {
         return 
       }
 
-   const payload = {
-  telefone: telefoneLimpo,
-  origem,
-  endereco: tipoPedido === "entrega" ? endereco : null,
-  itens: itens.map((item) => ({
-    produtoId: item.id,
-    quantidade: item.quantidade
-  }))
-}
+      const payload = {
+        telefone: telefoneLimpo,
+        origem,
+        endereco: tipoPedido === "entrega" ? endereco : null,
+        itens: itens.map((item) => ({
+          produtoId: item.id,
+          quantidade: item.quantidade
+        }))
+      }
 
-      const pedidoResponse = await api.post('/pedido', payload)
-
+      // 1️⃣ Criar pedido
+      const pedidoResponse = await api.post('/pedidos', payload)
       const pedidoId = pedidoResponse?.data?.data?.id
 
       if (!pedidoId) {
@@ -51,7 +49,19 @@ export default function Checkout() {
         return
       }
 
-      navigate(`/pagamento/${pedidoId}`)
+      // 2️⃣ Gerar checkout do Mercado Pago
+      const pagamentoResponse = await api.post('/pagamento/checkout', {
+        pedidoId,
+        telefone: telefoneLimpo
+      })
+
+      // 3️⃣ Redirecionar para o Mercado Pago
+      if (pagamentoResponse?.data?.data?.init_point) {
+        window.location.href = pagamentoResponse.data.data.init_point
+      } else {
+        console.error('Resposta inesperada do pagamento:', pagamentoResponse.data)
+        alert('Erro ao iniciar pagamento')
+      }
 
     } catch (error: any) {
       console.error('Erro ao finalizar pedido:', error?.response?.data || error)
