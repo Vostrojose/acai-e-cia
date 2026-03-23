@@ -42,7 +42,7 @@ app.use(httpLogger);
 ================================= */
 app.use("/api/pedido", pedidoRoutes);
 app.use("/api/produtos", produtoRoutes);
-app.use("/api/auth", authRoutes);
+app.use("/api", authRoutes);
 app.use("/api/pagamento", pagamentoRoutes);
 
 /* =================================
