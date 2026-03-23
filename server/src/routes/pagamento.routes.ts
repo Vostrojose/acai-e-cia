@@ -50,9 +50,13 @@ router.post("/checkout", async (req, res) => {
 
     const checkout = await PaymentProvider.criarCheckoutPreference(pedido);
 
+    // 🔑 Retorno consistente: sempre dentro de { success, data }
     return res.status(200).json({
       success: true,
-      data: checkout,
+      data: {
+        init_point: checkout.init_point,
+        ...checkout, // mantém outros dados que o provider retornar
+      },
     });
   } catch (error: any) {
     console.error("🔥 ERRO CHECKOUT:", error);
