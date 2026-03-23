@@ -20,21 +20,6 @@ const app = express();
    MIDDLEWARES GLOBAIS
 ================================= */
 
-// Configuração do CORS
-app.use(
-  cors({
-    origin: [
-      "https://acai-e-cia-admin-fy6kdh17d-jose-m-da-silvas-projects.vercel.app",
-      "https://pedido.acaiecompanhia.com.br",
-      "http://localhost:5173",   // front-end local
-      "http://127.0.0.1:5173",   // suporte IP local
-    ],
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true, // permite cookies/autenticação
-  })
-);
-
 // Receber JSON
 app.use(express.json());
 
@@ -45,9 +30,9 @@ app.use(httpLogger);
    ROTAS PRINCIPAIS
 ================================= */
 
-// Prefixo correto /api + rota plural se o frontend espera
+// Todas as rotas com prefixo /api
 app.use("/api/pedido", pedidoRoutes);
-app.use("/api/produtos", produtoRoutes); // ⚠️ importante: plural deve bater com frontend
+app.use("/api/produto", produtoRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/pagamento", pagamentoRoutes);
 
@@ -56,7 +41,7 @@ app.use("/api/pagamento", pagamentoRoutes);
 ================================= */
 app.get("/", (req, res) => {
   return res.json({
-    message: "API Açaí & Cia funcionando corretamente! 🚀",
+    message: "API Açaí & Cia funcionando corretamente! 🚀"
   });
 });
 
