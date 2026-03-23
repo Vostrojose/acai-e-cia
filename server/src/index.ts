@@ -16,54 +16,45 @@ dotenv.config();
 
 const app = express();
 
-/* =================================
-   MIDDLEWARES GLOBAIS
-================================= */
+/* ================================= MIDDLEWARES GLOBAIS ================================= */
+app.use(
+  cors({
+    origin: [
+      "https://acai-e-cia-admin-fy6kdh17d-jose-m-da-silvas-projects.vercel.app",
+      "https://pedido.acaiecompanhia.com.br",
+    ],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
-// Receber JSON
 app.use(express.json());
-
-// Logger de requisições HTTP
 app.use(httpLogger);
 
-/* =================================
-   ROTAS PRINCIPAIS
-================================= */
+/* ================================= ROTAS PRINCIPAIS ================================= */
+app.use("/api", pedidoRoutes);
+app.use("/api", produtoRoutes);
+app.use("/api", authRoutes);
+app.use("/api", pagamentoRoutes);
 
-// Todas as rotas com prefixo /api
-app.use("/api/pedido", pedidoRoutes);
-app.use("/api/produto", produtoRoutes);
-app.use("/api/auth", authRoutes);
-app.use("/api/pagamento", pagamentoRoutes);
-
-/* =================================
-   ROTA DE TESTE
-================================= */
+/* ================================= ROTA DE TESTE ================================= */
 app.get("/", (req, res) => {
   return res.json({
-    message: "API Açaí & Cia funcionando corretamente! 🚀"
+    message: "API Açaí & Cia funcionando corretamente!",
   });
 });
 
-/* =================================
-   MIDDLEWARE DE ERRO
-================================= */
+/* ================================= MIDDLEWARE DE ERRO ================================= */
 app.use(errorMiddleware);
 
-/* =================================
-   SERVIDOR HTTP
-================================= */
+/* ================================= SERVIDOR HTTP ================================= */
 const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 
-/* =================================
-   WEBSOCKET
-================================= */
+/* ================================= WEBSOCKET ================================= */
 initSocket(server);
 
-/* =================================
-   INICIAR SERVIDOR
-================================= */
+/* ================================= INICIAR SERVIDOR ================================= */
 server.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
