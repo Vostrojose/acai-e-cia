@@ -9,7 +9,7 @@ export default function Checkout() {
   const [loading, setLoading] = useState(false)
   const [tipoPedido, setTipoPedido] = useState<'retirada' | 'entrega'>('retirada')
 
-  // Endereço como objeto
+  // Endereço como objeto para inputs
   const [endereco, setEndereco] = useState({
     rua: '',
     numero: '',
@@ -37,10 +37,15 @@ export default function Checkout() {
         return 
       }
 
+      // monta endereco como string
+      const enderecoString = tipoPedido === "entrega"
+        ? `${endereco.rua}, ${endereco.numero} - ${endereco.bairro}, ${endereco.cidade} - ${endereco.cep}`
+        : null
+
       const payload = {
         telefone: telefoneLimpo,
         origem,
-        endereco: tipoPedido === "entrega" ? endereco : null,
+        endereco: enderecoString,
         itens: itens.map((item) => ({
           produtoId: item.id,
           quantidade: item.quantidade
