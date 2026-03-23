@@ -24,6 +24,7 @@ app.use(
     origin: [
       "https://acai-e-cia-admin-fy6kdh17d-jose-m-da-silvas-projects.vercel.app",
       "https://pedido.acaiecompanhia.com.br",
+      "https://admin.acaiecompanhia.com.br",
       "http://localhost:5173",
       "http://127.0.0.1:5173",
     ],
