@@ -119,15 +119,14 @@ h2 {
 
 .developer-info {
   position: fixed;          /* fixo na janela */
-  bottom: 20px;             /* distância do rodapé */
-  left: 50%;                /* centraliza horizontalmente */
-  transform: translateX(-50%);
-  font-size: 0.85rem;
+  bottom: 10px;             /* distância do rodapé */
+               /* colado no canto direito */
+  font-size: 0.65rem;
   letter-spacing: 1px;
   opacity: 0.6;
   color: #080808;
-  font-weight: 300;
-  text-align: center;
+  font-weight: 10;
+  text-align: center;        /* texto alinhado à direita */
 }
 
 
