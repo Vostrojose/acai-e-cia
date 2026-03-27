@@ -13,14 +13,14 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/login" element={<Login />} />
 
-      <Route
-        path="/"
-        element={
-          <PrivateRoute>
-            <Dashboard />
-          </PrivateRoute>
-        }
-      />
+     <Route
+  path="/"
+  element={
+    <PrivateRoute>
+      <Cozinha />
+    </PrivateRoute>
+  }
+/>
 
       <Route
         path="/produtos"
