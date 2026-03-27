@@ -10,11 +10,23 @@ export default function Dashboard(){
 
     async function carregar(){
 
-      const p = await api.get("/produtos")
-      setProdutos(p.data.length)
+      try{
 
-      const pe = await api.get("/pedidos")
-      setPedidos(pe.data.length)
+        const p = await api.get("/produtos")
+
+        if(p.data?.data){
+          setProdutos(p.data.data.length)
+        }
+
+        const pe = await api.get("/pedidos")
+
+        if(pe.data?.data){
+          setPedidos(pe.data.data.length)
+        }
+
+      }catch(err){
+        console.error("Erro ao carregar dashboard",err)
+      }
 
     }
 
