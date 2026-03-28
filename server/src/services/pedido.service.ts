@@ -142,14 +142,16 @@ class PedidoService {
     /* ---------- websocket ---------- */
 
     try {
-      const io = getIO()
+    if (pedidoCriado.status === StatusPedido.RECEBIDO) {
+  const io = getIO()
 
-      io.emit('novo_pedido', {
-        id: pedidoCriado.id,
-        status: pedidoCriado.status,
-        total: pedidoCriado.total,
-        criadoEm: pedidoCriado.criadoEm,
-      })
+  io.emit('novo_pedido', {
+    id: pedidoCriado.id,
+    status: pedidoCriado.status,
+    total: pedidoCriado.total,
+    criadoEm: pedidoCriado.criadoEm,
+  })
+ }  
     } catch {
       console.warn('⚠️ WebSocket ainda não inicializado.')
     }
