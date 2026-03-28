@@ -13,22 +13,18 @@ class PedidoController {
   /* CRIAR */
   /* ============================= */
 
- criar: RequestHandler = asyncHandler(
-  async (request: Request, response: Response) => {
+  criar: RequestHandler = asyncHandler(
+    async (request: Request, response: Response) => {
+      const data = criarPedidoSchema.parse(request.body)
 
-    const data = criarPedidoSchema.parse(request.body)
+      const pedido = await pedidoService.criarPedido(data)
 
-    const pedido = await pedidoService.criarPedido({
-      ...data,
-      status: StatusPedido.AGUARDANDO_PAGAMENTO
-    })
-
-    return response.status(201).json({
-      success: true,
-      data: pedido,
-    })
-  }
-)
+      return response.status(201).json({
+        success: true,
+        data: pedido,
+      })
+    }
+  )
 
   /* ============================= */
   /* LISTAR */
