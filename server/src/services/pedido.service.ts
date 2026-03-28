@@ -126,7 +126,7 @@ class PedidoService {
      telefone: data.telefone,
      origem: data.origem,
      endereco: data.endereco,
-     status: StatusPedido.RECEBIDO,
+     status: StatusPedido.AGUARDANDO_PAGAMENTO,
      itens: {
         create: itensParaCriar,
      },
