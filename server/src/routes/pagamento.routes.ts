@@ -44,9 +44,10 @@ router.post("/checkout", async (req, res) => {
       throw new AppError("Pedido não encontrado.", 404);
     }
 
-    if (pedido.status !== StatusPedido.RECEBIDO) {
+    // Agora o pedido precisa estar aguardando pagamento
+    if (pedido.status !== StatusPedido.AGUARDANDO_PAGAMENTO) {
       throw new AppError(
-        "Pagamento só pode ser realizado para pedidos RECEBIDO.",
+        "Pagamento só pode ser realizado para pedidos aguardando pagamento.",
         400
       );
     }
@@ -63,7 +64,7 @@ router.post("/checkout", async (req, res) => {
 
   } catch (error: any) {
 
-    console.error(" ERRO CHECKOUT:", error);
+    console.error("ERRO CHECKOUT:", error);
 
     if (error instanceof AppError) {
       return res.status(error.statusCode).json({
@@ -106,6 +107,7 @@ router.post("/webhook", async (req, res) => {
       return res.sendStatus(200);
     }
 
+    // só processa pagamento aprovado
     if (pagamento.status !== "approved") {
       return res.sendStatus(200);
     }
@@ -121,16 +123,18 @@ router.post("/webhook", async (req, res) => {
       return res.sendStatus(200);
     }
 
+    // valida valor do pagamento
     if (Number(pedido.total) !== Number(pagamento.transaction_amount)) {
       console.error("Divergência de valor detectada");
       return res.sendStatus(200);
     }
 
-    if (pedido.status !== StatusPedido.RECEBIDO) {
+    // evita processar webhook duplicado
+    if (pedido.status !== StatusPedido.AGUARDANDO_PAGAMENTO) {
       return res.sendStatus(200);
     }
 
-    // Pedido pago aparece na cozinha como RECEBIDO
+    // pagamento aprovado → pedido recebido pela cozinha
     const pedidoAtualizado = await PedidoService.atualizarStatus(
       pedido.id,
       StatusPedido.RECEBIDO
@@ -143,14 +147,14 @@ router.post("/webhook", async (req, res) => {
         total: pedidoAtualizado.total,
       });
     } catch {
-      console.warn(" WebSocket não inicializado.");
+      console.warn("WebSocket não inicializado.");
     }
 
     return res.sendStatus(200);
 
   } catch (error) {
 
-    console.error(" ERRO WEBHOOK:", error);
+    console.error("ERRO WEBHOOK:", error);
     return res.sendStatus(200);
 
   }
