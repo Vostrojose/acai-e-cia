@@ -68,7 +68,7 @@ export default function Cozinha() {
 
     <div style={{ padding: 20, background: "#f5f5f5", minHeight: "100vh" }}>
 
-      <h1 style={{ marginBottom: 30 }}>Painel da Josy mais a Célia</h1>
+      <h1 style={{ marginBottom: 30 }}>Pedidos – Status</h1>
       <div
   style={{
     display: "flex",
