@@ -99,7 +99,7 @@ router.post('/pagamento/webhook', async (req, res) => {
         if (pedido.status !== client_1.StatusPedido.RECEBIDO) {
             return res.sendStatus(200);
         }
-        const pedidoAtualizado = await pedido_service_1.default.atualizarStatus(pedido.id, client_1.StatusPedido.EM_PREPARO);
+        const pedidoAtualizado = await pedido_service_1.default.atualizarStatus(pedido.id, client_1.StatusPedido.RECEBIDO);
         // 🔌 WebSocket opcional
         try {
             (0, socket_1.getIO)().emit('pedido_atualizado', {
