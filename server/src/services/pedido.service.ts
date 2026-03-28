@@ -197,14 +197,14 @@ class PedidoService {
     if (!pedido) {
       throw new AppError('Pedido não encontrado.', 404)
     }
-
     const regras: Record<StatusPedido, StatusPedido[]> = {
+      AGUARDANDO_PAGAMENTO: ['RECEBIDO', 'CANCELADO'],
       RECEBIDO: ['EM_PREPARO', 'CANCELADO'],
       EM_PREPARO: ['PRONTO', 'CANCELADO'],
       PRONTO: ['ENTREGUE'],
       ENTREGUE: [],
       CANCELADO: [],
-    }
+}
 
     const permitidos = regras[pedido.status]
 
@@ -256,12 +256,13 @@ class PedidoService {
     })
 
     const base: Record<StatusPedido, number> = {
+      AGUARDANDO_PAGAMENTO: 0,
       RECEBIDO: 0,
       EM_PREPARO: 0,
       PRONTO: 0,
       ENTREGUE: 0,
       CANCELADO: 0,
-    }
+ }
 
     pedidos.forEach((item) => {
       base[item.status] = item._count.status
