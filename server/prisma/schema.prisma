@@ -74,6 +74,7 @@ model Usuario {
 }
 
 enum StatusPedido {
+  AGUARDANDO_PAGAMENTO
   RECEBIDO
   EM_PREPARO
   PRONTO
