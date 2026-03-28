@@ -121,15 +121,16 @@ class PedidoService {
 
     const pedidoCriado = await prisma.$transaction(async (tx) => {
       const pedido = await tx.pedido.create({
-     data: {
-  total: totalCalculado,
-  telefone: data.telefone,
-  origem: data.origem,
-  endereco: data.endereco,
-  itens: {
-    create: itensParaCriar,
-  },
-},
+  data: {
+     total: totalCalculado,
+     telefone: data.telefone,
+     origem: data.origem,
+     endereco: data.endereco,
+     status: StatusPedido.RECEBIDO,
+     itens: {
+        create: itensParaCriar,
+     },
+   },
         include: {
           itens: true,
         },
