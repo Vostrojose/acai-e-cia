@@ -113,15 +113,15 @@ function Coluna({ titulo, pedidos }: any) {
 
 function PedidoCard({ pedido }: any) {
 
- async function atualizarStatus(status: string) {
-  try {
-    await api.patch(`/pedidos/${pedido.id}/status`, {
-      status
-    })
-  } catch {
-    alert("Erro ao atualizar pedido")
+  async function atualizarStatus(status: string) {
+    try {
+      await api.patch(`/pedidos/${pedido.id}/status`, {
+        status
+      })
+    } catch {
+      alert("Erro ao atualizar pedido")
+    }
   }
-}
 
   return (
     <div style={{
@@ -190,6 +190,23 @@ function PedidoCard({ pedido }: any) {
             }}
           >
             Marcar pronto
+          </button>
+        )}
+
+        {pedido.status === "PRONTO" && (
+          <button
+            onClick={() => atualizarStatus("ENTREGUE")}
+            style={{
+              padding: "8px 12px",
+              borderRadius: 5,
+              border: "none",
+              background: "#2196f3",
+              color: "#fff",
+              cursor: "pointer",
+              marginLeft: 10
+            }}
+          >
+            Pedido entregue
           </button>
         )}
 
