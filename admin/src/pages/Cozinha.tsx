@@ -69,6 +69,57 @@ export default function Cozinha() {
     <div style={{ padding: 20, background: "#f5f5f5", minHeight: "100vh" }}>
 
       <h1 style={{ marginBottom: 30 }}>Painel da Josy mais a Célia</h1>
+      <div
+  style={{
+    display: "flex",
+    gap: 20,
+    marginBottom: 30
+  }}
+>
+
+  <div
+    style={{
+      background: "#fff",
+      padding: 15,
+      borderRadius: 10,
+      minWidth: 120,
+      textAlign: "center",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.1)"
+    }}
+  >
+    <strong>🆕 Novos</strong>
+    <div style={{ fontSize: 24 }}>{novos.length}</div>
+  </div>
+
+  <div
+    style={{
+      background: "#fff",
+      padding: 15,
+      borderRadius: 10,
+      minWidth: 120,
+      textAlign: "center",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.1)"
+    }}
+  >
+    <strong>👨‍🍳 Em preparo</strong>
+    <div style={{ fontSize: 24 }}>{preparo.length}</div>
+  </div>
+
+  <div
+    style={{
+      background: "#fff",
+      padding: 15,
+      borderRadius: 10,
+      minWidth: 120,
+      textAlign: "center",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.1)"
+    }}
+  >
+    <strong>✅ Prontos</strong>
+    <div style={{ fontSize: 24 }}>{prontos.length}</div>
+  </div>
+
+</div>
 
       <div style={{
         display: "grid",
