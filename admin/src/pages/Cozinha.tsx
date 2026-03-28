@@ -206,7 +206,7 @@ function PedidoCard({ pedido }: any) {
               marginLeft: 10
             }}
           >
-            Pedido entregue
+            QUITADO
           </button>
         )}
 
