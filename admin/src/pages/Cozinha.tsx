@@ -2,16 +2,18 @@ import { useEffect, useState } from "react"
 import { io } from "socket.io-client"
 import api from "../services/api"
 
-const socket = io("https://api.acaiecompanhia.com.br", {
-  transports: ["websocket"],
-  reconnection: true
-})
-
 export default function Cozinha() {
 
   const [pedidos, setPedidos] = useState<any[]>([])
 
   useEffect(() => {
+
+    const socket = io("https://api.acaiecompanhia.com.br", {
+      transports: ["websocket"],
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000
+    })
 
     async function carregarPedidos() {
       try {
@@ -25,13 +27,28 @@ export default function Cozinha() {
     carregarPedidos()
 
     /* ========================= */
+    /* SOCKET CONECTADO          */
+    /* ========================= */
+
+    socket.on("connect", () => {
+      console.log("🟢 Socket conectado:", socket.id)
+
+      // garante sincronização ao reconectar
+      carregarPedidos()
+    })
+
+    socket.on("disconnect", () => {
+      console.log("🔴 Socket desconectado")
+    })
+
+    /* ========================= */
     /* NOVO PEDIDO               */
     /* ========================= */
 
     socket.on("novo_pedido", (pedido) => {
 
       try {
-        const audio = new Audio("./novo-pedido.mp3")
+        const audio = new Audio("/novo-pedido.mp3")
         audio.play()
       } catch {}
 
@@ -58,21 +75,8 @@ export default function Cozinha() {
       )
     })
 
-    /* ========================= */
-    /* RECONEXÃO SOCKET          */
-    /* ========================= */
-
-    socket.on("connect", () => {
-      console.log("Socket conectado")
-    })
-
-    socket.on("disconnect", () => {
-      console.log("Socket desconectado")
-    })
-
     return () => {
-      socket.off("novo_pedido")
-      socket.off("pedido_atualizado")
+      socket.disconnect()
     }
 
   }, [])
