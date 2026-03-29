@@ -63,7 +63,6 @@ router.post("/checkout", async (req, res) => {
     });
 
   } catch (error: any) {
-
     console.error("ERRO CHECKOUT:", error);
 
     if (error instanceof AppError) {
@@ -86,9 +85,7 @@ router.post("/checkout", async (req, res) => {
 // POST /api/pagamento/webhook
 
 router.post("/webhook", async (req, res) => {
-
   try {
-
     const parsed = webhookSchema.safeParse(req.body);
 
     if (!parsed.success) {
@@ -141,11 +138,11 @@ router.post("/webhook", async (req, res) => {
     );
 
     try {
-      getIO().emit("pedido_atualizado", {
-        id: pedidoAtualizado.id,
-        status: pedidoAtualizado.status,
-        total: pedidoAtualizado.total,
-      });
+      // 🔔 Envia para cozinha como novo pedido
+      getIO().emit("novo_pedido", pedidoAtualizado);
+
+      // 🔄 Atualiza também quem já tem o pedido aberto
+      getIO().emit("pedido_atualizado", pedidoAtualizado);
     } catch {
       console.warn("WebSocket não inicializado.");
     }
@@ -153,12 +150,9 @@ router.post("/webhook", async (req, res) => {
     return res.sendStatus(200);
 
   } catch (error) {
-
     console.error("ERRO WEBHOOK:", error);
     return res.sendStatus(200);
-
   }
-
 });
 
 /* ============================= */
