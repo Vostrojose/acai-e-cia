@@ -31,7 +31,7 @@ export default function Cozinha() {
     socket.on("novo_pedido", (pedido) => {
 
       try {
-        const audio = new Audio("/som-pedido.mp3")
+        const audio = new Audio("./novo-pedido.mp3")
         audio.play()
       } catch {}
 
