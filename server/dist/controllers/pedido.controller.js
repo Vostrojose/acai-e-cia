@@ -10,20 +10,24 @@ const pedido_status_schema_1 = require("../validators/pedido-status.schema");
 const pedido_schema_1 = require("../validators/pedido.schema");
 const socket_1 = require("../websocket/socket");
 const notification_1 = require("../services/notification");
+
 class PedidoController {
     /* ============================= */
-    /* CRIAR */
+    /* CRIAR                         */
     /* ============================= */
     criar = (0, asyncHandler_1.asyncHandler)(async (request, response) => {
         const data = pedido_schema_1.criarPedidoSchema.parse(request.body);
         const pedido = await pedido_service_1.default.criarPedido(data);
+
+        // ⚠️ Não emitir nada aqui — cozinha só recebe após pagamento aprovado
         return response.status(201).json({
             success: true,
             data: pedido,
         });
     });
+
     /* ============================= */
-    /* LISTAR */
+    /* LISTAR                        */
     /* ============================= */
     listar = (0, asyncHandler_1.asyncHandler)(async (request, response) => {
         const { status } = request.query;
@@ -33,26 +37,34 @@ class PedidoController {
             data: pedidos,
         });
     });
+
     /* ============================= */
-    /* ATUALIZAR STATUS */
+    /* ATUALIZAR STATUS              */
     /* ============================= */
     atualizarStatus = (0, asyncHandler_1.asyncHandler)(async (request, response) => {
         const { id } = request.params;
         const data = pedido_status_schema_1.atualizarStatusSchema.parse(request.body);
         const pedido = await pedido_service_1.default.atualizarStatus(id, data.status);
-        // 🔔 Atualização em tempo real
-        (0, socket_1.getIO)().emit('pedido_atualizado', pedido);
+
+        // 🔔 Atualização em tempo real para cozinha
+        (0, socket_1.getIO)().emit("pedido_atualizado", pedido);
+
         // 📲 Notificação quando estiver PRONTO
         if (pedido.status === client_1.StatusPedido.PRONTO && pedido.telefone) {
-            await notification_1.NotificationService.enviarMensagem(pedido.telefone, '🍧 Seu pedido está PRONTO para retirada!');
+            await notification_1.NotificationService.enviarMensagem(
+                pedido.telefone,
+                "🍧 Seu pedido está PRONTO para retirada!"
+            );
         }
+
         return response.json({
             success: true,
             data: pedido,
         });
     });
+
     /* ============================= */
-    /* DASHBOARD */
+    /* DASHBOARD                     */
     /* ============================= */
     dashboard = (0, asyncHandler_1.asyncHandler)(async (_request, response) => {
         const data = await pedido_service_1.default.dashboardPedidos();
@@ -62,4 +74,6 @@ class PedidoController {
         });
     });
 }
+
 exports.default = new PedidoController();
+

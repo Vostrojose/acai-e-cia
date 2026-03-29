@@ -28,8 +28,8 @@ const webhookSchema = zod_1.z.object({
     type: zod_1.z.string().optional(),
     data: zod_1.z
         .object({
-        id: zod_1.z.string(),
-    })
+            id: zod_1.z.string(),
+        })
         .optional(),
 });
 
@@ -39,7 +39,6 @@ const webhookSchema = zod_1.z.object({
 
 router.post('/pagamento/checkout', async (req, res) => {
     try {
-
         const { pedidoId } = pagamentoSchema.parse(req.body);
 
         const pedido = await pedido_service_1.default.buscarPorIdComProdutos(pedidoId);
@@ -59,9 +58,7 @@ router.post('/pagamento/checkout', async (req, res) => {
             data: checkout,
         });
 
-    }
-    catch (error) {
-
+    } catch (error) {
         console.error('ERRO CHECKOUT:', error);
 
         if (error instanceof AppError_1.AppError) {
@@ -83,9 +80,7 @@ router.post('/pagamento/checkout', async (req, res) => {
 /* ============================= */
 
 router.post('/pagamento/webhook', async (req, res) => {
-
     try {
-
         const parsed = webhookSchema.safeParse(req.body);
 
         if (!parsed.success) {
@@ -120,7 +115,7 @@ router.post('/pagamento/webhook', async (req, res) => {
         }
 
         if (Number(pedido.total) !== Number(pagamento.transaction_amount)) {
-            console.error(' Divergência de valor detectada');
+            console.error('Divergência de valor detectada');
             return res.sendStatus(200);
         }
 
@@ -128,33 +123,28 @@ router.post('/pagamento/webhook', async (req, res) => {
             return res.sendStatus(200);
         }
 
-        // PEDIDO PERMANECE RECEBIDO
+        // Atualiza status para RECEBIDO após pagamento aprovado
         const pedidoAtualizado = await pedido_service_1.default.atualizarStatus(
             pedido.id,
             client_1.StatusPedido.RECEBIDO
         );
 
         try {
-            (0, socket_1.getIO)().emit('pedido_atualizado', {
-                id: pedidoAtualizado.id,
-                status: pedidoAtualizado.status,
-                total: pedidoAtualizado.total,
-            });
-        }
-        catch {
-            console.warn(' WebSocket não inicializado.');
+            // 🔔 Envia para cozinha como novo pedido
+            (0, socket_1.getIO)().emit("novo_pedido", pedidoAtualizado);
+
+            // 🔄 Atualiza também quem já tem o pedido aberto
+            (0, socket_1.getIO)().emit("pedido_atualizado", pedidoAtualizado);
+        } catch {
+            console.warn("WebSocket não inicializado.");
         }
 
         return res.sendStatus(200);
 
-    }
-    catch (error) {
-
-        console.error('ERRO WEBHOOK:', error);
+    } catch (error) {
+        console.error("ERRO WEBHOOK:", error);
         return res.sendStatus(200);
-
     }
-
 });
 
 exports.default = router;
