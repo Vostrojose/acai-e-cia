@@ -2,7 +2,10 @@ import { useEffect, useState } from "react"
 import { io } from "socket.io-client"
 import api from "../services/api"
 
-const socket = io("https://api.acaiecompanhia.com.br")
+const socket = io("https://api.acaiecompanhia.com.br", {
+  transports: ["websocket"],
+  reconnection: true
+})
 
 export default function Cozinha() {
 
@@ -11,29 +14,60 @@ export default function Cozinha() {
   useEffect(() => {
 
     async function carregarPedidos() {
-      const res = await api.get("/pedidos")
-      setPedidos(res.data.data)
+      try {
+        const res = await api.get("/pedidos")
+        setPedidos(res.data.data || [])
+      } catch (err) {
+        console.error("Erro ao carregar pedidos", err)
+      }
     }
 
     carregarPedidos()
 
+    /* ========================= */
+    /* NOVO PEDIDO               */
+    /* ========================= */
+
     socket.on("novo_pedido", (pedido) => {
 
-      // 🔔 som quando chega pedido
       try {
         const audio = new Audio("/som-pedido.mp3")
         audio.play()
       } catch {}
 
-      setPedidos((prev) => [pedido, ...prev])
+      setPedidos((prev) => {
+
+        const jaExiste = prev.find(p => p.id === pedido.id)
+
+        if (jaExiste) return prev
+
+        return [pedido, ...prev]
+      })
     })
 
+    /* ========================= */
+    /* PEDIDO ATUALIZADO         */
+    /* ========================= */
+
     socket.on("pedido_atualizado", (pedidoAtualizado) => {
+
       setPedidos((prev) =>
         prev.map((p) =>
           p.id === pedidoAtualizado.id ? pedidoAtualizado : p
         )
       )
+    })
+
+    /* ========================= */
+    /* RECONEXÃO SOCKET          */
+    /* ========================= */
+
+    socket.on("connect", () => {
+      console.log("Socket conectado")
+    })
+
+    socket.on("disconnect", () => {
+      console.log("Socket desconectado")
     })
 
     return () => {
@@ -43,12 +77,15 @@ export default function Cozinha() {
 
   }, [])
 
-  // ordenar pedidos por data
+  /* ========================= */
+  /* ORDENAR PEDIDOS           */
+  /* ========================= */
+
   function ordenar(lista: any[]) {
-    return lista.sort(
+    return [...lista].sort(
       (a, b) =>
-        new Date(a.createdAt).getTime() -
-        new Date(b.createdAt).getTime()
+        new Date(a.criadoEm || a.createdAt).getTime() -
+        new Date(b.criadoEm || b.createdAt).getTime()
     )
   }
 
@@ -69,63 +106,28 @@ export default function Cozinha() {
     <div style={{ padding: 20, background: "#f5f5f5", minHeight: "100vh" }}>
 
       <h1 style={{ marginBottom: 30 }}>Pedidos – Status</h1>
+
       <div
-  style={{
-    display: "flex",
-    gap: 20,
-    marginBottom: 30
-  }}
->
+        style={{
+          display: "flex",
+          gap: 20,
+          marginBottom: 30
+        }}
+      >
 
-  <div
-    style={{
-      background: "#fff",
-      padding: 15,
-      borderRadius: 10,
-      minWidth: 120,
-      textAlign: "center",
-      boxShadow: "0 2px 6px rgba(0,0,0,0.1)"
-    }}
-  >
-    <strong>🆕 Novos</strong>
-    <div style={{ fontSize: 24 }}>{novos.length}</div>
-  </div>
+        <CardStatus titulo="🆕 Novos" valor={novos.length} />
+        <CardStatus titulo="👨‍🍳 Em preparo" valor={preparo.length} />
+        <CardStatus titulo="✅ Prontos" valor={prontos.length} />
 
-  <div
-    style={{
-      background: "#fff",
-      padding: 15,
-      borderRadius: 10,
-      minWidth: 120,
-      textAlign: "center",
-      boxShadow: "0 2px 6px rgba(0,0,0,0.1)"
-    }}
-  >
-    <strong>👨‍🍳 Em preparo</strong>
-    <div style={{ fontSize: 24 }}>{preparo.length}</div>
-  </div>
+      </div>
 
-  <div
-    style={{
-      background: "#fff",
-      padding: 15,
-      borderRadius: 10,
-      minWidth: 120,
-      textAlign: "center",
-      boxShadow: "0 2px 6px rgba(0,0,0,0.1)"
-    }}
-  >
-    <strong>✅ Prontos</strong>
-    <div style={{ fontSize: 24 }}>{prontos.length}</div>
-  </div>
-
-</div>
-
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr 1fr",
-        gap: 20
-      }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr 1fr",
+          gap: 20
+        }}
+      >
 
         <Coluna titulo="🆕 Novos Pedidos" pedidos={novos} />
         <Coluna titulo="👨‍🍳 Em Preparo" pedidos={preparo} />
@@ -134,19 +136,47 @@ export default function Cozinha() {
       </div>
 
     </div>
-
   )
 }
+
+/* ========================= */
+/* CARD STATUS               */
+/* ========================= */
+
+function CardStatus({ titulo, valor }: any) {
+
+  return (
+    <div
+      style={{
+        background: "#fff",
+        padding: 15,
+        borderRadius: 10,
+        minWidth: 120,
+        textAlign: "center",
+        boxShadow: "0 2px 6px rgba(0,0,0,0.1)"
+      }}
+    >
+      <strong>{titulo}</strong>
+      <div style={{ fontSize: 24 }}>{valor}</div>
+    </div>
+  )
+}
+
+/* ========================= */
+/* COLUNA                    */
+/* ========================= */
 
 function Coluna({ titulo, pedidos }: any) {
 
   return (
-    <div style={{
-      background: "#ffffff",
-      borderRadius: 10,
-      padding: 20,
-      minHeight: 400
-    }}>
+    <div
+      style={{
+        background: "#ffffff",
+        borderRadius: 10,
+        padding: 20,
+        minHeight: 400
+      }}
+    >
 
       <h2 style={{ marginBottom: 20 }}>{titulo}</h2>
 
@@ -162,28 +192,32 @@ function Coluna({ titulo, pedidos }: any) {
   )
 }
 
+/* ========================= */
+/* CARD DO PEDIDO            */
+/* ========================= */
+
 function PedidoCard({ pedido }: any) {
 
   async function atualizarStatus(status: string) {
     try {
-      await api.patch(`/pedidos/${pedido.id}/status`, {
-        status
-      })
+      await api.patch(`/pedidos/${pedido.id}/status`, { status })
     } catch {
       alert("Erro ao atualizar pedido")
     }
   }
 
   return (
-    <div style={{
-      border: "1px solid #ddd",
-      borderRadius: 10,
-      padding: 15,
-      marginBottom: 15,
-      background: "#fff8e1"
-    }}>
+    <div
+      style={{
+        border: "1px solid #ddd",
+        borderRadius: 10,
+        padding: 15,
+        marginBottom: 15,
+        background: "#fff8e1"
+      }}
+    >
 
-      <h3>Pedido #{pedido.id.slice(0,6)}</h3>
+      <h3>Pedido #{pedido.id.slice(0, 6)}</h3>
 
       {pedido.tipo && (
         <p>
@@ -194,17 +228,9 @@ function PedidoCard({ pedido }: any) {
         </p>
       )}
 
-      {pedido.origem && (
-        <p>📍 {pedido.origem}</p>
-      )}
-
-      {pedido.telefone && (
-        <p>📱 {pedido.telefone}</p>
-      )}
-
-      {pedido.endereco && (
-        <p>🏠 {pedido.endereco}</p>
-      )}
+      {pedido.origem && <p>📍 {pedido.origem}</p>}
+      {pedido.telefone && <p>📱 {pedido.telefone}</p>}
+      {pedido.endereco && <p>🏠 {pedido.endereco}</p>}
 
       <p>
         <strong>Total:</strong> R$ {pedido.total}
