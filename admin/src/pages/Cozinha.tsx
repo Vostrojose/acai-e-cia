@@ -5,6 +5,7 @@ import api from "../services/api"
 export default function Cozinha() {
 
   const [pedidos, setPedidos] = useState<any[]>([])
+  const [mostrarEntregues, setMostrarEntregues] = useState(false)
 
   useEffect(() => {
     const socket = io("https://api.acaiecompanhia.com.br", {
@@ -81,15 +82,25 @@ export default function Cozinha() {
         <CardStatus titulo="🆕 Novos" valor={novos.length} cor="#f44336" />
         <CardStatus titulo="👨‍🍳 Em preparo" valor={preparo.length} cor="#ff9800" />
         <CardStatus titulo="✅ Prontos" valor={prontos.length} cor="#4caf50" />
-        <CardStatus titulo="📦 Entregues" valor={entregues.length} cor="#9e9e9e" />
+        
+        {/* Card de entregues com clique para expandir */}
+        <div onClick={() => setMostrarEntregues(!mostrarEntregues)} style={{ cursor: "pointer" }}>
+          <CardStatus titulo="📦 Entregues" valor={entregues.length} cor="#9e9e9e" />
+        </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 0.7fr", gap: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20 }}>
         <Coluna titulo="🆕 Novos Pedidos" pedidos={novos} />
         <Coluna titulo="👨‍🍳 Em Preparo" pedidos={preparo} />
         <Coluna titulo="✅ Prontos" pedidos={prontos} />
-        <Coluna titulo="📦 Entregues" pedidos={entregues} reduzido />
       </div>
+
+      {/* Área expansível para entregues */}
+      {mostrarEntregues && (
+        <div style={{ marginTop: 30 }}>
+          <Coluna titulo="📦 Entregues" pedidos={entregues} reduzido />
+        </div>
+      )}
     </div>
   )
 }
