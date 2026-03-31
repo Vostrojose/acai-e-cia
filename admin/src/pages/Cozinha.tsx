@@ -100,7 +100,7 @@ export default function Cozinha() {
   return (
     <div style={{ padding: 20, background: "#f5f5f5", minHeight: "100vh" }}>
       <h1 style={{ marginBottom: 30 }}>
-        {diaSemana}, {data} – {horaAtual}
+        {diaSemana}- {data} – {horaAtual}
       </h1>
 
       <div style={{ display: "flex", gap: 20, marginBottom: 30 }}>
