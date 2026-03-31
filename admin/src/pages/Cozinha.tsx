@@ -7,7 +7,6 @@ export default function Cozinha() {
   const [pedidos, setPedidos] = useState<any[]>([])
 
   useEffect(() => {
-
     const socket = io("https://api.acaiecompanhia.com.br", {
       transports: ["websocket"],
       reconnection: true,
@@ -26,14 +25,8 @@ export default function Cozinha() {
 
     carregarPedidos()
 
-    /* ========================= */
-    /* SOCKET CONECTADO          */
-    /* ========================= */
-
     socket.on("connect", () => {
       console.log("🟢 Socket conectado:", socket.id)
-
-      // garante sincronização ao reconectar
       carregarPedidos()
     })
 
@@ -41,33 +34,20 @@ export default function Cozinha() {
       console.log("🔴 Socket desconectado")
     })
 
-    /* ========================= */
-    /* NOVO PEDIDO               */
-    /* ========================= */
-
     socket.on("novo_pedido", (pedido) => {
-
       try {
         const audio = new Audio("/novo-pedido.mp3")
         audio.play()
       } catch {}
 
       setPedidos((prev) => {
-
         const jaExiste = prev.find(p => p.id === pedido.id)
-
         if (jaExiste) return prev
-
         return [pedido, ...prev]
       })
     })
 
-    /* ========================= */
-    /* PEDIDO ATUALIZADO         */
-    /* ========================= */
-
     socket.on("pedido_atualizado", (pedidoAtualizado) => {
-
       setPedidos((prev) =>
         prev.map((p) =>
           p.id === pedidoAtualizado.id ? pedidoAtualizado : p
@@ -78,12 +58,7 @@ export default function Cozinha() {
     return () => {
       socket.disconnect()
     }
-
   }, [])
-
-  /* ========================= */
-  /* ORDENAR PEDIDOS           */
-  /* ========================= */
 
   function ordenar(lista: any[]) {
     return [...lista].sort(
@@ -93,52 +68,28 @@ export default function Cozinha() {
     )
   }
 
-  const novos = ordenar(
-    pedidos.filter((p) => p.status === "RECEBIDO")
-  )
-
-  const preparo = ordenar(
-    pedidos.filter((p) => p.status === "EM_PREPARO")
-  )
-
-  const prontos = ordenar(
-    pedidos.filter((p) => p.status === "PRONTO")
-  )
+  const novos = ordenar(pedidos.filter((p) => p.status === "RECEBIDO"))
+  const preparo = ordenar(pedidos.filter((p) => p.status === "EM_PREPARO"))
+  const prontos = ordenar(pedidos.filter((p) => p.status === "PRONTO"))
+  const entregues = ordenar(pedidos.filter((p) => p.status === "ENTREGUE"))
 
   return (
-
     <div style={{ padding: 20, background: "#f5f5f5", minHeight: "100vh" }}>
-
       <h1 style={{ marginBottom: 30 }}>Pedidos – Status</h1>
 
-      <div
-        style={{
-          display: "flex",
-          gap: 20,
-          marginBottom: 30
-        }}
-      >
-
-        <CardStatus titulo="🆕 Novos" valor={novos.length} />
-        <CardStatus titulo="👨‍🍳 Em preparo" valor={preparo.length} />
-        <CardStatus titulo="✅ Prontos" valor={prontos.length} />
-
+      <div style={{ display: "flex", gap: 20, marginBottom: 30 }}>
+        <CardStatus titulo="🆕 Novos" valor={novos.length} cor="#f44336" />
+        <CardStatus titulo="👨‍🍳 Em preparo" valor={preparo.length} cor="#ff9800" />
+        <CardStatus titulo="✅ Prontos" valor={prontos.length} cor="#4caf50" />
+        <CardStatus titulo="📦 Entregues" valor={entregues.length} cor="#9e9e9e" />
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          gap: 20
-        }}
-      >
-
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 0.7fr", gap: 20 }}>
         <Coluna titulo="🆕 Novos Pedidos" pedidos={novos} />
         <Coluna titulo="👨‍🍳 Em Preparo" pedidos={preparo} />
         <Coluna titulo="✅ Prontos" pedidos={prontos} />
-
+        <Coluna titulo="📦 Entregues" pedidos={entregues} reduzido />
       </div>
-
     </div>
   )
 }
@@ -147,17 +98,18 @@ export default function Cozinha() {
 /* CARD STATUS               */
 /* ========================= */
 
-function CardStatus({ titulo, valor }: any) {
-
+function CardStatus({ titulo, valor, cor }: any) {
   return (
     <div
       style={{
-        background: "#fff",
+        background: cor,
         padding: 15,
         borderRadius: 10,
         minWidth: 120,
         textAlign: "center",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.1)"
+        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+        color: "#fff",
+        fontWeight: "bold"
       }}
     >
       <strong>{titulo}</strong>
@@ -170,28 +122,21 @@ function CardStatus({ titulo, valor }: any) {
 /* COLUNA                    */
 /* ========================= */
 
-function Coluna({ titulo, pedidos }: any) {
-
+function Coluna({ titulo, pedidos, reduzido }: any) {
   return (
     <div
       style={{
         background: "#ffffff",
         borderRadius: 10,
         padding: 20,
-        minHeight: 400
+        minHeight: reduzido ? 200 : 400
       }}
     >
-
       <h2 style={{ marginBottom: 20 }}>{titulo}</h2>
-
-      {pedidos.length === 0 && (
-        <p style={{ color: "#777" }}>Nenhum pedido</p>
-      )}
-
+      {pedidos.length === 0 && <p style={{ color: "#777" }}>Nenhum pedido</p>}
       {pedidos.map((pedido: any) => (
         <PedidoCard key={pedido.id} pedido={pedido} />
       ))}
-
     </div>
   )
 }
@@ -201,6 +146,18 @@ function Coluna({ titulo, pedidos }: any) {
 /* ========================= */
 
 function PedidoCard({ pedido }: any) {
+  const [tempo, setTempo] = useState("")
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const inicio = new Date(pedido.atualizadoEm || pedido.updatedAt || pedido.criadoEm)
+      const diff = Date.now() - inicio.getTime()
+      const minutos = Math.floor(diff / 60000)
+      const segundos = Math.floor((diff % 60000) / 1000)
+      setTempo(`${minutos}m ${segundos}s`)
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [pedido])
 
   async function atualizarStatus(status: string) {
     try {
@@ -217,11 +174,11 @@ function PedidoCard({ pedido }: any) {
         borderRadius: 10,
         padding: 15,
         marginBottom: 15,
-        background: "#fff8e1"
+        background: "#fff"
       }}
     >
-
       <h3>Pedido #{pedido.id.slice(0, 6)}</h3>
+      <p><strong>Status:</strong> {pedido.status} – ⏱ {tempo}</p>
 
       {pedido.tipo && (
         <p>
@@ -236,12 +193,9 @@ function PedidoCard({ pedido }: any) {
       {pedido.telefone && <p>📱 {pedido.telefone}</p>}
       {pedido.endereco && <p>🏠 {pedido.endereco}</p>}
 
-      <p>
-        <strong>Total:</strong> R$ {pedido.total}
-      </p>
+      <p><strong>Total:</strong> R$ {pedido.total}</p>
 
       <div style={{ marginTop: 10 }}>
-
         {pedido.status === "RECEBIDO" && (
           <button
             onClick={() => atualizarStatus("EM_PREPARO")}
@@ -290,9 +244,7 @@ function PedidoCard({ pedido }: any) {
             QUITADO
           </button>
         )}
-
       </div>
-
     </div>
   )
 }
