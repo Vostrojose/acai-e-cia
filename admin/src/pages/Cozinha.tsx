@@ -6,6 +6,7 @@ export default function Cozinha() {
 
   const [pedidos, setPedidos] = useState<any[]>([])
   const [mostrarEntregues, setMostrarEntregues] = useState(false)
+  const [hora, setHora] = useState(new Date())
 
   useEffect(() => {
     const socket = io("https://api.acaiecompanhia.com.br", {
@@ -61,6 +62,24 @@ export default function Cozinha() {
     }
   }, [])
 
+  /* ========================= */
+  /* RELÓGIO E RESET DIÁRIO    */
+  /* ========================= */
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const agora = new Date()
+      setHora(agora)
+
+      // Se for meia-noite, zera pedidos e prepara auditoria
+      if (agora.getHours() === 0 && agora.getMinutes() === 0 && agora.getSeconds() === 0) {
+        console.log("⏰ Virou o dia! Transferindo dados para auditoria...")
+        setPedidos([])
+      }
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
+
   function ordenar(lista: any[]) {
     return [...lista].sort(
       (a, b) =>
@@ -74,9 +93,15 @@ export default function Cozinha() {
   const prontos = ordenar(pedidos.filter((p) => p.status === "PRONTO"))
   const entregues = ordenar(pedidos.filter((p) => p.status === "ENTREGUE"))
 
+  const diaSemana = hora.toLocaleDateString("pt-BR", { weekday: "long" })
+  const data = hora.toLocaleDateString("pt-BR")
+  const horaAtual = hora.toLocaleTimeString("pt-BR")
+
   return (
     <div style={{ padding: 20, background: "#f5f5f5", minHeight: "100vh" }}>
-      <h1 style={{ marginBottom: 30 }}>Pedidos – Status</h1>
+      <h1 style={{ marginBottom: 30 }}>
+        {diaSemana}, {data} – {horaAtual}
+      </h1>
 
       <div style={{ display: "flex", gap: 20, marginBottom: 30 }}>
         <CardStatus titulo="🆕 Novos" valor={novos.length} cor="#f44336" />
@@ -223,23 +248,7 @@ function PedidoCard({ pedido }: any) {
           </button>
         )}
 
-        {pedido.status === "EM_PREPARO" && (
-          <button
-            onClick={() => atualizarStatus("PRONTO")}
-            style={{
-              padding: "8px 12px",
-              borderRadius: 5,
-              border: "none",
-              background: "#4caf50",
-              color: "#fff",
-              cursor: "pointer"
-            }}
-          >
-            Marcar pronto
-          </button>
-        )}
-
-        {pedido.status === "PRONTO" && (
+             {pedido.status === "PRONTO" && (
           <button
             onClick={() => atualizarStatus("ENTREGUE")}
             style={{
@@ -259,3 +268,4 @@ function PedidoCard({ pedido }: any) {
     </div>
   )
 }
+
