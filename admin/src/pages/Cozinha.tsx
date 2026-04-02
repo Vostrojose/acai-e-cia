@@ -103,7 +103,7 @@ export default function Cozinha() {
       setHora(agora)
 
       if (agora.getHours() === 0 && agora.getMinutes() === 0 && agora.getSeconds() === 0) {
-        console.log("⏰ Virou o dia! Transferindo dados para auditoria...")
+        console.log("⏰ Virou o dia!")
         setPedidos([])
       }
     }, 1000)
@@ -198,6 +198,10 @@ function Coluna({ titulo, pedidos, reduzido }: any) {
   )
 }
 
+/* ========================= */
+/* CARD DO PEDIDO            */
+/* ========================= */
+
 function PedidoCard({ pedido }: any) {
   const [tempo, setTempo] = useState("")
 
@@ -218,6 +222,22 @@ function PedidoCard({ pedido }: any) {
     } catch {
       alert("Erro ao atualizar pedido")
     }
+  }
+
+  /* ========================= */
+  /* WHATSAPP                  */
+  /* ========================= */
+
+  function enviarWhatsApp(telefone: string) {
+    const numero = telefone.replace(/\D/g, "")
+
+    const mensagem = encodeURIComponent(
+      "🍧 Seu pedido está PRONTO para retirada no balcão!"
+    )
+
+    const url = `https://wa.me/55${numero}?text=${mensagem}`
+
+    window.open(url, "_blank")
   }
 
   return (
@@ -255,20 +275,35 @@ function PedidoCard({ pedido }: any) {
         )}
 
         {pedido.status === "PRONTO" && (
-          <button
-            onClick={() => atualizarStatus("ENTREGUE")}
-            style={{
-              marginLeft: 10,
-              background: "#2196f3",
-              color: "#fff"
-            }}
-          >
-            QUITADO
-          </button>
+          <>
+            <button
+              onClick={() => atualizarStatus("ENTREGUE")}
+              style={{
+                marginLeft: 10,
+                background: "#2196f3",
+                color: "#fff"
+              }}
+            >
+              QUITADO
+            </button>
+
+            {/* BOTÃO WHATSAPP */}
+            {pedido.telefone && (
+              <button
+                onClick={() => enviarWhatsApp(pedido.telefone)}
+                style={{
+                  marginLeft: 10,
+                  background: "#25D366",
+                  color: "#fff"
+                }}
+              >
+                📲 Avisar cliente
+              </button>
+            )}
+          </>
         )}
 
       </div>
     </div>
   )
 }
-
