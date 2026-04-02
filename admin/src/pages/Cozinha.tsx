@@ -139,7 +139,6 @@ export default function Cozinha() {
         marginBottom: 20,
         flexWrap: 'wrap'
       }}>
-        <button onClick={() => navigate('/cozinha')} style={botaoMenu}>🍧 Cozinha</button>
         <button onClick={() => navigate('/auditoria')} style={botaoMenu}>📊 Auditoria</button>
         <button onClick={() => navigate('/pedidos')} style={botaoMenu}>📦 Pedidos</button>
         <button onClick={() => navigate('/produtos')} style={botaoMenu}>🛒 Produtos</button>
