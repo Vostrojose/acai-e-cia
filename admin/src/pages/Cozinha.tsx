@@ -3,6 +3,22 @@ import { io } from 'socket.io-client'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 
+/* ========================= */
+/* SOCKET GLOBAL (FIXO)      */
+/* ========================= */
+const socket = io('https://api.acaiecompanhia.com.br', {
+  transports: ['websocket'],
+  reconnection: true,
+  reconnectionAttempts: 10,
+  reconnectionDelay: 1000,
+})
+
+/* ========================= */
+/* ÁUDIO GLOBAL              */
+/* ========================= */
+const audioGlobal = new Audio('/novo-pedido.mp3')
+audioGlobal.volume = 1
+
 export default function Cozinha() {
   const [pedidos, setPedidos] = useState<any[]>([])
   const [mostrarEntregues, setMostrarEntregues] = useState(false)
@@ -11,21 +27,41 @@ export default function Cozinha() {
   const intervaloSom = useRef<any>(null)
   const navigate = useNavigate()
 
+  /* ========================= */
+  /* TOCAR SOM                 */
+  /* ========================= */
   function tocarSom() {
     try {
-      const audio = new Audio('/novo-pedido.mp3')
-      audio.volume = 1
-      audio.play().catch(() => {})
+      audioGlobal.currentTime = 0
+      audioGlobal.play().catch(() => {
+        console.warn('🔇 Áudio bloqueado pelo navegador')
+      })
     } catch {}
   }
 
+  /* ========================= */
+  /* LIBERAR ÁUDIO (TABLET)    */
+  /* ========================= */
   useEffect(() => {
-    const socket = io('https://api.acaiecompanhia.com.br', {
-      transports: ['websocket'],
-      reconnection: true,
-      reconnectionAttempts: 10,
-      reconnectionDelay: 1000,
-    })
+    const liberarAudio = () => {
+      audioGlobal.play()
+        .then(() => {
+          audioGlobal.pause()
+          audioGlobal.currentTime = 0
+          console.log('🔊 Áudio liberado')
+        })
+        .catch(() => {})
+
+      window.removeEventListener('click', liberarAudio)
+    }
+
+    window.addEventListener('click', liberarAudio)
+  }, [])
+
+  /* ========================= */
+  /* SOCKET + PEDIDOS          */
+  /* ========================= */
+  useEffect(() => {
 
     async function carregarPedidos() {
       try {
@@ -48,6 +84,8 @@ export default function Cozinha() {
     })
 
     socket.on('novo_pedido', (pedido) => {
+      console.log('🔥 NOVO PEDIDO RECEBIDO')
+
       tocarSom()
 
       setPedidos((prev) => {
@@ -59,13 +97,19 @@ export default function Cozinha() {
 
     socket.on('pedido_atualizado', (pedidoAtualizado) => {
       setPedidos((prev) =>
-        prev.map((p) => (p.id === pedidoAtualizado.id ? pedidoAtualizado : p)),
+        prev.map((p) =>
+          p.id === pedidoAtualizado.id ? pedidoAtualizado : p
+        )
       )
     })
 
     return () => {
-      socket.disconnect()
+      socket.off('connect')
+      socket.off('disconnect')
+      socket.off('novo_pedido')
+      socket.off('pedido_atualizado')
     }
+
   }, [])
 
   /* ========================= */
@@ -74,19 +118,21 @@ export default function Cozinha() {
   useEffect(() => {
     const temPedidoNovo = pedidos.some((p) => p.status === 'RECEBIDO')
 
-    if (temPedidoNovo) {
-      if (!intervaloSom.current) {
-        intervaloSom.current = setInterval(() => {
-          console.log('🔔 Lembrete de pedido pendente')
-          tocarSom()
-        }, 60000)
-      }
-    } else {
-      if (intervaloSom.current) {
-        clearInterval(intervaloSom.current)
-        intervaloSom.current = null
-      }
+    if (temPedidoNovo && !intervaloSom.current) {
+      console.log('🔔 Iniciando alerta sonoro')
+
+      intervaloSom.current = setInterval(() => {
+        tocarSom()
+      }, 60000)
     }
+
+    if (!temPedidoNovo && intervaloSom.current) {
+      console.log('🔕 Parando alerta')
+
+      clearInterval(intervaloSom.current)
+      intervaloSom.current = null
+    }
+
   }, [pedidos])
 
   /* ========================= */
@@ -130,15 +176,8 @@ export default function Cozinha() {
   return (
     <div style={{ padding: 20, background: '#f5f5f5', minHeight: '100vh' }}>
 
-      {/* ========================= */}
-      {/* MENU DE NAVEGAÇÃO         */}
-      {/* ========================= */}
-      <div style={{
-        display: 'flex',
-        gap: 10,
-        marginBottom: 20,
-        flexWrap: 'wrap'
-      }}>
+      {/* MENU */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
         <button onClick={() => navigate('/auditoria')} style={botaoMenu}>📊 Auditoria</button>
         <button onClick={() => navigate('/pedidos')} style={botaoMenu}>📦 Pedidos</button>
         <button onClick={() => navigate('/produtos')} style={botaoMenu}>🛒 Produtos</button>
@@ -174,9 +213,8 @@ export default function Cozinha() {
 }
 
 /* ========================= */
-/* ESTILO BOTÃO MENU         */
+/* ESTILO MENU               */
 /* ========================= */
-
 const botaoMenu = {
   padding: '10px 15px',
   borderRadius: 8,
@@ -184,7 +222,7 @@ const botaoMenu = {
   background: '#333',
   color: '#fff',
   cursor: 'pointer',
-  fontWeight: 'bold'
+  fontWeight: 'bold',
 }
 
 /* ========================= */
@@ -199,7 +237,6 @@ function CardStatus({ titulo, valor, cor }: any) {
       borderRadius: 10,
       minWidth: 120,
       textAlign: 'center',
-      boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
       color: '#fff',
       fontWeight: 'bold',
     }}>
@@ -212,105 +249,71 @@ function CardStatus({ titulo, valor, cor }: any) {
 function Coluna({ titulo, pedidos, reduzido }: any) {
   return (
     <div style={{
-      background: '#ffffff',
+      background: '#fff',
       borderRadius: 10,
       padding: 20,
       minHeight: reduzido ? 200 : 400,
     }}>
-      <h2 style={{ marginBottom: 20 }}>{titulo}</h2>
-      {pedidos.length === 0 && <p style={{ color: '#777' }}>Nenhum pedido</p>}
-      {pedidos.map((pedido: any) => (
-        <PedidoCard key={pedido.id} pedido={pedido} />
-      ))}
+      <h2>{titulo}</h2>
+      {pedidos.map((p: any) => <PedidoCard key={p.id} pedido={p} />)}
     </div>
   )
 }
-
-/* ========================= */
-/* CARD DO PEDIDO            */
-/* ========================= */
 
 function PedidoCard({ pedido }: any) {
   const [tempo, setTempo] = useState('')
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const inicio = new Date(
-        pedido.atualizadoEm || pedido.updatedAt || pedido.criadoEm,
-      )
+      const inicio = new Date(pedido.updatedAt || pedido.criadoEm)
       const diff = Date.now() - inicio.getTime()
-      const minutos = Math.floor(diff / 60000)
-      const segundos = Math.floor((diff % 60000) / 1000)
-      setTempo(`${minutos}m ${segundos}s`)
+      const m = Math.floor(diff / 60000)
+      const s = Math.floor((diff % 60000) / 1000)
+      setTempo(`${m}m ${s}s`)
     }, 1000)
     return () => clearInterval(interval)
   }, [pedido])
 
   async function atualizarStatus(status: string) {
-    try {
-      await api.patch(`/pedidos/${pedido.id}/status`, { status })
-    } catch {
-      alert('Erro ao atualizar pedido')
-    }
+    await api.patch(`/pedidos/${pedido.id}/status`, { status })
   }
 
   function enviarWhatsApp(telefone: string) {
     const numero = telefone.replace(/\D/g, '')
-    const mensagem = encodeURIComponent(
-      '🍧 Seu pedido está PRONTO para retirada no balcão!',
-    )
-    const url = `https://wa.me/55${numero}?text=${mensagem}`
-    window.open(url, '_blank')
+    const msg = encodeURIComponent('🍧 Seu pedido está PRONTO!')
+    window.open(`https://wa.me/55${numero}?text=${msg}`, '_blank')
   }
 
   return (
-    <div style={{
-      border: '1px solid #ddd',
-      borderRadius: 10,
-      padding: 15,
-      marginBottom: 15,
-      background: '#fff',
-    }}>
+    <div style={{ border: '1px solid #ddd', padding: 15, marginBottom: 10 }}>
       <h3>Pedido #{pedido.id.slice(0, 6)}</h3>
-      <p><strong>Status:</strong> {pedido.status} – ⏱ {tempo}</p>
-      <p><strong>Total:</strong> R$ {pedido.total}</p>
+      <p>{pedido.status} – ⏱ {tempo}</p>
 
-      <div style={{ marginTop: 10 }}>
-        {pedido.status === 'RECEBIDO' && (
-          <button onClick={() => atualizarStatus('EM_PREPARO')}>
-            Iniciar preparo
+      {pedido.status === 'RECEBIDO' && (
+        <button onClick={() => atualizarStatus('EM_PREPARO')}>
+          Iniciar preparo
+        </button>
+      )}
+
+      {pedido.status === 'EM_PREPARO' && (
+        <button onClick={() => atualizarStatus('PRONTO')}>
+          Marcar pronto
+        </button>
+      )}
+
+      {pedido.status === 'PRONTO' && (
+        <>
+          <button onClick={() => atualizarStatus('ENTREGUE')}>
+            QUITADO
           </button>
-        )}
 
-        {pedido.status === 'EM_PREPARO' && (
-          <button
-            onClick={() => atualizarStatus('PRONTO')}
-            style={{ marginLeft: 10, background: '#4caf50', color: '#fff' }}
-          >
-            Marcar pronto
-          </button>
-        )}
-
-        {pedido.status === 'PRONTO' && (
-          <>
-            <button
-              onClick={() => atualizarStatus('ENTREGUE')}
-              style={{ marginLeft: 10, background: '#2196f3', color: '#fff' }}
-            >
-              QUITADO
+          {pedido.telefone && (
+            <button onClick={() => enviarWhatsApp(pedido.telefone)}>
+              📲 Avisar cliente
             </button>
-
-            {pedido.telefone && (
-              <button
-                onClick={() => enviarWhatsApp(pedido.telefone)}
-                style={{ marginLeft: 10, background: '#25D366', color: '#fff' }}
-              >
-                📲 Avisar cliente
-              </button>
-            )}
-          </>
-        )}
-      </div>
+          )}
+        </>
+      )}
     </div>
   )
 }
