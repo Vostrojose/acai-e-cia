@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import api from "../services/api"
 
 export default function Auditoria() {
+
+  const navigate = useNavigate()
+
   const [vendas, setVendas] = useState<any>({
     diarias: 0,
     semanais: 0,
@@ -12,7 +16,7 @@ export default function Auditoria() {
   useEffect(() => {
     async function carregarAuditoria() {
       try {
-        const res = await api.get("/auditoria") // endpoint que deve retornar os dados
+        const res = await api.get("/auditoria")
         setVendas(res.data)
       } catch (err) {
         console.error("Erro ao carregar auditoria", err)
@@ -32,6 +36,23 @@ export default function Auditoria() {
 
   return (
     <div style={{ padding: 20, background: "#fafafa", minHeight: "100vh" }}>
+
+      {/* ========================= */}
+      {/* MENU DE NAVEGAÇÃO         */}
+      {/* ========================= */}
+
+      <div style={{
+        display: "flex",
+        gap: 10,
+        marginBottom: 20,
+        flexWrap: "wrap"
+      }}>
+        <button onClick={() => navigate("/cozinha")}>🍳 Cozinha</button>
+        <button onClick={() => navigate("/pedidos")}>📦 Pedidos</button>
+        <button onClick={() => navigate("/produtos")}>🛒 Produtos</button>
+        <button onClick={() => navigate("/dashboard")}>📊 Dashboard</button>
+      </div>
+
       <h1>📊 Auditoria de Vendas</h1>
 
       <div style={{ display: "flex", gap: 20, marginBottom: 30 }}>
@@ -41,16 +62,25 @@ export default function Auditoria() {
       </div>
 
       <h2>Produtos mais vendidos</h2>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20 }}>
+
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr 1fr",
+        gap: 20
+      }}>
         {vendas.produtos.map((p: any, i: number) => {
-          // gradiente de cor baseado na posição
+
           const cor =
             i === 0 ? "#4caf50" :
             i < vendas.produtos.length / 2 ? "#ffeb3b" :
             "#f44336"
 
           return (
-            <div key={p.nome} style={{ background: cor, padding: 15, borderRadius: 10 }}>
+            <div key={p.nome} style={{
+              background: cor,
+              padding: 15,
+              borderRadius: 10
+            }}>
               <strong>{p.nome}</strong>
               <p>{p.qtd} vendidos</p>
             </div>
@@ -59,7 +89,12 @@ export default function Auditoria() {
       </div>
 
       <h2 style={{ marginTop: 30 }}>Registrar venda rápida</h2>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+
+      <div style={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 10
+      }}>
         {vendas.produtos.map((p: any) => (
           <button
             key={p.nome}
@@ -76,6 +111,7 @@ export default function Auditoria() {
           </button>
         ))}
       </div>
+
     </div>
   )
 }
