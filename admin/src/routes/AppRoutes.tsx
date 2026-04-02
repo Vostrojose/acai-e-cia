@@ -4,6 +4,7 @@ import Dashboard from '../pages/Dashboard'
 import Produtos from '../pages/Produtos'
 import Pedidos from '../pages/Pedidos'
 import Cozinha from '../pages/Cozinha'
+import Auditoria from '../pages/Auditoria' // ✅ ADICIONADO
 import Login from '../pages/Login'
 
 import PrivateRoute from './PrivateRoute'
@@ -11,35 +12,27 @@ import PrivateRoute from './PrivateRoute'
 export default function AppRoutes() {
   return (
     <Routes>
+
+      {/* ========================= */}
+      {/* LOGIN (PÚBLICO)          */}
+      {/* ========================= */}
       <Route path="/login" element={<Login />} />
 
-     <Route
-  path="/"
-  element={
-    <PrivateRoute>
-      <Cozinha />
-    </PrivateRoute>
-  }
-/>
-
+      {/* ========================= */}
+      {/* ROTA PRINCIPAL            */}
+      {/* ========================= */}
       <Route
-        path="/produtos"
+        path="/"
         element={
           <PrivateRoute>
-            <Produtos />
+            <Cozinha />
           </PrivateRoute>
         }
       />
 
-      <Route
-        path="/pedidos"
-        element={
-          <PrivateRoute>
-            <Pedidos />
-          </PrivateRoute>
-        }
-      />
-
+      {/* ========================= */}
+      {/* COZINHA                   */}
+      {/* ========================= */}
       <Route
         path="/cozinha"
         element={
@@ -49,6 +42,45 @@ export default function AppRoutes() {
         }
       />
 
+      {/* ========================= */}
+      {/* PRODUTOS                  */}
+      {/* ========================= */}
+      <Route
+        path="/produtos"
+        element={
+          <PrivateRoute>
+            <Produtos />
+          </PrivateRoute>
+        }
+      />
+
+      {/* ========================= */}
+      {/* PEDIDOS                   */}
+      {/* ========================= */}
+      <Route
+        path="/pedidos"
+        element={
+          <PrivateRoute>
+            <Pedidos />
+          </PrivateRoute>
+        }
+      />
+
+      {/* ========================= */}
+      {/* AUDITORIA (NOVO)          */}
+      {/* ========================= */}
+      <Route
+        path="/auditoria"
+        element={
+          <PrivateRoute>
+            <Auditoria />
+          </PrivateRoute>
+        }
+      />
+
+      {/* ========================= */}
+      {/* DASHBOARD                 */}
+      {/* ========================= */}
       <Route
         path="/dashboard"
         element={
@@ -57,6 +89,7 @@ export default function AppRoutes() {
           </PrivateRoute>
         }
       />
+
     </Routes>
   )
 }
