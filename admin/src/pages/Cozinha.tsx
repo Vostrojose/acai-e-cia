@@ -196,9 +196,9 @@ function CardRelogio({ hora }: { hora: Date }) {
   style={{
     background: '#111',
     color: '#fff',
-    padding: 8,        // 👈 diminui espaço interno
+    padding: 5,        // 👈 diminui espaço interno
     borderRadius: 10,    // 👈 opcional (mais compacto)
-    minWidth: 140,      // 👈 diminui largura
+    minWidth: 160,      // 👈 diminui largura
     textAlign: 'center',
   }}
 >
