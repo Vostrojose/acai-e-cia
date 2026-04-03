@@ -128,7 +128,7 @@ export default function Cozinha() {
         style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr 1fr',
-          gap: 40,
+          gap: 60,
         }}
       >
         <Coluna titulo="🆕 Novos Pedidos" pedidos={novos} />
