@@ -177,7 +177,7 @@ function CardRelogio({ hora }: { hora: Date }) {
     <div style={{
       background: '#111',
       color: '#fff',
-      padding: 5,
+      padding: 8,
       borderRadius: 10,
       minWidth: 140,
       textAlign: 'center'
