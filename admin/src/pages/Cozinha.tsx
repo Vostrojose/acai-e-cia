@@ -8,7 +8,7 @@ export default function Cozinha() {
   const [mostrarEntregues, setMostrarEntregues] = useState(false)
   const [hora, setHora] = useState(new Date())
 
- const intervaloSom = useRef<ReturnType<typeof setInterval> | null>(null)
+  const intervaloSom = useRef<ReturnType<typeof setInterval> | null>(null)
   const navigate = useNavigate()
 
   function tocarSom() {
@@ -37,20 +37,22 @@ export default function Cozinha() {
 
     carregarPedidos()
 
-    socket.on('connect', carregarPedidos)
+    socket.on('connect', () => {
+      carregarPedidos()
+    })
 
-    socket.on('novo_pedido', (pedido: any) => {
+    socket.on('novo_pedido', (pedido) => {
       tocarSom()
-      setPedidos((prev) => {
-        const jaExiste = prev.find((p) => p.id === pedido.id)
+      setPedidos((prev: any[]) => {
+        const jaExiste = prev.find((p: any) => p.id === pedido.id)
         if (jaExiste) return prev
         return [pedido, ...prev]
       })
     })
 
-    socket.on('pedido_atualizado', (pedidoAtualizado: any) => {
-      setPedidos((prev) =>
-        prev.map((p) =>
+    socket.on('pedido_atualizado', (pedidoAtualizado) => {
+      setPedidos((prev: any[]) =>
+        prev.map((p: any) =>
           p.id === pedidoAtualizado.id ? pedidoAtualizado : p
         )
       )
@@ -111,53 +113,35 @@ export default function Cozinha() {
   return (
     <div style={{ padding: 20, background: '#f5f5f5', minHeight: '100vh' }}>
 
-      {/* TOPO */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: 20,
-        }}
-      >
+      {/* MENU */}
+      <CardMenu navigate={navigate} />
 
-        {/* ESQUERDA */}
-        <div style={{ flex: 1 }}>
-          <div
-            style={{
-              display: 'flex',
-              gap: 20,
-              alignItems: 'center',
-              flexWrap: 'wrap',
-            }}
-          >
-            <CardRelogio hora={hora} />
+      {/* RELÓGIO + STATUS */}
+      <div style={{
+        display: 'flex',
+        gap: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexWrap: 'wrap',
+        marginBottom: 20
+      }}>
+        <CardRelogio hora={hora} />
 
-            <CardStatus titulo="🆕 Novos" valor={novos.length} cor="#f44336" />
-            <CardStatus titulo="👨‍🍳 Em preparo" valor={preparo.length} cor="#ff9800" />
-            <CardStatus titulo="✅ Prontos" valor={prontos.length} cor="#4caf50" />
+        <CardStatus titulo="🆕 Novos" valor={novos.length} cor="#f44336" />
+        <CardStatus titulo="👨‍🍳 Em preparo" valor={preparo.length} cor="#ff9800" />
+        <CardStatus titulo="✅ Prontos" valor={prontos.length} cor="#4caf50" />
 
-            <div
-              onClick={() => setMostrarEntregues(!mostrarEntregues)}
-              style={{ cursor: 'pointer' }}
-            >
-              <CardStatus titulo="📦 Entregues" valor={entregues.length} cor="#9e9e9e" />
-            </div>
-          </div>
+        <div onClick={() => setMostrarEntregues(!mostrarEntregues)} style={{ cursor: 'pointer' }}>
+          <CardStatus titulo="📦 Entregues" valor={entregues.length} cor="#9e9e9e" />
         </div>
-
-        {/* DIREITA */}
-        <CardMenu navigate={navigate} />
       </div>
 
       {/* COLUNAS */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr',
-          gap: 20,
-        }}
-      >
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr 1fr',
+        gap: 20
+      }}>
         <Coluna titulo="🆕 Novos Pedidos" pedidos={novos} />
         <Coluna titulo="👨‍🍳 Em Preparo" pedidos={preparo} />
         <Coluna titulo="✅ Prontos" pedidos={prontos} />
@@ -174,37 +158,33 @@ export default function Cozinha() {
 
 /* BOTÃO */
 const botaoMenu = {
-  padding: '10px',
-  borderRadius: 8,
+  padding: '8px 12px',
+  borderRadius: 6,
   border: 'none',
   background: '#333',
   color: '#fff',
   cursor: 'pointer',
-  fontWeight: 'bold',
+  fontWeight: 'bold'
 }
 
 /* RELÓGIO */
 function CardRelogio({ hora }: { hora: Date }) {
-  const diaSemana = hora
-    .toLocaleDateString('pt-BR', { weekday: 'long' })
-    .replace('-feira', '')
+  const diaSemana = hora.toLocaleDateString('pt-BR', { weekday: 'long' }).replace('-feira', '')
   const data = hora.toLocaleDateString('pt-BR').replace(/\//g, '-')
   const horaAtual = hora.toLocaleTimeString('pt-BR')
 
   return (
- <div
-  style={{
-    background: '#111',
-    color: '#fff',
-    padding: 5,        // 👈 diminui espaço interno
-    borderRadius: 10,    // 👈 opcional (mais compacto)
-    minWidth: 160,      // 👈 diminui largura
-    textAlign: 'center',
-  }}
->
+    <div style={{
+      background: '#111',
+      color: '#fff',
+      padding: 10,
+      borderRadius: 10,
+      minWidth: 140,
+      textAlign: 'center'
+    }}>
       <div>{diaSemana.toUpperCase()}</div>
-      <div style={{ fontSize: 22 }}>{data}</div>
-      <div style={{ fontSize: 26 }}>{horaAtual}</div>
+      <div style={{ fontSize: 16 }}>{data}</div>
+      <div style={{ fontSize: 18, fontWeight: 'bold' }}>{horaAtual}</div>
     </div>
   )
 }
@@ -214,16 +194,15 @@ function CardMenu({ navigate }: any) {
   return (
     <div style={{
       display: 'flex',
-      justifyContent: 'center', // 👈 centraliza
+      justifyContent: 'center',
       marginBottom: 20
     }}>
       <div style={{
         background: '#111',
         padding: 10,
-        borderRadius: 8,
+        borderRadius: 10,
         display: 'flex',
-        gap: 10,
-        boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
+        gap: 10
       }}>
         <button onClick={() => navigate('/auditoria')} style={botaoMenu}>📊 Auditoria</button>
         <button onClick={() => navigate('/pedidos')} style={botaoMenu}>📦 Pedidos</button>
@@ -237,19 +216,17 @@ function CardMenu({ navigate }: any) {
 /* STATUS */
 function CardStatus({ titulo, valor, cor }: any) {
   return (
-    <div
-      style={{
-        background: cor,
-        padding: 15,
-        borderRadius: 10,
-        minWidth: 140,
-        textAlign: 'center',
-        color: '#fff',
-        fontWeight: 'bold',
-      }}
-    >
+    <div style={{
+      background: cor,
+      padding: 12,
+      borderRadius: 10,
+      minWidth: 120,
+      textAlign: 'center',
+      color: '#fff',
+      fontWeight: 'bold'
+    }}>
       <strong>{titulo}</strong>
-      <div style={{ fontSize: 34 }}>{valor}</div>
+      <div style={{ fontSize: 28 }}>{valor}</div>
     </div>
   )
 }
@@ -257,14 +234,12 @@ function CardStatus({ titulo, valor, cor }: any) {
 /* COLUNA */
 function Coluna({ titulo, pedidos, reduzido }: any) {
   return (
-    <div
-      style={{
-        background: '#fff',
-        borderRadius: 10,
-        padding: 20,
-        minHeight: reduzido ? 200 : 400,
-      }}
-    >
+    <div style={{
+      background: '#fff',
+      borderRadius: 10,
+      padding: 20,
+      minHeight: reduzido ? 200 : 400
+    }}>
       <h2>{titulo}</h2>
       {pedidos.length === 0 && <p>Nenhum pedido</p>}
       {pedidos.map((pedido: any) => (
@@ -301,15 +276,13 @@ function PedidoCard({ pedido }: any) {
   }
 
   return (
-    <div
-      style={{
-        border: '1px solid #ddd',
-        borderRadius: 10,
-        padding: 15,
-        marginBottom: 15,
-        background: '#fff',
-      }}
-    >
+    <div style={{
+      border: '1px solid #ddd',
+      borderRadius: 10,
+      padding: 15,
+      marginBottom: 15,
+      background: '#fff'
+    }}>
       <h3>Pedido #{pedido.id.slice(0, 6)}</h3>
       <p>Status: {pedido.status} – ⏱ {tempo}</p>
 
