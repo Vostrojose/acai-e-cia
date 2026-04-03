@@ -133,7 +133,7 @@ export default function Cozinha() {
       {/* ========================= */}
       {/* MENU DE NAVEGAÇÃO         */}
       {/* ========================= */}
-      <h1 style={{ marginBottom: 30 }}>
+      <h1 style={{ marginBottom: 15 }}>
         {diaSemana} – {data} – {horaAtual}
       </h1>
       <div style={{
@@ -260,7 +260,7 @@ function PedidoCard({ pedido }: any) {
   function enviarWhatsApp(telefone: string) {
     const numero = telefone.replace(/\D/g, '')
     const mensagem = encodeURIComponent(
-      '🍧 Seu pedido está PRONTO para retirada no balcão!',
+      ' Seu pedido está PRONTO para retirada no balcão!',
     )
     const url = `https://wa.me/55${numero}?text=${mensagem}`
     window.open(url, '_blank')
