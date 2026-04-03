@@ -212,23 +212,24 @@ function CardRelogio({ hora }: { hora: Date }) {
 /* MENU */
 function CardMenu({ navigate }: any) {
   return (
-    <div
-      style={{
-        background: '#fff',
-        padding: 15,
-        borderRadius: 12,
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center', // 👈 centraliza
+      marginBottom: 20
+    }}>
+      <div style={{
+        background: '#111',
+        padding: 10,
+        borderRadius: 8,
         display: 'flex',
-        flexDirection: 'column',
         gap: 10,
-        minWidth: 180,
-        position: 'sticky',
-        top: 20,
-      }}
-    >
-      <button onClick={() => navigate('/auditoria')} style={botaoMenu}>📊 Auditoria</button>
-      <button onClick={() => navigate('/pedidos')} style={botaoMenu}>📦 Pedidos</button>
-      <button onClick={() => navigate('/produtos')} style={botaoMenu}>🛒 Produtos</button>
-      <button onClick={() => navigate('/dashboard')} style={botaoMenu}>📈 Dashboard</button>
+        boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
+      }}>
+        <button onClick={() => navigate('/auditoria')} style={botaoMenu}>📊 Auditoria</button>
+        <button onClick={() => navigate('/pedidos')} style={botaoMenu}>📦 Pedidos</button>
+        <button onClick={() => navigate('/produtos')} style={botaoMenu}>🛒 Produtos</button>
+        <button onClick={() => navigate('/dashboard')} style={botaoMenu}>📈 Dashboard</button>
+      </div>
     </div>
   )
 }
