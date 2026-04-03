@@ -192,16 +192,16 @@ function CardRelogio({ hora }: { hora: Date }) {
   const horaAtual = hora.toLocaleTimeString('pt-BR')
 
   return (
-    <div
-      style={{
-        background: '#111',
-        color: '#fff',
-        padding: 20,
-        borderRadius: 12,
-        minWidth: 100,
-        textAlign: 'center',
-      }}
-    >
+ <div
+  style={{
+    background: '#111',
+    color: '#fff',
+    padding: 10,        // 👈 diminui espaço interno
+    borderRadius: 8,    // 👈 opcional (mais compacto)
+    minWidth: 140,      // 👈 diminui largura
+    textAlign: 'center',
+  }}
+>
       <div>{diaSemana.toUpperCase()}</div>
       <div style={{ fontSize: 22 }}>{data}</div>
       <div style={{ fontSize: 26 }}>{horaAtual}</div>
