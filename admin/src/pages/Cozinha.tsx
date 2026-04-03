@@ -204,7 +204,7 @@ function CardStatus({ titulo, valor, cor }: any) {
       borderRadius: 10,
       minWidth: 120,
       textAlign: 'center',
-      color: '#f20e0e',
+      color: '#fff',
       fontWeight: 'bold'
     }}>
       <strong>{titulo}</strong>
@@ -216,7 +216,7 @@ function CardStatus({ titulo, valor, cor }: any) {
 /* COLUNA */
 function Coluna({ titulo, pedidos }: any) {
   return (
-    <div style={{ background: '#fff', borderRadius: 10, padding: 20 }}>
+    <div style={{ background: '#f70202', borderRadius: 10, padding: 20 }}>
       <h2>{titulo}</h2>
       {pedidos.map((pedido: any) => (
         <PedidoCard key={pedido.id} pedido={pedido} />
