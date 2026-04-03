@@ -249,6 +249,50 @@ function PedidoCard({ pedido }: any) {
     return () => clearInterval(interval)
   }, [pedido])
 
+  function CardRelogio({ hora }: { hora: Date }) {
+  const diaSemana = hora.toLocaleDateString('pt-BR', { weekday: 'long' })
+    .replace('-feira', '') // remove "feira"
+  const data = hora.toLocaleDateString('pt-BR').replace(/\//g, '-') // dd-mm-yyyy
+  const horaAtual = hora.toLocaleTimeString('pt-BR')
+
+  return (
+    <div style={{
+      background: '#333',
+      padding: 15,
+      borderRadius: 10,
+      minWidth: 120,
+      textAlign: 'center',
+      boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+      color: '#fff',
+      fontWeight: 'bold',
+    }}>
+      <div>{diaSemana}</div>
+      <div style={{ fontSize: 20 }}>{data}</div>
+      <div style={{ fontSize: 20 }}>{horaAtual}</div>
+    </div>
+  )
+}
+function CardMenu({ navigate }: any) {
+  return (
+    <div style={{
+      background: '#fff',
+      padding: 15,
+      borderRadius: 10,
+      boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+      display: 'flex',
+      gap: 10,
+      flexWrap: 'wrap',
+      marginBottom: 20
+    }}>
+      <button onClick={() => navigate('/auditoria')} style={botaoMenu}>📊 Auditoria</button>
+      <button onClick={() => navigate('/pedidos')} style={botaoMenu}>📦 Pedidos</button>
+      <button onClick={() => navigate('/produtos')} style={botaoMenu}>🛒 Produtos</button>
+      <button onClick={() => navigate('/dashboard')} style={botaoMenu}>📈 Dashboard</button>
+    </div>
+  )
+}
+
+
   async function atualizarStatus(status: string) {
     try {
       await api.patch(`/pedidos/${pedido.id}/status`, { status })
