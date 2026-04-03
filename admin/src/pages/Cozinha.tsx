@@ -204,7 +204,7 @@ function CardStatus({ titulo, valor, cor }: any) {
       borderRadius: 10,
       minWidth: 120,
       textAlign: 'center',
-      color: '#fff',
+      color: '#f20e0e',
       fontWeight: 'bold'
     }}>
       <strong>{titulo}</strong>
