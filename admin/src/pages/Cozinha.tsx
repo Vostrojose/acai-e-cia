@@ -101,6 +101,7 @@ export default function Cozinha() {
     background: '#f5f5f5',
     minHeight: '100vh',
     width: '100%',
+    boxSizing: 'border-box'
   }}
 >
       {/* MENU */}
