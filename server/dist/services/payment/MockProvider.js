@@ -1,14 +1,11 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.MockProvider = void 0;
-class MockProvider {
+export class MockProvider {
     payments = new Map();
     async criarPagamentoPix(pedidoId, total) {
         const id = `MOCK-${Date.now()}`;
         const payment = {
             id,
             pedidoId,
-            status: 'pending', // 🔒 NÃO APROVA AUTOMATICAMENTE
+            status: 'pending',
             transaction_amount: total,
             qr_code: 'PIX-MOCK-CODE',
             qr_code_base64: '',
@@ -33,4 +30,3 @@ class MockProvider {
         return this.payments.get(paymentId) || null;
     }
 }
-exports.MockProvider = MockProvider;

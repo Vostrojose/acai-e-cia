@@ -1,11 +1,7 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.initSocket = initSocket;
-exports.getIO = getIO;
-const socket_io_1 = require("socket.io");
+import { Server } from 'socket.io';
 let io = null;
-function initSocket(server) {
-    io = new socket_io_1.Server(server, {
+export function initSocket(server) {
+    io = new Server(server, {
         cors: {
             origin: '*',
         },
@@ -17,7 +13,7 @@ function initSocket(server) {
         });
     });
 }
-function getIO() {
+export function getIO() {
     if (!io) {
         throw new Error('Socket.io não inicializado');
     }

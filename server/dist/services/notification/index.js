@@ -1,8 +1,2 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.NotificationService = void 0;
-const ManualWhatsAppProvider_1 = __importDefault(require("./ManualWhatsAppProvider"));
-exports.NotificationService = ManualWhatsAppProvider_1.default;
+import ManualWhatsAppProvider from './ManualWhatsAppProvider';
+export const NotificationService = ManualWhatsAppProvider;

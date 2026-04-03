@@ -1,12 +1,7 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const prisma_1 = __importDefault(require("../lib/prisma"));
+import prisma from '../lib/prisma';
 class ProdutoService {
     async criarProduto(data) {
-        return await prisma_1.default.produto.create({
+        return await prisma.produto.create({
             data: {
                 nome: data.nome,
                 descricao: data.descricao,
@@ -16,22 +11,22 @@ class ProdutoService {
         });
     }
     async listarProdutos() {
-        return await prisma_1.default.produto.findMany({
+        return await prisma.produto.findMany({
             orderBy: {
                 criadoEm: 'desc',
             },
         });
     }
     async alterarStatus(id, ativo) {
-        return await prisma_1.default.produto.update({
+        return await prisma.produto.update({
             where: { id },
             data: { ativo },
         });
     }
     async removerProduto(id) {
-        return await prisma_1.default.produto.delete({
+        return await prisma.produto.delete({
             where: { id }
         });
     }
 }
-exports.default = new ProdutoService();
+export default new ProdutoService();

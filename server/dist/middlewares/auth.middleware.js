@@ -1,21 +1,30 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ensureAuthenticated = ensureAuthenticated;
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-function ensureAuthenticated(req, res, next) {
+import jwt from "jsonwebtoken";
+export function ensureAuthenticated(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-        return res.status(401).json({ message: "Token não informado" });
+        return res.status(401).json({
+            message: "Token não informado"
+        });
     }
-    const [, token] = authHeader.split(" ");
+    const parts = authHeader.split(" ");
+    if (parts.length !== 2) {
+        return res.status(401).json({
+            message: "Token mal formatado"
+        });
+    }
+    const [scheme, token] = parts;
+    if (!/^Bearer$/i.test(scheme)) {
+        return res.status(401).json({
+            message: "Token mal formatado"
+        });
+    }
     try {
-        jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
-        next();
+        jwt.verify(token, process.env.JWT_SECRET);
+        return next();
     }
     catch {
-        return res.status(401).json({ message: "Token inválido" });
+        return res.status(401).json({
+            message: "Token inválido"
+        });
     }
 }

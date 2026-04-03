@@ -1,16 +1,10 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.errorMiddleware = errorMiddleware;
-const AppError_1 = require("../utils/AppError");
-const logger_1 = __importDefault(require("../utils/logger"));
-const zod_1 = require("zod");
-function errorMiddleware(error, request, response, next) {
-    if (error instanceof zod_1.ZodError) {
+import { AppError } from '../utils/AppError';
+import logger from '../utils/logger';
+import { ZodError } from 'zod';
+export function errorMiddleware(error, request, response, next) {
+    if (error instanceof ZodError) {
         const formattedErrors = error.issues.map((issue) => issue.message);
-        logger_1.default.warn({
+        logger.warn({
             message: 'Validation error',
             errors: formattedErrors,
             path: request.path,
@@ -21,8 +15,8 @@ function errorMiddleware(error, request, response, next) {
             error: formattedErrors,
         });
     }
-    if (error instanceof AppError_1.AppError) {
-        logger_1.default.warn({
+    if (error instanceof AppError) {
+        logger.warn({
             message: error.message,
             statusCode: error.statusCode,
             path: request.path,
@@ -33,7 +27,7 @@ function errorMiddleware(error, request, response, next) {
             error: error.message,
         });
     }
-    logger_1.default.error({
+    logger.error({
         message: error.message,
         stack: error.stack,
         path: request.path,

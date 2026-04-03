@@ -1,15 +1,12 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.atualizarStatusSchema = exports.criarPedidoSchema = void 0;
-const zod_1 = require("zod");
+import { z } from 'zod';
 /* ============================= */
 /* ITEM DO PEDIDO */
 /* ============================= */
-const itemPedidoSchema = zod_1.z.object({
-    produtoId: zod_1.z
+const itemPedidoSchema = z.object({
+    produtoId: z
         .string()
         .uuid('produtoId deve ser um UUID válido.'),
-    quantidade: zod_1.z
+    quantidade: z
         .number()
         .int('quantidade deve ser um número inteiro.')
         .positive('quantidade deve ser maior que zero.'),
@@ -17,25 +14,25 @@ const itemPedidoSchema = zod_1.z.object({
 /* ============================= */
 /* CRIAR PEDIDO */
 /* ============================= */
-exports.criarPedidoSchema = zod_1.z
+export const criarPedidoSchema = z
     .object({
-    itens: zod_1.z
+    itens: z
         .array(itemPedidoSchema)
         .min(1, 'Pedido deve conter ao menos um item.'),
-    telefone: zod_1.z
+    telefone: z
         .string()
         .trim()
         .min(10, 'telefone inválido.')
         .max(20, 'telefone inválido.')
         .optional(),
-    origem: zod_1.z
+    origem: z
         .string()
         .trim()
         .optional(),
-    endereco: zod_1.z
+    endereco: z
         .string()
         .optional(),
-    tipo: zod_1.z.enum([
+    tipo: z.enum([
         "MESA",
         "RETIRADA",
         "ENTREGA",
@@ -46,9 +43,9 @@ exports.criarPedidoSchema = zod_1.z
 /* ============================= */
 /* ATUALIZAR STATUS */
 /* ============================= */
-exports.atualizarStatusSchema = zod_1.z
+export const atualizarStatusSchema = z
     .object({
-    status: zod_1.z.enum([
+    status: z.enum([
         'RECEBIDO',
         'EM_PREPARO',
         'PRONTO',

@@ -8,72 +8,74 @@ datasource db {
 }
 
 model Produto {
-  id            String   @id @default(uuid())
-  nome          String
-  descricao     String?
-  preco         Float
-  ativo         Boolean  @default(true)
+  id        String  @id @default(uuid())
+  nome      String
+  descricao String?
+  preco     Float
+  ativo     Boolean @default(true)
 
-  destaque      Boolean  @default(false) 
+  destaque Boolean @default(false)
 
-  disponivelSeg Boolean  @default(true)
-  disponivelTer Boolean  @default(true)
-  disponivelQua Boolean  @default(true)
-  disponivelQui Boolean  @default(true)
-  disponivelSex Boolean  @default(true)
-  disponivelSab Boolean  @default(true)
-  disponivelDom Boolean  @default(true)
+  disponivelSeg Boolean @default(true)
+  disponivelTer Boolean @default(true)
+  disponivelQua Boolean @default(true)
+  disponivelQui Boolean @default(true)
+  disponivelSex Boolean @default(true)
+  disponivelSab Boolean @default(true)
+  disponivelDom Boolean @default(true)
 
-  criadoEm      DateTime @default(now())
-  atualizadoEm  DateTime @updatedAt
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
 
-  itensPedido   ItemPedido[]
+  itensPedido ItemPedido[]
 }
 
 model Pedido {
-  id            String        @id @default(uuid())
-  status        StatusPedido  @default(RECEBIDO)
-  tipo          TipoPedido    @default(ONLINE)
-  total         Float
-  telefone      String?
-  origem        String?       // origem do pedido (mesa, QR, panfleto, etc)
-  endereco      String?
-  criadoEm      DateTime      @default(now())
-  atualizadoEm  DateTime      @updatedAt
-  itens         ItemPedido[]
+  id           String       @id @default(uuid())
+  status       StatusPedido @default(RECEBIDO)
+  tipo         TipoPedido   @default(ONLINE)
+  total        Float
+  telefone     String?
+  origem       String? // origem do pedido (mesa, QR, panfleto, etc)
+  endereco     String?
+  criadoEm     DateTime     @default(now())
+  atualizadoEm DateTime     @updatedAt
+  itens        ItemPedido[]
 
-  auditoriaId   String?
-  auditoria     AuditoriaMensal? @relation(fields: [auditoriaId], references: [id])
+  auditoriaId String?
+  auditoria   AuditoriaMensal? @relation(fields: [auditoriaId], references: [id])
 }
 
 model ItemPedido {
-  id         String   @id @default(uuid())
+  id         String @id @default(uuid())
   quantidade Int
   precoUnit  Float
 
-  pedido     Pedido   @relation(fields: [pedidoId], references: [id])
-  pedidoId   String
+  pedido   Pedido @relation(fields: [pedidoId], references: [id])
+  pedidoId String
 
-  produto    Produto  @relation(fields: [produtoId], references: [id])
-  produtoId  String
+  produto   Produto @relation(fields: [produtoId], references: [id])
+  produtoId String
 }
 
 model Usuario {
-  id        String   @id @default(uuid())
-  nome      String
-  email     String   @unique
-  senha     String
-  role      Role     @default(ADMIN)
-  criadoEm  DateTime @default(now())
+  id       String   @id @default(uuid())
+  nome     String
+  email    String   @unique
+  senha    String
+  role     Role     @default(ADMIN)
+  criadoEm DateTime @default(now())
 }
 
 model AuditoriaMensal {
   id          String   @id @default(uuid())
-  mes         Int      // 1 a 12
+  mes         Int // 1 a 12
   ano         Int
   totalVendas Float
-  produtos    Json     // guarda ranking de produtos (mais/menos vendidos)
+  produtos    Json // guarda ranking de produtos (mais/menos vendidos)
   criadoEm    DateTime @default(now())
+
+  pedidos Pedido[] // <-- campo inverso obrigatório
 }
 
 enum StatusPedido {

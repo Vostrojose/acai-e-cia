@@ -1,17 +1,10 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateToken = generateToken;
-exports.verifyToken = verifyToken;
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+import jwt from 'jsonwebtoken';
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret';
-function generateToken(payload) {
-    return jsonwebtoken_1.default.sign(payload, JWT_SECRET, {
+export function generateToken(payload) {
+    return jwt.sign(payload, JWT_SECRET, {
         expiresIn: '1d',
     });
 }
-function verifyToken(token) {
-    return jsonwebtoken_1.default.verify(token, JWT_SECRET);
+export function verifyToken(token) {
+    return jwt.verify(token, JWT_SECRET);
 }

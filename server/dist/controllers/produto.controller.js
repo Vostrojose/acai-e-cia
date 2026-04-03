@@ -1,51 +1,46 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const produto_service_1 = __importDefault(require("../services/produto.service"));
-const asyncHandler_1 = require("../utils/asyncHandler");
-const produto_schema_1 = require("../validators/produto.schema");
-const AppError_1 = require("../utils/AppError");
-const prisma_1 = __importDefault(require("../services/prisma")); // ✅ precisa importar o prisma
+import produtoService from '../services/produto.service';
+import { asyncHandler } from '../utils/asyncHandler';
+import { criarProdutoSchema } from '../validators/produto.schema';
+import { AppError } from '../utils/AppError';
+import prisma from '../services/prisma'; // ✅ precisa importar o prisma
 class ProdutoController {
-    criar = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
-        const data = produto_schema_1.criarProdutoSchema.parse(req.body);
-        const produto = await produto_service_1.default.criarProduto(data);
+    criar = asyncHandler(async (req, res) => {
+        const data = criarProdutoSchema.parse(req.body);
+        const produto = await produtoService.criarProduto(data);
         return res.status(201).json({
             success: true,
             data: produto,
         });
     });
-    listar = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
-        const produtos = await produto_service_1.default.listarProdutos();
+    listar = asyncHandler(async (req, res) => {
+        const produtos = await produtoService.listarProdutos();
         return res.json({
             success: true,
             data: produtos,
         });
     });
-    alterarStatus = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    alterarStatus = asyncHandler(async (req, res) => {
         const { id } = req.params;
         const { ativo } = req.body;
         if (typeof ativo !== 'boolean') {
-            throw new AppError_1.AppError('O campo "ativo" deve ser boolean.', 400);
+            throw new AppError('O campo "ativo" deve ser boolean.', 400);
         }
-        const produto = await produto_service_1.default.alterarStatus(id, ativo);
+        const produto = await produtoService.alterarStatus(id, ativo);
         return res.json({
             success: true,
             data: produto,
         });
     });
-    remover = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    remover = asyncHandler(async (req, res) => {
         const { id } = req.params;
-        await produto_service_1.default.removerProduto(id);
+        await produtoService.removerProduto(id);
         return res.json({
             success: true,
         });
     });
-    atualizar = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    atualizar = asyncHandler(async (req, res) => {
         const { id } = req.params;
-        const produto = await prisma_1.default.produto.update({
+        const produto = await prisma.produto.update({
             where: { id },
             data: req.body,
         });
@@ -54,9 +49,9 @@ class ProdutoController {
             data: produto,
         });
     });
-    deletar = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    deletar = asyncHandler(async (req, res) => {
         const { id } = req.params;
-        await prisma_1.default.produto.delete({
+        await prisma.produto.delete({
             where: { id },
         });
         return res.json({
@@ -64,4 +59,4 @@ class ProdutoController {
         });
     });
 }
-exports.default = new ProdutoController();
+export default new ProdutoController();

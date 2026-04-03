@@ -1,44 +1,64 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const cors_1 = __importDefault(require("cors"));
-const dotenv_1 = __importDefault(require("dotenv"));
-const http_1 = __importDefault(require("http"));
-const pedido_routes_1 = __importDefault(require("./routes/pedido.routes"));
-const produto_routes_1 = __importDefault(require("./routes/produto.routes"));
-const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
-const pagamento_routes_1 = __importDefault(require("./routes/pagamento.routes"));
-const error_middleware_1 = require("./middlewares/error.middleware");
-const logger_middleware_1 = require("./middlewares/logger.middleware");
-const socket_1 = require("./websocket/socket");
-dotenv_1.default.config();
-const app = (0, express_1.default)();
-// Middlewares globais
-app.use((0, cors_1.default)());
-app.use(express_1.default.json());
-app.use(logger_middleware_1.httpLogger);
-// Rotas principais
-app.use('/api', pedido_routes_1.default);
-app.use('/api', produto_routes_1.default);
-app.use('/api', auth_routes_1.default);
-app.use('/api', pagamento_routes_1.default);
-// Rota de teste
-app.get('/', (req, res) => {
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import http from "http";
+import pedidoRoutes from "./routes/pedido.routes";
+import produtoRoutes from "./routes/produto.routes";
+import authRoutes from "./routes/auth.routes";
+import pagamentoRoutes from "./routes/pagamento.routes";
+import { errorMiddleware } from "./middlewares/error.middleware";
+import { httpLogger } from "./middlewares/logger.middleware";
+import { initSocket } from "./websocket/socket";
+dotenv.config();
+const app = express();
+/* =================================
+   MIDDLEWARES GLOBAIS
+================================= */
+app.use(cors({
+    origin: [
+        "https://acai-e-cia-admin-fy6kdh17d-jose-m-da-silvas-projects.vercel.app",
+        "https://pedido.acaiecompanhia.com.br",
+        "https://admin.acaiecompanhia.com.br",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+}));
+app.use(express.json());
+app.use(httpLogger);
+/* =================================
+   ROTAS PRINCIPAIS
+================================= */
+app.use("/api/pedidos", pedidoRoutes);
+app.use("/api/produtos", produtoRoutes);
+app.use("/api", authRoutes);
+app.use("/api/pagamento", pagamentoRoutes);
+/* =================================
+   ROTA DE TESTE
+================================= */
+app.get("/", (req, res) => {
     return res.json({
-        message: 'API Açaí & Cia funcionando 🚀',
+        message: "API Açaí & Cia funcionando corretamente! 🚀",
     });
 });
-// Middleware de erro (sempre por último)
-app.use(error_middleware_1.errorMiddleware);
+/* =================================
+   MIDDLEWARE DE ERRO
+================================= */
+app.use(errorMiddleware);
+/* =================================
+   SERVIDOR HTTP
+================================= */
 const PORT = process.env.PORT || 3000;
-// 🔌 Criar servidor HTTP uma única vez
-const server = http_1.default.createServer(app);
-// 🔌 Inicializar WebSocket
-(0, socket_1.initSocket)(server);
-// 🚀 Subir servidor
+const server = http.createServer(app);
+/* =================================
+   WEBSOCKET
+================================= */
+initSocket(server);
+/* =================================
+   INICIAR SERVIDOR
+================================= */
 server.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });

@@ -1,5 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 class ManualWhatsAppProvider {
     async enviarMensagem(telefone, mensagem) {
         console.log('📲 ENVIO MANUAL NECESSÁRIO');
@@ -7,4 +5,4 @@ class ManualWhatsAppProvider {
         console.log(`Mensagem: ${mensagem}`);
     }
 }
-exports.default = new ManualWhatsAppProvider();
+export default new ManualWhatsAppProvider();
