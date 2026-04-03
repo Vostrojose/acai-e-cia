@@ -8,7 +8,7 @@ export default function Cozinha() {
   const [mostrarEntregues, setMostrarEntregues] = useState(false)
   const [hora, setHora] = useState(new Date())
 
-  const intervaloSom = useRef<any>(null)
+ const intervaloSom = useRef<ReturnType<typeof setInterval> | null>(null)
   const navigate = useNavigate()
 
   function tocarSom() {
@@ -19,12 +19,11 @@ export default function Cozinha() {
     } catch {}
   }
 
+  /* SOCKET */
   useEffect(() => {
     const socket = io('https://api.acaiecompanhia.com.br', {
       transports: ['websocket'],
       reconnection: true,
-      reconnectionAttempts: 10,
-      reconnectionDelay: 1000,
     })
 
     async function carregarPedidos() {
@@ -38,12 +37,9 @@ export default function Cozinha() {
 
     carregarPedidos()
 
-    socket.on('connect', () => {
-      console.log('🟢 Socket conectado:', socket.id)
-      carregarPedidos()
-    })
+    socket.on('connect', carregarPedidos)
 
-    socket.on('novo_pedido', (pedido) => {
+    socket.on('novo_pedido', (pedido: any) => {
       tocarSom()
       setPedidos((prev) => {
         const jaExiste = prev.find((p) => p.id === pedido.id)
@@ -52,9 +48,11 @@ export default function Cozinha() {
       })
     })
 
-    socket.on('pedido_atualizado', (pedidoAtualizado) => {
+    socket.on('pedido_atualizado', (pedidoAtualizado: any) => {
       setPedidos((prev) =>
-        prev.map((p) => (p.id === pedidoAtualizado.id ? pedidoAtualizado : p)),
+        prev.map((p) =>
+          p.id === pedidoAtualizado.id ? pedidoAtualizado : p
+        )
       )
     })
 
@@ -63,23 +61,23 @@ export default function Cozinha() {
     }
   }, [])
 
+  /* SOM REPETITIVO */
   useEffect(() => {
     const temPedidoNovo = pedidos.some((p) => p.status === 'RECEBIDO')
 
-    if (temPedidoNovo) {
-      if (!intervaloSom.current) {
-        intervaloSom.current = setInterval(() => {
-          tocarSom()
-        }, 60000)
-      }
-    } else {
-      if (intervaloSom.current) {
-        clearInterval(intervaloSom.current)
-        intervaloSom.current = null
-      }
+    if (temPedidoNovo && !intervaloSom.current) {
+      intervaloSom.current = setInterval(() => {
+        tocarSom()
+      }, 60000)
+    }
+
+    if (!temPedidoNovo && intervaloSom.current) {
+      clearInterval(intervaloSom.current)
+      intervaloSom.current = null
     }
   }, [pedidos])
 
+  /* RELÓGIO */
   useEffect(() => {
     const timer = setInterval(() => {
       const agora = new Date()
@@ -101,7 +99,7 @@ export default function Cozinha() {
     return [...lista].sort(
       (a, b) =>
         new Date(a.criadoEm || a.createdAt).getTime() -
-        new Date(b.criadoEm || b.createdAt).getTime(),
+        new Date(b.criadoEm || b.createdAt).getTime()
     )
   }
 
@@ -113,31 +111,53 @@ export default function Cozinha() {
   return (
     <div style={{ padding: 20, background: '#f5f5f5', minHeight: '100vh' }}>
 
-      {/* TOPO COM CARDS */}
-      <div style={{
-        display: 'flex',
-        gap: 20,
-        marginBottom: 20,
-        flexWrap: 'wrap',
-        alignItems: 'center'
-      }}>
-        <CardRelogio hora={hora} />
+      {/* TOPO */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          marginBottom: 20,
+        }}
+      >
+
+        {/* ESQUERDA */}
+        <div style={{ flex: 1 }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: 20,
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
+            <CardRelogio hora={hora} />
+
+            <CardStatus titulo="🆕 Novos" valor={novos.length} cor="#f44336" />
+            <CardStatus titulo="👨‍🍳 Em preparo" valor={preparo.length} cor="#ff9800" />
+            <CardStatus titulo="✅ Prontos" valor={prontos.length} cor="#4caf50" />
+
+            <div
+              onClick={() => setMostrarEntregues(!mostrarEntregues)}
+              style={{ cursor: 'pointer' }}
+            >
+              <CardStatus titulo="📦 Entregues" valor={entregues.length} cor="#9e9e9e" />
+            </div>
+          </div>
+        </div>
+
+        {/* DIREITA */}
         <CardMenu navigate={navigate} />
       </div>
 
-      {/* STATUS */}
-      <div style={{ display: 'flex', gap: 20, marginBottom: 30 }}>
-        <CardStatus titulo="🆕 Novos" valor={novos.length} cor="#f44336" />
-        <CardStatus titulo="👨‍🍳 Em preparo" valor={preparo.length} cor="#ff9800" />
-        <CardStatus titulo="✅ Prontos" valor={prontos.length} cor="#4caf50" />
-
-        <div onClick={() => setMostrarEntregues(!mostrarEntregues)} style={{ cursor: 'pointer' }}>
-          <CardStatus titulo="📦 Entregues" valor={entregues.length} cor="#9e9e9e" />
-        </div>
-      </div>
-
       {/* COLUNAS */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr 1fr',
+          gap: 20,
+        }}
+      >
         <Coluna titulo="🆕 Novos Pedidos" pedidos={novos} />
         <Coluna titulo="👨‍🍳 Em Preparo" pedidos={preparo} />
         <Coluna titulo="✅ Prontos" pedidos={prontos} />
@@ -152,32 +172,36 @@ export default function Cozinha() {
   )
 }
 
-/* BOTÃO MENU */
+/* BOTÃO */
 const botaoMenu = {
-  padding: '10px 15px',
+  padding: '10px',
   borderRadius: 8,
   border: 'none',
   background: '#333',
   color: '#fff',
   cursor: 'pointer',
-  fontWeight: 'bold'
+  fontWeight: 'bold',
 }
 
-/* CARD RELÓGIO */
+/* RELÓGIO */
 function CardRelogio({ hora }: { hora: Date }) {
-  const diaSemana = hora.toLocaleDateString('pt-BR', { weekday: 'long' }).replace('-feira', '')
+  const diaSemana = hora
+    .toLocaleDateString('pt-BR', { weekday: 'long' })
+    .replace('-feira', '')
   const data = hora.toLocaleDateString('pt-BR').replace(/\//g, '-')
   const horaAtual = hora.toLocaleTimeString('pt-BR')
 
   return (
-    <div style={{
-      background: '#111',
-      color: '#fff',
-      padding: 20,
-      borderRadius: 12,
-      minWidth: 200,
-      textAlign: 'center'
-    }}>
+    <div
+      style={{
+        background: '#111',
+        color: '#fff',
+        padding: 20,
+        borderRadius: 12,
+        minWidth: 200,
+        textAlign: 'center',
+      }}
+    >
       <div>{diaSemana.toUpperCase()}</div>
       <div style={{ fontSize: 22 }}>{data}</div>
       <div style={{ fontSize: 26 }}>{horaAtual}</div>
@@ -185,17 +209,22 @@ function CardRelogio({ hora }: { hora: Date }) {
   )
 }
 
-/* CARD MENU */
+/* MENU */
 function CardMenu({ navigate }: any) {
   return (
-    <div style={{
-      background: '#fff',
-      padding: 15,
-      borderRadius: 12,
-      display: 'flex',
-      gap: 10,
-      flexWrap: 'wrap'
-    }}>
+    <div
+      style={{
+        background: '#fff',
+        padding: 15,
+        borderRadius: 12,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+        minWidth: 180,
+        position: 'sticky',
+        top: 20,
+      }}
+    >
       <button onClick={() => navigate('/auditoria')} style={botaoMenu}>📊 Auditoria</button>
       <button onClick={() => navigate('/pedidos')} style={botaoMenu}>📦 Pedidos</button>
       <button onClick={() => navigate('/produtos')} style={botaoMenu}>🛒 Produtos</button>
@@ -204,18 +233,20 @@ function CardMenu({ navigate }: any) {
   )
 }
 
-/* CARD STATUS */
+/* STATUS */
 function CardStatus({ titulo, valor, cor }: any) {
   return (
-    <div style={{
-      background: cor,
-      padding: 15,
-      borderRadius: 10,
-      minWidth: 120,
-      textAlign: 'center',
-      color: '#fff',
-      fontWeight: 'bold'
-    }}>
+    <div
+      style={{
+        background: cor,
+        padding: 15,
+        borderRadius: 10,
+        minWidth: 120,
+        textAlign: 'center',
+        color: '#fff',
+        fontWeight: 'bold',
+      }}
+    >
       <strong>{titulo}</strong>
       <div style={{ fontSize: 24 }}>{valor}</div>
     </div>
@@ -225,12 +256,14 @@ function CardStatus({ titulo, valor, cor }: any) {
 /* COLUNA */
 function Coluna({ titulo, pedidos, reduzido }: any) {
   return (
-    <div style={{
-      background: '#fff',
-      borderRadius: 10,
-      padding: 20,
-      minHeight: reduzido ? 200 : 400
-    }}>
+    <div
+      style={{
+        background: '#fff',
+        borderRadius: 10,
+        padding: 20,
+        minHeight: reduzido ? 200 : 400,
+      }}
+    >
       <h2>{titulo}</h2>
       {pedidos.length === 0 && <p>Nenhum pedido</p>}
       {pedidos.map((pedido: any) => (
@@ -247,13 +280,14 @@ function PedidoCard({ pedido }: any) {
   useEffect(() => {
     const interval = setInterval(() => {
       const inicio = new Date(
-        pedido.atualizadoEm || pedido.updatedAt || pedido.criadoEm,
+        pedido.atualizadoEm || pedido.updatedAt || pedido.criadoEm
       )
       const diff = Date.now() - inicio.getTime()
       const minutos = Math.floor(diff / 60000)
       const segundos = Math.floor((diff % 60000) / 1000)
       setTempo(`${minutos}m ${segundos}s`)
     }, 1000)
+
     return () => clearInterval(interval)
   }, [pedido])
 
@@ -265,24 +299,18 @@ function PedidoCard({ pedido }: any) {
     }
   }
 
-  function enviarWhatsApp(telefone: string) {
-    const numero = telefone.replace(/\D/g, '')
-    const mensagem = encodeURIComponent('Seu pedido está PRONTO!')
-    const url = `https://wa.me/55${numero}?text=${mensagem}`
-    window.open(url, '_blank')
-  }
-
   return (
-    <div style={{
-      border: '1px solid #ddd',
-      borderRadius: 10,
-      padding: 15,
-      marginBottom: 15,
-      background: '#fff'
-    }}>
+    <div
+      style={{
+        border: '1px solid #ddd',
+        borderRadius: 10,
+        padding: 15,
+        marginBottom: 15,
+        background: '#fff',
+      }}
+    >
       <h3>Pedido #{pedido.id.slice(0, 6)}</h3>
       <p>Status: {pedido.status} – ⏱ {tempo}</p>
-      <p>Total: R$ {pedido.total}</p>
 
       {pedido.status === 'RECEBIDO' && (
         <button onClick={() => atualizarStatus('EM_PREPARO')}>
@@ -297,17 +325,9 @@ function PedidoCard({ pedido }: any) {
       )}
 
       {pedido.status === 'PRONTO' && (
-        <>
-          <button onClick={() => atualizarStatus('ENTREGUE')}>
-            QUITADO
-          </button>
-
-          {pedido.telefone && (
-            <button onClick={() => enviarWhatsApp(pedido.telefone)}>
-              📲 Avisar cliente
-            </button>
-          )}
-        </>
+        <button onClick={() => atualizarStatus('ENTREGUE')}>
+          QUITADO
+        </button>
       )}
     </div>
   )
