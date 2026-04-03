@@ -96,14 +96,13 @@ export default function Cozinha() {
 
   return (
     <div
-      style={{
-        padding: 20,
-        background: '#f5f5f5',
-        minHeight: '100vh',
-        maxWidth: 1400,
-        margin: '0 auto',
-      }}
-    >
+  style={{
+    padding: 20,
+    background: '#f5f5f5',
+    minHeight: '100vh',
+    width: '100%',
+  }}
+>
       {/* MENU */}
       <CardMenu navigate={navigate} />
 
