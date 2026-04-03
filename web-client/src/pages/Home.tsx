@@ -34,15 +34,25 @@ export default function Home() {
 
   useEffect(() => {
     async function loadProdutos() {
+      try {
+        const response = await api.get('/produtos')
 
-      const response = await api.get('/produtos')
+        const produtosData = response.data?.data || []
 
-      const produtosAtivos = response.data.data.filter(
-        (produto: Produto) => produto.ativo
-      )
+        const produtosAtivos = produtosData
+          .map((produto: Produto) => ({
+            ...produto,
+            preco: Number(produto.preco),
+          }))
+          .filter((produto: Produto) => produto.ativo)
 
-      setProdutos(produtosAtivos)
-      setLoading(false)
+        setProdutos(produtosAtivos)
+
+      } catch (error) {
+        console.error('Erro ao carregar produtos:', error)
+      } finally {
+        setLoading(false)
+      }
     }
 
     loadProdutos()
@@ -57,10 +67,6 @@ export default function Home() {
   if (loading) {
     return <p style={{ padding: 20 }}>Carregando produtos...</p>
   }
-
-  /* ============================= */
-  /* FILTRO DE DISPONIBILIDADE    */
-  /* ============================= */
 
   const produtosDisponiveis = produtos.filter((produto: Produto) => {
 
