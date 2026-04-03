@@ -73,6 +73,14 @@ model Usuario {
   criadoEm  DateTime @default(now())
 }
 
+model AuditoriaMensal {
+  id          String   @id @default(uuid())
+  mes         Int      // 1 a 12
+  ano         Int
+  totalVendas Float
+  produtos    Json     // guarda ranking de produtos (mais/menos vendidos)
+  criadoEm    DateTime @default(now())
+}
 enum StatusPedido {
   AGUARDANDO_PAGAMENTO
   RECEBIDO
