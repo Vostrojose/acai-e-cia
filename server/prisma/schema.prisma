@@ -32,16 +32,18 @@ model Produto {
 
 model Pedido {
   id       String       @id @default(uuid())
-  status   StatusPedido @default(RECEBIDO)
+  status   StatusPedido @default(AGUARDANDO_PAGAMENTO)
   tipo     TipoPedido   @default(ONLINE)
   total    Decimal      @db.Decimal(10, 2)
+
   telefone String?
-  origem   String?
+  origem   OrigemPedido?
   endereco String?
 
-  // 🔥 NOVO (IMPORTANTE PARA PAGAMENTO)
-  pagamentoId     String? // id do Mercado Pago
-  statusPagamento String? // aprovado, pendente, recusado
+  // 🔐 PAGAMENTO (SEGURANÇA)
+  pagamentoId        String?          @unique
+  externalReference  String?          @unique
+  statusPagamento    StatusPagamento?
 
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
@@ -50,6 +52,9 @@ model Pedido {
 
   auditoriaId String?
   auditoria   AuditoriaMensal? @relation(fields: [auditoriaId], references: [id])
+
+  @@index([status])
+  @@index([criadoEm])
 }
 
 model ItemPedido {
@@ -57,7 +62,7 @@ model ItemPedido {
   quantidade Int
   precoUnit  Decimal @db.Decimal(10, 2)
 
-  pedido   Pedido @relation(fields: [pedidoId], references: [id])
+  pedido   Pedido @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
   pedidoId String
 
   produto   Produto @relation(fields: [produtoId], references: [id])
@@ -82,6 +87,8 @@ model AuditoriaMensal {
   criadoEm    DateTime @default(now())
 
   pedidos Pedido[]
+
+  @@unique([mes, ano]) // evita duplicidade mensal
 }
 
 enum StatusPedido {
@@ -90,6 +97,13 @@ enum StatusPedido {
   EM_PREPARO
   PRONTO
   ENTREGUE
+  CANCELADO
+}
+
+enum StatusPagamento {
+  PENDENTE
+  APROVADO
+  RECUSADO
   CANCELADO
 }
 
@@ -102,4 +116,11 @@ enum TipoPedido {
   RETIRADA
   ENTREGA
   ONLINE
+}
+
+enum OrigemPedido {
+  QR_CODE
+  APP
+  ADMIN
+  BALCAO
 }
