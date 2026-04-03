@@ -6,7 +6,6 @@ import api from '../services/api'
 export default function Cozinha() {
   const [pedidos, setPedidos] = useState<any[]>([])
   const [mostrarEntregues, setMostrarEntregues] = useState(false)
-  const [hora, setHora] = useState(new Date())
 
   const intervaloSom = useRef<ReturnType<typeof setInterval> | null>(null)
   const navigate = useNavigate()
@@ -29,30 +28,27 @@ export default function Cozinha() {
     async function carregarPedidos() {
       try {
         const res = await api.get('/pedidos')
-        setPedidos(res.data.data || [])
+        setPedidos(res.data?.data || [])
       } catch (err) {
         console.error('Erro ao carregar pedidos', err)
       }
     }
 
     carregarPedidos()
+    socket.on('connect', carregarPedidos)
 
-    socket.on('connect', () => {
-      carregarPedidos()
-    })
-
-    socket.on('novo_pedido', (pedido) => {
+    socket.on('novo_pedido', (pedido: any) => {
       tocarSom()
-      setPedidos((prev: any[]) => {
-        const jaExiste = prev.find((p: any) => p.id === pedido.id)
+      setPedidos((prev) => {
+        const jaExiste = prev.find((p) => p.id === pedido.id)
         if (jaExiste) return prev
         return [pedido, ...prev]
       })
     })
 
-    socket.on('pedido_atualizado', (pedidoAtualizado) => {
-      setPedidos((prev: any[]) =>
-        prev.map((p: any) =>
+    socket.on('pedido_atualizado', (pedidoAtualizado: any) => {
+      setPedidos((prev) =>
+        prev.map((p) =>
           p.id === pedidoAtualizado.id ? pedidoAtualizado : p
         )
       )
@@ -60,6 +56,12 @@ export default function Cozinha() {
 
     return () => {
       socket.disconnect()
+
+      // segurança extra: limpa intervalo se componente desmontar
+      if (intervaloSom.current) {
+        clearInterval(intervaloSom.current)
+        intervaloSom.current = null
+      }
     }
   }, [])
 
@@ -79,24 +81,6 @@ export default function Cozinha() {
     }
   }, [pedidos])
 
-  /* RELÓGIO */
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const agora = new Date()
-      setHora(agora)
-
-      if (
-        agora.getHours() === 0 &&
-        agora.getMinutes() === 0 &&
-        agora.getSeconds() === 0
-      ) {
-        setPedidos([])
-      }
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [])
-
   function ordenar(lista: any[]) {
     return [...lista].sort(
       (a, b) =>
@@ -111,37 +95,51 @@ export default function Cozinha() {
   const entregues = ordenar(pedidos.filter((p) => p.status === 'ENTREGUE'))
 
   return (
-    <div style={{ padding: 20, background: '#f5f5f5', minHeight: '100vh' }}>
-
+    <div
+      style={{
+        padding: 20,
+        background: '#f5f5f5',
+        minHeight: '100vh',
+        maxWidth: 1400,
+        margin: '0 auto',
+      }}
+    >
       {/* MENU */}
       <CardMenu navigate={navigate} />
 
       {/* RELÓGIO + STATUS */}
-      <div style={{
-        display: 'flex',
-        gap: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexWrap: 'wrap',
-        marginBottom: 20
-      }}>
-        <CardRelogio hora={hora} />
+      <div
+        style={{
+          display: 'flex',
+          gap: 20,
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          flexWrap: 'wrap',
+          marginBottom: 20,
+        }}
+      >
+        <CardRelogio />
 
         <CardStatus titulo="🆕 Novos" valor={novos.length} cor="#f44336" />
         <CardStatus titulo="👨‍🍳 Em preparo" valor={preparo.length} cor="#ff9800" />
         <CardStatus titulo="✅ Prontos" valor={prontos.length} cor="#4caf50" />
 
-        <div onClick={() => setMostrarEntregues(!mostrarEntregues)} style={{ cursor: 'pointer' }}>
+        <div
+          onClick={() => setMostrarEntregues(!mostrarEntregues)}
+          style={{ cursor: 'pointer' }}
+        >
           <CardStatus titulo="📦 Entregues" valor={entregues.length} cor="#9e9e9e" />
         </div>
       </div>
 
       {/* COLUNAS */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr 1fr',
-        gap: 20
-      }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr 1fr',
+          gap: 20,
+        }}
+      >
         <Coluna titulo="🆕 Novos Pedidos" pedidos={novos} />
         <Coluna titulo="👨‍🍳 Em Preparo" pedidos={preparo} />
         <Coluna titulo="✅ Prontos" pedidos={prontos} />
@@ -164,27 +162,42 @@ const botaoMenu = {
   background: '#333',
   color: '#fff',
   cursor: 'pointer',
-  fontWeight: 'bold'
+  fontWeight: 'bold',
 }
 
-/* RELÓGIO */
-function CardRelogio({ hora }: { hora: Date }) {
-  const diaSemana = hora.toLocaleDateString('pt-BR', { weekday: 'long' }).replace('-feira', '')
+/* RELÓGIO (ISOLADO) */
+function CardRelogio() {
+  const [hora, setHora] = useState(new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setHora(new Date())
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
+
+  const diaSemana = hora
+    .toLocaleDateString('pt-BR', { weekday: 'long' })
+    .replace('-feira', '')
+
   const data = hora.toLocaleDateString('pt-BR').replace(/\//g, '-')
   const horaAtual = hora.toLocaleTimeString('pt-BR')
 
   return (
-    <div style={{
-      background: '#111',
-      color: '#fff',
-      padding: 7,
-      borderRadius: 10,
-      minWidth: 130,
-      textAlign: 'center'
-    }}>
+    <div
+      style={{
+        background: '#111',
+        color: '#fff',
+        padding: 7,
+        borderRadius: 10,
+        minWidth: 130,
+        textAlign: 'center',
+      }}
+    >
       <div>{diaSemana.toUpperCase()}</div>
-      <div style={{ fontSize: 16 }}>{data}</div>
-      <div style={{ fontSize: 18, fontWeight: 'bold' }}>{horaAtual}</div>
+      <div style={{ fontSize: 14 }}>{data}</div>
+      <div style={{ fontSize: 16, fontWeight: 'bold' }}>{horaAtual}</div>
     </div>
   )
 }
@@ -192,18 +205,22 @@ function CardRelogio({ hora }: { hora: Date }) {
 /* MENU */
 function CardMenu({ navigate }: any) {
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      marginBottom: 20
-    }}>
-      <div style={{
-        background: '#111',
-        padding: 10,
-        borderRadius: 10,
+    <div
+      style={{
         display: 'flex',
-        gap: 10
-      }}>
+        justifyContent: 'center',
+        marginBottom: 20,
+      }}
+    >
+      <div
+        style={{
+          background: '#111',
+          padding: 10,
+          borderRadius: 10,
+          display: 'flex',
+          gap: 10,
+        }}
+      >
         <button onClick={() => navigate('/auditoria')} style={botaoMenu}>📊 Auditoria</button>
         <button onClick={() => navigate('/pedidos')} style={botaoMenu}>📦 Pedidos</button>
         <button onClick={() => navigate('/produtos')} style={botaoMenu}>🛒 Produtos</button>
@@ -216,17 +233,19 @@ function CardMenu({ navigate }: any) {
 /* STATUS */
 function CardStatus({ titulo, valor, cor }: any) {
   return (
-    <div style={{
-      background: cor,
-      padding: 12,
-      borderRadius: 10,
-      minWidth: 120,
-      textAlign: 'center',
-      color: '#fff',
-      fontWeight: 'bold'
-    }}>
+    <div
+      style={{
+        background: cor,
+        padding: 12,
+        borderRadius: 10,
+        minWidth: 120,
+        textAlign: 'center',
+        color: '#fff',
+        fontWeight: 'bold',
+      }}
+    >
       <strong>{titulo}</strong>
-      <div style={{ fontSize: 28 }}>{valor}</div>
+      <div style={{ fontSize: 26 }}>{valor}</div>
     </div>
   )
 }
@@ -234,12 +253,14 @@ function CardStatus({ titulo, valor, cor }: any) {
 /* COLUNA */
 function Coluna({ titulo, pedidos, reduzido }: any) {
   return (
-    <div style={{
-      background: '#fff',
-      borderRadius: 10,
-      padding: 20,
-      minHeight: reduzido ? 200 : 400
-    }}>
+    <div
+      style={{
+        background: '#fff',
+        borderRadius: 10,
+        padding: 20,
+        minHeight: reduzido ? 200 : 400,
+      }}
+    >
       <h2>{titulo}</h2>
       {pedidos.length === 0 && <p>Nenhum pedido</p>}
       {pedidos.map((pedido: any) => (
@@ -276,13 +297,15 @@ function PedidoCard({ pedido }: any) {
   }
 
   return (
-    <div style={{
-      border: '1px solid #ddd',
-      borderRadius: 10,
-      padding: 15,
-      marginBottom: 15,
-      background: '#fff'
-    }}>
+    <div
+      style={{
+        border: '1px solid #ddd',
+        borderRadius: 10,
+        padding: 15,
+        marginBottom: 15,
+        background: '#fff',
+      }}
+    >
       <h3>Pedido #{pedido.id.slice(0, 6)}</h3>
       <p>Status: {pedido.status} – ⏱ {tempo}</p>
 
