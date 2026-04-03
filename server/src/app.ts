@@ -12,8 +12,10 @@ const app: Application = express();
 /* MIDDLEWARES               */
 /* ========================= */
 
+// JSON
 app.use(express.json());
 
+// CORS
 app.use(
   cors({
     origin: [
@@ -21,20 +23,20 @@ app.use(
       "https://admin.acaiecompanhia.com.br",
       "http://localhost:5173",
     ],
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
   })
 );
+
+// 🔥 ESSENCIAL PRA PRE-FLIGHT (resolve bloqueio do DevTools)
+app.options("*", cors());
 
 /* ========================= */
 /* ROTAS                     */
 /* ========================= */
 
 app.use("/api/auth", authRoutes);
-
-// ✅ CORREÇÃO AQUI
-app.use("/api/pedidos", pedidoRoutes);
-
+app.use("/api/pedidos", pedidoRoutes); // ✅ corrigido
 app.use("/api/produtos", produtoRoutes);
 app.use("/api/pagamento", pagamentoRoutes);
 
