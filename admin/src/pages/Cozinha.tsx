@@ -241,7 +241,7 @@ function CardStatus({ titulo, valor, cor }: any) {
         background: cor,
         padding: 15,
         borderRadius: 10,
-        minWidth: 120,
+        minWidth: 140,
         textAlign: 'center',
         color: '#fff',
         fontWeight: 'bold',
