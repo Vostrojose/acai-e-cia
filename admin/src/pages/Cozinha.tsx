@@ -56,6 +56,7 @@ export default function Cozinha() {
 
     return () => {
       socket.disconnect()
+
       if (intervaloSom.current) {
         clearInterval(intervaloSom.current)
         intervaloSom.current = null
@@ -102,7 +103,6 @@ export default function Cozinha() {
     >
       <CardMenu navigate={navigate} />
 
-      {/* TOPO */}
       <div
         style={{
           display: 'flex',
@@ -123,12 +123,12 @@ export default function Cozinha() {
         </div>
       </div>
 
-      {/* GRID RESPONSIVO 🔥 */}
+      {/* GRID CORRIGIDO */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: 20,
+          gridTemplateColumns: '1fr 1fr 1fr',
+          gap: 40,
         }}
       >
         <Coluna titulo="🆕 Novos Pedidos" pedidos={novos} />
@@ -138,7 +138,7 @@ export default function Cozinha() {
 
       {mostrarEntregues && (
         <div style={{ marginTop: 30 }}>
-          <Coluna titulo="📦 Entregues" pedidos={entregues} />
+          <Coluna titulo="📦 Entregues" pedidos={entregues} reduzido />
         </div>
       )}
     </div>
@@ -169,14 +169,14 @@ function CardRelogio() {
     <div style={{
       background: '#111',
       color: '#fff',
-      padding: 10,
+      padding: 8,
       borderRadius: 10,
-      minWidth: 140,
+      minWidth: 130,
       textAlign: 'center'
     }}>
       <div>{hora.toLocaleDateString('pt-BR', { weekday: 'long' }).toUpperCase()}</div>
       <div>{hora.toLocaleDateString('pt-BR')}</div>
-      <div style={{ fontWeight: 'bold' }}>{hora.toLocaleTimeString('pt-BR')}</div>
+      <div>{hora.toLocaleTimeString('pt-BR')}</div>
     </div>
   )
 }
@@ -185,7 +185,7 @@ function CardRelogio() {
 function CardMenu({ navigate }: any) {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-      <div style={{ background: '#111', padding: 10, borderRadius: 10, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+      <div style={{ background: '#111', padding: 10, borderRadius: 10, display: 'flex', gap: 10 }}>
         <button onClick={() => navigate('/auditoria')} style={botaoMenu}>📊 Auditoria</button>
         <button onClick={() => navigate('/pedidos')} style={botaoMenu}>📦 Pedidos</button>
         <button onClick={() => navigate('/produtos')} style={botaoMenu}>🛒 Produtos</button>
@@ -207,8 +207,8 @@ function CardStatus({ titulo, valor, cor }: any) {
       color: '#fff',
       fontWeight: 'bold'
     }}>
-      <div>{titulo}</div>
-      <div style={{ fontSize: 24 }}>{valor}</div>
+      <strong>{titulo}</strong>
+      <div style={{ fontSize: 26 }}>{valor}</div>
     </div>
   )
 }
@@ -216,16 +216,8 @@ function CardStatus({ titulo, valor, cor }: any) {
 /* COLUNA */
 function Coluna({ titulo, pedidos }: any) {
   return (
-    <div style={{
-      background: '#fff',
-      borderRadius: 10,
-      padding: 15,
-      minWidth: 0
-    }}>
-      <h2 style={{ marginBottom: 10 }}>{titulo}</h2>
-
-      {pedidos.length === 0 && <p>Nenhum pedido</p>}
-
+    <div style={{ background: '#fff', borderRadius: 10, padding: 20 }}>
+      <h2>{titulo}</h2>
       {pedidos.map((pedido: any) => (
         <PedidoCard key={pedido.id} pedido={pedido} />
       ))}
@@ -265,43 +257,38 @@ function PedidoCard({ pedido }: any) {
     <div style={{
       border: '1px solid #ddd',
       borderRadius: 10,
-      padding: 12,
-      marginBottom: 10
+      padding: 15,
+      marginBottom: 15
     }}>
-      <h3 style={{ fontSize: 16 }}>Pedido #{pedido.id.slice(0, 6)}</h3>
+      <h3>Pedido #{pedido.id.slice(0, 6)}</h3>
+      <p>{pedido.status} – ⏱ {tempo}</p>
 
-      <p style={{ fontSize: 14 }}>
-        {pedido.status} – ⏱ {tempo}
-      </p>
+      {pedido.status === 'RECEBIDO' && (
+        <button style={{ background: '#ff9800', color: '#fff' }} onClick={() => atualizarStatus('EM_PREPARO')}>
+          Iniciar preparo
+        </button>
+      )}
 
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {pedido.status === 'RECEBIDO' && (
-          <button style={{ background: '#ff9800', color: '#fff', padding: 6 }} onClick={() => atualizarStatus('EM_PREPARO')}>
-            Iniciar
+      {pedido.status === 'EM_PREPARO' && (
+        <button style={{ background: '#4caf50', color: '#fff' }} onClick={() => atualizarStatus('PRONTO')}>
+          Marcar pronto
+        </button>
+      )}
+
+      {pedido.status === 'PRONTO' && (
+        <>
+          <button style={{ background: '#2196f3', color: '#fff' }} onClick={() => atualizarStatus('ENTREGUE')}>
+            QUITADO
           </button>
-        )}
 
-        {pedido.status === 'EM_PREPARO' && (
-          <button style={{ background: '#4caf50', color: '#fff', padding: 6 }} onClick={() => atualizarStatus('PRONTO')}>
-            Pronto
-          </button>
-        )}
-
-        {pedido.status === 'PRONTO' && (
-          <>
-            <button style={{ background: '#2196f3', color: '#fff', padding: 6 }} onClick={() => atualizarStatus('ENTREGUE')}>
-              Entregar
+          {pedido.telefone && (
+            <button style={{ background: '#25D366', color: '#fff', marginLeft: 10 }}
+              onClick={() => enviarWhatsApp(pedido.telefone)}>
+              📲 WhatsApp
             </button>
-
-            {pedido.telefone && (
-              <button style={{ background: '#25D366', color: '#fff', padding: 6 }}
-                onClick={() => enviarWhatsApp(pedido.telefone)}>
-                WhatsApp
-              </button>
-            )}
-          </>
-        )}
-      </div>
+          )}
+        </>
+      )}
     </div>
   )
 }
