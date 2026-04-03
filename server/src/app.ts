@@ -19,7 +19,7 @@ app.use(
     origin: [
       "https://pedido.acaiecompanhia.com.br",
       "https://admin.acaiecompanhia.com.br",
-      "http://localhost:5173", // para testes locais
+      "http://localhost:5173",
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
@@ -31,7 +31,10 @@ app.use(
 /* ========================= */
 
 app.use("/api/auth", authRoutes);
-app.use("/api/pedido", pedidoRoutes);
+
+// ✅ CORREÇÃO AQUI
+app.use("/api/pedidos", pedidoRoutes);
+
 app.use("/api/produtos", produtoRoutes);
 app.use("/api/pagamento", pagamentoRoutes);
 
