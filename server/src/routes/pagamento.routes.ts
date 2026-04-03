@@ -24,13 +24,13 @@ const webhookSchema = z.object({
   type: z.string().optional(),
   data: z
     .object({
-      id: z.string(),
+      id: z.union([z.string(), z.number()]),
     })
     .optional(),
 });
 
 /* ============================= */
-/* CRIAR CHECKOUT (PREFERENCE)   */
+/* CRIAR CHECKOUT                */
 /* ============================= */
 // POST /api/pagamento/checkout
 
@@ -44,7 +44,6 @@ router.post("/checkout", async (req, res) => {
       throw new AppError("Pedido não encontrado.", 404);
     }
 
-    // Agora o pedido precisa estar aguardando pagamento
     if (pedido.status !== StatusPedido.AGUARDANDO_PAGAMENTO) {
       throw new AppError(
         "Pagamento só pode ser realizado para pedidos aguardando pagamento.",
@@ -92,7 +91,7 @@ router.post("/webhook", async (req, res) => {
       return res.sendStatus(200);
     }
 
-    const paymentId = parsed.data.data?.id;
+    const paymentId = parsed.data.data?.id?.toString();
 
     if (!paymentId) {
       return res.sendStatus(200);
@@ -120,29 +119,26 @@ router.post("/webhook", async (req, res) => {
       return res.sendStatus(200);
     }
 
-    // valida valor do pagamento
+    // valida valor
     if (Number(pedido.total) !== Number(pagamento.transaction_amount)) {
       console.error("Divergência de valor detectada");
       return res.sendStatus(200);
     }
 
-    // evita processar webhook duplicado
+    // evita duplicidade
     if (pedido.status !== StatusPedido.AGUARDANDO_PAGAMENTO) {
       return res.sendStatus(200);
     }
 
-    // pagamento aprovado → pedido recebido pela cozinha
     const pedidoAtualizado = await PedidoService.atualizarStatus(
       pedido.id,
       StatusPedido.RECEBIDO
     );
 
     try {
-      // 🔔 Envia para cozinha como novo pedido
-      getIO().emit("novo_pedido", pedidoAtualizado);
-
-      // 🔄 Atualiza também quem já tem o pedido aberto
-      getIO().emit("pedido_atualizado", pedidoAtualizado);
+      const io = getIO();
+      io.emit("novo_pedido", pedidoAtualizado);
+      io.emit("pedido_atualizado", pedidoAtualizado);
     } catch {
       console.warn("WebSocket não inicializado.");
     }
@@ -154,9 +150,5 @@ router.post("/webhook", async (req, res) => {
     return res.sendStatus(200);
   }
 });
-
-/* ============================= */
-/* EXPORTAÇÃO DAS ROTAS          */
-/* ============================= */
 
 export default router;

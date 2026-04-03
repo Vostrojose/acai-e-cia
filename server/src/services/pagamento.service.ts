@@ -1,5 +1,7 @@
 import { MercadoPagoConfig, Payment } from "mercadopago";
 import prisma from "../lib/prisma";
+import { StatusPedido, StatusPagamento } from "@prisma/client";
+import { AppError } from "../utils/AppError";
 
 const client = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN!,
@@ -8,61 +10,79 @@ const client = new MercadoPagoConfig({
 
 class PagamentoService {
   async criarPagamentoPix(pedidoId: string) {
-    // 🔍 1. Buscar pedido no banco
+    /* ---------- 1. Buscar pedido ---------- */
+
     const pedido = await prisma.pedido.findUnique({
       where: { id: pedidoId },
     });
 
     if (!pedido) {
-      throw new Error("Pedido não encontrado");
+      throw new AppError("Pedido não encontrado", 404);
     }
 
-    // 🚫 Segurança: não permitir pagar 2x
-    if (pedido.statusPagamento === "APROVADO") {
-      throw new Error("Pedido já está pago");
+    /* ---------- 2. Segurança ---------- */
+
+    if (pedido.status !== StatusPedido.AGUARDANDO_PAGAMENTO) {
+      throw new AppError(
+        "Pedido não está aguardando pagamento",
+        400
+      );
+    }
+
+    if (pedido.statusPagamento === StatusPagamento.APROVADO) {
+      throw new AppError("Pedido já está pago", 400);
+    }
+
+    // 🔥 evita criar múltiplos pagamentos
+    if (pedido.pagamentoId) {
+      throw new AppError("Pagamento já iniciado para este pedido", 400);
     }
 
     const payment = new Payment(client);
 
     try {
-      // 💳 2. Criar pagamento no Mercado Pago
+      /* ---------- 3. Criar pagamento ---------- */
+
       const response = await payment.create({
         body: {
-          transaction_amount: Number(pedido.total), // vem do banco
-          description: `Pedido #${pedidoId}`,
+          transaction_amount: Number(pedido.total),
+          description: `Pedido #${pedido.id}`,
           payment_method_id: "pix",
 
           payer: {
-            email: "cliente@email.com", // 🔥 depois substituir por real
+            email: "cliente@acaiecompanhia.com", // pode melhorar depois
           },
 
-          // 🔐 ESSENCIAL
           external_reference: pedido.id,
 
-          notification_url: `${process.env.BASE_URL}/webhook/mercadopago`,
+          // ✅ CORRETO
+          notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
         },
       });
 
-      // 💾 3. Salvar no banco
+      /* ---------- 4. Salvar ---------- */
+
       await prisma.pedido.update({
-        where: { id: pedidoId },
+        where: { id: pedido.id },
         data: {
           pagamentoId: String(response.id),
           externalReference: pedido.id,
-          statusPagamento: "PENDENTE",
+          statusPagamento: StatusPagamento.PENDENTE,
         },
       });
 
-      // 📦 4. Retornar dados úteis pro front
+      /* ---------- 5. Retorno ---------- */
+
       return {
         pagamentoId: response.id,
         qr_code: response.point_of_interaction?.transaction_data?.qr_code,
         qr_code_base64:
           response.point_of_interaction?.transaction_data?.qr_code_base64,
       };
+
     } catch (error) {
-      console.error("Erro ao criar pagamento:", error);
-      throw new Error("Erro ao gerar pagamento PIX");
+      console.error("Erro Mercado Pago:", error);
+      throw new AppError("Erro ao gerar pagamento PIX", 500);
     }
   }
 }

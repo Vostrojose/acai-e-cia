@@ -5,25 +5,25 @@ const router = Router();
 
 /**
  * Criar novo pedido
- * POST /api/pedido
+ * POST /api/pedidos
  */
 router.post("/", pedidoController.criar);
 
 /**
  * Listar todos os pedidos
- * GET /api/pedido
+ * GET /api/pedidos
  */
 router.get("/", pedidoController.listar);
 
 /**
  * Atualizar status de um pedido
- * PATCH /api/pedido/:id/status
+ * PATCH /api/pedidos/:id/status
  */
 router.patch("/:id/status", pedidoController.atualizarStatus);
 
 /**
  * Dashboard de pedidos
- * GET /api/pedido/dashboard
+ * GET /api/pedidos/dashboard
  */
 router.get("/dashboard", pedidoController.dashboard);
 
