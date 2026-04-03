@@ -31,19 +31,19 @@ model Produto {
 }
 
 model Pedido {
-  id       String       @id @default(uuid())
-  status   StatusPedido @default(AGUARDANDO_PAGAMENTO)
-  tipo     TipoPedido   @default(ONLINE)
-  total    Decimal      @db.Decimal(10, 2)
+  id     String       @id @default(uuid())
+  status StatusPedido @default(AGUARDANDO_PAGAMENTO)
+  tipo   TipoPedido   @default(ONLINE)
+  total  Decimal      @db.Decimal(10, 2)
 
   telefone String?
   origem   OrigemPedido?
   endereco String?
 
   // 🔐 PAGAMENTO (SEGURANÇA)
-  pagamentoId        String?          @unique
-  externalReference  String?          @unique
-  statusPagamento    StatusPagamento?
+  pagamentoId       String?          @unique
+  externalReference String?          @unique
+  statusPagamento   StatusPagamento?
 
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
