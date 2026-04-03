@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 
 interface Item {
@@ -19,7 +19,16 @@ interface CartContextData {
 const CartContext = createContext({} as CartContextData)
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [itens, setItens] = useState<Item[]>([])
+  // 🔥 Agora persiste no localStorage
+  const [itens, setItens] = useState<Item[]>(() => {
+    const data = localStorage.getItem('carrinho')
+    return data ? JSON.parse(data) : []
+  })
+
+  // 🔥 Sempre salva quando mudar
+  useEffect(() => {
+    localStorage.setItem('carrinho', JSON.stringify(itens))
+  }, [itens])
 
   function adicionarItem(item: Omit<Item, 'quantidade'>) {
     setItens((prevItens) => {
@@ -28,7 +37,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
       )
 
       if (itemExistente) {
-        // 🔥 AQUI aumenta corretamente
         return prevItens.map((i) =>
           i.id === item.id
             ? { ...i, quantidade: i.quantidade + 1 }
@@ -36,7 +44,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
         )
       }
 
-      // 🔥 Se não existe, cria com quantidade 1
       return [...prevItens, { ...item, quantidade: 1 }]
     })
   }
