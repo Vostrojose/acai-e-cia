@@ -17,6 +17,7 @@ class PedidoService {
     origem?: string
     endereco?: string
   }) {
+
     /* ---------- valida itens ---------- */
 
     if (!Array.isArray(data.itens) || data.itens.length === 0) {
@@ -61,6 +62,14 @@ class PedidoService {
       }
     }
 
+    /* ---------- valida origem ---------- */
+
+    const origensValidas = ["QR_CODE", "APP", "ADMIN", "BALCAO"]
+
+    if (data.origem && !origensValidas.includes(data.origem)) {
+      throw new AppError("Origem inválida.", 400)
+    }
+
     /* ---------- busca produtos ---------- */
 
     const produtosIds = data.itens.map((i) => i.produtoId)
@@ -92,7 +101,14 @@ class PedidoService {
         throw new AppError('Produto não encontrado.', 400)
       }
 
-      const subtotal = produto.preco * item.quantidade
+      // ✅ CORREÇÃO DECIMAL
+      const preco = Number(produto.preco)
+
+      if (!Number.isFinite(preco)) {
+        throw new AppError('Preço inválido no produto.', 400)
+      }
+
+      const subtotal = preco * item.quantidade
 
       if (!Number.isFinite(subtotal)) {
         throw new AppError('Erro no cálculo do pedido.', 400)
@@ -103,7 +119,7 @@ class PedidoService {
       return {
         produtoId: produto.id,
         quantidade: item.quantidade,
-        precoUnit: produto.preco,
+        precoUnit: preco, // garante número
       }
     })
 
@@ -121,16 +137,16 @@ class PedidoService {
 
     const pedidoCriado = await prisma.$transaction(async (tx) => {
       const pedido = await tx.pedido.create({
-  data: {
-     total: totalCalculado,
-     telefone: data.telefone,
-     origem: data.origem,
-     endereco: data.endereco,
-     status: StatusPedido.AGUARDANDO_PAGAMENTO,
-     itens: {
-        create: itensParaCriar,
-     },
-   },
+        data: {
+          total: totalCalculado,
+          telefone: telefoneLimpo,
+          origem: data.origem as any, // enum validado acima
+          endereco: data.endereco,
+          status: StatusPedido.AGUARDANDO_PAGAMENTO,
+          itens: {
+            create: itensParaCriar,
+          },
+        },
         include: {
           itens: true,
         },
@@ -142,16 +158,16 @@ class PedidoService {
     /* ---------- websocket ---------- */
 
     try {
-    if (pedidoCriado.status === StatusPedido.RECEBIDO) {
-  const io = getIO()
+      if (pedidoCriado.status === StatusPedido.RECEBIDO) {
+        const io = getIO()
 
-  io.emit('novo_pedido', {
-    id: pedidoCriado.id,
-    status: pedidoCriado.status,
-    total: pedidoCriado.total,
-    criadoEm: pedidoCriado.criadoEm,
-  })
- }  
+        io.emit('novo_pedido', {
+          id: pedidoCriado.id,
+          status: pedidoCriado.status,
+          total: pedidoCriado.total,
+          criadoEm: pedidoCriado.criadoEm,
+        })
+      }
     } catch {
       console.warn('⚠️ WebSocket ainda não inicializado.')
     }
@@ -199,6 +215,7 @@ class PedidoService {
     if (!pedido) {
       throw new AppError('Pedido não encontrado.', 404)
     }
+
     const regras: Record<StatusPedido, StatusPedido[]> = {
       AGUARDANDO_PAGAMENTO: ['RECEBIDO', 'CANCELADO'],
       RECEBIDO: ['EM_PREPARO', 'CANCELADO'],
@@ -206,7 +223,7 @@ class PedidoService {
       PRONTO: ['ENTREGUE'],
       ENTREGUE: [],
       CANCELADO: [],
-}
+    }
 
     const permitidos = regras[pedido.status]
 
@@ -264,7 +281,7 @@ class PedidoService {
       PRONTO: 0,
       ENTREGUE: 0,
       CANCELADO: 0,
- }
+    }
 
     pedidos.forEach((item) => {
       base[item.status] = item._count.status
