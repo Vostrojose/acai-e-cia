@@ -67,8 +67,8 @@ export default function Produtos() {
       }}>
         <Botao onClick={() => navigate("/cozinha")}>🍳 Cozinha</Botao>
         <Botao onClick={() => navigate("/pedidos")}>📦 Pedidos</Botao>
-        <Botao onClick={() => navigate("/produtos")}>🛒 Produtos</Botao>
         <Botao onClick={() => navigate("/dashboard")}>📊 Dashboard</Botao>
+        <Botao onClick={() => navigate("/auditoria")}>📊 Auditoria</Botao>
       </div>
 
       <h1>Painel do Cardápio</h1>

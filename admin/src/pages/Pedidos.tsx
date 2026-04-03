@@ -78,6 +78,7 @@ export default function Pedidos() {
         <Botao onClick={() => navigate("/cozinha")}>🍳 Cozinha</Botao>
         <Botao onClick={() => navigate("/produtos")}>🛒 Produtos</Botao>
         <Botao onClick={() => navigate("/dashboard")}>📊 Dashboard</Botao>
+        <Botao onClick={() => navigate("/auditoria")}>📊 Auditoria</Botao>
       </div>
 
       <h1>Pedidos</h1>
