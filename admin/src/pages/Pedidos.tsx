@@ -64,7 +64,7 @@ export default function Pedidos() {
   }
 
   return (
-    <div style={{ padding: 40 }}>
+    <div style={{ padding: 40, background: "#f5f5f5", minHeight: "100vh" }}>
 
       {/* ========================= */}
       {/* MENU DE NAVEGAÇÃO         */}
@@ -75,10 +75,10 @@ export default function Pedidos() {
         marginBottom: 20,
         flexWrap: "wrap"
       }}>
-        <button onClick={() => navigate("/cozinha")}>🍳 Cozinha</button>
-        <button onClick={() => navigate("/pedidos")}>📦 Pedidos</button>
-        <button onClick={() => navigate("/produtos")}>🛒 Produtos</button>
-        <button onClick={() => navigate("/dashboard")}>📊 Dashboard</button>
+        <Botao onClick={() => navigate("/cozinha")}>🍳 Cozinha</Botao>
+        <Botao onClick={() => navigate("/pedidos")}>📦 Pedidos</Botao>
+        <Botao onClick={() => navigate("/produtos")}>🛒 Produtos</Botao>
+        <Botao onClick={() => navigate("/dashboard")}>📊 Dashboard</Botao>
       </div>
 
       <h1>Pedidos</h1>
@@ -105,6 +105,7 @@ export default function Pedidos() {
                 marginBottom: 16,
                 padding: 16,
                 borderRadius: 6,
+                background: "#fff"
               }}
             >
               <div style={{ marginBottom: 8 }}>
@@ -143,23 +144,17 @@ export default function Pedidos() {
               </div>
 
               {/* Botões de status */}
-              <div style={{ marginTop: 12 }}>
+              <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
                 {pedido.status !== "PRONTO" && (
-                  <button
-                    style={{ marginRight: 8 }}
-                    onClick={() => atualizarStatus(pedido.id, "PRONTO")}
-                  >
+                  <Botao onClick={() => atualizarStatus(pedido.id, "PRONTO")} cor="#4caf50">
                     Marcar como pronto
-                  </button>
+                  </Botao>
                 )}
 
                 {pedido.status !== "EM_PREPARO" && (
-                  <button
-                    style={{ marginRight: 8 }}
-                    onClick={() => atualizarStatus(pedido.id, "EM_PREPARO")}
-                  >
+                  <Botao onClick={() => atualizarStatus(pedido.id, "EM_PREPARO")} cor="#ff9800">
                     Marcar como em preparo
-                  </button>
+                  </Botao>
                 )}
               </div>
 
@@ -169,4 +164,35 @@ export default function Pedidos() {
       )}
     </div>
   );
+}
+
+/* ========================= */
+/* ESTILO PADRÃO DE BOTÕES   */
+/* ========================= */
+const botaoPadrao = {
+  padding: "10px 15px",
+  borderRadius: 8,
+  border: "none",
+  background: "#333",
+  color: "#fff",
+  cursor: "pointer",
+  fontWeight: "bold",
+  transition: "background 0.3s"
+}
+
+function Botao({ children, onClick, cor, type }: any) {
+  return (
+    <button
+      type={type || "button"}
+      onClick={onClick}
+      style={{
+        ...botaoPadrao,
+        background: cor || botaoPadrao.background
+      }}
+      onMouseOver={(e) => (e.currentTarget.style.background = "#555")}
+      onMouseOut={(e) => (e.currentTarget.style.background = cor || "#333")}
+    >
+      {children}
+    </button>
+  )
 }
