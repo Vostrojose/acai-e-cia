@@ -127,8 +127,8 @@ export default function Cozinha() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: 20,
+          gridTemplateColumns: '1fr 1fr 1fr',
+          gap: 40,
         }}
       >
         <Coluna titulo="🆕 Novos Pedidos" pedidos={novos} />
