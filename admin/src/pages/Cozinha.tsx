@@ -43,13 +43,8 @@ export default function Cozinha() {
       carregarPedidos()
     })
 
-    socket.on('disconnect', () => {
-      console.log('🔴 Socket desconectado')
-    })
-
     socket.on('novo_pedido', (pedido) => {
       tocarSom()
-
       setPedidos((prev) => {
         const jaExiste = prev.find((p) => p.id === pedido.id)
         if (jaExiste) return prev
@@ -68,16 +63,12 @@ export default function Cozinha() {
     }
   }, [])
 
-  /* ========================= */
-  /* SOM REPETITIVO            */
-  /* ========================= */
   useEffect(() => {
     const temPedidoNovo = pedidos.some((p) => p.status === 'RECEBIDO')
 
     if (temPedidoNovo) {
       if (!intervaloSom.current) {
         intervaloSom.current = setInterval(() => {
-          console.log('🔔 Lembrete de pedido pendente')
           tocarSom()
         }, 60000)
       }
@@ -89,9 +80,6 @@ export default function Cozinha() {
     }
   }, [pedidos])
 
-  /* ========================= */
-  /* RELÓGIO                   */
-  /* ========================= */
   useEffect(() => {
     const timer = setInterval(() => {
       const agora = new Date()
@@ -102,7 +90,6 @@ export default function Cozinha() {
         agora.getMinutes() === 0 &&
         agora.getSeconds() === 0
       ) {
-        console.log('⏰ Virou o dia!')
         setPedidos([])
       }
     }, 1000)
@@ -123,34 +110,22 @@ export default function Cozinha() {
   const prontos = ordenar(pedidos.filter((p) => p.status === 'PRONTO'))
   const entregues = ordenar(pedidos.filter((p) => p.status === 'ENTREGUE'))
 
-  const diaSemana = hora.toLocaleDateString('pt-BR', { weekday: 'long' })
-  const data = hora.toLocaleDateString('pt-BR')
-  const horaAtual = hora.toLocaleTimeString('pt-BR')
-
   return (
     <div style={{ padding: 20, background: '#f5f5f5', minHeight: '100vh' }}>
 
-      {/* ========================= */}
-      {/* MENU DE NAVEGAÇÃO         */}
-      {/* ========================= */}
-      <h1 style={{ marginBottom: 15 }}>
-        {diaSemana} – {data} – {horaAtual}
-      </h1>
+      {/* TOPO COM CARDS */}
       <div style={{
         display: 'flex',
-        gap: 10,
+        gap: 20,
         marginBottom: 20,
-        flexWrap: 'wrap'
+        flexWrap: 'wrap',
+        alignItems: 'center'
       }}>
-        <button onClick={() => navigate('/auditoria')} style={botaoMenu}>📊 Auditoria</button>
-        <button onClick={() => navigate('/pedidos')} style={botaoMenu}>📦 Pedidos</button>
-        <button onClick={() => navigate('/produtos')} style={botaoMenu}>🛒 Produtos</button>
-        <button onClick={() => navigate('/dashboard')} style={botaoMenu}>📈 Dashboard</button>
-        
+        <CardRelogio hora={hora} />
+        <CardMenu navigate={navigate} />
       </div>
 
-      
-
+      {/* STATUS */}
       <div style={{ display: 'flex', gap: 20, marginBottom: 30 }}>
         <CardStatus titulo="🆕 Novos" valor={novos.length} cor="#f44336" />
         <CardStatus titulo="👨‍🍳 Em preparo" valor={preparo.length} cor="#ff9800" />
@@ -161,6 +136,7 @@ export default function Cozinha() {
         </div>
       </div>
 
+      {/* COLUNAS */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
         <Coluna titulo="🆕 Novos Pedidos" pedidos={novos} />
         <Coluna titulo="👨‍🍳 Em Preparo" pedidos={preparo} />
@@ -176,10 +152,7 @@ export default function Cozinha() {
   )
 }
 
-/* ========================= */
-/* ESTILO BOTÃO MENU         */
-/* ========================= */
-
+/* BOTÃO MENU */
 const botaoMenu = {
   padding: '10px 15px',
   borderRadius: 8,
@@ -190,10 +163,48 @@ const botaoMenu = {
   fontWeight: 'bold'
 }
 
-/* ========================= */
-/* COMPONENTES               */
-/* ========================= */
+/* CARD RELÓGIO */
+function CardRelogio({ hora }: { hora: Date }) {
+  const diaSemana = hora.toLocaleDateString('pt-BR', { weekday: 'long' }).replace('-feira', '')
+  const data = hora.toLocaleDateString('pt-BR').replace(/\//g, '-')
+  const horaAtual = hora.toLocaleTimeString('pt-BR')
 
+  return (
+    <div style={{
+      background: '#111',
+      color: '#fff',
+      padding: 20,
+      borderRadius: 12,
+      minWidth: 200,
+      textAlign: 'center'
+    }}>
+      <div>{diaSemana.toUpperCase()}</div>
+      <div style={{ fontSize: 22 }}>{data}</div>
+      <div style={{ fontSize: 26 }}>{horaAtual}</div>
+    </div>
+  )
+}
+
+/* CARD MENU */
+function CardMenu({ navigate }: any) {
+  return (
+    <div style={{
+      background: '#fff',
+      padding: 15,
+      borderRadius: 12,
+      display: 'flex',
+      gap: 10,
+      flexWrap: 'wrap'
+    }}>
+      <button onClick={() => navigate('/auditoria')} style={botaoMenu}>📊 Auditoria</button>
+      <button onClick={() => navigate('/pedidos')} style={botaoMenu}>📦 Pedidos</button>
+      <button onClick={() => navigate('/produtos')} style={botaoMenu}>🛒 Produtos</button>
+      <button onClick={() => navigate('/dashboard')} style={botaoMenu}>📈 Dashboard</button>
+    </div>
+  )
+}
+
+/* CARD STATUS */
 function CardStatus({ titulo, valor, cor }: any) {
   return (
     <div style={{
@@ -202,9 +213,8 @@ function CardStatus({ titulo, valor, cor }: any) {
       borderRadius: 10,
       minWidth: 120,
       textAlign: 'center',
-      boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
       color: '#fff',
-      fontWeight: 'bold',
+      fontWeight: 'bold'
     }}>
       <strong>{titulo}</strong>
       <div style={{ fontSize: 24 }}>{valor}</div>
@@ -212,16 +222,17 @@ function CardStatus({ titulo, valor, cor }: any) {
   )
 }
 
+/* COLUNA */
 function Coluna({ titulo, pedidos, reduzido }: any) {
   return (
     <div style={{
-      background: '#ffffff',
+      background: '#fff',
       borderRadius: 10,
       padding: 20,
-      minHeight: reduzido ? 200 : 400,
+      minHeight: reduzido ? 200 : 400
     }}>
-      <h2 style={{ marginBottom: 20 }}>{titulo}</h2>
-      {pedidos.length === 0 && <p style={{ color: '#777' }}>Nenhum pedido</p>}
+      <h2>{titulo}</h2>
+      {pedidos.length === 0 && <p>Nenhum pedido</p>}
       {pedidos.map((pedido: any) => (
         <PedidoCard key={pedido.id} pedido={pedido} />
       ))}
@@ -229,10 +240,7 @@ function Coluna({ titulo, pedidos, reduzido }: any) {
   )
 }
 
-/* ========================= */
-/* CARD DO PEDIDO            */
-/* ========================= */
-
+/* PEDIDO */
 function PedidoCard({ pedido }: any) {
   const [tempo, setTempo] = useState('')
 
@@ -249,50 +257,6 @@ function PedidoCard({ pedido }: any) {
     return () => clearInterval(interval)
   }, [pedido])
 
-  function CardRelogio({ hora }: { hora: Date }) {
-  const diaSemana = hora.toLocaleDateString('pt-BR', { weekday: 'long' })
-    .replace('-feira', '') // remove "feira"
-  const data = hora.toLocaleDateString('pt-BR').replace(/\//g, '-') // dd-mm-yyyy
-  const horaAtual = hora.toLocaleTimeString('pt-BR')
-
-  return (
-    <div style={{
-      background: '#333',
-      padding: 15,
-      borderRadius: 10,
-      minWidth: 120,
-      textAlign: 'center',
-      boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-      color: '#fff',
-      fontWeight: 'bold',
-    }}>
-      <div>{diaSemana}</div>
-      <div style={{ fontSize: 20 }}>{data}</div>
-      <div style={{ fontSize: 20 }}>{horaAtual}</div>
-    </div>
-  )
-}
-function CardMenu({ navigate }: any) {
-  return (
-    <div style={{
-      background: '#fff',
-      padding: 15,
-      borderRadius: 10,
-      boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-      display: 'flex',
-      gap: 10,
-      flexWrap: 'wrap',
-      marginBottom: 20
-    }}>
-      <button onClick={() => navigate('/auditoria')} style={botaoMenu}>📊 Auditoria</button>
-      <button onClick={() => navigate('/pedidos')} style={botaoMenu}>📦 Pedidos</button>
-      <button onClick={() => navigate('/produtos')} style={botaoMenu}>🛒 Produtos</button>
-      <button onClick={() => navigate('/dashboard')} style={botaoMenu}>📈 Dashboard</button>
-    </div>
-  )
-}
-
-
   async function atualizarStatus(status: string) {
     try {
       await api.patch(`/pedidos/${pedido.id}/status`, { status })
@@ -303,9 +267,7 @@ function CardMenu({ navigate }: any) {
 
   function enviarWhatsApp(telefone: string) {
     const numero = telefone.replace(/\D/g, '')
-    const mensagem = encodeURIComponent(
-      ' Seu pedido está PRONTO para retirada no balcão!',
-    )
+    const mensagem = encodeURIComponent('Seu pedido está PRONTO!')
     const url = `https://wa.me/55${numero}?text=${mensagem}`
     window.open(url, '_blank')
   }
@@ -316,48 +278,37 @@ function CardMenu({ navigate }: any) {
       borderRadius: 10,
       padding: 15,
       marginBottom: 15,
-      background: '#fff',
+      background: '#fff'
     }}>
       <h3>Pedido #{pedido.id.slice(0, 6)}</h3>
-      <p><strong>Status:</strong> {pedido.status} – ⏱ {tempo}</p>
-      <p><strong>Total:</strong> R$ {pedido.total}</p>
+      <p>Status: {pedido.status} – ⏱ {tempo}</p>
+      <p>Total: R$ {pedido.total}</p>
 
-      <div style={{ marginTop: 10 }}>
-        {pedido.status === 'RECEBIDO' && (
-          <button onClick={() => atualizarStatus('EM_PREPARO')}>
-            Iniciar preparo
+      {pedido.status === 'RECEBIDO' && (
+        <button onClick={() => atualizarStatus('EM_PREPARO')}>
+          Iniciar preparo
+        </button>
+      )}
+
+      {pedido.status === 'EM_PREPARO' && (
+        <button onClick={() => atualizarStatus('PRONTO')}>
+          Marcar pronto
+        </button>
+      )}
+
+      {pedido.status === 'PRONTO' && (
+        <>
+          <button onClick={() => atualizarStatus('ENTREGUE')}>
+            QUITADO
           </button>
-        )}
 
-        {pedido.status === 'EM_PREPARO' && (
-          <button
-            onClick={() => atualizarStatus('PRONTO')}
-            style={{ marginLeft: 10, background: '#4caf50', color: '#fff' }}
-          >
-            Marcar pronto
-          </button>
-        )}
-
-        {pedido.status === 'PRONTO' && (
-          <>
-            <button
-              onClick={() => atualizarStatus('ENTREGUE')}
-              style={{ marginLeft: 10, background: '#2196f3', color: '#fff' }}
-            >
-              QUITADO
+          {pedido.telefone && (
+            <button onClick={() => enviarWhatsApp(pedido.telefone)}>
+              📲 Avisar cliente
             </button>
-
-            {pedido.telefone && (
-              <button
-                onClick={() => enviarWhatsApp(pedido.telefone)}
-                style={{ marginLeft: 10, background: '#25D366', color: '#fff' }}
-              >
-                📲 Avisar cliente
-              </button>
-            )}
-          </>
-        )}
-      </div>
+          )}
+        </>
+      )}
     </div>
   )
 }
