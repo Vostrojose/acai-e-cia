@@ -248,7 +248,7 @@ function CardStatus({ titulo, valor, cor }: any) {
       }}
     >
       <strong>{titulo}</strong>
-      <div style={{ fontSize: 24 }}>{valor}</div>
+      <div style={{ fontSize: 34 }}>{valor}</div>
     </div>
   )
 }
