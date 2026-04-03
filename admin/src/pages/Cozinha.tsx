@@ -57,7 +57,6 @@ export default function Cozinha() {
     return () => {
       socket.disconnect()
 
-      // segurança extra: limpa intervalo se componente desmontar
       if (intervaloSom.current) {
         clearInterval(intervaloSom.current)
         intervaloSom.current = null
@@ -65,14 +64,12 @@ export default function Cozinha() {
     }
   }, [])
 
-  /* SOM REPETITIVO */
+  /* SOM */
   useEffect(() => {
     const temPedidoNovo = pedidos.some((p) => p.status === 'RECEBIDO')
 
     if (temPedidoNovo && !intervaloSom.current) {
-      intervaloSom.current = setInterval(() => {
-        tocarSom()
-      }, 60000)
+      intervaloSom.current = setInterval(tocarSom, 60000)
     }
 
     if (!temPedidoNovo && intervaloSom.current) {
@@ -96,24 +93,21 @@ export default function Cozinha() {
 
   return (
     <div
-  style={{
-    padding: 20,
-    background: '#f5f5f5',
-    minHeight: '100vh',
-    width: '100%',
-    boxSizing: 'border-box'
-  }}
->
-      {/* MENU */}
+      style={{
+        padding: 20,
+        background: '#f5f5f5',
+        minHeight: '100vh',
+        width: '100%',
+        boxSizing: 'border-box',
+      }}
+    >
       <CardMenu navigate={navigate} />
 
-      {/* RELÓGIO + STATUS */}
       <div
         style={{
           display: 'flex',
           gap: 20,
           alignItems: 'center',
-          justifyContent: 'flex-start',
           flexWrap: 'wrap',
           marginBottom: 20,
         }}
@@ -124,19 +118,16 @@ export default function Cozinha() {
         <CardStatus titulo="👨‍🍳 Em preparo" valor={preparo.length} cor="#ff9800" />
         <CardStatus titulo="✅ Prontos" valor={prontos.length} cor="#4caf50" />
 
-        <div
-          onClick={() => setMostrarEntregues(!mostrarEntregues)}
-          style={{ cursor: 'pointer' }}
-        >
+        <div onClick={() => setMostrarEntregues(!mostrarEntregues)}>
           <CardStatus titulo="📦 Entregues" valor={entregues.length} cor="#9e9e9e" />
         </div>
       </div>
 
-      {/* COLUNAS */}
+      {/* GRID CORRIGIDO */}
       <div
         style={{
           display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
           gap: 20,
         }}
       >
@@ -154,7 +145,7 @@ export default function Cozinha() {
   )
 }
 
-/* BOTÃO */
+/* BOTÃO MENU */
 const botaoMenu = {
   padding: '8px 12px',
   borderRadius: 6,
@@ -165,39 +156,27 @@ const botaoMenu = {
   fontWeight: 'bold',
 }
 
-/* RELÓGIO (ISOLADO) */
+/* RELÓGIO */
 function CardRelogio() {
   const [hora, setHora] = useState(new Date())
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setHora(new Date())
-    }, 1000)
-
+    const timer = setInterval(() => setHora(new Date()), 1000)
     return () => clearInterval(timer)
   }, [])
 
-  const diaSemana = hora
-    .toLocaleDateString('pt-BR', { weekday: 'long' })
-    .replace('-feira', '')
-
-  const data = hora.toLocaleDateString('pt-BR').replace(/\//g, '-')
-  const horaAtual = hora.toLocaleTimeString('pt-BR')
-
   return (
-    <div
-      style={{
-        background: '#111',
-        color: '#fff',
-        padding: 7,
-        borderRadius: 10,
-        minWidth: 130,
-        textAlign: 'center',
-      }}
-    >
-      <div>{diaSemana.toUpperCase()}</div>
-      <div style={{ fontSize: 14 }}>{data}</div>
-      <div style={{ fontSize: 16, fontWeight: 'bold' }}>{horaAtual}</div>
+    <div style={{
+      background: '#111',
+      color: '#fff',
+      padding: 8,
+      borderRadius: 10,
+      minWidth: 130,
+      textAlign: 'center'
+    }}>
+      <div>{hora.toLocaleDateString('pt-BR', { weekday: 'long' }).toUpperCase()}</div>
+      <div>{hora.toLocaleDateString('pt-BR')}</div>
+      <div>{hora.toLocaleTimeString('pt-BR')}</div>
     </div>
   )
 }
@@ -205,22 +184,8 @@ function CardRelogio() {
 /* MENU */
 function CardMenu({ navigate }: any) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        marginBottom: 20,
-      }}
-    >
-      <div
-        style={{
-          background: '#111',
-          padding: 10,
-          borderRadius: 10,
-          display: 'flex',
-          gap: 10,
-        }}
-      >
+    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+      <div style={{ background: '#111', padding: 10, borderRadius: 10, display: 'flex', gap: 10 }}>
         <button onClick={() => navigate('/auditoria')} style={botaoMenu}>📊 Auditoria</button>
         <button onClick={() => navigate('/pedidos')} style={botaoMenu}>📦 Pedidos</button>
         <button onClick={() => navigate('/produtos')} style={botaoMenu}>🛒 Produtos</button>
@@ -233,17 +198,15 @@ function CardMenu({ navigate }: any) {
 /* STATUS */
 function CardStatus({ titulo, valor, cor }: any) {
   return (
-    <div
-      style={{
-        background: cor,
-        padding: 12,
-        borderRadius: 10,
-        minWidth: 120,
-        textAlign: 'center',
-        color: '#fff',
-        fontWeight: 'bold',
-      }}
-    >
+    <div style={{
+      background: cor,
+      padding: 12,
+      borderRadius: 10,
+      minWidth: 120,
+      textAlign: 'center',
+      color: '#fff',
+      fontWeight: 'bold'
+    }}>
       <strong>{titulo}</strong>
       <div style={{ fontSize: 26 }}>{valor}</div>
     </div>
@@ -251,18 +214,10 @@ function CardStatus({ titulo, valor, cor }: any) {
 }
 
 /* COLUNA */
-function Coluna({ titulo, pedidos, reduzido }: any) {
+function Coluna({ titulo, pedidos }: any) {
   return (
-    <div
-      style={{
-        background: '#fff',
-        borderRadius: 10,
-        padding: 20,
-        minHeight: reduzido ? 200 : 400,
-      }}
-    >
+    <div style={{ background: '#fff', borderRadius: 10, padding: 20 }}>
       <h2>{titulo}</h2>
-      {pedidos.length === 0 && <p>Nenhum pedido</p>}
       {pedidos.map((pedido: any) => (
         <PedidoCard key={pedido.id} pedido={pedido} />
       ))}
@@ -288,43 +243,51 @@ function PedidoCard({ pedido }: any) {
     return () => clearInterval(interval)
   }, [pedido])
 
+  function enviarWhatsApp(telefone: string) {
+    const numero = telefone.replace(/\D/g, '')
+    const mensagem = encodeURIComponent('Seu pedido está PRONTO!')
+    window.open(`https://wa.me/55${numero}?text=${mensagem}`, '_blank')
+  }
+
   async function atualizarStatus(status: string) {
-    try {
-      await api.patch(`/pedidos/${pedido.id}/status`, { status })
-    } catch {
-      alert('Erro ao atualizar pedido')
-    }
+    await api.patch(`/pedidos/${pedido.id}/status`, { status })
   }
 
   return (
-    <div
-      style={{
-        border: '1px solid #ddd',
-        borderRadius: 10,
-        padding: 15,
-        marginBottom: 15,
-        background: '#fff',
-      }}
-    >
+    <div style={{
+      border: '1px solid #ddd',
+      borderRadius: 10,
+      padding: 15,
+      marginBottom: 15
+    }}>
       <h3>Pedido #{pedido.id.slice(0, 6)}</h3>
-      <p>Status: {pedido.status} – ⏱ {tempo}</p>
+      <p>{pedido.status} – ⏱ {tempo}</p>
 
       {pedido.status === 'RECEBIDO' && (
-        <button onClick={() => atualizarStatus('EM_PREPARO')}>
+        <button style={{ background: '#ff9800', color: '#fff' }} onClick={() => atualizarStatus('EM_PREPARO')}>
           Iniciar preparo
         </button>
       )}
 
       {pedido.status === 'EM_PREPARO' && (
-        <button onClick={() => atualizarStatus('PRONTO')}>
+        <button style={{ background: '#4caf50', color: '#fff' }} onClick={() => atualizarStatus('PRONTO')}>
           Marcar pronto
         </button>
       )}
 
       {pedido.status === 'PRONTO' && (
-        <button onClick={() => atualizarStatus('ENTREGUE')}>
-          QUITADO
-        </button>
+        <>
+          <button style={{ background: '#2196f3', color: '#fff' }} onClick={() => atualizarStatus('ENTREGUE')}>
+            QUITADO
+          </button>
+
+          {pedido.telefone && (
+            <button style={{ background: '#25D366', color: '#fff', marginLeft: 10 }}
+              onClick={() => enviarWhatsApp(pedido.telefone)}>
+              📲 WhatsApp
+            </button>
+          )}
+        </>
       )}
     </div>
   )
