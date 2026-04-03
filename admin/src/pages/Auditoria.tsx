@@ -25,10 +25,12 @@ export default function Auditoria() {
     carregarAuditoria()
   }, [])
 
-  function registrarVenda(produto: string) {
+  async function registrarVenda(produto: string) {
     try {
-      api.post("/auditoria/venda", { produto })
+      await api.post("/auditoria/venda", { produto })
       alert(`Venda registrada: ${produto}`)
+      const res = await api.get("/auditoria")
+      setVendas(res.data)
     } catch {
       alert("Erro ao registrar venda")
     }
@@ -40,17 +42,16 @@ export default function Auditoria() {
       {/* ========================= */}
       {/* MENU DE NAVEGAÇÃO         */}
       {/* ========================= */}
-
       <div style={{
         display: "flex",
         gap: 10,
         marginBottom: 20,
         flexWrap: "wrap"
       }}>
-        <button onClick={() => navigate("/cozinha")}>🍳 Cozinha</button>
-        <button onClick={() => navigate("/pedidos")}>📦 Pedidos</button>
-        <button onClick={() => navigate("/produtos")}>🛒 Produtos</button>
-        <button onClick={() => navigate("/dashboard")}>📊 Dashboard</button>
+        <Botao onClick={() => navigate("/cozinha")}>🍳 Cozinha</Botao>
+        <Botao onClick={() => navigate("/pedidos")}>📦 Pedidos</Botao>
+        <Botao onClick={() => navigate("/produtos")}>🛒 Produtos</Botao>
+        <Botao onClick={() => navigate("/dashboard")}>📊 Dashboard</Botao>
       </div>
 
       <h1>📊 Auditoria de Vendas</h1>
@@ -69,7 +70,6 @@ export default function Auditoria() {
         gap: 20
       }}>
         {vendas.produtos.map((p: any, i: number) => {
-
           const cor =
             i === 0 ? "#4caf50" :
             i < vendas.produtos.length / 2 ? "#ffeb3b" :
@@ -96,19 +96,9 @@ export default function Auditoria() {
         gap: 10
       }}>
         {vendas.produtos.map((p: any) => (
-          <button
-            key={p.nome}
-            onClick={() => registrarVenda(p.nome)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: 5,
-              border: "1px solid #ccc",
-              background: '#333',
-              cursor: "pointer"
-            }}
-          >
+          <Botao key={p.nome} onClick={() => registrarVenda(p.nome)}>
             {p.nome}
-          </button>
+          </Botao>
         ))}
       </div>
 
@@ -117,9 +107,35 @@ export default function Auditoria() {
 }
 
 /* ========================= */
+/* ESTILO PADRÃO DE BOTÕES   */
+/* ========================= */
+const botaoPadrao = {
+  padding: "10px 15px",
+  borderRadius: 8,
+  border: "none",
+  background: "#333",
+  color: "#fff",
+  cursor: "pointer",
+  fontWeight: "bold",
+  transition: "background 0.3s"
+}
+
+function Botao({ children, onClick }: any) {
+  return (
+    <button
+      onClick={onClick}
+      style={botaoPadrao}
+      onMouseOver={(e) => (e.currentTarget.style.background = "#555")}
+      onMouseOut={(e) => (e.currentTarget.style.background = "#333")}
+    >
+      {children}
+    </button>
+  )
+}
+
+/* ========================= */
 /* CARD RESUMO               */
 /* ========================= */
-
 function CardResumo({ titulo, valor, cor }: any) {
   return (
     <div
