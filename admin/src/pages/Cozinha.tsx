@@ -133,6 +133,9 @@ export default function Cozinha() {
       {/* ========================= */}
       {/* MENU DE NAVEGAÇÃO         */}
       {/* ========================= */}
+      <h1 style={{ marginBottom: 30 }}>
+        {diaSemana} – {data} – {horaAtual}
+      </h1>
       <div style={{
         display: 'flex',
         gap: 10,
@@ -146,9 +149,7 @@ export default function Cozinha() {
         
       </div>
 
-      <h1 style={{ marginBottom: 30 }}>
-        {diaSemana} – {data} – {horaAtual}
-      </h1>
+      
 
       <div style={{ display: 'flex', gap: 20, marginBottom: 30 }}>
         <CardStatus titulo="🆕 Novos" valor={novos.length} cor="#f44336" />
