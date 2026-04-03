@@ -179,7 +179,7 @@ function CardRelogio({ hora }: { hora: Date }) {
       color: '#fff',
       padding: 7,
       borderRadius: 10,
-      minWidth: 140,
+      minWidth: 130,
       textAlign: 'center'
     }}>
       <div>{diaSemana.toUpperCase()}</div>
