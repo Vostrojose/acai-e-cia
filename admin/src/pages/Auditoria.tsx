@@ -103,7 +103,7 @@ export default function Auditoria() {
               padding: "8px 12px",
               borderRadius: 5,
               border: "1px solid #ccc",
-              background: "#fff",
+              background: '#333',
               cursor: "pointer"
             }}
           >
