@@ -1,3 +1,4 @@
+// src/pages/Auditoria.tsx
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import api from "../services/api"
@@ -118,5 +119,6 @@ function CardResumo({ titulo, valor, cor }: any) {
     </div>
   )
 }
+
 
 
