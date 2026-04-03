@@ -5,6 +5,28 @@ import api from "../services/api"
 import Botao from "../components/Botao"
 import { Bar, Pie } from "react-chartjs-2"
 
+// Import e registro dos elementos do Chart.js
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+} from "chart.js"
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+)
+
 export default function Auditoria() {
   const navigate = useNavigate()
   const [vendas, setVendas] = useState<any>({
@@ -119,6 +141,7 @@ function CardResumo({ titulo, valor, cor }: any) {
     </div>
   )
 }
+
 
 
 
