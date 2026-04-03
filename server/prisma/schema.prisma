@@ -32,24 +32,32 @@ model Produto {
 
 model Pedido {
   id            String        @id @default(uuid())
-
   status        StatusPedido  @default(RECEBIDO)
-
   tipo          TipoPedido    @default(ONLINE)
-
   total         Float
-
   telefone      String?
-
-  origem        String?       // ✅ origem do pedido (mesa, QR, panfleto, etc)
-
-   endereco      String?
-
+  origem        String?       // origem do pedido (mesa, QR, panfleto, etc)
+  endereco      String?
   criadoEm      DateTime      @default(now())
   atualizadoEm  DateTime      @updatedAt
-
   itens         ItemPedido[]
+
+  auditoriaId   String?
+  auditoria     AuditoriaMensal? @relation(fields: [auditoriaId], references: [id])
 }
+
+model ItemPedido {
+  id         String   @id @default(uuid())
+  quantidade Int
+  precoUnit  Float
+
+  pedido     Pedido   @relation(fields: [pedidoId], references: [id])
+  pedidoId   String
+
+  produto    Produto  @relation(fields: [produtoId], references: [id])
+  produtoId  String
+}
+
 model Usuario {
   id        String   @id @default(uuid())
   nome      String
@@ -67,21 +75,6 @@ model AuditoriaMensal {
   produtos    Json     // guarda ranking de produtos (mais/menos vendidos)
   criadoEm    DateTime @default(now())
 }
-model Pedido {
-  id            String        @id @default(uuid())
-  status        StatusPedido  @default(RECEBIDO)
-  tipo          TipoPedido    @default(ONLINE)
-  total         Float
-  telefone      String?
-  origem        String?
-  endereco      String?
-  criadoEm      DateTime      @default(now())
-  atualizadoEm  DateTime      @updatedAt
-  itens         ItemPedido[]
-
-  auditoriaId   String? 
-  auditoria     AuditoriaMensal? @relation(fields: [auditoriaId], references: [id])
-}
 
 enum StatusPedido {
   AGUARDANDO_PAGAMENTO
@@ -95,6 +88,7 @@ enum StatusPedido {
 enum Role {
   ADMIN
 }
+
 enum TipoPedido {
   MESA
   RETIRADA
