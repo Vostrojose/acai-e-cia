@@ -76,7 +76,6 @@ export default function Pedidos() {
         flexWrap: "wrap"
       }}>
         <Botao onClick={() => navigate("/cozinha")}>🍳 Cozinha</Botao>
-        <Botao onClick={() => navigate("/pedidos")}>📦 Pedidos</Botao>
         <Botao onClick={() => navigate("/produtos")}>🛒 Produtos</Botao>
         <Botao onClick={() => navigate("/dashboard")}>📊 Dashboard</Botao>
       </div>

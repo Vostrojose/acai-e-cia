@@ -14,7 +14,6 @@ type Produto = {
 };
 
 export default function Produtos() {
-
   const navigate = useNavigate();
 
   const [produtos, setProdutos] = useState<Produto[]>([]);
@@ -33,7 +32,6 @@ export default function Produtos() {
       } else {
         setErro("Resposta inesperada do servidor.");
       }
-
     } catch (e: any) {
       setErro(e?.message || "Erro ao carregar produtos.");
     } finally {
@@ -56,7 +54,7 @@ export default function Produtos() {
   }
 
   return (
-    <div style={{ padding: 40 }}>
+    <div style={{ padding: 40, background: "#f5f5f5", minHeight: "100vh" }}>
 
       {/* ========================= */}
       {/* MENU DE NAVEGAÇÃO         */}
@@ -67,10 +65,10 @@ export default function Produtos() {
         marginBottom: 20,
         flexWrap: "wrap"
       }}>
-        <button onClick={() => navigate("/cozinha")}>🍳 Cozinha</button>
-        <button onClick={() => navigate("/pedidos")}>📦 Pedidos</button>
-        <button onClick={() => navigate("/produtos")}>🛒 Produtos</button>
-        <button onClick={() => navigate("/dashboard")}>📊 Dashboard</button>
+        <Botao onClick={() => navigate("/cozinha")}>🍳 Cozinha</Botao>
+        <Botao onClick={() => navigate("/pedidos")}>📦 Pedidos</Botao>
+        <Botao onClick={() => navigate("/produtos")}>🛒 Produtos</Botao>
+        <Botao onClick={() => navigate("/dashboard")}>📊 Dashboard</Botao>
       </div>
 
       <h1>Painel do Cardápio</h1>
@@ -83,7 +81,6 @@ export default function Produtos() {
       {/* ========================= */}
       {/* STATUS                    */}
       {/* ========================= */}
-
       {carregando && <p>Carregando produtos...</p>}
 
       {erro && (
@@ -99,7 +96,6 @@ export default function Produtos() {
       {/* ========================= */}
       {/* LISTA                     */}
       {/* ========================= */}
-
       {!carregando && !erro && produtos.length > 0 && (
         <ul style={{ listStyle: "none", padding: 0 }}>
           {produtos.map((p) => (
@@ -113,7 +109,6 @@ export default function Produtos() {
                 background: "#fff"
               }}
             >
-
               <div style={{ marginBottom: 6 }}>
                 <strong>{p.nome}</strong>
               </div>
@@ -131,44 +126,50 @@ export default function Produtos() {
               {/* ========================= */}
               {/* AÇÕES                     */}
               {/* ========================= */}
-
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-
-                <button
-                  onClick={() => remover(p.id)}
-                  style={{
-                    background: "#f44336",
-                    color: "#fff",
-                    border: "none",
-                    padding: "6px 10px",
-                    borderRadius: 4,
-                    cursor: "pointer"
-                  }}
-                >
+                <Botao onClick={() => remover(p.id)} cor="#f44336">
                   Remover
-                </button>
+                </Botao>
 
-                {/* PREPARADO PARA FUTURO */}
-                <button
-                  onClick={() => alert("Em breve: edição de preço")}
-                  style={{
-                    background: "#2196f3",
-                    color: "#fff",
-                    border: "none",
-                    padding: "6px 10px",
-                    borderRadius: 4,
-                    cursor: "pointer"
-                  }}
-                >
+                <Botao onClick={() => alert("Em breve: edição de preço")} cor="#2196f3">
                   Editar preço
-                </button>
-
+                </Botao>
               </div>
-
             </li>
           ))}
         </ul>
       )}
     </div>
   );
+}
+
+/* ========================= */
+/* ESTILO PADRÃO DE BOTÕES   */
+/* ========================= */
+const botaoPadrao = {
+  padding: "10px 15px",
+  borderRadius: 8,
+  border: "none",
+  background: "#333",
+  color: "#fff",
+  cursor: "pointer",
+  fontWeight: "bold",
+  transition: "background 0.3s"
+}
+
+function Botao({ children, onClick, cor, type }: any) {
+  return (
+    <button
+      type={type || "button"}
+      onClick={onClick}
+      style={{
+        ...botaoPadrao,
+        background: cor || botaoPadrao.background
+      }}
+      onMouseOver={(e) => (e.currentTarget.style.background = "#555")}
+      onMouseOut={(e) => (e.currentTarget.style.background = cor || "#333")}
+    >
+      {children}
+    </button>
+  )
 }
