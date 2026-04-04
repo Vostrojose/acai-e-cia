@@ -15,7 +15,13 @@ class PedidoController {
 
   criar: RequestHandler = asyncHandler(
     async (request: Request, response: Response) => {
-      const data = criarPedidoSchema.parse(request.body)
+      const parsed = criarPedidoSchema.parse(request.body)
+
+      // 🔥 CORREÇÃO AQUI
+      const data = {
+        ...parsed,
+        endereco: parsed.endereco ?? ''
+      }
 
       const pedido = await pedidoService.criarPedido(data)
 
