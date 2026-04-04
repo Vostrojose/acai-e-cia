@@ -23,7 +23,6 @@ export class MercadoPagoProvider {
     console.log('🧪 [MP PIX] Criando pagamento PIX')
     console.log('Pedido:', pedido.id)
     console.log('Valor:', valor)
-    console.log('Payer:', process.env.MP_TEST_USER_EMAIL)
 
     try {
       const response = await this.payment.create({
@@ -31,9 +30,12 @@ export class MercadoPagoProvider {
           transaction_amount: valor,
           description: `Pedido #${pedido.id}`,
           payment_method_id: 'pix',
+
+          // ✔ manter no PIX (ok)
           payer: {
-            email: process.env.MP_TEST_USER_EMAIL!,
+            email: process.env.MP_TEST_USER_EMAIL || 'test@test.com',
           },
+
           external_reference: pedido.id,
           notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
         },
@@ -64,7 +66,6 @@ export class MercadoPagoProvider {
     console.log('🧪 [MP CHECKOUT] Criando preference')
     console.log('Pedido:', pedido.id)
     console.log('Itens:', pedido.itens)
-    console.log('Payer:', process.env.MP_TEST_USER_EMAIL)
 
     try {
       const response = await this.preference.create({
@@ -72,6 +73,7 @@ export class MercadoPagoProvider {
           external_reference: pedido.id,
           notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
 
+          // 🚀 NOVO PADRÃO: SEM payer
 
           items: pedido.itens.map((item: any) => ({
             title: `Produto ${item.produtoId}`,
