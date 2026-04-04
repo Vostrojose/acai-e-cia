@@ -31,9 +31,8 @@ export class MercadoPagoProvider {
           description: `Pedido #${pedido.id}`,
           payment_method_id: 'pix',
 
-          // ✔ manter no PIX (ok)
           payer: {
-            email: process.env.MP_TEST_USER_EMAIL || 'test@test.com',
+            email: process.env.MP_TEST_USER_EMAIL || 'test_user_123@mercadopago.com',
           },
 
           external_reference: pedido.id,
@@ -73,7 +72,9 @@ export class MercadoPagoProvider {
           external_reference: pedido.id,
           notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
 
-          // 🚀 NOVO PADRÃO: SEM payer
+          payer: {
+            email: process.env.MP_TEST_USER_EMAIL || 'test_user_123@mercadopago.com',
+          },
 
           items: pedido.itens.map((item: any) => ({
             title: `Produto ${item.produtoId}`,
