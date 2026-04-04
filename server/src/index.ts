@@ -1,7 +1,10 @@
-import 'dotenv/config'
+import dotenv from "dotenv";
+
+dotenv.config();
+
+console.log('TOKEN:', process.env.MP_ACCESS_TOKEN)
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import http from "http";
 
 import pedidoRoutes from "./routes/pedido.routes";
