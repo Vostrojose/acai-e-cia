@@ -3,7 +3,8 @@ import produtoService from '../services/produto.service'
 import { asyncHandler } from '../utils/asyncHandler'
 import { criarProdutoSchema } from '../validators/produto.schema'
 import { AppError } from '../utils/AppError'
-import prisma from '../services/prisma' // ✅ precisa importar o prisma
+import prisma from '../services/prisma'
+import { serializeDecimal } from '../utils/serializeDecimal' // ✅ NOVO
 
 class ProdutoController {
   criar = asyncHandler(async (req: Request, res: Response) => {
@@ -13,7 +14,7 @@ class ProdutoController {
 
     return res.status(201).json({
       success: true,
-      data: produto,
+      data: serializeDecimal(produto), // ✅ CORREÇÃO
     })
   })
 
@@ -22,7 +23,7 @@ class ProdutoController {
 
     return res.json({
       success: true,
-      data: produtos,
+      data: serializeDecimal(produtos), // ✅ CORREÇÃO
     })
   })
 
@@ -38,7 +39,7 @@ class ProdutoController {
 
     return res.json({
       success: true,
-      data: produto,
+      data: serializeDecimal(produto), // ✅ CORREÇÃO
     })
   })
 
@@ -62,7 +63,7 @@ class ProdutoController {
 
     return res.json({
       success: true,
-      data: produto,
+      data: serializeDecimal(produto), // ✅ CORREÇÃO
     })
   })
 

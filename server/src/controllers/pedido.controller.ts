@@ -6,18 +6,14 @@ import { atualizarStatusSchema } from '../validators/pedido-status.schema'
 import { criarPedidoSchema } from '../validators/pedido.schema'
 import { getIO } from '../websocket/socket'
 import { NotificationService } from '../services/notification'
+import { serializeDecimal } from '../utils/serializeDecimal' // ✅ NOVO
 
 class PedidoController {
-
-  /* ============================= */
-  /* CRIAR */
-  /* ============================= */
 
   criar: RequestHandler = asyncHandler(
     async (request: Request, response: Response) => {
       const parsed = criarPedidoSchema.parse(request.body)
 
-      // 🔥 CORREÇÃO AQUI
       const data = {
         ...parsed,
         endereco: parsed.endereco ?? ''
@@ -27,14 +23,10 @@ class PedidoController {
 
       return response.status(201).json({
         success: true,
-        data: pedido,
+        data: serializeDecimal(pedido), // ✅ CORREÇÃO
       })
     }
   )
-
-  /* ============================= */
-  /* LISTAR */
-  /* ============================= */
 
   listar: RequestHandler = asyncHandler(
     async (request: Request, response: Response) => {
@@ -46,14 +38,10 @@ class PedidoController {
 
       return response.json({
         success: true,
-        data: pedidos,
+        data: serializeDecimal(pedidos), // ✅ CORREÇÃO
       })
     }
   )
-
-  /* ============================= */
-  /* ATUALIZAR STATUS */
-  /* ============================= */
 
   atualizarStatus: RequestHandler = asyncHandler(
     async (request: Request, response: Response) => {
@@ -65,10 +53,9 @@ class PedidoController {
         data.status as StatusPedido
       )
 
-      // 🔔 Atualização em tempo real
-      getIO().emit('pedido_atualizado', pedido)
+      // 🔔 socket (mantém original)
+      getIO().emit('pedido_atualizado', serializeDecimal(pedido)) // ✅ CORREÇÃO
 
-      // 📲 Notificação quando estiver PRONTO
       if (pedido.status === StatusPedido.PRONTO && pedido.telefone) {
         await NotificationService.enviarMensagem(
           pedido.telefone,
@@ -78,14 +65,10 @@ class PedidoController {
 
       return response.json({
         success: true,
-        data: pedido,
+        data: serializeDecimal(pedido), // ✅ CORREÇÃO
       })
     }
   )
-
-  /* ============================= */
-  /* DASHBOARD */
-  /* ============================= */
 
   dashboard: RequestHandler = asyncHandler(
     async (_request: Request, response: Response) => {
@@ -93,7 +76,7 @@ class PedidoController {
 
       return response.json({
         success: true,
-        data,
+        data: serializeDecimal(data), // ✅ CORREÇÃO
       })
     }
   )
