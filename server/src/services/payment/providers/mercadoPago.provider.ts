@@ -31,7 +31,6 @@ export class MercadoPagoProvider {
           description: `Pedido #${pedido.id}`,
           payment_method_id: 'pix',
 
-          // ✔ manter no PIX (ok)
           payer: {
             email: process.env.MP_TEST_USER_EMAIL || 'test@test.com',
           },
@@ -67,13 +66,27 @@ export class MercadoPagoProvider {
     console.log('Pedido:', pedido.id)
     console.log('Itens:', pedido.itens)
 
+    const FRONT_URL = process.env.FRONT_URL || 'http://localhost:5173'
+
     try {
       const response = await this.preference.create({
         body: {
           external_reference: pedido.id,
           notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
 
-          // 🚀 NOVO PADRÃO: SEM payer
+          // 🔴 PROTEÇÃO IMPORTANTE
+          back_urls: {
+            success: `${FRONT_URL}/sucesso`,
+            failure: `${FRONT_URL}/erro`,
+            pending: `${FRONT_URL}/pendente`,
+          },
+
+          auto_return: 'approved',
+
+          // 🔴 EVITA BUG NO SANDBOX
+          payment_methods: {
+            installments: 1,
+          },
 
           items: pedido.itens.map((item: any) => ({
             title: `Produto ${item.produtoId}`,
