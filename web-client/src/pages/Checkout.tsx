@@ -26,14 +26,18 @@ export default function Checkout() {
       }
 
       setLoading(true)
-
-      const origemSalva = localStorage.getItem('origemPedido')
+const origemSalva = localStorage.getItem('origemPedido')
 
 const origensValidas = ["QR_CODE", "APP", "ADMIN", "BALCAO"]
 
-const origem = origensValidas.includes(origemSalva || "")
-  ? origemSalva
+let origem: string = origensValidas.includes(origemSalva ?? "")
+  ? (origemSalva as string)
   : "APP"
+
+// override inteligente
+if (window.location.pathname.includes('/m/')) {
+  origem = "QR_CODE"
+}
 
       // remove caracteres não numéricos
       const telefoneLimpo = telefone.replace(/\D/g, '')
