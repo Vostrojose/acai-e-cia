@@ -9,16 +9,12 @@ import { getIO } from "../websocket/socket";
 const router = Router();
 
 /* ============================= */
-/* SCHEMA CHECKOUT               */
+/* SCHEMAS                       */
 /* ============================= */
 
 const pagamentoSchema = z.object({
   pedidoId: z.string().uuid(),
 });
-
-/* ============================= */
-/* SCHEMA WEBHOOK                */
-/* ============================= */
 
 const webhookSchema = z.object({
   type: z.string().optional(),
@@ -30,7 +26,40 @@ const webhookSchema = z.object({
 });
 
 /* ============================= */
-/* CRIAR CHECKOUT                */
+/* PIX                           */
+/* ============================= */
+// POST /api/pagamento/pix
+
+router.post("/pix", async (req, res) => {
+  try {
+    const { pedidoId } = pagamentoSchema.parse(req.body);
+
+    const resultado = await PaymentProvider.criarPagamentoPix(pedidoId);
+
+    return res.json({
+      success: true,
+      data: resultado,
+    });
+
+  } catch (error: any) {
+    console.error("ERRO PIX:", error);
+
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Erro ao gerar pagamento PIX",
+    });
+  }
+});
+
+/* ============================= */
+/* CHECKOUT                      */
 /* ============================= */
 // POST /api/pagamento/checkout
 
@@ -51,13 +80,12 @@ router.post("/checkout", async (req, res) => {
       );
     }
 
-    const checkout = await PaymentProvider.criarCheckoutPreference(pedido);
+    const checkout = await PaymentProvider.criarCheckout(pedidoId);
 
     return res.status(200).json({
       success: true,
       data: {
         init_point: checkout.init_point,
-        ...checkout,
       },
     });
 
@@ -103,7 +131,6 @@ router.post("/webhook", async (req, res) => {
       return res.sendStatus(200);
     }
 
-    // só processa pagamento aprovado
     if (pagamento.status !== "approved") {
       return res.sendStatus(200);
     }
@@ -119,13 +146,11 @@ router.post("/webhook", async (req, res) => {
       return res.sendStatus(200);
     }
 
-    // valida valor
     if (Number(pedido.total) !== Number(pagamento.transaction_amount)) {
       console.error("Divergência de valor detectada");
       return res.sendStatus(200);
     }
 
-    // evita duplicidade
     if (pedido.status !== StatusPedido.AGUARDANDO_PAGAMENTO) {
       return res.sendStatus(200);
     }

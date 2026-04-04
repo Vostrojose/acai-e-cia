@@ -9,7 +9,9 @@ export default function Checkout() {
   const [loading, setLoading] = useState(false)
   const [tipoPedido, setTipoPedido] = useState<'retirada' | 'entrega'>('retirada')
 
-  // Endereço como objeto para inputs
+  const [metodoPagamento, setMetodoPagamento] = useState<'PIX' | 'CHECKOUT'>('CHECKOUT')
+  const [qrCode, setQrCode] = useState<string | null>(null)
+
   const [endereco, setEndereco] = useState({
     rua: '',
     numero: '',
@@ -26,32 +28,33 @@ export default function Checkout() {
       }
 
       setLoading(true)
-const origemSalva = localStorage.getItem('origemPedido')
 
-const origensValidas = ["QR_CODE", "APP", "ADMIN", "BALCAO"]
+      // 🔥 ORIGEM INTELIGENTE
+      const origemSalva = localStorage.getItem('origemPedido')
+      const origensValidas = ["QR_CODE", "APP", "ADMIN", "BALCAO"]
 
-let origem: string = origensValidas.includes(origemSalva ?? "")
-  ? (origemSalva as string)
-  : "APP"
+      let origem: string = origensValidas.includes(origemSalva ?? "")
+        ? (origemSalva as string)
+        : "APP"
 
-// override inteligente
-if (window.location.pathname.includes('/m/')) {
-  origem = "QR_CODE"
-}
+      if (window.location.pathname.includes('/m/')) {
+        origem = "QR_CODE"
+      }
 
-      // remove caracteres não numéricos
+      // 🔥 TELEFONE
       const telefoneLimpo = telefone.replace(/\D/g, '')
 
       if (telefoneLimpo.length < 10) {
         alert('Digite um WhatsApp válido.')
-        return 
+        return
       }
 
-      // monta endereco como string
+      // 🔥 ENDEREÇO
       const enderecoString = tipoPedido === "entrega"
         ? `${endereco.rua}, ${endereco.numero} - ${endereco.bairro}, ${endereco.cidade} - ${endereco.cep}`
         : null
 
+      // 🔥 PAYLOAD
       const payload = {
         telefone: telefoneLimpo,
         origem,
@@ -62,27 +65,31 @@ if (window.location.pathname.includes('/m/')) {
         }))
       }
 
-      // 1️⃣ Criar pedido
+      // ✅ CRIAR PEDIDO
       const pedidoResponse = await api.post('/pedidos', payload)
       const pedidoId = pedidoResponse?.data?.data?.id
 
       if (!pedidoId) {
-        console.error('Resposta inesperada da API:', pedidoResponse.data)
         alert('Erro ao criar pedido')
         return
       }
 
-      // 2️⃣ Gerar checkout do Mercado Pago
+      // ✅ PIX
+      if (metodoPagamento === "PIX") {
+        const res = await api.post('/pagamento/pix', { pedidoId })
+
+        setQrCode(res.data.data.qr_code_base64)
+        return
+      }
+
+      // ✅ CHECKOUT (CARTÃO / BOLETO / ETC)
       const pagamentoResponse = await api.post('/pagamento/checkout', {
-        pedidoId,
-        telefone: telefoneLimpo
+        pedidoId
       })
 
-      // 3️⃣ Redirecionar para o Mercado Pago
       if (pagamentoResponse?.data?.data?.init_point) {
         window.location.href = pagamentoResponse.data.data.init_point
       } else {
-        console.error('Resposta inesperada do pagamento:', pagamentoResponse.data)
         alert('Erro ao iniciar pagamento')
       }
 
@@ -99,8 +106,9 @@ if (window.location.pathname.includes('/m/')) {
       <h1>💳 Checkout</h1>
 
       <p>Total do pedido:</p>
-      <h2>R$ {(total ?? 0).toFixed(2)}</h2>
+      <h2>R$ {(Number(total) || 0).toFixed(2)}</h2>
 
+      {/* TELEFONE */}
       <div style={{ marginTop: 20 }}>
         <label>WhatsApp para confirmação</label>
         <input
@@ -118,6 +126,7 @@ if (window.location.pathname.includes('/m/')) {
         />
       </div>
 
+      {/* TIPO PEDIDO */}
       <div style={{ marginTop: 20 }}>
         <label>Tipo de pedido</label>
         <select
@@ -136,47 +145,67 @@ if (window.location.pathname.includes('/m/')) {
         </select>
       </div>
 
+      {/* ENDEREÇO */}
       {tipoPedido === 'entrega' && (
         <div style={{ marginTop: 20 }}>
           <label>Endereço de entrega</label>
+
           <input
             type="text"
             placeholder="Rua"
             value={endereco.rua}
             onChange={(e) => setEndereco({ ...endereco, rua: e.target.value })}
-            style={{ width: '100%', padding: 10, marginTop: 5 }}
           />
+
           <input
             type="text"
             placeholder="Número"
             value={endereco.numero}
             onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })}
-            style={{ width: '100%', padding: 10, marginTop: 5 }}
           />
+
           <input
             type="text"
             placeholder="Bairro"
             value={endereco.bairro}
             onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })}
-            style={{ width: '100%', padding: 10, marginTop: 5 }}
           />
+
           <input
             type="text"
             placeholder="Cidade"
             value={endereco.cidade}
             onChange={(e) => setEndereco({ ...endereco, cidade: e.target.value })}
-            style={{ width: '100%', padding: 10, marginTop: 5 }}
           />
+
           <input
             type="text"
             placeholder="CEP"
             value={endereco.cep}
             onChange={(e) => setEndereco({ ...endereco, cep: e.target.value })}
-            style={{ width: '100%', padding: 10, marginTop: 5 }}
           />
         </div>
       )}
 
+      {/* PAGAMENTO */}
+      <div style={{ marginTop: 20 }}>
+        <label>Forma de pagamento</label>
+
+        <select
+          value={metodoPagamento}
+          onChange={(e) => setMetodoPagamento(e.target.value as 'PIX' | 'CHECKOUT')}
+          style={{
+            width: '100%',
+            padding: 10,
+            marginTop: 5
+          }}
+        >
+          <option value="CHECKOUT">Cartão / Outros</option>
+          <option value="PIX">PIX</option>
+        </select>
+      </div>
+
+      {/* BOTÃO */}
       <button
         onClick={finalizarPedido}
         disabled={loading}
@@ -189,12 +218,19 @@ if (window.location.pathname.includes('/m/')) {
           border: 'none',
           borderRadius: 8,
           fontSize: 16,
-          fontWeight: 'bold',
-          cursor: 'pointer'
+          fontWeight: 'bold'
         }}
       >
         {loading ? 'Processando...' : 'Confirmar Pedido'}
       </button>
+
+      {/* QR CODE */}
+      {qrCode && (
+        <div style={{ marginTop: 20 }}>
+          <p>Escaneie o QR Code:</p>
+          <img src={`data:image/png;base64,${qrCode}`} alt="QR Code" />
+        </div>
+      )}
     </div>
   )
 }
