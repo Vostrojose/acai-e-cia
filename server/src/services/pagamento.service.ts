@@ -98,7 +98,7 @@ class PagamentoService {
             {
               title: `Pedido #${pedido.id}`,
               quantity: 1,
-              unit_price: valor,
+              unit_price: 1, // 👈 DEBUG
               currency_id: "BRL",
             } as any, // 🔥 evita erro de tipagem do SDK
           ],
