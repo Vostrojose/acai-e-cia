@@ -27,7 +27,13 @@ export default function Checkout() {
 
       setLoading(true)
 
-      const origem = localStorage.getItem('origemPedido') ?? "1"
+      const origemSalva = localStorage.getItem('origemPedido')
+
+const origensValidas = ["QR_CODE", "APP", "ADMIN", "BALCAO"]
+
+const origem = origensValidas.includes(origemSalva || "")
+  ? origemSalva
+  : "APP"
 
       // remove caracteres não numéricos
       const telefoneLimpo = telefone.replace(/\D/g, '')
