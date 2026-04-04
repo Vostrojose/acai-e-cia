@@ -72,9 +72,6 @@ export class MercadoPagoProvider {
           external_reference: pedido.id,
           notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
 
-          payer: {
-            email: process.env.MP_TEST_USER_EMAIL!,
-          },
 
           items: pedido.itens.map((item: any) => ({
             title: `Produto ${item.produtoId}`,
