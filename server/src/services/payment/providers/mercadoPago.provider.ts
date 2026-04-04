@@ -13,64 +13,121 @@ export class MercadoPagoProvider {
     this.payment = new Payment(client)
   }
 
+  /* ============================= */
+  /* PIX                          */
+  /* ============================= */
+
   async criarPagamentoPix(pedido: any) {
     const valor = Number(pedido.total)
 
-    const response = await this.payment.create({
-      body: {
-        transaction_amount: valor,
-        description: `Pedido #${pedido.id}`,
-        payment_method_id: 'pix',
-        payer: {
-          email: process.env.MP_TEST_USER_EMAIL!,
-        },
-        external_reference: pedido.id,
-        notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
-      },
-    })
+    console.log('🧪 [MP PIX] Criando pagamento PIX')
+    console.log('Pedido:', pedido.id)
+    console.log('Valor:', valor)
+    console.log('Payer:', process.env.MP_TEST_USER_EMAIL)
 
-    return {
-      pagamentoId: response.id,
-      qr_code: response.point_of_interaction?.transaction_data?.qr_code,
-      qr_code_base64:
-        response.point_of_interaction?.transaction_data?.qr_code_base64,
+    try {
+      const response = await this.payment.create({
+        body: {
+          transaction_amount: valor,
+          description: `Pedido #${pedido.id}`,
+          payment_method_id: 'pix',
+          payer: {
+            email: process.env.MP_TEST_USER_EMAIL!,
+          },
+          external_reference: pedido.id,
+          notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
+        },
+      })
+
+      console.log('✅ [MP PIX] Criado com sucesso:')
+      console.log(JSON.stringify(response, null, 2))
+
+      return {
+        pagamentoId: response.id,
+        qr_code: response.point_of_interaction?.transaction_data?.qr_code,
+        qr_code_base64:
+          response.point_of_interaction?.transaction_data?.qr_code_base64,
+      }
+    } catch (error: any) {
+      console.error('❌ [MP PIX] Erro ao criar pagamento:')
+      console.error(error?.message)
+      console.error(JSON.stringify(error, null, 2))
+      throw error
     }
   }
+
+  /* ============================= */
+  /* CHECKOUT (PREFERENCE)        */
+  /* ============================= */
 
   async criarCheckoutPreference(pedido: any) {
-    const response = await this.preference.create({
-      body: {
-        external_reference: pedido.id,
-        notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
+    console.log('🧪 [MP CHECKOUT] Criando preference')
+    console.log('Pedido:', pedido.id)
+    console.log('Itens:', pedido.itens)
+    console.log('Payer:', process.env.MP_TEST_USER_EMAIL)
 
-        payer: {
-          email: process.env.MP_TEST_USER_EMAIL!,
+    try {
+      const response = await this.preference.create({
+        body: {
+          external_reference: pedido.id,
+          notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
+
+          payer: {
+            email: process.env.MP_TEST_USER_EMAIL!,
+          },
+
+          items: pedido.itens.map((item: any) => ({
+            title: `Produto ${item.produtoId}`,
+            quantity: item.quantidade,
+            unit_price: Number(item.precoUnit),
+            currency_id: 'BRL',
+          })),
         },
+      })
 
-        items: pedido.itens.map((item: any) => ({
-          title: `Produto ${item.produtoId}`, // ✅ corrigido
-          quantity: item.quantidade,
-          unit_price: Number(item.precoUnit),
-          currency_id: 'BRL',
-        })),
-      },
-    })
+      console.log('✅ [MP CHECKOUT] Preference criada:')
+      console.log(JSON.stringify(response, null, 2))
 
-    return {
-      id: response.id,
-      init_point: response.init_point,
-      sandbox_init_point: response.sandbox_init_point,
+      return {
+        id: response.id,
+        init_point: response.init_point,
+        sandbox_init_point: response.sandbox_init_point,
+      }
+    } catch (error: any) {
+      console.error('❌ [MP CHECKOUT] Erro ao criar preference:')
+      console.error(error?.message)
+      console.error(JSON.stringify(error, null, 2))
+      throw error
     }
   }
 
-  async buscarPagamento(paymentId: string) {
-    const response = await this.payment.get({ id: paymentId })
+  /* ============================= */
+  /* BUSCAR PAGAMENTO             */
+  /* ============================= */
 
-    return {
-      id: response.id?.toString(),
-      status: response.status,
-      transaction_amount: response.transaction_amount,
-      pedidoId: response.external_reference,
+  async buscarPagamento(paymentId: string) {
+    console.log('🧪 [MP] Buscando pagamento:', paymentId)
+
+    try {
+      const response = await this.payment.get({ id: paymentId })
+
+      console.log('📥 [MP] Resposta pagamento:')
+      console.log(JSON.stringify(response, null, 2))
+
+      console.log('📊 Status:', response.status)
+      console.log('📊 Status Detail:', (response as any).status_detail)
+
+      return {
+        id: response.id?.toString(),
+        status: response.status,
+        transaction_amount: response.transaction_amount,
+        pedidoId: response.external_reference,
+      }
+    } catch (error: any) {
+      console.error('❌ [MP] Erro ao buscar pagamento:')
+      console.error(error?.message)
+      console.error(JSON.stringify(error, null, 2))
+      throw error
     }
   }
 }
