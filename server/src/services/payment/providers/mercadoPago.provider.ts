@@ -4,7 +4,6 @@ const client = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN!,
 })
 
-
 export class MercadoPagoProvider {
   private preference: Preference
   private payment: Payment
@@ -27,7 +26,8 @@ export class MercadoPagoProvider {
         description: `Pedido #${pedido.id}`,
         payment_method_id: 'pix',
         payer: {
-          email: 'cliente@acaiecompanhia.com',
+          // ⚠️ para testes, use um email de usuário de teste do MP
+          email: 'test_user_123@testuser.com',
         },
         external_reference: pedido.id,
         notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
@@ -47,11 +47,21 @@ export class MercadoPagoProvider {
   /* ============================= */
 
   async criarCheckoutPreference(pedido: any) {
+    // 🔥 DEBUG TEMPORÁRIO — REMOVER DEPOIS
     console.log("🔥 MP TOKEN:", process.env.MP_ACCESS_TOKEN)
+
+    // ✅ DEBUG SEGURO (pode manter se quiser)
+    // console.log("MP TOKEN configurado:", !!process.env.MP_ACCESS_TOKEN)
+
     const response = await this.preference.create({
       body: {
         external_reference: pedido.id,
         notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
+
+        payer: {
+          // ⚠️ importante para sandbox
+          email: 'test_user_123@testuser.com',
+        },
 
         items: pedido.itens.map((item: any) => ({
           title: item.produto?.nome || 'Produto',
