@@ -13,12 +13,8 @@ export class MercadoPagoProvider {
     this.payment = new Payment(client)
   }
 
-  /* ============================= */
-  /* PIX                          */
-  /* ============================= */
-
   async criarPagamentoPix(pedido: any) {
-    const valor = Number(pedido.total?.toString?.() || pedido.total)
+    const valor = Number(pedido.total)
 
     const response = await this.payment.create({
       body: {
@@ -26,8 +22,7 @@ export class MercadoPagoProvider {
         description: `Pedido #${pedido.id}`,
         payment_method_id: 'pix',
         payer: {
-          // ⚠️ para testes, use um email de usuário de teste do MP
-          email: 'test_user_123@testuser.com',
+          email: process.env.MP_TEST_USER_EMAIL!,
         },
         external_reference: pedido.id,
         notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
@@ -42,31 +37,20 @@ export class MercadoPagoProvider {
     }
   }
 
-  /* ============================= */
-  /* CHECKOUT (PREFERENCE)        */
-  /* ============================= */
-
   async criarCheckoutPreference(pedido: any) {
-    // 🔥 DEBUG TEMPORÁRIO — REMOVER DEPOIS
-    
-
-    // ✅ DEBUG SEGURO (pode manter se quiser)
-    // console.log("MP TOKEN configurado:", !!process.env.MP_ACCESS_TOKEN)
-
     const response = await this.preference.create({
       body: {
         external_reference: pedido.id,
         notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
 
         payer: {
-          // ⚠️ importante para sandbox
-          email: 'test_user_123@testuser.com',
+          email: process.env.MP_TEST_USER_EMAIL!,
         },
 
         items: pedido.itens.map((item: any) => ({
-          title: item.produto?.nome || 'Produto',
+          title: `Produto ${item.produtoId}`, // ✅ corrigido
           quantity: item.quantidade,
-          unit_price: Number(item.precoUnit?.toString?.() || item.precoUnit),
+          unit_price: Number(item.precoUnit),
           currency_id: 'BRL',
         })),
       },
@@ -78,10 +62,6 @@ export class MercadoPagoProvider {
       sandbox_init_point: response.sandbox_init_point,
     }
   }
-
-  /* ============================= */
-  /* WEBHOOK                      */
-  /* ============================= */
 
   async buscarPagamento(paymentId: string) {
     const response = await this.payment.get({ id: paymentId })
