@@ -1,9 +1,10 @@
+import { Decimal } from '@prisma/client/runtime/library'
+
 export function serializeDecimal(obj: any): any {
   if (Array.isArray(obj)) {
     return obj.map(serializeDecimal)
   }
 
-  // ✅ NÃO mexer em Date
   if (obj instanceof Date) {
     return obj.toISOString()
   }
@@ -14,19 +15,13 @@ export function serializeDecimal(obj: any): any {
     for (const key in obj) {
       const value = obj[key]
 
-      // ✅ tratar Decimal
-      if (
-        value &&
-        typeof value === 'object' &&
-        value.constructor &&
-        value.constructor.name === 'Decimal'
-      ) {
+      // ✅ CORREÇÃO REAL
+      if (value instanceof Decimal) {
         newObj[key] = Number(value)
-      }
-      // ✅ tratar Date corretamente
+      } 
       else if (value instanceof Date) {
         newObj[key] = value.toISOString()
-      }
+      } 
       else {
         newObj[key] = serializeDecimal(value)
       }
