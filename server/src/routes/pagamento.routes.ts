@@ -34,7 +34,13 @@ router.post("/pix", async (req, res) => {
   try {
     const { pedidoId } = pagamentoSchema.parse(req.body);
 
-    const resultado = await PaymentProvider.criarPagamentoPix(pedidoId);
+    const pedido = await PedidoService.buscarPorIdComProdutos(pedidoId);
+
+    if (!pedido) {
+      throw new AppError("Pedido não encontrado.", 404);
+    }
+
+    const resultado = await PaymentProvider.criarPagamentoPix(pedido);
 
     return res.json({
       success: true,
@@ -80,7 +86,7 @@ router.post("/checkout", async (req, res) => {
       );
     }
 
-    const checkout = await PaymentProvider.criarCheckout(pedidoId);
+    const checkout = await PaymentProvider.criarCheckoutPreference(pedido);
 
     return res.status(200).json({
       success: true,
