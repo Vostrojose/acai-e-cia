@@ -19,7 +19,6 @@ const pagamentoSchema = z.object({
 /* ============================= */
 /* PIX                           */
 /* ============================= */
-// POST /api/pagamento/pix
 
 router.post("/pix", async (req, res) => {
   try {
@@ -58,7 +57,6 @@ router.post("/pix", async (req, res) => {
 /* ============================= */
 /* CHECKOUT                      */
 /* ============================= */
-// POST /api/pagamento/checkout
 
 router.post("/checkout", async (req, res) => {
   try {
@@ -106,7 +104,6 @@ router.post("/checkout", async (req, res) => {
 /* ============================= */
 /* WEBHOOK MERCADO PAGO          */
 /* ============================= */
-// POST /api/pagamento/webhook
 
 router.post("/webhook", async (req, res) => {
   try {
@@ -115,9 +112,6 @@ router.post("/webhook", async (req, res) => {
 
     console.log("🔥 WEBHOOK RECEBIDO:", { topic, id });
 
-    // =============================
-    // 🔥 PAYMENT (principal)
-    // =============================
     if (topic === "payment") {
       if (!id) return res.sendStatus(200);
 
@@ -131,22 +125,22 @@ router.post("/webhook", async (req, res) => {
         return res.sendStatus(200);
       }
 
-      if (!pagamento.pedidoId) {
+      if (!pagamento.externalReference) {
         console.error("Pagamento sem external_reference");
         return res.sendStatus(200);
       }
 
-      const pedido = await PedidoService.buscarPorId(pagamento.pedidoId);
+      const pedido = await PedidoService.buscarPorId(
+        pagamento.externalReference
+      );
 
       if (!pedido) return res.sendStatus(200);
 
-      // valida valor
       if (Number(pedido.total) !== Number(pagamento.transaction_amount)) {
         console.error("Divergência de valor detectada");
         return res.sendStatus(200);
       }
 
-      // evita duplicidade
       if (pedido.status !== StatusPedido.AGUARDANDO_PAGAMENTO) {
         return res.sendStatus(200);
       }
@@ -167,9 +161,6 @@ router.post("/webhook", async (req, res) => {
       console.log("✅ PEDIDO CONFIRMADO:", pedido.id);
     }
 
-    // =============================
-    // 🔥 MERCHANT ORDER (ignorar)
-    // =============================
     if (topic === "merchant_order") {
       console.log("🟡 merchant_order recebido (ignorado)");
     }

@@ -32,7 +32,9 @@ export class MercadoPagoProvider {
           payment_method_id: 'pix',
 
           payer: {
-            email: process.env.MP_TEST_USER_EMAIL || 'test_user_123@mercadopago.com',
+            email:
+              process.env.MP_TEST_USER_EMAIL ||
+              'test_user_123@mercadopago.com',
           },
 
           external_reference: pedido.id,
@@ -45,7 +47,8 @@ export class MercadoPagoProvider {
 
       return {
         pagamentoId: response.id,
-        qr_code: response.point_of_interaction?.transaction_data?.qr_code,
+        qr_code:
+          response.point_of_interaction?.transaction_data?.qr_code,
         qr_code_base64:
           response.point_of_interaction?.transaction_data?.qr_code_base64,
       }
@@ -70,18 +73,33 @@ export class MercadoPagoProvider {
       const response = await this.preference.create({
         body: {
           external_reference: pedido.id,
+
           notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
 
+          back_urls: {
+            success: `${process.env.FRONTEND_URL}/sucesso`,
+            failure: `${process.env.FRONTEND_URL}/erro`,
+            pending: `${process.env.FRONTEND_URL}/pendente`,
+          },
+
+          auto_return: 'approved',
+
           payer: {
-            email: process.env.MP_TEST_USER_EMAIL || 'test_user_123@mercadopago.com',
+            email:
+              process.env.MP_TEST_USER_EMAIL ||
+              'test_user_123@mercadopago.com',
           },
 
           items: pedido.itens.map((item: any) => ({
             title: `Produto ${item.produtoId}`,
-            quantity: item.quantidade,
+            quantity: Number(item.quantidade),
             unit_price: Number(item.precoUnit),
             currency_id: 'BRL',
           })),
+
+          metadata: {
+            pedido_id: pedido.id,
+          },
         },
       })
 
@@ -119,11 +137,10 @@ export class MercadoPagoProvider {
       console.log('📥 [MP] Resposta pagamento:')
       console.log(JSON.stringify(response, null, 2))
 
-      // Forçar captura do campo external_reference
       const externalRef =
         response.external_reference ||
         response.body?.external_reference ||
-        response.metadata?.external_reference ||
+        response.metadata?.pedido_id ||
         undefined
 
       console.log('📊 External Reference resolvido:', externalRef)
@@ -132,7 +149,7 @@ export class MercadoPagoProvider {
         id: response.id?.toString(),
         status: response.status,
         transaction_amount: response.transaction_amount,
-        externalReference: externalRef, // ✅ garantido
+        externalReference: externalRef,
       }
     } catch (error: any) {
       console.error('❌ [MP] Erro ao buscar pagamento:')
