@@ -48,7 +48,7 @@ export class MercadoPagoProvider {
 
   async criarCheckoutPreference(pedido: any) {
     // 🔥 DEBUG TEMPORÁRIO — REMOVER DEPOIS
-    console.log("🔥 MP TOKEN:", process.env.MP_ACCESS_TOKEN)
+    
 
     // ✅ DEBUG SEGURO (pode manter se quiser)
     // console.log("MP TOKEN configurado:", !!process.env.MP_ACCESS_TOKEN)
@@ -60,7 +60,7 @@ export class MercadoPagoProvider {
 
         payer: {
           // ⚠️ importante para sandbox
-          email: 'test_user_123@testuser.com',
+          email: 'josemsilva1984@gmail.com',
         },
 
         items: pedido.itens.map((item: any) => ({
