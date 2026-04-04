@@ -8,11 +8,9 @@ const client = new MercadoPagoConfig({
 });
 
 class PagamentoService {
-
   /* ========================= */
   /* PIX */
   /* ========================= */
-
   async criarPagamentoPix(pedidoId: string) {
     const pedido = await prisma.pedido.findUnique({
       where: { id: pedidoId },
@@ -67,9 +65,8 @@ class PagamentoService {
         qr_code_base64:
           response.point_of_interaction?.transaction_data?.qr_code_base64,
       };
-
     } catch (error) {
-      console.error("Erro Mercado Pago PIX:", error);
+      console.error("🔥 ERRO COMPLETO PIX:", error);
       throw new AppError("Erro ao gerar pagamento PIX", 500);
     }
   }
@@ -77,7 +74,6 @@ class PagamentoService {
   /* ========================= */
   /* CHECKOUT (CARTÃO / BOLETO / ETC) */
   /* ========================= */
-
   async criarCheckout(pedidoId: string) {
     const pedido = await prisma.pedido.findUnique({
       where: { id: pedidoId },
@@ -106,17 +102,13 @@ class PagamentoService {
               currency_id: "BRL",
             } as any, // 🔥 evita erro de tipagem do SDK
           ],
-
           external_reference: pedido.id,
-
           notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
-
           back_urls: {
             success: "https://pedido.acaiecompanhia.com.br/sucesso",
             failure: "https://pedido.acaiecompanhia.com.br/erro",
             pending: "https://pedido.acaiecompanhia.com.br/pendente",
           },
-
           auto_return: "approved",
         },
       });
@@ -124,13 +116,13 @@ class PagamentoService {
       return {
         init_point: response.init_point,
       };
-
     } catch (error) {
-      console.error("Erro Mercado Pago Checkout:", error);
+      console.error("🔥 ERRO COMPLETO CHECKOUT:", error);
       throw new AppError("Erro ao criar checkout", 500);
     }
   }
 }
 
 export default new PagamentoService();
+
 
