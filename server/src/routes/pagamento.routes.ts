@@ -16,15 +16,6 @@ const pagamentoSchema = z.object({
   pedidoId: z.string().uuid(),
 });
 
-const webhookSchema = z.object({
-  type: z.string().optional(),
-  data: z
-    .object({
-      id: z.union([z.string(), z.number()]),
-    })
-    .optional(),
-});
-
 /* ============================= */
 /* PIX                           */
 /* ============================= */
@@ -119,59 +110,68 @@ router.post("/checkout", async (req, res) => {
 
 router.post("/webhook", async (req, res) => {
   try {
-    const parsed = webhookSchema.safeParse(req.body);
+    const topic = req.query.topic as string;
+    const id = req.query.id as string;
 
-    if (!parsed.success) {
-      return res.sendStatus(200);
+    console.log("🔥 WEBHOOK RECEBIDO:", { topic, id });
+
+    // =============================
+    // 🔥 PAYMENT (principal)
+    // =============================
+    if (topic === "payment") {
+      if (!id) return res.sendStatus(200);
+
+      const pagamento = await PaymentProvider.buscarPagamento(id);
+
+      if (!pagamento) return res.sendStatus(200);
+
+      console.log("💳 STATUS PAGAMENTO:", pagamento.status);
+
+      if (pagamento.status !== "approved") {
+        return res.sendStatus(200);
+      }
+
+      if (!pagamento.pedidoId) {
+        console.error("Pagamento sem external_reference");
+        return res.sendStatus(200);
+      }
+
+      const pedido = await PedidoService.buscarPorId(pagamento.pedidoId);
+
+      if (!pedido) return res.sendStatus(200);
+
+      // valida valor
+      if (Number(pedido.total) !== Number(pagamento.transaction_amount)) {
+        console.error("Divergência de valor detectada");
+        return res.sendStatus(200);
+      }
+
+      // evita duplicidade
+      if (pedido.status !== StatusPedido.AGUARDANDO_PAGAMENTO) {
+        return res.sendStatus(200);
+      }
+
+      const pedidoAtualizado = await PedidoService.atualizarStatus(
+        pedido.id,
+        StatusPedido.RECEBIDO
+      );
+
+      try {
+        const io = getIO();
+        io.emit("novo_pedido", pedidoAtualizado);
+        io.emit("pedido_atualizado", pedidoAtualizado);
+      } catch {
+        console.warn("WebSocket não inicializado.");
+      }
+
+      console.log("✅ PEDIDO CONFIRMADO:", pedido.id);
     }
 
-    const paymentId = parsed.data.data?.id?.toString();
-
-    if (!paymentId) {
-      return res.sendStatus(200);
-    }
-
-    const pagamento = await PaymentProvider.buscarPagamento(paymentId);
-
-    if (!pagamento) {
-      return res.sendStatus(200);
-    }
-
-    if (pagamento.status !== "approved") {
-      return res.sendStatus(200);
-    }
-
-    if (!pagamento.pedidoId) {
-      console.error("Pagamento sem external_reference");
-      return res.sendStatus(200);
-    }
-
-    const pedido = await PedidoService.buscarPorId(pagamento.pedidoId);
-
-    if (!pedido) {
-      return res.sendStatus(200);
-    }
-
-    if (Number(pedido.total) !== Number(pagamento.transaction_amount)) {
-      console.error("Divergência de valor detectada");
-      return res.sendStatus(200);
-    }
-
-    if (pedido.status !== StatusPedido.AGUARDANDO_PAGAMENTO) {
-      return res.sendStatus(200);
-    }
-
-    const pedidoAtualizado = await PedidoService.atualizarStatus(
-      pedido.id,
-      StatusPedido.RECEBIDO
-    );
-
-    try {
-      const io = getIO();
-      io.emit("novo_pedido", pedidoAtualizado);
-      io.emit("pedido_atualizado", pedidoAtualizado);
-    } catch {
-      console.warn("WebSocket não inicializado.");
+    // =============================
+    // 🔥 MERCHANT ORDER (ignorar)
+    // =============================
+    if (topic === "merchant_order") {
+      console.log("🟡 merchant_order recebido (ignorado)");
     }
 
     return res.sendStatus(200);
