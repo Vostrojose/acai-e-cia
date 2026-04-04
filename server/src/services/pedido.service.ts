@@ -1,5 +1,5 @@
 import prisma from '../lib/prisma'
-import { StatusPedido } from '@prisma/client'
+import { StatusPedido, StatusPagamento } from '@prisma/client'
 import { AppError } from '../utils/AppError'
 import { getIO } from '../websocket/socket'
 
@@ -17,14 +17,9 @@ class PedidoService {
     origem?: string
     endereco?: string
   }) {
-
-    /* ---------- valida itens ---------- */
-
     if (!Array.isArray(data.itens) || data.itens.length === 0) {
       throw new AppError('Pedido precisa conter ao menos um item.', 400)
     }
-
-    /* ---------- proteção contra duplicação ---------- */
 
     const idsDuplicados = new Set<string>()
     data.itens.forEach((i) => {
@@ -34,133 +29,76 @@ class PedidoService {
       idsDuplicados.add(i.produtoId)
     })
 
-    /* ---------- valida quantidade ---------- */
-
     data.itens.forEach((item) => {
       if (!item.produtoId || item.produtoId.length < 10) {
         throw new AppError('produtoId inválido.', 400)
       }
-
       if (!Number.isInteger(item.quantidade) || item.quantidade <= 0) {
         throw new AppError('Quantidade inválida.', 400)
       }
-
       if (item.quantidade > 50) {
         throw new AppError('Quantidade máxima por item excedida.', 400)
       }
     })
 
-    /* ---------- normaliza telefone ---------- */
-
     let telefoneLimpo: string | undefined
-
     if (data.telefone) {
       telefoneLimpo = data.telefone.replace(/\D/g, '')
-
       if (telefoneLimpo.length < 10 || telefoneLimpo.length > 15) {
         throw new AppError('Telefone inválido.', 400)
       }
     }
 
-    /* ---------- valida origem ---------- */
-
     const origensValidas = ["QR_CODE", "APP", "ADMIN", "BALCAO"]
-
     if (data.origem && !origensValidas.includes(data.origem)) {
       throw new AppError("Origem inválida.", 400)
     }
 
-    /* ---------- busca produtos ---------- */
-
     const produtosIds = data.itens.map((i) => i.produtoId)
-
     const produtos = await prisma.produto.findMany({
-      where: {
-        id: { in: produtosIds },
-        ativo: true,
-      },
+      where: { id: { in: produtosIds }, ativo: true },
     })
-
     if (produtos.length !== produtosIds.length) {
-      throw new AppError(
-        'Um ou mais produtos são inválidos ou estão inativos.',
-        400,
-      )
+      throw new AppError('Um ou mais produtos são inválidos ou estão inativos.', 400)
     }
 
     const produtosMap = new Map(produtos.map((p) => [p.id, p]))
-
-    /* ---------- recalcula total ---------- */
-
     let totalCalculado = 0
 
     const itensParaCriar = data.itens.map((item) => {
       const produto = produtosMap.get(item.produtoId)
+      if (!produto) throw new AppError('Produto não encontrado.', 400)
 
-      if (!produto) {
-        throw new AppError('Produto não encontrado.', 400)
-      }
-
-      // ✅ CORREÇÃO DECIMAL
       const preco = Number(produto.preco)
-
-      if (!Number.isFinite(preco)) {
-        throw new AppError('Preço inválido no produto.', 400)
-      }
+      if (!Number.isFinite(preco)) throw new AppError('Preço inválido no produto.', 400)
 
       const subtotal = preco * item.quantidade
-
-      if (!Number.isFinite(subtotal)) {
-        throw new AppError('Erro no cálculo do pedido.', 400)
-      }
+      if (!Number.isFinite(subtotal)) throw new AppError('Erro no cálculo do pedido.', 400)
 
       totalCalculado += subtotal
-
-      return {
-        produtoId: produto.id,
-        quantidade: item.quantidade,
-        precoUnit: preco, // garante número
-      }
+      return { produtoId: produto.id, quantidade: item.quantidade, precoUnit: preco }
     })
 
-    /* ---------- valida total ---------- */
-
-    if (totalCalculado <= 0) {
-      throw new AppError('Total do pedido inválido.', 400)
-    }
-
-    if (totalCalculado > 10000) {
-      throw new AppError('Total do pedido excede limite permitido.', 400)
-    }
-
-    /* ---------- cria pedido ---------- */
+    if (totalCalculado <= 0) throw new AppError('Total do pedido inválido.', 400)
+    if (totalCalculado > 10000) throw new AppError('Total do pedido excede limite permitido.', 400)
 
     const pedidoCriado = await prisma.$transaction(async (tx) => {
-      const pedido = await tx.pedido.create({
+      return tx.pedido.create({
         data: {
           total: totalCalculado,
           telefone: telefoneLimpo,
-          origem: data.origem as any, // enum validado acima
+          origem: data.origem as any,
           endereco: data.endereco,
           status: StatusPedido.AGUARDANDO_PAGAMENTO,
-          itens: {
-            create: itensParaCriar,
-          },
+          itens: { create: itensParaCriar },
         },
-        include: {
-          itens: true,
-        },
+        include: { itens: true },
       })
-
-      return pedido
     })
-
-    /* ---------- websocket ---------- */
 
     try {
       if (pedidoCriado.status === StatusPedido.RECEBIDO) {
         const io = getIO()
-
         io.emit('novo_pedido', {
           id: pedidoCriado.id,
           status: pedidoCriado.status,
@@ -180,41 +118,23 @@ class PedidoService {
   /* ============================= */
 
   async buscarPorId(id: string) {
-    return prisma.pedido.findUnique({
-      where: { id },
-      include: { itens: true },
-    })
+    return prisma.pedido.findUnique({ where: { id }, include: { itens: true } })
   }
-
-  /* ============================= */
-  /* BUSCAR PEDIDO COM PRODUTOS */
-  /* ============================= */
 
   async buscarPorIdComProdutos(id: string) {
     return prisma.pedido.findUnique({
       where: { id },
-      include: {
-        itens: {
-          include: {
-            produto: true,
-          },
-        },
-      },
+      include: { itens: { include: { produto: true } } },
     })
   }
 
   /* ============================= */
-  /* ATUALIZAR STATUS */
+  /* ATUALIZAR STATUS DO PEDIDO */
   /* ============================= */
 
   async atualizarStatus(id: string, novoStatus: StatusPedido) {
-    const pedido = await prisma.pedido.findUnique({
-      where: { id },
-    })
-
-    if (!pedido) {
-      throw new AppError('Pedido não encontrado.', 404)
-    }
+    const pedido = await prisma.pedido.findUnique({ where: { id } })
+    if (!pedido) throw new AppError('Pedido não encontrado.', 404)
 
     const regras: Record<StatusPedido, StatusPedido[]> = {
       AGUARDANDO_PAGAMENTO: ['RECEBIDO', 'CANCELADO'],
@@ -226,12 +146,8 @@ class PedidoService {
     }
 
     const permitidos = regras[pedido.status]
-
     if (!permitidos.includes(novoStatus)) {
-      throw new AppError(
-        `Transição inválida de ${pedido.status} para ${novoStatus}.`,
-        400,
-      )
+      throw new AppError(`Transição inválida de ${pedido.status} para ${novoStatus}.`, 400)
     }
 
     const pedidoAtualizado = await prisma.pedido.update({
@@ -241,8 +157,30 @@ class PedidoService {
     })
 
     try {
-      const io = getIO()
-      io.emit('pedido_atualizado', pedidoAtualizado)
+      getIO().emit('pedido_atualizado', pedidoAtualizado)
+    } catch {
+      console.warn('⚠️ WebSocket ainda não inicializado.')
+    }
+
+    return pedidoAtualizado
+  }
+
+  /* ============================= */
+  /* ATUALIZAR STATUS DE PAGAMENTO */
+  /* ============================= */
+
+  async atualizarPagamento(externalReference: string, novoStatus: StatusPagamento) {
+    const pedido = await prisma.pedido.findUnique({ where: { externalReference } })
+    if (!pedido) throw new AppError('Pedido não encontrado.', 404)
+
+    const pedidoAtualizado = await prisma.pedido.update({
+      where: { externalReference },
+      data: { statusPagamento: novoStatus },
+      include: { itens: true },
+    })
+
+    try {
+      getIO().emit('pedido_atualizado', pedidoAtualizado)
     } catch {
       console.warn('⚠️ WebSocket ainda não inicializado.')
     }
@@ -256,7 +194,6 @@ class PedidoService {
 
   async listarPedidos(status?: string) {
     const where = status ? { status: status as StatusPedido } : undefined
-
     return prisma.pedido.findMany({
       where,
       include: { itens: true },
@@ -289,11 +226,9 @@ class PedidoService {
 
     const total = Object.values(base).reduce((acc, curr) => acc + curr, 0)
 
-    return {
-      ...base,
-      TOTAL: total,
-    }
+    return { ...base, TOTAL: total }
   }
 }
 
 export default new PedidoService()
+

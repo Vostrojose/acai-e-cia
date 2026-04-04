@@ -105,23 +105,34 @@ export class MercadoPagoProvider {
   /* BUSCAR PAGAMENTO             */
   /* ============================= */
 
-  async buscarPagamento(paymentId: string) {
+  async buscarPagamento(paymentId: string): Promise<{
+    id: string | undefined
+    status: string | undefined
+    transaction_amount: number | undefined
+    externalReference: string | undefined
+  }> {
     console.log('🧪 [MP] Buscando pagamento:', paymentId)
 
     try {
-      const response = await this.payment.get({ id: paymentId })
+      const response: any = await this.payment.get({ id: paymentId })
 
       console.log('📥 [MP] Resposta pagamento:')
       console.log(JSON.stringify(response, null, 2))
 
-      console.log('📊 Status:', response.status)
-      console.log('📊 Status Detail:', (response as any).status_detail)
+      // Forçar captura do campo external_reference
+      const externalRef =
+        response.external_reference ||
+        response.body?.external_reference ||
+        response.metadata?.external_reference ||
+        undefined
+
+      console.log('📊 External Reference resolvido:', externalRef)
 
       return {
         id: response.id?.toString(),
         status: response.status,
         transaction_amount: response.transaction_amount,
-        pedidoId: response.external_reference,
+        externalReference: externalRef, // ✅ garantido
       }
     } catch (error: any) {
       console.error('❌ [MP] Erro ao buscar pagamento:')
