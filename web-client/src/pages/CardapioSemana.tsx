@@ -6,7 +6,7 @@ interface Produto {
   id: string
   nome: string
   descricao?: string
-  preco: number
+  preco: number | string
   destaque: boolean
 
   disponivelSeg: boolean
@@ -26,17 +26,12 @@ export default function CardapioSemana() {
   const destaque = produtos.find(p => p.destaque)
 
   useEffect(() => {
-
     async function loadProdutos() {
-
       const res = await api.get('/produtos')
-
       setProdutos(res.data.data)
-
     }
 
     loadProdutos()
-
   }, [])
 
   const dias = [
@@ -50,55 +45,51 @@ export default function CardapioSemana() {
   ]
 
   return (
-
     <div className="cardapio-semana-page">
 
       <h1 className="titulo-semana">
         Cardápio da Semana
       </h1>
+
       {destaque && (
+        <div className="destaque-card">
 
-  <div className="destaque-card">
+          <div className="destaque-label">
+            Especial da Semana
+          </div>
 
-    <div className="destaque-label">
-       Especial da Semana
-    </div>
+          <div className="destaque-nome">
+            {destaque.nome}
+          </div>
 
-    <div className="destaque-nome">
-      {destaque.nome}
-    </div>
+          {destaque.descricao && (
+            <div className="destaque-desc">
+              {destaque.descricao}
+            </div>
+          )}
 
-    {destaque.descricao && (
-      <div className="destaque-desc">
-        {destaque.descricao}
-      </div>
-    )}
+          <div className="destaque-preco">
+            R$ {Number(destaque.preco || 0).toFixed(2)}
+          </div>
 
-    <div className="destaque-preco">
-      R$ {destaque.preco.toFixed(2)}
-    </div>
-
-  </div>
-
-)}
+        </div>
+      )}
 
       {dias.map((dia) => {
 
         const produtosDoDia = produtos.filter(
-          (produto: any) => produto[dia.key]
+          (produto) => produto[dia.key as keyof Produto]
         )
 
         if (produtosDoDia.length === 0) return null
 
         return (
-
           <div
             key={dia.nome}
             className={`dia-card ${hoje === dia.numero ? 'dia-hoje' : ''}`}
           >
 
             <h2 className="dia-titulo">
-
               {dia.nome}
 
               {hoje === dia.numero && (
@@ -106,7 +97,6 @@ export default function CardapioSemana() {
                   HOJE
                 </span>
               )}
-
             </h2>
 
             <div className="produtos-dia">
@@ -126,7 +116,7 @@ export default function CardapioSemana() {
                   )}
 
                   <div className="produto-preco">
-                    R$ {produto.preco.toFixed(2)}
+                    R$ {Number(produto.preco || 0).toFixed(2)}
                   </div>
 
                 </div>
@@ -136,13 +126,10 @@ export default function CardapioSemana() {
             </div>
 
           </div>
-
         )
 
       })}
 
     </div>
-
   )
-
 }
