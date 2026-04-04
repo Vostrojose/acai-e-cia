@@ -3,6 +3,7 @@ import { MercadoPagoConfig, Preference, Payment } from 'mercadopago'
 const client = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN!,
 })
+console.log("🔥 MP TOKEN:", process.env.MP_ACCESS_TOKEN)
 
 export class MercadoPagoProvider {
   private preference: Preference
