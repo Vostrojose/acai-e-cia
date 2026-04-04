@@ -1,7 +1,4 @@
 import dotenv from "dotenv";
-
-dotenv.config();
-
 console.log('TOKEN:', process.env.MP_ACCESS_TOKEN)
 import express from "express";
 import cors from "cors";
