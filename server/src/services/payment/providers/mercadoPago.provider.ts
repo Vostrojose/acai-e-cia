@@ -84,11 +84,9 @@ export class MercadoPagoProvider {
 
           auto_return: 'approved',
 
-          payer: {
-            email:
-              process.env.MP_TEST_USER_EMAIL ||
-              'test_user_123@mercadopago.com',
-          },
+         payer: {
+           email: "josemsilva1984@gmail.com",
+           },
 
           items: pedido.itens.map((item: any) => ({
             title: `Produto ${item.produtoId}`,
