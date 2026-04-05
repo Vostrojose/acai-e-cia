@@ -86,8 +86,12 @@ export class MercadoPagoProvider {
 
          payer: {
            email: "josemsilva1984@gmail.com",
-            name: "Jose",
-            surname: "Silva",
+           name: "Jose",
+           surname: "Silva",
+           identification: {
+           type: "CPF",
+           number: "30657584827"
+              }
             } as any,
 
           items: pedido.itens.map((item: any) => ({
