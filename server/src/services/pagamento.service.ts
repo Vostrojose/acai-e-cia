@@ -98,9 +98,9 @@ class PagamentoService {
             {
               title: `Pedido #${pedido.id}`,
               quantity: 1,
-              unit_price: 1, // 👈 DEBUG
+              unit_price: Number(pedido.total), // 
               currency_id: "BRL",
-            } as any, // 🔥 evita erro de tipagem do SDK
+            } as any, // evita erro de tipagem do SDK
           ],
           external_reference: pedido.id,
           notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,

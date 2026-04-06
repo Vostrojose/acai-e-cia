@@ -32,9 +32,7 @@ export class MercadoPagoProvider {
           payment_method_id: 'pix',
 
           payer: {
-            email:
-              process.env.MP_TEST_USER_EMAIL ||
-              'test_user_123@mercadopago.com',
+            email: "pedido@acaiecompanhia.com" // vai precisar implementar isso para funcionar mercado pago
           },
 
           external_reference: pedido.id,
@@ -70,6 +68,9 @@ export class MercadoPagoProvider {
     console.log('Itens:', pedido.itens)
 
     try {
+       if (!pedido.itens || pedido.itens.length === 0) {
+         throw new Error("Pedido sem itens");
+       }
       const response = await this.preference.create({
         body: {
           external_reference: pedido.id,
@@ -86,13 +87,14 @@ export class MercadoPagoProvider {
 
          payer: {
            email: "josemsilva1984@gmail.com",
-           name: "Jose",
-           surname: "Silva",
+           name: "",
+           surname: "",
            identification: {
            type: "CPF",
-           number: "30657584827"
+           number: ""
               }
             } as any,
+            
 
           items: pedido.itens.map((item: any) => ({
             title: `Produto ${item.produtoId}`,

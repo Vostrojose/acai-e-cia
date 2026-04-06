@@ -1,8 +1,7 @@
 import dotenv from "dotenv";
 
-dotenv.config();
 
-console.log('TOKEN:', process.env.MP_ACCESS_TOKEN)
+console.log("MP token carregado:", !!process.env.MP_ACCESS_TOKEN);
 import express from "express";
 import cors from "cors";
 import http from "http";
@@ -15,6 +14,13 @@ import pagamentoRoutes from "./routes/pagamento.routes";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import { httpLogger } from "./middlewares/logger.middleware";
 import { initSocket } from "./websocket/socket";
+
+
+/* =================================
+   remover após restabelecer o mercado pago
+================================= */
+import simulacao from "./routes/pagamento.simulacao.routes";
+/* ================================= */
 
 dotenv.config();
 
@@ -57,6 +63,17 @@ app.get("/", (req, res) => {
     message: "API Açaí & Cia funcionando corretamente! 🚀",
   });
 });
+
+
+
+/* =================================
+   SIMULAÇÃO (ISOLADA)
+================================= */
+app.use("/api/debug", simulacao);
+/* ================================= */
+
+/* ========================= */
+
 
 /* =================================
    MIDDLEWARE DE ERRO
