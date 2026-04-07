@@ -188,3 +188,46 @@
   transform: scale(1.02);
   box-shadow: 0 6px 16px rgba(0,0,0,0.2);
 }
+/* CARRINHO FLUTUANTE */
+.cart-floating {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+
+  width: 52px;
+  height: 52px;
+
+  background: white;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 22px;
+  cursor: pointer;
+
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+
+  z-index: 999;
+  transition: transform 0.2s ease;
+}
+
+.cart-floating:hover {
+  transform: scale(1.1);
+}
+
+.cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+
+  background: #00c853;
+  color: white;
+
+  font-size: 12px;
+  font-weight: bold;
+
+  padding: 4px 7px;
+  border-radius: 20px;
+}

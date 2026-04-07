@@ -77,10 +77,23 @@ export default function Home() {
     }
   })
 
+  const total = itens.reduce((acc, i) => acc + i.preco * i.quantidade, 0)
+
   return (
     <div className="page">
 
-      {/* HEADER MELHORADO */}
+      {/* 🛒 CARRINHO FLUTUANTE */}
+      {itens.length > 0 && (
+        <div
+          className="cart-floating"
+          onClick={() => navigate('/carrinho')}
+        >
+          🛒
+          <span className="cart-badge">{itens.length}</span>
+        </div>
+      )}
+
+      {/* HEADER */}
       <div className="header">
         <h1 className="title">🍧 Açaí & Cia</h1>
         <p className="subtitle">
@@ -156,20 +169,16 @@ export default function Home() {
         </div>
       </div>
 
-      {/* BARRA INFERIOR MELHORADA */}
+      {/* BARRA INFERIOR (mantida para teste) */}
       {itens.length > 0 && (
-
         <div className="checkout-bar">
-
           <button
             className="checkout-btn"
             onClick={() => navigate('/carrinho')}
           >
-            Ver pedido ({itens.length}) • R$ {itens.reduce((acc, i) => acc + i.preco * i.quantidade, 0).toFixed(2)}
+            Ver pedido ({itens.length}) • R$ {total.toFixed(2)}
           </button>
-
         </div>
-
       )}
 
     </div>
