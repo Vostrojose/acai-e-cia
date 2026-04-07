@@ -1,7 +1,7 @@
 .page {
   min-height: 100vh;
   width: 100%;
-  background: #4A148C;
+  background: linear-gradient(180deg, #4A148C 0%, #6A1B9A 100%);
 
   display: flex;
   flex-direction: column;
@@ -11,18 +11,29 @@
   box-sizing: border-box;
 }
 
+/* ========================= */
+/* HEADER                    */
+/* ========================= */
+
 .title {
   color: white;
-  margin-bottom: 25px;
+  margin-bottom: 10px;
   font-size: 28px;
+  font-weight: 700;
 }
 
 .subtitle {
   color: white;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
   opacity: 0.9;
-  font-size: 18px;
+  font-size: 16px;
+  text-align: center;
+  max-width: 400px;
 }
+
+/* ========================= */
+/* LISTA                     */
+/* ========================= */
 
 .cardapio-container {
   width: 100%;
@@ -41,10 +52,13 @@
   }
 }
 
-.produto-card {
+/* ========================= */
+/* CARD PRODUTO              */
+/* ========================= */
 
+.produto-card {
   background: white;
-  border-radius: 14px;
+  border-radius: 16px;
 
   padding: 16px;
 
@@ -54,56 +68,86 @@
 
   gap: 15px;
 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
 
+/* efeito hover (desktop) */
+.produto-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.18);
 }
 
 .produto-info {
-
   display: flex;
   flex-direction: column;
-
   flex: 1;
-
 }
 
 .produto-nome {
-
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
-
   color: #333;
+}
 
+.produto-descricao {
+  font-size: 13px;
+  color: #777;
+  margin-top: 4px;
+  line-height: 1.3;
 }
 
 .produto-preco {
   color: #6A1B9A;
   font-weight: bold;
-  margin-top: 4px;
+  margin-top: 6px;
+  font-size: 16px;
 }
 
-/* botão adicionar */
+/* ========================= */
+/* BOTÕES                    */
+/* ========================= */
+
 .add-btn {
   background: #6A1B9A;
   color: white;
   border: none;
+
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
+
   cursor: pointer;
+  font-weight: 600;
+
+  transition: all 0.2s ease;
 }
 
-/* botão quando já tem item */
+.add-btn:hover {
+  background: #7B1FA2;
+}
+
 .add-btn-added {
   background: #00c853;
   color: white;
   border: none;
+
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
+
   font-weight: bold;
   cursor: pointer;
+
+  transition: all 0.2s ease;
 }
 
-/* barra inferior */
+.add-btn-added:hover {
+  background: #00b44b;
+}
+
+/* ========================= */
+/* CHECKOUT BAR              */
+/* ========================= */
+
 .checkout-bar {
   position: fixed;
   bottom: 0;
@@ -111,9 +155,10 @@
   width: 100%;
 
   background: white;
-  padding: 16px;
+  padding: 14px 16px;
 
-  box-shadow: 0 -4px 10px rgba(0,0,0,0.15);
+  box-shadow: 0 -6px 16px rgba(0,0,0,0.15);
+  backdrop-filter: blur(6px);
 }
 
 .checkout-btn {
@@ -123,25 +168,23 @@
   margin: auto;
   display: block;
 
-  padding: 14px;
+  padding: 16px;
 
-  background: #00c853;
+  background: linear-gradient(135deg, #00c853, #00e676);
   color: white;
 
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
 
   font-size: 16px;
   font-weight: bold;
 
   cursor: pointer;
+
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.produto-descricao {
-
-  font-size: 14px;
-  color: #777;
-
-  margin-top: 4px;
-
+.checkout-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
 }

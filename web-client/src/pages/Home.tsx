@@ -10,7 +10,6 @@ interface Produto {
   descricao?: string
   preco: number
   ativo: boolean
-
   disponivelSeg: boolean
   disponivelTer: boolean
   disponivelQua: boolean
@@ -21,9 +20,7 @@ interface Produto {
 }
 
 export default function Home() {
-
   const hoje = new Date().getDay()
-
   const { origem } = useParams()
   const navigate = useNavigate()
 
@@ -47,7 +44,6 @@ export default function Home() {
           .filter((produto: Produto) => produto.ativo)
 
         setProdutos(produtosAtivos)
-
       } catch (error) {
         console.error('Erro ao carregar produtos:', error)
       } finally {
@@ -69,62 +65,50 @@ export default function Home() {
   }
 
   const produtosDisponiveis = produtos.filter((produto: Produto) => {
-
     switch (hoje) {
-
-      case 0:
-        return produto.disponivelDom
-
-      case 1:
-        return produto.disponivelSeg
-
-      case 2:
-        return produto.disponivelTer
-
-      case 3:
-        return produto.disponivelQua
-
-      case 4:
-        return produto.disponivelQui
-
-      case 5:
-        return produto.disponivelSex
-
-      case 6:
-        return produto.disponivelSab
-
-      default:
-        return true
+      case 0: return produto.disponivelDom
+      case 1: return produto.disponivelSeg
+      case 2: return produto.disponivelTer
+      case 3: return produto.disponivelQua
+      case 4: return produto.disponivelQui
+      case 5: return produto.disponivelSex
+      case 6: return produto.disponivelSab
+      default: return true
     }
-
   })
 
   return (
     <div className="page">
 
-      <h1 className="title">Açaí & Cia</h1>
+      {/* HEADER MELHORADO */}
+      <div className="header">
+        <h1 className="title">🍧 Açaí & Cia</h1>
+        <p className="subtitle">
+          Monte seu pedido e retire na loja 🚀
+        </p>
+      </div>
 
-      <h2 className="subtitle">
-        Faça seu Pedido e Aguarde a Mensagem no WhatsApp Informado Para Ir Retirar
-      </h2>
-
+      {/* LISTA */}
       <div className="cardapio-container">
-
         <div className="cardapio-list">
 
           {produtosDisponiveis.map((produto) => {
-
             const item = itens.find(i => i.id === produto.id)
             const quantidade = item?.quantidade || 0
 
             return (
-
               <div key={produto.id} className="produto-card">
 
                 <div className="produto-info">
 
-                  <div className="produto-nome">
-                    {produto.nome}
+                  <div className="produto-header">
+                    <div className="produto-nome">
+                      {produto.nome}
+                    </div>
+
+                    <div className="produto-preco">
+                      R$ {produto.preco.toFixed(2)}
+                    </div>
                   </div>
 
                   {produto.descricao && (
@@ -133,53 +117,46 @@ export default function Home() {
                     </div>
                   )}
 
-                  <div className="produto-preco">
-                    R$ {produto.preco.toFixed(2)}
-                  </div>
-
                 </div>
 
-                {quantidade === 0 ? (
-
-                  <button
-                    className="add-btn"
-                    onClick={() =>
-                      adicionarItem({
-                        id: produto.id,
-                        nome: produto.nome,
-                        preco: produto.preco,
-                      })
-                    }
-                  >
-                    Adicionar
-                  </button>
-
-                ) : (
-
-                  <button
-                    className="add-btn-added"
-                    onClick={() =>
-                      adicionarItem({
-                        id: produto.id,
-                        nome: produto.nome,
-                        preco: produto.preco,
-                      })
-                    }
-                  >
-                    ✔ {quantidade} no pedido
-                  </button>
-
-                )}
+                <div className="produto-acoes">
+                  {quantidade === 0 ? (
+                    <button
+                      className="add-btn"
+                      onClick={() =>
+                        adicionarItem({
+                          id: produto.id,
+                          nome: produto.nome,
+                          preco: produto.preco,
+                        })
+                      }
+                    >
+                      + Adicionar
+                    </button>
+                  ) : (
+                    <button
+                      className="add-btn-added"
+                      onClick={() =>
+                        adicionarItem({
+                          id: produto.id,
+                          nome: produto.nome,
+                          preco: produto.preco,
+                        })
+                      }
+                    >
+                      ✔ {quantidade} no pedido
+                    </button>
+                  )}
+                </div>
 
               </div>
-
             )
           })}
 
         </div>
-
       </div>
 
+      {/* BARRA INFERIOR MELHORADA */}
       {itens.length > 0 && (
 
         <div className="checkout-bar">
@@ -188,7 +165,7 @@ export default function Home() {
             className="checkout-btn"
             onClick={() => navigate('/carrinho')}
           >
-            Ver pedido ({itens.length})
+            Ver pedido ({itens.length}) • R$ {itens.reduce((acc, i) => acc + i.preco * i.quantidade, 0).toFixed(2)}
           </button>
 
         </div>
