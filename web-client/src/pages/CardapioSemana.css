@@ -1,159 +1,224 @@
 .cardapio-semana-page {
-
   min-height: 100vh;
-  background: #4A148C;
+  width: 100%;
 
-  padding: 30px 20px;
+  background: linear-gradient(180deg, #4A148C 0%, #6A1B9A 100%);
 
   display: flex;
   flex-direction: column;
   align-items: center;
 
+  padding: 30px 20px;
+  box-sizing: border-box;
 }
+
+/* ========================= */
+/* TÍTULO                    */
+/* ========================= */
 
 .titulo-semana {
-
   color: white;
-  font-size: 32px;
-  margin-bottom: 30px;
-
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 25px;
 }
 
-.dia-card {
-
-  width: 100%;
-  max-width: 700px;
-
-  background: rgba(255,255,255,0.1);
-
-  border-radius: 12px;
-
-  padding: 20px;
-  margin-bottom: 20px;
-
-}
-
-.dia-hoje {
-
-  border: 2px solid #FFD700;
-
-}
-
-.dia-titulo {
-
-  color: white;
-
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  margin-bottom: 15px;
-
-}
-
-.badge-hoje {
-
-  background: #FFD700;
-  color: black;
-
-  font-size: 12px;
-
-  padding: 4px 8px;
-
-  border-radius: 6px;
-
-}
-
-.produtos-dia {
-
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-
-}
-
-.produto-card-semana {
-
-  background: white;
-
-  border-radius: 10px;
-
-  padding: 14px;
-
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-
-}
-
-.produto-nome {
-
-  font-weight: 600;
-  font-size: 18px;
-
-}
-
-.produto-descricao {
-
-  font-size: 14px;
-  color: #666;
-
-  margin-top: 4px;
-
-}
-
-.produto-preco {
-
-  margin-top: 6px;
-
-  color: #6A1B9A;
-  font-weight: bold;
-
-}
+/* ========================= */
+/* DESTAQUE                  */
+/* ========================= */
 
 .destaque-card {
-
   width: 100%;
   max-width: 700px;
 
-  background: linear-gradient(135deg,#FFD700,#FFC107);
-
-  border-radius: 14px;
+  background: linear-gradient(135deg, #ffffff, #f3e5f5);
+  border-radius: 16px;
 
   padding: 20px;
   margin-bottom: 25px;
 
-  color: black;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.2);
 
-  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-
+  text-align: center;
 }
 
 .destaque-label {
-
   font-size: 12px;
   font-weight: bold;
-
-  margin-bottom: 6px;
-
+  color: #6A1B9A;
+  margin-bottom: 8px;
 }
 
 .destaque-nome {
-
-  font-size: 22px;
+  font-size: 20px;
   font-weight: bold;
-
+  color: #333;
 }
 
 .destaque-desc {
-
+  font-size: 14px;
+  color: #666;
   margin-top: 6px;
-
 }
 
 .destaque-preco {
-
   margin-top: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #00c853;
+}
 
+/* ========================= */
+/* DIA                       */
+/* ========================= */
+
+.dia-card {
+  width: 100%;
+  max-width: 700px;
+
+  background: white;
+  border-radius: 16px;
+
+  padding: 18px;
+  margin-bottom: 18px;
+
+  box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+}
+
+/* destaque do dia atual */
+.dia-hoje {
+  border: 2px solid #00c853;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.25);
+}
+
+/* título do dia */
+.dia-titulo {
   font-size: 20px;
   font-weight: bold;
+  margin-bottom: 15px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* badge HOJE */
+.badge-hoje {
+  background: #00c853;
+  color: white;
+
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+/* ========================= */
+/* LISTA DE PRODUTOS         */
+/* ========================= */
+
+.produtos-dia {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ========================= */
+/* CARD PRODUTO (PADRÃO HOME)*/
+/* ========================= */
+
+.produto-card {
+  background: #fff;
+  border-radius: 14px;
+
+  padding: 14px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 12px;
+
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.produto-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+}
+
+.produto-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.produto-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.produto-nome {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.produto-descricao {
+  font-size: 13px;
+  color: #777;
+  margin-top: 4px;
+}
+
+.produto-preco {
+  font-size: 15px;
+  font-weight: bold;
+  color: #6A1B9A;
+}
+
+/* ========================= */
+/* BOTÃO                     */
+/* ========================= */
+
+.add-btn {
+  background: #6A1B9A;
+  color: white;
+
+  border: none;
+  padding: 10px 12px;
+
+  border-radius: 10px;
+  cursor: pointer;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  transition: all 0.2s ease;
+}
+
+.add-btn:hover {
+  background: #7B1FA2;
+}
+
+.add-btn:active {
+  transform: scale(0.95);
+}
+
+/* ========================= */
+/* RESPONSIVO                */
+/* ========================= */
+
+@media (max-width: 500px) {
+
+  .produto-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .add-btn {
+    width: 100%;
+    text-align: center;
+  }
 
 }

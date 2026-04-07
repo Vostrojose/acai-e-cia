@@ -44,18 +44,44 @@ export default function CardapioSemana() {
     { nome: "Domingo", key: "disponivelDom", numero: 0 }
   ]
 
+  /* 🔥 ORDENA DIA ATUAL NO TOPO */
+  const diasOrdenados = [...dias].sort((a, b) => {
+    if (a.numero === hoje) return -1
+    if (b.numero === hoje) return 1
+    return a.numero - b.numero
+  })
+
+  /* 🔥 INTERESSE (SAFE - SEM BACKEND) */
+  function registrarInteresse(produto: Produto, dia: string) {
+    const interesses = JSON.parse(localStorage.getItem('interesses') || '[]')
+
+    const novo = {
+      produtoId: produto.id,
+      nome: produto.nome,
+      dia,
+      data: new Date().toISOString()
+    }
+
+    interesses.push(novo)
+
+    localStorage.setItem('interesses', JSON.stringify(interesses))
+
+    console.log('📌 Interesse registrado:', novo)
+  }
+
   return (
     <div className="cardapio-semana-page">
 
       <h1 className="titulo-semana">
-        Cardápio da Semana
+        🍽️ Cardápio da Semana
       </h1>
 
+      {/* 🔥 DESTAQUE MELHORADO */}
       {destaque && (
         <div className="destaque-card">
 
           <div className="destaque-label">
-            Especial da Semana
+            ⭐ Especial da Semana
           </div>
 
           <div className="destaque-nome">
@@ -75,7 +101,8 @@ export default function CardapioSemana() {
         </div>
       )}
 
-      {dias.map((dia) => {
+      {/* 🔥 DIAS ORDENADOS */}
+      {diasOrdenados.map((dia) => {
 
         const produtosDoDia = produtos.filter(
           (produto) => produto[dia.key as keyof Produto]
@@ -103,21 +130,34 @@ export default function CardapioSemana() {
 
               {produtosDoDia.map(produto => (
 
-                <div key={produto.id} className="produto-card-semana">
+                <div key={produto.id} className="produto-card">
 
-                  <div className="produto-nome">
-                    {produto.nome}
-                  </div>
+                  <div className="produto-info">
 
-                  {produto.descricao && (
-                    <div className="produto-descricao">
-                      {produto.descricao}
+                    <div className="produto-header">
+                      <div className="produto-nome">
+                        {produto.nome}
+                      </div>
+
+                      <div className="produto-preco">
+                        R$ {Number(produto.preco || 0).toFixed(2)}
+                      </div>
                     </div>
-                  )}
 
-                  <div className="produto-preco">
-                    R$ {Number(produto.preco || 0).toFixed(2)}
+                    {produto.descricao && (
+                      <div className="produto-descricao">
+                        {produto.descricao}
+                      </div>
+                    )}
+
                   </div>
+
+                  <button
+                    className="add-btn"
+                    onClick={() => registrarInteresse(produto, dia.nome)}
+                  >
+                    Tenho interesse
+                  </button>
 
                 </div>
 
