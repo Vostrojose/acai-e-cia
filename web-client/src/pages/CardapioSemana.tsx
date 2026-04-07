@@ -44,14 +44,15 @@ export default function CardapioSemana() {
     { nome: "Domingo", key: "disponivelDom", numero: 0 }
   ]
 
-  /* 🔥 ORDENA DIA ATUAL NO TOPO */
-  const diasOrdenados = [...dias].sort((a, b) => {
-    if (a.numero === hoje) return -1
-    if (b.numero === hoje) return 1
-    return a.numero - b.numero
-  })
+  /* 🔥 ROTAÇÃO CORRETA DA SEMANA */
+  const indexHoje = dias.findIndex(d => d.numero === hoje)
 
-  /* 🔥 INTERESSE (SAFE - SEM BACKEND) */
+  const diasOrdenados = [
+    ...dias.slice(indexHoje),
+    ...dias.slice(0, indexHoje)
+  ]
+
+  /* 🔥 INTERESSE (SAFE) */
   function registrarInteresse(produto: Produto, dia: string) {
     const interesses = JSON.parse(localStorage.getItem('interesses') || '[]')
 
@@ -76,7 +77,6 @@ export default function CardapioSemana() {
         🍽️ Cardápio da Semana
       </h1>
 
-      {/* 🔥 DESTAQUE MELHORADO */}
       {destaque && (
         <div className="destaque-card">
 
@@ -101,7 +101,6 @@ export default function CardapioSemana() {
         </div>
       )}
 
-      {/* 🔥 DIAS ORDENADOS */}
       {diasOrdenados.map((dia) => {
 
         const produtosDoDia = produtos.filter(
