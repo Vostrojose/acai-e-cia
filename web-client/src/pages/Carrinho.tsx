@@ -1,106 +1,126 @@
 import { useCart } from '../context/CartContext'
 import { useNavigate } from 'react-router-dom'
 
-import Button from '../components/ui/Button'
-import Card from '../components/ui/Card'
-import Container from '../components/ui/Container'
-
 export default function Carrinho() {
   const { itens, total, removerItem, limparCarrinho } = useCart()
   const navigate = useNavigate()
 
-  if (itens.length === 0) {
-    return (
-      <Container>
-        <h1 style={titulo}>🛒 Carrinho</h1>
-
-        <p style={{ color: '#666', textAlign: 'center' }}>
-          Seu carrinho está vazio.
-        </p>
-
-        <div style={{ marginTop: 20 }}>
-          <Button variant="secondary" onClick={() => navigate('/')}>
-            Voltar ao Cardápio
-          </Button>
-        </div>
-      </Container>
-    )
-  }
-
   return (
-    <Container>
-      <h1 style={titulo}>🛒 Carrinho</h1>
+    <div style={container}>
 
-      <div style={{ marginTop: 20 }}>
-        {itens.map((item) => (
-          <Card key={item.id}>
-            <div style={linhaItem}>
-              <div style={{ flex: 1 }}>
-                <strong style={{ fontSize: 16 }}>{item.nome}</strong>
+      <h1 style={titulo}>🛒 Seu Pedido</h1>
 
-                <p style={{ color: '#555', marginTop: 4 }}>
-                  {item.quantidade}x R$ {item.preco.toFixed(2)}
-                </p>
+      {itens.length === 0 ? (
+        <>
+          <p style={{ color: '#666' }}>Seu carrinho está vazio.</p>
+
+          <button style={botaoSecundario} onClick={() => navigate('/')}>
+            Voltar
+          </button>
+        </>
+      ) : (
+        <>
+          {itens.map(item => (
+            <div key={item.id} style={card}>
+              <div>
+                <strong>{item.nome}</strong>
+                <p>{item.quantidade}x R$ {item.preco.toFixed(2)}</p>
               </div>
 
-              <Button
-                variant="secondary"
+              <button
+                style={botaoRemover}
                 onClick={() => removerItem(item.id)}
               >
                 Remover
-              </Button>
+              </button>
             </div>
-          </Card>
-        ))}
-      </div>
+          ))}
 
-      <Card>
-        <div style={resumo}>
-          <h3>Total</h3>
-          <h2>R$ {total.toFixed(2)}</h2>
-        </div>
-      </Card>
+          <div style={resumo}>
+            <h3>Total</h3>
+            <h2>R$ {total.toFixed(2)}</h2>
+          </div>
 
-      <div style={acoes}>
-        <Button variant="secondary" onClick={() => navigate('/')}>
-          Continuar Comprando
-        </Button>
+          <div style={acoes}>
+            <button style={botaoPrincipal} onClick={() => navigate('/checkout')}>
+              Finalizar Pedido
+            </button>
 
-        <Button variant="primary" onClick={() => navigate('/checkout')}>
-          Finalizar Pedido
-        </Button>
-
-        <Button variant="danger" onClick={limparCarrinho}>
-          Limpar Carrinho
-        </Button>
-      </div>
-    </Container>
+            <button style={botaoPerigo} onClick={limparCarrinho}>
+              Limpar
+            </button>
+          </div>
+        </>
+      )}
+    </div>
   )
 }
 
-/* ========================= */
-/* ESTILOS LOCAIS (LEVE)     */
-/* ========================= */
+/* estilos */
 
-const titulo = {
-  fontSize: 28,
-  fontWeight: 'bold',
-  textAlign: 'center' as const,
+const container = {
+  maxWidth: 600,
+  margin: '0 auto',
+  padding: 20,
+  background: '#f9f9f9',
+  minHeight: '100vh'
 }
 
-const linhaItem = {
+const titulo = {
+  textAlign: 'center' as const
+}
+
+const card = {
+  background: '#fff',
+  padding: 15,
+  marginBottom: 10,
+  borderRadius: 12,
   display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
+  justifyContent: 'space-between'
 }
 
 const resumo = {
-  textAlign: 'center' as const,
+  marginTop: 20,
+  padding: 15,
+  background: '#fff',
+  borderRadius: 12,
+  textAlign: 'center' as const
 }
 
 const acoes = {
   marginTop: 20,
   display: 'flex',
   flexDirection: 'column' as const,
-  gap: 10,
+  gap: 10
+}
+
+const botaoPrincipal = {
+  background: '#00c853',
+  color: '#fff',
+  padding: 12,
+  borderRadius: 10,
+  border: 'none'
+}
+
+const botaoSecundario = {
+  background: '#333',
+  color: '#fff',
+  padding: 12,
+  borderRadius: 10,
+  border: 'none'
+}
+
+const botaoPerigo = {
+  background: '#f44336',
+  color: '#fff',
+  padding: 12,
+  borderRadius: 10,
+  border: 'none'
+}
+
+const botaoRemover = {
+  background: '#eee',
+  padding: 8,
+  borderRadius: 8,
+  border: 'none'
 }

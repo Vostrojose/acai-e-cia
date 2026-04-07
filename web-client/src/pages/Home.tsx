@@ -29,9 +29,6 @@ export default function Home() {
 
   const { adicionarItem, itens } = useCart()
 
-  /* ========================= */
-  /* ANIMAÇÃO ITEM -> CARRINHO */
-  /* ========================= */
   function animarAdicionar(event: React.MouseEvent<HTMLButtonElement>) {
     const carrinho = document.querySelector('.cart-floating') as HTMLElement
     if (!carrinho) return
@@ -52,20 +49,16 @@ export default function Home() {
       bolinha.style.opacity = '0'
     })
 
-    // efeito pulse
     carrinho.classList.add('pulse')
     setTimeout(() => carrinho.classList.remove('pulse'), 400)
 
-    setTimeout(() => {
-      bolinha.remove()
-    }, 600)
+    setTimeout(() => bolinha.remove(), 600)
   }
 
   useEffect(() => {
     async function loadProdutos() {
       try {
         const response = await api.get('/produtos')
-
         const produtosData = response.data?.data || []
 
         const produtosAtivos = produtosData
@@ -76,7 +69,6 @@ export default function Home() {
           .filter((produto: Produto) => produto.ativo)
 
         setProdutos(produtosAtivos)
-
       } catch (error) {
         console.error('Erro ao carregar produtos:', error)
       } finally {
@@ -88,16 +80,12 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    if (origem) {
-      localStorage.setItem("origemPedido", origem)
-    }
+    if (origem) localStorage.setItem("origemPedido", origem)
   }, [origem])
 
-  if (loading) {
-    return <p style={{ padding: 20 }}>Carregando produtos...</p>
-  }
+  if (loading) return <p style={{ padding: 20 }}>Carregando...</p>
 
-  const produtosDisponiveis = produtos.filter((produto: Produto) => {
+  const produtosDisponiveis = produtos.filter((produto) => {
     switch (hoje) {
       case 0: return produto.disponivelDom
       case 1: return produto.disponivelSeg
@@ -110,115 +98,61 @@ export default function Home() {
     }
   })
 
-  const total = itens.reduce((acc, i) => acc + i.preco * i.quantidade, 0)
-
   return (
     <div className="page">
 
-      {/* 🛒 CARRINHO FLUTUANTE */}
+      {/* 🛒 CARRINHO NOVO */}
       {itens.length > 0 && (
-        <div
-          className="cart-floating"
-          onClick={() => navigate('/carrinho')}
-        >
+        <div className="cart-floating" onClick={() => navigate('/carrinho')}>
           🛒
           <span className="cart-badge">{itens.length}</span>
         </div>
       )}
 
-      {/* HEADER */}
       <div className="header">
-        <h1 className="title">🍧 Açaí & Cia</h1>
-        <p className="subtitle">
-          Monte seu pedido e retire na loja 🚀
-        </p>
+        <h1 className="title"> Açaí & Cia</h1>
+        <p className="subtitle">Monte seu pedido </p>
       </div>
 
-      {/* LISTA */}
       <div className="cardapio-container">
         <div className="cardapio-list">
-
           {produtosDisponiveis.map((produto) => {
             const item = itens.find(i => i.id === produto.id)
             const quantidade = item?.quantidade || 0
 
             return (
               <div key={produto.id} className="produto-card">
-
                 <div className="produto-info">
-
                   <div className="produto-header">
-                    <div className="produto-nome">
-                      {produto.nome}
-                    </div>
-
-                    <div className="produto-preco">
-                      R$ {produto.preco.toFixed(2)}
-                    </div>
+                    <div className="produto-nome">{produto.nome}</div>
+                    <div className="produto-preco">R$ {produto.preco.toFixed(2)}</div>
                   </div>
 
                   {produto.descricao && (
-                    <div className="produto-descricao">
-                      {produto.descricao}
-                    </div>
+                    <div className="produto-descricao">{produto.descricao}</div>
                   )}
-
                 </div>
 
                 <div className="produto-acoes">
-                  {quantidade === 0 ? (
-
-                    <button
-                      className="add-btn"
-                      onClick={(e) => {
-                        animarAdicionar(e)
-                        adicionarItem({
-                          id: produto.id,
-                          nome: produto.nome,
-                          preco: produto.preco,
-                        })
-                      }}
-                    >
-                      + Adicionar
-                    </button>
-
-                  ) : (
-
-                    <button
-                      className="add-btn-added"
-                      onClick={(e) => {
-                        animarAdicionar(e)
-                        adicionarItem({
-                          id: produto.id,
-                          nome: produto.nome,
-                          preco: produto.preco,
-                        })
-                      }}
-                    >
-                      ✔ {quantidade} no pedido
-                    </button>
-
-                  )}
+                  <button
+                    className={quantidade ? 'add-btn-added' : 'add-btn'}
+                    onClick={(e) => {
+                      animarAdicionar(e)
+                      adicionarItem({
+                        id: produto.id,
+                        nome: produto.nome,
+                        preco: produto.preco,
+                      })
+                    }}
+                  >
+                    {quantidade ? `✔ ${quantidade}` : '+ Adicionar'}
+                  </button>
                 </div>
-
               </div>
             )
           })}
-
         </div>
       </div>
-
-      {/* BARRA INFERIOR */}
-      {itens.length > 0 && (
-        <div className="checkout-bar">
-          <button
-            className="checkout-btn"
-            onClick={() => navigate('/carrinho')}
-          >
-            Ver pedido ({itens.length}) • R$ {total.toFixed(2)}
-          </button>
-        </div>
-      )}
 
     </div>
   )
