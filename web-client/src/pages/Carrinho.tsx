@@ -15,7 +15,7 @@ export default function Carrinho() {
           <p style={{ color: '#666' }}>Seu carrinho está vazio.</p>
 
           <button style={botaoSecundario} onClick={() => navigate('/')}>
-            Voltar
+            Voltar ao cardápio
           </button>
         </>
       ) : (
@@ -41,14 +41,30 @@ export default function Carrinho() {
             <h2>R$ {total.toFixed(2)}</h2>
           </div>
 
+          {/* 🔥 AÇÕES ORGANIZADAS */}
           <div style={acoes}>
-            <button style={botaoPrincipal} onClick={() => navigate('/checkout')}>
+
+            <button
+              style={botaoSecundario}
+              onClick={() => navigate('/')}
+            >
+              ← Continuar comprando
+            </button>
+
+            <button
+              style={botaoPrincipal}
+              onClick={() => navigate('/checkout')}
+            >
               Finalizar Pedido
             </button>
 
-            <button style={botaoPerigo} onClick={limparCarrinho}>
-              Limpar
+            <button
+              style={botaoPerigo}
+              onClick={limparCarrinho}
+            >
+              Limpar carrinho
             </button>
+
           </div>
         </>
       )}
@@ -56,7 +72,9 @@ export default function Carrinho() {
   )
 }
 
-/* estilos */
+/* ========================= */
+/* ESTILOS                   */
+/* ========================= */
 
 const container = {
   maxWidth: 600,
@@ -67,7 +85,8 @@ const container = {
 }
 
 const titulo = {
-  textAlign: 'center' as const
+  textAlign: 'center' as const,
+  marginBottom: 20
 }
 
 const card = {
@@ -76,7 +95,8 @@ const card = {
   marginBottom: 10,
   borderRadius: 12,
   display: 'flex',
-  justifyContent: 'space-between'
+  justifyContent: 'space-between',
+  alignItems: 'center'
 }
 
 const resumo = {
@@ -94,33 +114,36 @@ const acoes = {
   gap: 10
 }
 
-const botaoPrincipal = {
-  background: '#00c853',
-  color: '#fff',
-  padding: 12,
+const botaoBase = {
+  padding: '12px',
   borderRadius: 10,
-  border: 'none'
+  border: 'none',
+  fontWeight: 'bold',
+  cursor: 'pointer'
+}
+
+const botaoPrincipal = {
+  ...botaoBase,
+  background: '#00c853',
+  color: '#fff'
 }
 
 const botaoSecundario = {
+  ...botaoBase,
   background: '#333',
-  color: '#fff',
-  padding: 12,
-  borderRadius: 10,
-  border: 'none'
+  color: '#fff'
 }
 
 const botaoPerigo = {
+  ...botaoBase,
   background: '#f44336',
-  color: '#fff',
-  padding: 12,
-  borderRadius: 10,
-  border: 'none'
+  color: '#fff'
 }
 
 const botaoRemover = {
   background: '#eee',
-  padding: 8,
+  padding: '8px 12px',
   borderRadius: 8,
-  border: 'none'
+  border: 'none',
+  cursor: 'pointer'
 }
