@@ -136,7 +136,7 @@
 }
 
 .add-btn-added {
-  background: #384329cd;
+  background: #5f7805cd;
   color: white;
   border: none;
 
@@ -150,7 +150,7 @@
 }
 
 .add-btn-added:hover {
-  background: #384329cd;
+  background: #5f7805cd;
 }
 
 .add-btn-added:active {
@@ -247,7 +247,7 @@
   top: -6px;
   right: -6px;
 
-  background: #384329cd;
+  background: #5f7805cd;
   color: white;
 
   font-size: 12px;
