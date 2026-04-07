@@ -29,6 +29,38 @@ export default function Home() {
 
   const { adicionarItem, itens } = useCart()
 
+  /* ========================= */
+  /* ANIMAÇÃO ITEM -> CARRINHO */
+  /* ========================= */
+  function animarAdicionar(event: React.MouseEvent<HTMLButtonElement>) {
+    const carrinho = document.querySelector('.cart-floating') as HTMLElement
+    if (!carrinho) return
+
+    const origem = event.currentTarget.getBoundingClientRect()
+    const destino = carrinho.getBoundingClientRect()
+
+    const bolinha = document.createElement('div')
+    bolinha.className = 'fly-item'
+
+    document.body.appendChild(bolinha)
+
+    bolinha.style.left = `${origem.left}px`
+    bolinha.style.top = `${origem.top}px`
+
+    requestAnimationFrame(() => {
+      bolinha.style.transform = `translate(${destino.left - origem.left}px, ${destino.top - origem.top}px) scale(0.3)`
+      bolinha.style.opacity = '0'
+    })
+
+    // efeito pulse
+    carrinho.classList.add('pulse')
+    setTimeout(() => carrinho.classList.remove('pulse'), 400)
+
+    setTimeout(() => {
+      bolinha.remove()
+    }, 600)
+  }
+
   useEffect(() => {
     async function loadProdutos() {
       try {
@@ -44,6 +76,7 @@ export default function Home() {
           .filter((produto: Produto) => produto.ativo)
 
         setProdutos(produtosAtivos)
+
       } catch (error) {
         console.error('Erro ao carregar produtos:', error)
       } finally {
@@ -134,31 +167,37 @@ export default function Home() {
 
                 <div className="produto-acoes">
                   {quantidade === 0 ? (
+
                     <button
                       className="add-btn"
-                      onClick={() =>
+                      onClick={(e) => {
+                        animarAdicionar(e)
                         adicionarItem({
                           id: produto.id,
                           nome: produto.nome,
                           preco: produto.preco,
                         })
-                      }
+                      }}
                     >
                       + Adicionar
                     </button>
+
                   ) : (
+
                     <button
                       className="add-btn-added"
-                      onClick={() =>
+                      onClick={(e) => {
+                        animarAdicionar(e)
                         adicionarItem({
                           id: produto.id,
                           nome: produto.nome,
                           preco: produto.preco,
                         })
-                      }
+                      }}
                     >
                       ✔ {quantidade} no pedido
                     </button>
+
                   )}
                 </div>
 
@@ -169,7 +208,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* BARRA INFERIOR (mantida para teste) */}
+      {/* BARRA INFERIOR */}
       {itens.length > 0 && (
         <div className="checkout-bar">
           <button
