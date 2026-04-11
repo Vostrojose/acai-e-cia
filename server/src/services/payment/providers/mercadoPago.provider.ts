@@ -20,6 +20,10 @@ export class MercadoPagoProvider {
   async criarPagamentoPix(pedido: any) {
     const valor = Number(pedido.total);
 
+    if (!valor || valor <= 0) {
+      throw new Error("Valor inválido para pagamento");
+    }
+
     try {
       const response = await this.payment.create({
         body: {
@@ -27,7 +31,7 @@ export class MercadoPagoProvider {
           description: `Pedido #${pedido.id}`,
           payment_method_id: "pix",
           payer: {
-            email: "SEU_EMAIL_REAL@gmail.com",
+            email: "pagamento@acaiecompanhia.com", // ✔ email válido fixo
           },
           external_reference: pedido.id,
           notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
@@ -42,7 +46,16 @@ export class MercadoPagoProvider {
           response.point_of_interaction?.transaction_data?.qr_code_base64,
       };
     } catch (error: any) {
-      console.error("❌ [MP PIX]", error);
+      console.error("❌ [MP PIX] ERRO COMPLETO:");
+      console.error(error);
+
+      if (error?.response?.data) {
+        console.error(
+          "MP RESPONSE:",
+          JSON.stringify(error.response.data, null, 2)
+        );
+      }
+
       throw error;
     }
   }
@@ -52,11 +65,39 @@ export class MercadoPagoProvider {
   /* ============================= */
 
   async criarCheckout(pedido: any) {
+    if (!pedido) {
+      throw new Error("Pedido inválido");
+    }
+
     if (!pedido.itens || pedido.itens.length === 0) {
       throw new Error("Pedido sem itens");
     }
 
+    if (!process.env.FRONT_URL) {
+      throw new Error("FRONT_URL não configurado");
+    }
+
     try {
+      const itensFormatados = pedido.itens.map((item: any) => {
+        const preco = Number(item.precoUnit);
+        const quantidade = Number(item.quantidade);
+
+        if (!preco || preco <= 0) {
+          throw new Error("Preço inválido no item");
+        }
+
+        if (!quantidade || quantidade <= 0) {
+          throw new Error("Quantidade inválida no item");
+        }
+
+        return {
+          title: `Produto ${item.produtoId}`,
+          quantity: quantidade,
+          unit_price: preco,
+          currency_id: "BRL",
+        };
+      });
+
       const response = await this.preference.create({
         body: {
           external_reference: pedido.id,
@@ -69,16 +110,13 @@ export class MercadoPagoProvider {
             pending: `${process.env.FRONT_URL}/pendente`,
           },
 
+          auto_return: "approved",
+
           payer: {
-            email: "SEU_EMAIL_REAL@gmail.com",
+            email: "pagamento@acaiecompanhia.com", // ✔ seguro
           },
 
-          items: pedido.itens.map((item: any) => ({
-            title: `Produto ${item.produtoId}`,
-            quantity: Number(item.quantidade),
-            unit_price: Number(item.precoUnit),
-            currency_id: "BRL",
-          })),
+          items: itensFormatados,
 
           metadata: {
             pedido_id: pedido.id,
@@ -91,7 +129,20 @@ export class MercadoPagoProvider {
         init_point: response.init_point,
       };
     } catch (error: any) {
-      console.error("❌ [MP CHECKOUT]", error);
+      console.error("❌ [MP CHECKOUT] ERRO COMPLETO:");
+      console.error(error);
+
+      if (error?.cause) {
+        console.error("CAUSE:", error.cause);
+      }
+
+      if (error?.response?.data) {
+        console.error(
+          "MP RESPONSE:",
+          JSON.stringify(error.response.data, null, 2)
+        );
+      }
+
       throw error;
     }
   }
@@ -101,6 +152,10 @@ export class MercadoPagoProvider {
   /* ============================= */
 
   async buscarPagamento(paymentId: string) {
+    if (!paymentId) {
+      throw new Error("paymentId não informado");
+    }
+
     try {
       const response: any = await this.payment.get({ id: paymentId });
 
@@ -117,7 +172,9 @@ export class MercadoPagoProvider {
         external_reference: externalRef,
       };
     } catch (error: any) {
-      console.error("❌ [MP BUSCAR PAGAMENTO]", error);
+      console.error("❌ [MP BUSCAR PAGAMENTO] ERRO COMPLETO:");
+      console.error(error);
+
       throw error;
     }
   }
