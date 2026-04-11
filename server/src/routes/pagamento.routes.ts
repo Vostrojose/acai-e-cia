@@ -30,7 +30,8 @@ router.post("/pix", async (req, res) => {
       throw new AppError("Pedido não encontrado.", 404);
     }
 
-    const resultado = await PaymentProvider.criarPagamentoPix(pedido.id);
+    // ✅ CORREÇÃO: passar pedido completo
+    const resultado = await PaymentProvider.criarPagamentoPix(pedido);
 
     return res.json({
       success: true,
@@ -38,19 +39,12 @@ router.post("/pix", async (req, res) => {
     });
 
   } catch (error: any) {
-    console.error("ERRO PIX:", error);
-
-    if (error instanceof AppError) {
-   return res.status(500).json({
-  success: false,
-  message: error?.message || "Erro ao gerar checkout.",
-  error: error,
-});
-    }
+    console.error("🔥 ERRO PIX COMPLETO:", error);
 
     return res.status(500).json({
       success: false,
-      message: "Erro ao gerar pagamento PIX",
+      message: error?.message || "Erro ao gerar pagamento PIX",
+      detalhe: error?.response?.data || error,
     });
   }
 });
@@ -61,6 +55,7 @@ router.post("/pix", async (req, res) => {
 
 router.post("/checkout", async (req, res) => {
   try {
+     console.log("🔥 CHEGOU NO CHECKOUT");
     const { pedidoId } = pagamentoSchema.parse(req.body);
 
     const pedido = await PedidoService.buscarPorIdComProdutos(pedidoId);
@@ -76,7 +71,8 @@ router.post("/checkout", async (req, res) => {
       );
     }
 
-    const checkout = await PaymentProvider.criarCheckout(pedido.id);
+    // ✅ CORREÇÃO: passar pedido completo
+    const checkout = await PaymentProvider.criarCheckout(pedido);
 
     return res.status(200).json({
       success: true,
@@ -86,18 +82,13 @@ router.post("/checkout", async (req, res) => {
     });
 
   } catch (error: any) {
-    console.error("ERRO CHECKOUT:", error);
-
-    if (error instanceof AppError) {
-      return res.status(error.statusCode).json({
-        success: false,
-        message: error.message,
-      });
-    }
+    console.error("🔥 ERRO REAL CHECKOUT:");
+    console.error(error);
 
     return res.status(500).json({
       success: false,
-      message: "Erro ao gerar checkout.",
+      message: error?.message || "Erro ao gerar checkout.",
+      detalhe: error?.response?.data || error,
     });
   }
 });
