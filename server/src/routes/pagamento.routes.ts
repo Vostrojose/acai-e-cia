@@ -41,10 +41,11 @@ router.post("/pix", async (req, res) => {
     console.error("ERRO PIX:", error);
 
     if (error instanceof AppError) {
-      return res.status(error.statusCode).json({
-        success: false,
-        message: error.message,
-      });
+   return res.status(500).json({
+  success: false,
+  message: error?.message || "Erro ao gerar checkout.",
+  error: error,
+});
     }
 
     return res.status(500).json({
