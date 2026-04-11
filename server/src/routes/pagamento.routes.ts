@@ -30,7 +30,7 @@ router.post("/pix", async (req, res) => {
       throw new AppError("Pedido não encontrado.", 404);
     }
 
-    const resultado = await PaymentProvider.criarPagamentoPix(pedido);
+    const resultado = await PaymentProvider.criarPagamentoPix(pedido.id);
 
     return res.json({
       success: true,
@@ -75,7 +75,7 @@ router.post("/checkout", async (req, res) => {
       );
     }
 
-    const checkout = await PaymentProvider.criarCheckoutPreference(pedido);
+    const checkout = await PaymentProvider.criarCheckout(pedido.id);
 
     return res.status(200).json({
       success: true,
@@ -119,19 +119,20 @@ router.post("/webhook", async (req, res) => {
 
       if (!pagamento) return res.sendStatus(200);
 
+      console.log("🔎 PAGAMENTO COMPLETO:", pagamento);
       console.log("💳 STATUS PAGAMENTO:", pagamento.status);
 
       if (pagamento.status !== "approved") {
         return res.sendStatus(200);
       }
 
-      if (!pagamento.externalReference) {
+      if (!pagamento.external_reference) {
         console.error("Pagamento sem external_reference");
         return res.sendStatus(200);
       }
 
       const pedido = await PedidoService.buscarPorId(
-        pagamento.externalReference
+        pagamento.external_reference
       );
 
       if (!pedido) return res.sendStatus(200);

@@ -43,7 +43,7 @@ class PagamentoService {
           description: `Pedido #${pedido.id}`,
           payment_method_id: "pix",
           payer: {
-            email: "cliente@acaiecompanhia.com",
+            email: "josemsilva1984@gmail.com", // 🔴 colocar email real
           },
           external_reference: pedido.id,
           notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
@@ -98,9 +98,9 @@ class PagamentoService {
             {
               title: `Pedido #${pedido.id}`,
               quantity: 1,
-              unit_price: Number(pedido.total), // 
+              unit_price: valor,
               currency_id: "BRL",
-            } as any, // evita erro de tipagem do SDK
+            } as any,
           ],
           external_reference: pedido.id,
           notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
@@ -109,7 +109,9 @@ class PagamentoService {
             failure: "https://pedido.acaiecompanhia.com.br/erro",
             pending: "https://pedido.acaiecompanhia.com.br/pendente",
           },
-          auto_return: "approved",
+          payer: {
+            email: "josemsilva1984@gmail.com", // 🔴 colocar email real
+          },
         },
       });
 

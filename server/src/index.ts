@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
+dotenv.config();
 
-
-console.log("MP token carregado:", !!process.env.MP_ACCESS_TOKEN);
 import express from "express";
 import cors from "cors";
 import http from "http";
@@ -15,15 +14,6 @@ import { errorMiddleware } from "./middlewares/error.middleware";
 import { httpLogger } from "./middlewares/logger.middleware";
 import { initSocket } from "./websocket/socket";
 
-
-/* =================================
-   remover após restabelecer o mercado pago
-================================= */
-import simulacao from "./routes/pagamento.simulacao.routes";
-/* ================================= */
-
-dotenv.config();
-
 const app = express();
 
 /* =================================
@@ -32,13 +22,12 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "https://acai-e-cia-admin-fy6kdh17d-jose-m-da-silvas-projects.vercel.app",
       "https://pedido.acaiecompanhia.com.br",
       "https://admin.acaiecompanhia.com.br",
       "http://localhost:5173",
       "http://127.0.0.1:5173",
     ],
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
@@ -50,30 +39,19 @@ app.use(httpLogger);
 /* =================================
    ROTAS PRINCIPAIS
 ================================= */
+app.use("/api/auth", authRoutes);
 app.use("/api/pedidos", pedidoRoutes);
 app.use("/api/produtos", produtoRoutes);
-app.use("/api", authRoutes);
 app.use("/api/pagamento", pagamentoRoutes);
 
 /* =================================
-   ROTA DE TESTE
+   HEALTH CHECK
 ================================= */
 app.get("/", (req, res) => {
   return res.json({
     message: "API Açaí & Cia funcionando corretamente! 🚀",
   });
 });
-
-
-
-/* =================================
-   SIMULAÇÃO (ISOLADA)
-================================= */
-app.use("/api/debug", simulacao);
-/* ================================= */
-
-/* ========================= */
-
 
 /* =================================
    MIDDLEWARE DE ERRO
