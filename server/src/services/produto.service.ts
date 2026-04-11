@@ -20,12 +20,17 @@ class ProdutoService {
   }
 
   async listarProdutos() {
-    return await prisma.produto.findMany({
-      orderBy: {
-        criadoEm: 'desc',
-      },
-    })
-  }
+  const produtos = await prisma.produto.findMany({
+    orderBy: {
+      criadoEm: 'desc',
+    },
+  })
+
+  return produtos.map((p) => ({
+    ...p,
+    preco: Number(p.preco),
+  }))
+}
   async alterarStatus(id: string, ativo: boolean) {
   return await prisma.produto.update({
     where: { id },
