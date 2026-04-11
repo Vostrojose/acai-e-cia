@@ -18,14 +18,16 @@ class ProdutoController {
     })
   })
 
-  listar = asyncHandler(async (req: Request, res: Response) => {
-    const produtos = await produtoService.listarProdutos()
+listar = asyncHandler(async (req: Request, res: Response) => {
+  const produtos = await produtoService.listarProdutos()
 
-    return res.json({
-      success: true,
-      data: serializeDecimal(produtos), // ✅ CORREÇÃO
-    })
+  console.log("📦 PRODUTOS:", produtos)
+
+  return res.json({
+    success: true,
+    data: produtos // 🔥 SEM serializeDecimal
   })
+})
 
   alterarStatus = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
