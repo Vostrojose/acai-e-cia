@@ -38,7 +38,7 @@ export default function Acompanhamento() {
     // 🔎 1️⃣ Buscar pedido inicial
     async function loadPedido() {
       try {
-        const response = await api.get(`/pedido/${id}`)
+        const response = await api.get(`/pedidos/${id}`)
         const pedidoData = response.data.data
 
         if (!pedidoData) {
