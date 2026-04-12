@@ -4,6 +4,7 @@ import { AppError } from '../utils/AppError'
 import { getIO } from '../websocket/socket'
 
 class PedidoService {
+
   /* ============================= */
   /* CRIAR PEDIDO */
   /* ============================= */
@@ -92,12 +93,19 @@ class PedidoService {
   }
 
   /* ============================= */
-  /* BUSCAR */
+  /* BUSCAR (BLINDADO) */
   /* ============================= */
 
   async buscarPorId(id: string) {
-    const pedido = await prisma.pedido.findUnique({
-      where: { id },
+    const cleanId = id.trim()
+
+    const pedido = await prisma.pedido.findFirst({
+      where: {
+        OR: [
+          { id: cleanId },
+          { externalReference: cleanId }
+        ]
+      },
       include: { itens: true },
     })
 
@@ -107,20 +115,23 @@ class PedidoService {
   }
 
   async buscarPorIdComProdutos(id: string) {
-    const pedido = await prisma.pedido.findUnique({
-      where: { id },
+    const cleanId = id.trim()
+
+    const pedido = await prisma.pedido.findFirst({
+      where: {
+        OR: [
+          { id: cleanId },
+          { externalReference: cleanId }
+        ]
+      },
       include: {
         itens: {
-          include: { produto: true },
+          include: {
+            produto: true,
+          },
         },
       },
     })
-
-    if (!pedido) throw new AppError('Pedido não encontrado.', 404)
-
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('🧪 PEDIDO:', JSON.stringify(pedido, null, 2))
-    }
 
     return pedido
   }
@@ -157,14 +168,19 @@ class PedidoService {
       throw new AppError('Status de pagamento inválido.', 400)
     }
 
-    const pedido = await prisma.pedido.findUnique({
-      where: { externalReference },
+    const pedido = await prisma.pedido.findFirst({
+      where: {
+        OR: [
+          { id: externalReference },
+          { externalReference }
+        ]
+      },
     })
 
     if (!pedido) throw new AppError('Pedido não encontrado.', 404)
 
     return prisma.pedido.update({
-      where: { externalReference },
+      where: { id: pedido.id },
       data: { statusPagamento: novoStatus },
       include: { itens: true },
     })
