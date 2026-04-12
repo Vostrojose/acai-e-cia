@@ -18,9 +18,9 @@ export class MercadoPagoProvider {
   /* ============================= */
 
   async criarPagamentoPix(pedido: any) {
-    const valor = Number(pedido.total)
+    const valor = Number(Number(pedido.total).toFixed(2))
 
-    if (!valor || valor <= 0) {
+    if (!valor || valor <= 0 || isNaN(valor)) {
       throw new Error('Valor inválido para pagamento')
     }
 
@@ -31,9 +31,9 @@ export class MercadoPagoProvider {
           description: `Pedido #${pedido.id}`,
           payment_method_id: 'pix',
           payer: {
-            email: 'pagamento@acaiecompanhia.com',
+            email: pedido.email || 'pagamento@acaiecompanhia.com',
           },
-          external_reference: pedido.id,
+          external_reference: String(pedido.id),
           notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
         },
       })
@@ -64,41 +64,39 @@ export class MercadoPagoProvider {
   /* ============================= */
 
   async criarCheckout(pedido: any) {
-    if (!pedido) {
-      throw new Error('Pedido inválido')
-    }
-
-    if (!pedido.itens || pedido.itens.length === 0) {
+    if (!pedido) throw new Error('Pedido inválido')
+    if (!pedido.itens || pedido.itens.length === 0)
       throw new Error('Pedido sem itens')
-    }
 
-    if (!process.env.FRONT_URL) {
+    if (!process.env.FRONT_URL)
       throw new Error('FRONT_URL não configurado')
-    }
 
-    if (!process.env.BASE_URL) {
+    if (!process.env.BASE_URL)
       throw new Error('BASE_URL não configurado')
-    }
 
     try {
       /* ============================= */
-      /* FORMATAR ITENS                */
+      /* FORMATAR ITENS (BLINDADO)     */
       /* ============================= */
 
       const itensFormatados = pedido.itens.map((item: any) => {
-        const preco = Number(item.precoUnit)
+        const preco = Number(Number(item.precoUnit).toFixed(2))
         const quantidade = Number(item.quantidade)
 
-        if (!preco || preco <= 0) {
+        if (!preco || preco <= 0 || isNaN(preco)) {
           throw new Error(`Preço inválido no item ${item.produtoId}`)
         }
 
-        if (!quantidade || quantidade <= 0) {
+        if (!quantidade || quantidade <= 0 || isNaN(quantidade)) {
           throw new Error(`Quantidade inválida no item ${item.produtoId}`)
         }
 
         return {
-          title: item.produto?.nome || item.nome || `Produto ${item.produtoId}`,
+          title: String(
+            item.produto?.nome ||
+              item.nome ||
+              `Produto ${item.produtoId || 'sem-id'}`
+          ),
           quantity: quantidade,
           unit_price: preco,
           currency_id: 'BRL',
@@ -106,7 +104,7 @@ export class MercadoPagoProvider {
       })
 
       /* ============================= */
-      /* 🔥 VALIDAÇÃO ANTIFRAUDE       */
+      /* VALIDAÇÃO SEGURA (FLOAT FIX)  */
       /* ============================= */
 
       const totalCalculado = itensFormatados.reduce(
@@ -115,10 +113,13 @@ export class MercadoPagoProvider {
         0,
       )
 
-      if (Number(pedido.total) !== totalCalculado) {
+      const totalPedido = Number(Number(pedido.total).toFixed(2))
+      const totalCalc = Number(totalCalculado.toFixed(2))
+
+      if (totalPedido !== totalCalc) {
         console.error('🚨 Divergência de valores detectada', {
-          totalPedido: pedido.total,
-          totalCalculado,
+          totalPedido,
+          totalCalc,
           itens: itensFormatados,
         })
 
@@ -126,33 +127,41 @@ export class MercadoPagoProvider {
       }
 
       /* ============================= */
+      /* DEBUG (ESSENCIAL AGORA)       */
+      /* ============================= */
+
+      const payload = {
+        external_reference: String(pedido.id),
+
+        notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
+
+        back_urls: {
+          success: `${process.env.FRONT_URL}/acompanhamento/${pedido.id}`,
+          failure: `${process.env.FRONT_URL}/carrinho`,
+          pending: `${process.env.FRONT_URL}/acompanhamento/${pedido.id}`,
+        },
+
+        auto_return: 'approved',
+
+        payer: {
+          email: pedido.email || 'pagamento@acaiecompanhia.com',
+        },
+
+        items: itensFormatados,
+
+        metadata: {
+          pedido_id: pedido.id,
+        },
+      }
+
+      console.log('📦 PAYLOAD MP:', JSON.stringify(payload, null, 2))
+
+      /* ============================= */
       /* CRIAR PREFERENCE              */
       /* ============================= */
 
       const response = await this.preference.create({
-        body: {
-          external_reference: pedido.id,
-
-          notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
-
-          back_urls: {
-            success: `${process.env.FRONT_URL}/acompanhamento/${pedido.id}`,
-            failure: `${process.env.FRONT_URL}/carrinho`,
-            pending: `${process.env.FRONT_URL}/acompanhamento/${pedido.id}`,
-          },
-
-          auto_return: 'approved',
-
-          payer: {
-            email: 'pagamento@acaiecompanhia.com',
-          },
-
-          items: itensFormatados,
-
-          metadata: {
-            pedido_id: pedido.id,
-          },
-        },
+        body: payload,
       })
 
       if (!response.init_point) {
