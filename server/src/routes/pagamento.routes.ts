@@ -30,7 +30,6 @@ router.post("/pix", async (req, res) => {
       throw new AppError("Pedido não encontrado.", 404);
     }
 
-    // ✅ CORREÇÃO: passar pedido completo
     const resultado = await PaymentProvider.criarPagamentoPix(pedido);
 
     return res.json({
@@ -55,7 +54,8 @@ router.post("/pix", async (req, res) => {
 
 router.post("/checkout", async (req, res) => {
   try {
-     console.log("🔥 CHEGOU NO CHECKOUT");
+    console.log("🔥 CHEGOU NO CHECKOUT");
+
     const { pedidoId } = pagamentoSchema.parse(req.body);
 
     const pedido = await PedidoService.buscarPorIdComProdutos(pedidoId);
@@ -71,7 +71,6 @@ router.post("/checkout", async (req, res) => {
       );
     }
 
-    // ✅ CORREÇÃO: passar pedido completo
     const checkout = await PaymentProvider.criarCheckout(pedido);
 
     return res.status(200).json({
@@ -99,13 +98,13 @@ router.post("/checkout", async (req, res) => {
 
 router.post("/webhook", async (req, res) => {
   try {
-  const topic =
-  (req.query.topic as string) ||
-  (req.query.type as string);
+    const topic =
+      (req.query.topic as string) ||
+      (req.query.type as string);
 
-const id =
-  (req.query.id as string) ||
-  (req.query["data.id"] as string);
+    const id =
+      (req.query.id as string) ||
+      (req.query["data.id"] as string);
 
     console.log("🔥 WEBHOOK RECEBIDO:", { topic, id });
 
@@ -133,6 +132,12 @@ const id =
       );
 
       if (!pedido) return res.sendStatus(200);
+
+      // 🔥 BLOQUEIO DE DUPLICIDADE (ADICIONADO)
+      if (pedido.status === StatusPedido.RECEBIDO) {
+        console.log("⚠️ Pedido já confirmado, ignorando webhook duplicado");
+        return res.sendStatus(200);
+      }
 
       if (Number(pedido.total) !== Number(pagamento.transaction_amount)) {
         console.error("Divergência de valor detectada");
