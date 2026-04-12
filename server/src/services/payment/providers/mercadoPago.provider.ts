@@ -1,62 +1,72 @@
-import { MercadoPagoConfig, Preference, Payment } from "mercadopago";
+import { MercadoPagoConfig, Preference, Payment } from 'mercadopago'
+
+/* ============================= */
+/* TIPAGEM                       */
+/* ============================= */
+
+type PedidoMP = {
+  id: string
+  total: number | string
+  itens: {
+    produtoId: string
+    quantidade: number
+    precoUnit: number
+    produto?: {
+      nome?: string
+    }
+    nome?: string
+  }[]
+}
+
+/* ============================= */
+/* CLIENT                        */
+/* ============================= */
 
 const client = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN!,
-});
+})
 
 export class MercadoPagoProvider {
-  private preference: Preference;
-  private payment: Payment;
+  private preference: Preference
+  private payment: Payment
 
   constructor() {
-    this.preference = new Preference(client);
-    this.payment = new Payment(client);
+    this.preference = new Preference(client)
+    this.payment = new Payment(client)
   }
 
   /* ============================= */
   /* PIX                           */
   /* ============================= */
 
-  async criarPagamentoPix(pedido: any) {
-    const valor = Number(pedido.total);
+  async criarPagamentoPix(pedido: PedidoMP) {
+    const valor = Number(pedido.total)
 
     if (!valor || valor <= 0) {
-      throw new Error("Valor inválido para pagamento");
+      throw new Error('Valor inválido para pagamento')
     }
 
     try {
       const response = await this.payment.create({
-        body: {
-          transaction_amount: valor,
-          description: `Pedido #${pedido.id}`,
-          payment_method_id: "pix",
-          payer: {
-            email: "pagamento@acaiecompanhia.com", // ✔ email válido fixo
-          },
-          external_reference: pedido.id,
-          notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
+        transaction_amount: valor,
+        description: `Pedido #${pedido.id}`,
+        payment_method_id: 'pix',
+        payer: {
+          email: 'pagamento@acaiecompanhia.com',
         },
-      });
+        external_reference: pedido.id,
+        notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
+      } as any) // 🔥 CORREÇÃO AQUI
 
       return {
         pagamentoId: response.id,
-        qr_code:
-          response.point_of_interaction?.transaction_data?.qr_code,
+        qr_code: response.point_of_interaction?.transaction_data?.qr_code,
         qr_code_base64:
           response.point_of_interaction?.transaction_data?.qr_code_base64,
-      };
-    } catch (error: any) {
-      console.error("❌ [MP PIX] ERRO COMPLETO:");
-      console.error(error);
-
-      if (error?.response?.data) {
-        console.error(
-          "MP RESPONSE:",
-          JSON.stringify(error.response.data, null, 2)
-        );
       }
-
-      throw error;
+    } catch (error: any) {
+      console.error('❌ [MP PIX]', error)
+      throw error
     }
   }
 
@@ -64,86 +74,76 @@ export class MercadoPagoProvider {
   /* CHECKOUT                      */
   /* ============================= */
 
-  async criarCheckout(pedido: any) {
-    if (!pedido) {
-      throw new Error("Pedido inválido");
-    }
-
-    if (!pedido.itens || pedido.itens.length === 0) {
-      throw new Error("Pedido sem itens");
-    }
-
-    if (!process.env.FRONT_URL) {
-      throw new Error("FRONT_URL não configurado");
-    }
+  async criarCheckout(pedido: PedidoMP) {
+    if (!pedido) throw new Error('Pedido inválido')
+    if (!pedido.itens?.length) throw new Error('Pedido sem itens')
 
     try {
-      const itensFormatados = pedido.itens.map((item: any) => {
-        const preco = Number(item.precoUnit);
-        const quantidade = Number(item.quantidade);
+      const itensFormatados = pedido.itens
+        .map((item) => {
+          const preco = Number(item.precoUnit)
+          const quantidade = Number(item.quantidade)
 
-        if (!preco || preco <= 0) {
-          throw new Error("Preço inválido no item");
-        }
+          if (!preco || preco <= 0) return null
+          if (!quantidade || quantidade <= 0) return null
 
-        if (!quantidade || quantidade <= 0) {
-          throw new Error("Quantidade inválida no item");
-        }
+          return {
+            title:
+              item.produto?.nome ||
+              item.nome ||
+              `Produto ${item.produtoId}`,
+            quantity: quantidade,
+            unit_price: preco,
+            currency_id: 'BRL',
+          }
+        })
+        .filter(Boolean)
 
-        return {
-          title: `Produto ${item.produtoId}`,
-          quantity: quantidade,
-          unit_price: preco,
-          currency_id: "BRL",
-        };
-      });
+      if (!itensFormatados.length) {
+        throw new Error('Nenhum item válido')
+      }
+
+      const totalCalculado = itensFormatados.reduce(
+        (acc, item: any) =>
+          acc + item.unit_price * item.quantity,
+        0,
+      )
+
+      if (Math.abs(Number(pedido.total) - totalCalculado) > 0.01) {
+        throw new Error('Divergência de valor')
+      }
 
       const response = await this.preference.create({
-        body: {
-          external_reference: pedido.id,
+        external_reference: pedido.id,
 
-          notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
+        notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
 
-          back_urls: {
-            success: `${process.env.FRONT_URL}/sucesso`,
-            failure: `${process.env.FRONT_URL}/erro`,
-            pending: `${process.env.FRONT_URL}/pendente`,
-          },
-
-          auto_return: "approved",
-
-          payer: {
-            email: "pagamento@acaiecompanhia.com", // ✔ seguro
-          },
-
-          items: itensFormatados,
-
-          metadata: {
-            pedido_id: pedido.id,
-          },
+        back_urls: {
+          success: `${process.env.FRONT_URL}/acompanhamento/${pedido.id}`,
+          failure: `${process.env.FRONT_URL}/carrinho`,
+          pending: `${process.env.FRONT_URL}/acompanhamento/${pedido.id}`,
         },
-      });
+
+        auto_return: 'approved',
+
+        payer: {
+          email: 'pagamento@acaiecompanhia.com',
+        },
+
+        items: itensFormatados,
+
+        metadata: {
+          pedido_id: pedido.id,
+        },
+      } as any) // 🔥 CORREÇÃO AQUI
 
       return {
         id: response.id,
         init_point: response.init_point,
-      };
+      }
     } catch (error: any) {
-      console.error("❌ [MP CHECKOUT] ERRO COMPLETO:");
-      console.error(error);
-
-      if (error?.cause) {
-        console.error("CAUSE:", error.cause);
-      }
-
-      if (error?.response?.data) {
-        console.error(
-          "MP RESPONSE:",
-          JSON.stringify(error.response.data, null, 2)
-        );
-      }
-
-      throw error;
+      console.error('❌ [MP CHECKOUT]', error)
+      throw error
     }
   }
 
@@ -152,30 +152,20 @@ export class MercadoPagoProvider {
   /* ============================= */
 
   async buscarPagamento(paymentId: string) {
-    if (!paymentId) {
-      throw new Error("paymentId não informado");
-    }
-
     try {
-      const response: any = await this.payment.get({ id: paymentId });
-
-      const externalRef =
-        response.external_reference ||
-        response.body?.external_reference ||
-        response.metadata?.pedido_id ||
-        undefined;
+      const response: any = await this.payment.get({ id: paymentId })
 
       return {
         id: response.id?.toString(),
         status: response.status,
         transaction_amount: response.transaction_amount,
-        external_reference: externalRef,
-      };
+        external_reference:
+          response.external_reference ||
+          response.metadata?.pedido_id,
+      }
     } catch (error: any) {
-      console.error("❌ [MP BUSCAR PAGAMENTO] ERRO COMPLETO:");
-      console.error(error);
-
-      throw error;
+      console.error('❌ [MP BUSCAR PAGAMENTO]', error)
+      throw error
     }
   }
 }
