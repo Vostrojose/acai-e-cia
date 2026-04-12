@@ -1,4 +1,4 @@
-import { Request, Response, RequestHandler } from 'express'
+import { RequestHandler } from 'express'
 import { StatusPedido } from '@prisma/client'
 import pedidoService from '../services/pedido.service'
 import { asyncHandler } from '../utils/asyncHandler'
@@ -35,6 +35,29 @@ class PedidoController {
       return res.json({
         success: true,
         data: serializeDecimal(pedidos),
+      })
+    }
+  )
+
+  /* ============================= */
+  /* 🔥 NOVO: BUSCAR POR ID        */
+  /* ============================= */
+  buscarPorId: RequestHandler = asyncHandler(
+    async (req, res) => {
+      const { id } = req.params
+
+      const pedido = await pedidoService.buscarPorIdComProdutos(id)
+
+      if (!pedido) {
+        return res.status(404).json({
+          success: false,
+          message: 'Pedido não encontrado',
+        })
+      }
+
+      return res.json({
+        success: true,
+        data: serializeDecimal(pedido),
       })
     }
   )

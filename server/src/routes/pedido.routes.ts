@@ -16,6 +16,12 @@ router.post("/", pedidoController.criar);
 router.get("/", pedidoController.listar);
 
 /**
+ * 🔥 NOVO: Buscar pedido por ID
+ * GET /api/pedidos/:id
+ */
+router.get("/:id", pedidoController.buscarPorId);
+
+/**
  * Atualizar status de um pedido
  * PATCH /api/pedidos/:id/status
  */
