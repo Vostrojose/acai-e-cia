@@ -6,77 +6,80 @@ import { atualizarStatusSchema } from '../validators/pedido-status.schema'
 import { criarPedidoSchema } from '../validators/pedido.schema'
 import { getIO } from '../websocket/socket'
 import { NotificationService } from '../services/notification'
-import { serializeDecimal } from '../utils/serializeDecimal' // ✅ NOVO
+import { serializeDecimal } from '../utils/serializeDecimal'
 
 class PedidoController {
 
   criar: RequestHandler = asyncHandler(
-    async (request: Request, response: Response) => {
-      const parsed = criarPedidoSchema.parse(request.body)
+    async (req, res) => {
+      const parsed = criarPedidoSchema.parse(req.body)
 
-      const data = {
+      const pedido = await pedidoService.criarPedido({
         ...parsed,
         endereco: parsed.endereco ?? ''
-      }
+      })
 
-      const pedido = await pedidoService.criarPedido(data)
-
-      return response.status(201).json({
+      return res.status(201).json({
         success: true,
-        data: serializeDecimal(pedido), // ✅ CORREÇÃO
+        data: serializeDecimal(pedido),
       })
     }
   )
 
   listar: RequestHandler = asyncHandler(
-    async (request: Request, response: Response) => {
-      const { status } = request.query
+    async (req, res) => {
+      const status = req.query.status as string | undefined
 
-      const pedidos = await pedidoService.listarPedidos(
-        status as string | undefined
-      )
+      const pedidos = await pedidoService.listarPedidos(status)
 
-      return response.json({
+      return res.json({
         success: true,
-        data: serializeDecimal(pedidos), // ✅ CORREÇÃO
+        data: serializeDecimal(pedidos),
       })
     }
   )
 
   atualizarStatus: RequestHandler = asyncHandler(
-    async (request: Request, response: Response) => {
-      const { id } = request.params
-      const data = atualizarStatusSchema.parse(request.body)
+    async (req, res) => {
+      const { id } = req.params
+      const data = atualizarStatusSchema.parse(req.body)
 
       const pedido = await pedidoService.atualizarStatus(
         id,
         data.status as StatusPedido
       )
 
-      // 🔔 socket (mantém original)
-      getIO().emit('pedido_atualizado', serializeDecimal(pedido)) // ✅ CORREÇÃO
+      const serializado = serializeDecimal(pedido)
 
-      if (pedido.status === StatusPedido.PRONTO && pedido.telefone) {
-        await NotificationService.enviarMensagem(
-          pedido.telefone,
-          '🍧 Seu pedido está PRONTO para retirada!'
-        )
+      try {
+        getIO().emit('pedido_atualizado', serializado)
+      } catch {
+        console.warn('WebSocket não iniciado')
       }
 
-      return response.json({
+      if (pedido.status === StatusPedido.PRONTO && pedido.telefone) {
+        try {
+          await NotificationService.enviarMensagem(
+            pedido.telefone,
+            '🍧 Seu pedido está PRONTO!'
+          )
+        } catch {}
+      }
+
+      return res.json({
         success: true,
-        data: serializeDecimal(pedido), // ✅ CORREÇÃO
+        data: serializado,
       })
     }
   )
 
   dashboard: RequestHandler = asyncHandler(
-    async (_request: Request, response: Response) => {
+    async (_req, res) => {
       const data = await pedidoService.dashboardPedidos()
 
-      return response.json({
+      return res.json({
         success: true,
-        data: serializeDecimal(data), // ✅ CORREÇÃO
+        data: serializeDecimal(data),
       })
     }
   )

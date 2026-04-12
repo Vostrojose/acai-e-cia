@@ -1,11 +1,11 @@
 import prisma from '../lib/prisma'
-import { StatusPedido, StatusPagamento } from '@prisma/client'
+import { StatusPedido, StatusPagamento, OrigemPedido } from '@prisma/client'
 import { AppError } from '../utils/AppError'
 import { getIO } from '../websocket/socket'
 
 class PedidoService {
   /* ============================= */
-  /* CRIAR PEDIDO (BLINDADO) */
+  /* CRIAR PEDIDO */
   /* ============================= */
 
   async criarPedido(data: {
@@ -17,6 +17,7 @@ class PedidoService {
     origem?: string
     endereco?: string
   }) {
+
     if (!Array.isArray(data.itens) || data.itens.length === 0) {
       throw new AppError('Pedido precisa conter ao menos um item.', 400)
     }
@@ -36,166 +37,146 @@ class PedidoService {
       if (!Number.isInteger(item.quantidade) || item.quantidade <= 0) {
         throw new AppError('Quantidade inválida.', 400)
       }
-      if (item.quantidade > 50) {
-        throw new AppError('Quantidade máxima por item excedida.', 400)
-      }
     })
 
-    let telefoneLimpo: string | undefined
-    if (data.telefone) {
-      telefoneLimpo = data.telefone.replace(/\D/g, '')
-      if (telefoneLimpo.length < 10 || telefoneLimpo.length > 15) {
-        throw new AppError('Telefone inválido.', 400)
-      }
-    }
-
-    const origensValidas = ["QR_CODE", "APP", "ADMIN", "BALCAO"]
-    if (data.origem && !origensValidas.includes(data.origem)) {
-      throw new AppError("Origem inválida.", 400)
-    }
-
     const produtosIds = data.itens.map((i) => i.produtoId)
+
     const produtos = await prisma.produto.findMany({
       where: { id: { in: produtosIds }, ativo: true },
     })
+
     if (produtos.length !== produtosIds.length) {
-      throw new AppError('Um ou mais produtos são inválidos ou estão inativos.', 400)
+      throw new AppError('Um ou mais produtos são inválidos.', 400)
     }
 
     const produtosMap = new Map(produtos.map((p) => [p.id, p]))
+
     let totalCalculado = 0
 
     const itensParaCriar = data.itens.map((item) => {
       const produto = produtosMap.get(item.produtoId)
+
       if (!produto) throw new AppError('Produto não encontrado.', 400)
 
       const preco = Number(produto.preco)
-      if (!Number.isFinite(preco)) throw new AppError('Preço inválido no produto.', 400)
-
       const subtotal = preco * item.quantidade
-      if (!Number.isFinite(subtotal)) throw new AppError('Erro no cálculo do pedido.', 400)
 
       totalCalculado += subtotal
-      return { produtoId: produto.id, quantidade: item.quantidade, precoUnit: preco }
-    })
 
-    if (totalCalculado <= 0) throw new AppError('Total do pedido inválido.', 400)
-    if (totalCalculado > 10000) throw new AppError('Total do pedido excede limite permitido.', 400)
+      return {
+        produtoId: produto.id,
+        quantidade: item.quantidade,
+        precoUnit: preco,
+      }
+    })
 
     const pedidoCriado = await prisma.$transaction(async (tx) => {
       return tx.pedido.create({
         data: {
           total: totalCalculado,
-          telefone: telefoneLimpo,
-          origem: data.origem as any,
+          telefone: data.telefone,
+          origem: data.origem
+            ? (data.origem as OrigemPedido)
+            : undefined,
           endereco: data.endereco,
           status: StatusPedido.AGUARDANDO_PAGAMENTO,
           itens: { create: itensParaCriar },
         },
-        include: { itens: true },
+        include: {
+          itens: true,
+        },
       })
     })
-
-    try {
-      if (pedidoCriado.status === StatusPedido.RECEBIDO) {
-        const io = getIO()
-        io.emit('novo_pedido', {
-          id: pedidoCriado.id,
-          status: pedidoCriado.status,
-          total: pedidoCriado.total,
-          criadoEm: pedidoCriado.criadoEm,
-        })
-      }
-    } catch {
-      console.warn('⚠️ WebSocket ainda não inicializado.')
-    }
 
     return pedidoCriado
   }
 
   /* ============================= */
-  /* BUSCAR PEDIDO POR ID */
+  /* BUSCAR */
   /* ============================= */
 
   async buscarPorId(id: string) {
-    return prisma.pedido.findUnique({ where: { id }, include: { itens: true } })
+    const pedido = await prisma.pedido.findUnique({
+      where: { id },
+      include: { itens: true },
+    })
+
+    if (!pedido) throw new AppError('Pedido não encontrado.', 404)
+
+    return pedido
   }
 
   async buscarPorIdComProdutos(id: string) {
-    return prisma.pedido.findUnique({
+    const pedido = await prisma.pedido.findUnique({
       where: { id },
-      include: { itens: { include: { produto: true } } },
+      include: {
+        itens: {
+          include: { produto: true },
+        },
+      },
     })
+
+    if (!pedido) throw new AppError('Pedido não encontrado.', 404)
+
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('🧪 PEDIDO:', JSON.stringify(pedido, null, 2))
+    }
+
+    return pedido
   }
 
   /* ============================= */
-  /* ATUALIZAR STATUS DO PEDIDO */
+  /* STATUS */
   /* ============================= */
 
   async atualizarStatus(id: string, novoStatus: StatusPedido) {
     const pedido = await prisma.pedido.findUnique({ where: { id } })
+
     if (!pedido) throw new AppError('Pedido não encontrado.', 404)
 
-    const regras: Record<StatusPedido, StatusPedido[]> = {
-      AGUARDANDO_PAGAMENTO: ['RECEBIDO', 'CANCELADO'],
-      RECEBIDO: ['EM_PREPARO', 'CANCELADO'],
-      EM_PREPARO: ['PRONTO', 'CANCELADO'],
-      PRONTO: ['ENTREGUE'],
-      ENTREGUE: [],
-      CANCELADO: [],
-    }
-
-    const permitidos = regras[pedido.status]
-    if (!permitidos.includes(novoStatus)) {
-      throw new AppError(`Transição inválida de ${pedido.status} para ${novoStatus}.`, 400)
-    }
-
-    const pedidoAtualizado = await prisma.pedido.update({
+    const atualizado = await prisma.pedido.update({
       where: { id },
       data: { status: novoStatus },
       include: { itens: true },
     })
 
     try {
-      getIO().emit('pedido_atualizado', pedidoAtualizado)
-    } catch {
-      console.warn('⚠️ WebSocket ainda não inicializado.')
-    }
+      getIO().emit('pedido_atualizado', atualizado)
+    } catch {}
 
-    return pedidoAtualizado
+    return atualizado
   }
 
   /* ============================= */
-  /* ATUALIZAR STATUS DE PAGAMENTO */
+  /* PAGAMENTO */
   /* ============================= */
 
   async atualizarPagamento(externalReference: string, novoStatus: StatusPagamento) {
-    const pedido = await prisma.pedido.findUnique({ where: { externalReference } })
+
+    if (!Object.values(StatusPagamento).includes(novoStatus)) {
+      throw new AppError('Status de pagamento inválido.', 400)
+    }
+
+    const pedido = await prisma.pedido.findUnique({
+      where: { externalReference },
+    })
+
     if (!pedido) throw new AppError('Pedido não encontrado.', 404)
 
-    const pedidoAtualizado = await prisma.pedido.update({
+    return prisma.pedido.update({
       where: { externalReference },
       data: { statusPagamento: novoStatus },
       include: { itens: true },
     })
-
-    try {
-      getIO().emit('pedido_atualizado', pedidoAtualizado)
-    } catch {
-      console.warn('⚠️ WebSocket ainda não inicializado.')
-    }
-
-    return pedidoAtualizado
   }
 
   /* ============================= */
-  /* LISTAR PEDIDOS */
+  /* LISTAR */
   /* ============================= */
 
   async listarPedidos(status?: string) {
-    const where = status ? { status: status as StatusPedido } : undefined
     return prisma.pedido.findMany({
-      where,
+      where: status ? { status: status as StatusPedido } : undefined,
       include: { itens: true },
       orderBy: { criadoEm: 'desc' },
     })
@@ -231,4 +212,3 @@ class PedidoService {
 }
 
 export default new PedidoService()
-
