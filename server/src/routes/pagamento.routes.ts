@@ -99,8 +99,13 @@ router.post("/checkout", async (req, res) => {
 
 router.post("/webhook", async (req, res) => {
   try {
-    const topic = req.query.topic as string;
-    const id = req.query.id as string;
+  const topic =
+  (req.query.topic as string) ||
+  (req.query.type as string);
+
+const id =
+  (req.query.id as string) ||
+  (req.query["data.id"] as string);
 
     console.log("🔥 WEBHOOK RECEBIDO:", { topic, id });
 
