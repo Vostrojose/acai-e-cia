@@ -68,11 +68,9 @@ export class MercadoPagoProvider {
     if (!pedido.itens || pedido.itens.length === 0)
       throw new Error('Pedido sem itens')
 
-    if (!process.env.FRONT_URL)
-      throw new Error('FRONT_URL não configurado')
+    if (!process.env.FRONT_URL) throw new Error('FRONT_URL não configurado')
 
-    if (!process.env.BASE_URL)
-      throw new Error('BASE_URL não configurado')
+    if (!process.env.BASE_URL) throw new Error('BASE_URL não configurado')
 
     try {
       /* ============================= */
@@ -95,7 +93,7 @@ export class MercadoPagoProvider {
           title: String(
             item.produto?.nome ||
               item.nome ||
-              `Produto ${item.produtoId || 'sem-id'}`
+              `Produto ${item.produtoId || 'sem-id'}`,
           ),
           quantity: quantidade,
           unit_price: preco,
@@ -136,11 +134,10 @@ export class MercadoPagoProvider {
         notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
 
         back_urls: {
-          success: `${process.env.FRONT_URL}/acompanhamento/${pedido.id}`,
-          failure: `${process.env.FRONT_URL}/carrinho`,
-          pending: `${process.env.FRONT_URL}/acompanhamento/${pedido.id}`,
+          success: `${process.env.FRONT_URL}/sucesso/${pedido.id}`,
+          failure: `${process.env.FRONT_URL}/`,
+          pending: `${process.env.FRONT_URL}/sucesso/${pedido.id}`,
         },
-
         auto_return: 'approved',
 
         payer: {
