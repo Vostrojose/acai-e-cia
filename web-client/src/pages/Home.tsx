@@ -29,6 +29,14 @@ export default function Home() {
 
   const { adicionarItem, itens } = useCart()
 
+  /* ============================= */
+  /* 🧮 TOTAL DE ITENS (CORRIGIDO) */
+  /* ============================= */
+  const totalItens = itens.reduce(
+    (total, item) => total + item.quantidade,
+    0
+  )
+
   function animarAdicionar(event: React.MouseEvent<HTMLButtonElement>) {
     const carrinho = document.querySelector('.cart-floating') as HTMLElement
     if (!carrinho) return
@@ -102,10 +110,10 @@ export default function Home() {
     <div className="page">
 
       {/* 🛒 CARRINHO NOVO */}
-      {itens.length > 0 && (
+      {totalItens > 0 && (
         <div className="cart-floating" onClick={() => navigate('/carrinho')}>
           🛒
-          <span className="cart-badge">{itens.length}</span>
+          <span className="cart-badge">{totalItens}</span>
         </div>
       )}
 
@@ -117,7 +125,9 @@ export default function Home() {
       <div className="cardapio-container">
         <div className="cardapio-list">
           {produtosDisponiveis.map((produto) => {
-            const item = itens.find(i => i.id === produto.id)
+
+            // 🔥 comparação segura de ID
+            const item = itens.find(i => String(i.id) === String(produto.id))
             const quantidade = item?.quantidade || 0
 
             return (

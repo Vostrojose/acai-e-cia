@@ -19,10 +19,14 @@ interface CartContextData {
 const CartContext = createContext({} as CartContextData)
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  // 🔥 Agora persiste no localStorage
+  // 🔥 Persistência com segurança
   const [itens, setItens] = useState<Item[]>(() => {
-    const data = localStorage.getItem('carrinho')
-    return data ? JSON.parse(data) : []
+    try {
+      const data = localStorage.getItem('carrinho')
+      return data ? JSON.parse(data) : []
+    } catch {
+      return []
+    }
   })
 
   // 🔥 Sempre salva quando mudar
@@ -30,32 +34,56 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('carrinho', JSON.stringify(itens))
   }, [itens])
 
+  /* ============================= */
+  /* 🔥 ADICIONAR ITEM (CORRIGIDO) */
+  /* ============================= */
   function adicionarItem(item: Omit<Item, 'quantidade'>) {
+    const itemId = String(item.id)
+
     setItens((prevItens) => {
-      const itemExistente = prevItens.find(
-        (i) => i.id === item.id
+      const index = prevItens.findIndex(
+        (i) => String(i.id) === itemId
       )
 
-      if (itemExistente) {
-        return prevItens.map((i) =>
-          i.id === item.id
-            ? { ...i, quantidade: i.quantidade + 1 }
-            : i
-        )
+      if (index !== -1) {
+        const novosItens = [...prevItens]
+
+        novosItens[index] = {
+          ...novosItens[index],
+          quantidade: novosItens[index].quantidade + 1
+        }
+
+        return novosItens
       }
 
-      return [...prevItens, { ...item, quantidade: 1 }]
+      return [
+        ...prevItens,
+        { ...item, id: itemId, quantidade: 1 }
+      ]
     })
   }
 
+  /* ============================= */
+  /* ❌ REMOVER ITEM */
+  /* ============================= */
   function removerItem(id: string) {
-    setItens((prev) => prev.filter((item) => item.id !== id))
+    const itemId = String(id)
+
+    setItens((prev) =>
+      prev.filter((item) => String(item.id) !== itemId)
+    )
   }
 
+  /* ============================= */
+  /* 🧹 LIMPAR */
+  /* ============================= */
   function limparCarrinho() {
     setItens([])
   }
 
+  /* ============================= */
+  /* 💰 TOTAL */
+  /* ============================= */
   const total = itens.reduce(
     (acc, item) => acc + item.preco * item.quantidade,
     0
