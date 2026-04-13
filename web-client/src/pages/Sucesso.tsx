@@ -1,8 +1,19 @@
 import { useParams, useNavigate } from 'react-router-dom'
+import { useCart } from '../context/CartContext'
+import { useEffect } from 'react'
 
 export default function Sucesso() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { limparCarrinho } = useCart()
+
+  /* ============================= */
+  /* 🧹 LIMPAR CARRINHO APÓS PAGAMENTO */
+  /* ============================= */
+  useEffect(() => {
+    limparCarrinho()
+    localStorage.removeItem('pedidoId')
+  }, [limparCarrinho])
 
   return (
     <div style={{
@@ -24,7 +35,7 @@ export default function Sucesso() {
         boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
       }}>
 
-        <h1 style={{ fontSize: 28 }}> Pedido confirmado!</h1>
+        <h1 style={{ fontSize: 28 }}>🎉 Pedido confirmado!</h1>
 
         <p style={{ marginTop: 10 }}>
           Obrigado pela sua compra 💜
@@ -40,7 +51,7 @@ export default function Sucesso() {
 
         <div style={{ marginTop: 30 }}>
 
-          {/* VER PEDIDO */}
+          {/* 📡 VER PEDIDO */}
           <button
             onClick={() => navigate(`/acompanhamento/${id}`)}
             style={btn('#333')}
@@ -48,15 +59,15 @@ export default function Sucesso() {
             📡 Acompanhar pedido
           </button>
 
-          {/* CARDÁPIO */}
+          {/* 🛒 CARDÁPIO DO DIA */}
           <button
             onClick={() => navigate('/m/1')}
             style={btn('#4CAF50')}
           >
-            🛒 Cardápio
+            🛒 Cardápio de hoje
           </button>
 
-          {/* CARDÁPIO DA SEMANA */}
+          {/* 📅 CARDÁPIO DA SEMANA */}
           <button
             onClick={() => navigate('/cardapio')}
             style={btn('#FF9800')}
