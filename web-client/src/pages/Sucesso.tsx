@@ -24,7 +24,7 @@ export default function Sucesso() {
         boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
       }}>
 
-        <h1 style={{ fontSize: 28 }}>🎉 Pedido confirmado!</h1>
+        <h1 style={{ fontSize: 28 }}> Pedido confirmado!</h1>
 
         <p style={{ marginTop: 10 }}>
           Obrigado pela sua compra 💜
@@ -50,7 +50,7 @@ export default function Sucesso() {
 
           {/* CARDÁPIO */}
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/m/1')}
             style={btn('#4CAF50')}
           >
             🛒 Cardápio
@@ -58,7 +58,7 @@ export default function Sucesso() {
 
           {/* CARDÁPIO DA SEMANA */}
           <button
-            onClick={() => navigate('/cardapio-semana')}
+            onClick={() => navigate('/cardapio')}
             style={btn('#FF9800')}
           >
             📅 Cardápio da semana
