@@ -3,15 +3,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (!appButton) return
 
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera
-
-  const isAndroid = /android/i.test(userAgent)
-  const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream
-
   let deferredPrompt = null
 
   /* ============================= */
-  /* 🔥 PWA INSTALL (PRIORIDADE)   */
+  /* 🔥 PWA INSTALL                */
   /* ============================= */
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault()
@@ -25,33 +20,18 @@ document.addEventListener('DOMContentLoaded', function () {
   })
 
   /* ============================= */
-  /* 📱 FALLBACK LOJAS (CASO NÃO PWA) */
-  /* ============================= */
-  if (isAndroid) {
-    appButton.dataset.store = 'android'
-    appButton.href = 'https://play.google.com/store/apps/details?id=com.acai.cia'
-  }
-
-  if (isIOS) {
-    appButton.dataset.store = 'ios'
-    appButton.href = 'https://apps.apple.com/app/id000000000'
-  }
-
-  /* ============================= */
-  /* 🖱️ CLIQUE NO BOTÃO           */
+  /* 🖱️ CLIQUE                     */
   /* ============================= */
   appButton.addEventListener('click', async (e) => {
+    e.preventDefault()
 
-    // 🔥 se PWA disponível → usa install
     if (deferredPrompt) {
-      e.preventDefault()
-
       deferredPrompt.prompt()
 
       const choice = await deferredPrompt.userChoice
 
       if (choice.outcome === 'accepted') {
-        console.log('✅ Usuário instalou o app')
+        console.log('✅ Usuário instalou')
       } else {
         console.log('❌ Usuário recusou')
       }
@@ -61,14 +41,14 @@ document.addEventListener('DOMContentLoaded', function () {
       return
     }
 
-    // 📱 fallback → abre loja (não impede comportamento)
-    console.log('📱 Redirecionando para loja')
+    // 🔥 fallback (abre site)
+    window.location.href = 'https://pedido.acaiecompanhia.com.br'
   })
 
   /* ============================= */
-  /* 📊 CONTROLE DE EXIBIÇÃO       */
+  /* ⏱️ EXIBIÇÃO CONTROLADA        */
   /* ============================= */
-  const isMobile = /Android|iPhone|iPad/i.test(userAgent)
+  const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent)
 
   if (isMobile) {
     const jaMostrou = localStorage.getItem('pwa_prompt')
@@ -76,6 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!jaMostrou) {
       setTimeout(() => {
         appButton.classList.remove('hidden')
+        appButton.innerText = '📱 Usar como aplicativo'
         localStorage.setItem('pwa_prompt', 'true')
       }, 4000)
     }
