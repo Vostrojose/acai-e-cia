@@ -33,6 +33,9 @@ app.use(
   })
 );
 
+// ✅ CORRETO: fora do app.use
+app.options('*', cors());
+
 app.use(express.json());
 app.use(httpLogger);
 
