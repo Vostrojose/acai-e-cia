@@ -24,6 +24,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 🔥 PWA disponível
     if (deferredPrompt) {
+
+      const confirmar = confirm(
+        '📲 Instalar o aplicativo?\n\n✔ Acesso mais rápido\n✔ Funciona como app\n✔ Sem precisar abrir navegador'
+      )
+
+      if (!confirmar) return
+
       deferredPrompt.prompt()
 
       const choice = await deferredPrompt.userChoice
@@ -49,9 +56,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent)
 
     if (isIOS) {
-      alert('Para instalar: toque em "Compartilhar" → "Adicionar à Tela de Início"')
+      alert('📲 Para instalar:\n\n1. Toque no botão "Compartilhar"\n2. Depois em "Adicionar à Tela de Início"')
     } else {
-      alert('Para instalar: use o menu do navegador → "Adicionar à tela inicial"')
+      alert('📲 Para instalar:\n\n1. Abra o menu do navegador (⋮)\n2. Toque em "Adicionar à tela inicial"')
     }
   }
 })
