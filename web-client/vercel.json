@@ -1,6 +1,12 @@
 {
   "routes": [
     { "handle": "filesystem" },
+    {
+      "src": "/index.html",
+      "headers": {
+        "Cache-Control": "no-store"
+      }
+    },
     { "src": "/.*", "dest": "/index.html" }
   ]
 }
