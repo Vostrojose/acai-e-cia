@@ -224,6 +224,24 @@ function CardResumo({ titulo, valor, cor }: any) {
   )
 }
 
+/* ========================= */
+/* 🔥 TÍTULOS PADRÃO         */
+/* ========================= */
+
+const h1Style = {
+  fontSize: "28px",
+  fontWeight: "bold",
+  marginBottom: 20,
+  color: "#222",
+  textAlign: "center" as const,
+}
+
+const h2Style = {
+  fontSize: "20px",
+  fontWeight: "bold",
+  marginBottom: 15,
+  color: "#333",
+}
 
 
 
