@@ -4,103 +4,209 @@ import api from "../services/api"
 
 export default function Dashboard() {
 
-  const [produtos, setProdutos] = useState(0)
-  const [pedidos, setPedidos] = useState(0)
   const navigate = useNavigate()
+
+  const [dados, setDados] = useState({
+    totalHoje: 0,
+    produtoTop: "-",
+    pedidosAbertos: 0,
+    tempoMedio: 0,
+    tendencia: 0
+  })
 
   useEffect(() => {
     async function carregar() {
       try {
-        const p = await api.get("/produtos")
-        if (p.data?.data) {
-          setProdutos(p.data.data.length)
-        }
+        const res = await api.get("/pedidos")
+        const pedidos = res.data?.data || []
 
-        const pe = await api.get("/pedidos")
-        if (pe.data?.data) {
-          setPedidos(pe.data.data.length)
-        }
+        const hoje = new Date()
+
+        /* ========================= */
+        /* 💰 TOTAL HOJE              */
+        /* ========================= */
+        const pedidosHoje = pedidos.filter((p: any) => {
+          const data = new Date(p.criadoEm)
+          return data.toDateString() === hoje.toDateString()
+        })
+
+        const totalHoje = pedidosHoje.reduce(
+          (acc: number, p: any) => acc + p.total,
+          0
+        )
+
+        /* ========================= */
+        /* 📦 PEDIDOS EM ABERTO       */
+        /* ========================= */
+        const pedidosAbertos = pedidos.filter(
+          (p: any) => p.status !== "ENTREGUE"
+        ).length
+
+        /* ========================= */
+        /* 🔥 PRODUTO MAIS VENDIDO    */
+        /* ========================= */
+        const contador: any = {}
+
+        pedidos.forEach((p: any) => {
+          p.itens?.forEach((item: any) => {
+            contador[item.produtoId] =
+              (contador[item.produtoId] || 0) + item.quantidade
+          })
+        })
+
+        let produtoTop = "-"
+        let max = 0
+
+        Object.entries(contador).forEach(([id, qtd]: any) => {
+          if (qtd > max) {
+            max = qtd
+            produtoTop = id
+          }
+        })
+
+        /* ========================= */
+        /* ⏱ TEMPO MÉDIO             */
+        /* ========================= */
+        const entregues = pedidos.filter(
+          (p: any) => p.status === "ENTREGUE"
+        )
+
+        const tempoMedio =
+          entregues.reduce((acc: number, p: any) => {
+            const inicio = new Date(p.criadoEm).getTime()
+            const fim = new Date(p.atualizadoEm).getTime()
+            return acc + (fim - inicio)
+          }, 0) / (entregues.length || 1)
+
+        const tempoMin = Math.round(tempoMedio / 60000)
+
+        /* ========================= */
+        /* 📈 TENDÊNCIA               */
+        /* ========================= */
+        const ontem = new Date()
+        ontem.setDate(ontem.getDate() - 1)
+
+        const pedidosOntem = pedidos.filter((p: any) => {
+          const data = new Date(p.criadoEm)
+          return data.toDateString() === ontem.toDateString()
+        })
+
+        const totalOntem = pedidosOntem.reduce(
+          (acc: number, p: any) => acc + p.total,
+          0
+        )
+
+        const tendencia = totalHoje - totalOntem
+
+        setDados({
+          totalHoje,
+          produtoTop,
+          pedidosAbertos,
+          tempoMedio: tempoMin,
+          tendencia
+        })
+
       } catch (err) {
         console.error("Erro ao carregar dashboard", err)
       }
     }
+
     carregar()
   }, [])
 
   return (
-    <div style={{ padding: 40, background: "#f5f5f5", minHeight: "100vh" }}>
+    <div style={page}>
 
-      {/* ========================= */}
-      {/* MENU DE NAVEGAÇÃO         */}
-      {/* ========================= */}
-      <div style={{
-        display: "flex",
-        gap: 10,
-        marginBottom: 20,
-        flexWrap: "wrap"
-      }}>
-        <Botao onClick={() => navigate("/cozinha")}>🍳 Cozinha</Botao>
-        <Botao onClick={() => navigate("/pedidos")}>📦 Pedidos</Botao>
-        <Botao onClick={() => navigate("/produtos")}>🛒 Produtos</Botao>
-        <Botao onClick={() => navigate("/auditoria")}>📊 Auditoria</Botao>
+      <CardMenu navigate={navigate} />
+
+      <h1 style={h1Style}>📊 Dashboard</h1>
+
+      <div style={grid}>
+
+        <Card titulo="💰 Vendas hoje" valor={`R$ ${dados.totalHoje.toFixed(2)}`} cor="#4caf50" />
+
+        <Card titulo="🔥 Produto mais vendido" valor={dados.produtoTop} cor="#ff9800" />
+
+        <Card titulo="📦 Pedidos em aberto" valor={dados.pedidosAbertos} cor="#2196f3" />
+
+        <Card titulo="⏱ Tempo médio" valor={`${dados.tempoMedio} min`} cor="#9c27b0" />
+
+        <Card titulo="📈 Tendência" valor={`R$ ${dados.tendencia}`} cor="#f44336" />
+
       </div>
 
-      <h1>Dashboard</h1>
-
-      <div style={{ display: "flex", gap: 20 }}>
-        <CardResumo titulo="Produtos" valor={produtos} />
-        <CardResumo titulo="Pedidos" valor={pedidos} />
-      </div>
     </div>
   )
 }
 
 /* ========================= */
-/* ESTILO PADRÃO DE BOTÕES   */
+/* 🎨 VISUAL                 */
 /* ========================= */
-const botaoPadrao = {
-  padding: "10px 15px",
-  borderRadius: 8,
+
+const page = {
+  padding: 20,
+  background: "#f5f5f5",
+  minHeight: "100vh",
+}
+
+function CardMenu({ navigate }: any) {
+  return (
+    <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+      <div style={{
+        background: "#111",
+        padding: 10,
+        borderRadius: 10,
+        display: "flex",
+        gap: 10,
+        flexWrap: "wrap"
+      }}>
+        <button onClick={() => navigate("/cozinha")} style={botaoMenu}>🍳 Cozinha</button>
+        <button onClick={() => navigate("/pedidos")} style={botaoMenu}>📦 Pedidos</button>
+        <button onClick={() => navigate("/produtos")} style={botaoMenu}>🛒 Produtos</button>
+        <button onClick={() => navigate("/auditoria")} style={botaoMenu}>📊 Auditoria</button>
+      </div>
+    </div>
+  )
+}
+
+const botaoMenu = {
+  padding: "8px 12px",
+  borderRadius: 6,
   border: "none",
   background: "#333",
   color: "#fff",
   cursor: "pointer",
   fontWeight: "bold",
-  transition: "background 0.3s"
 }
 
-function Botao({ children, onClick, cor, type }: any) {
-  return (
-    <button
-      type={type || "button"}
-      onClick={onClick}
-      style={{
-        ...botaoPadrao,
-        background: cor || botaoPadrao.background
-      }}
-      onMouseOver={(e) => (e.currentTarget.style.background = "#555")}
-      onMouseOut={(e) => (e.currentTarget.style.background = cor || "#333")}
-    >
-      {children}
-    </button>
-  )
+/* GRID */
+const grid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: 20,
 }
 
-/* ========================= */
-/* CARD RESUMO               */
-/* ========================= */
-function CardResumo({ titulo, valor }: any) {
+/* CARD */
+function Card({ titulo, valor, cor }: any) {
   return (
     <div style={{
+      background: cor,
       padding: 20,
-      background: "#eee",
-      borderRadius: 10,
-      minWidth: 150,
-      textAlign: "center",
-      boxShadow: "0 2px 6px rgba(0,0,0,0.1)"
+      borderRadius: 12,
+      color: "#fff",
+      fontWeight: "bold",
+      textAlign: "center"
     }}>
-      <h2>{titulo}</h2>
-      <h3>{valor}</h3>
+      <div style={{ marginBottom: 10 }}>{titulo}</div>
+      <div style={{ fontSize: 22 }}>{valor}</div>
     </div>
   )
+}
+
+/* TÍTULO */
+const h1Style = {
+  fontSize: "28px",
+  fontWeight: "bold",
+  marginBottom: 20,
+  textAlign: "center" as const,
 }
