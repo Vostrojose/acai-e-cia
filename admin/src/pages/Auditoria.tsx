@@ -81,34 +81,30 @@ export default function Auditoria() {
   return (
     <div style={page}>
 
-      {/* 🔥 MENU PADRÃO */}
       <CardMenu navigate={navigate} />
 
-      <h1 style={{ marginBottom: 20 }}>📊 Auditoria de Vendas</h1>
+      <h1 style={h1Style}>📊 Auditoria de Vendas</h1>
 
-      {/* 🔥 RESUMO */}
       <div style={resumoContainer}>
         <CardResumo titulo="Diárias" valor={vendas.diarias} cor="#4caf50" />
         <CardResumo titulo="Semanais" valor={vendas.semanais} cor="#ff9800" />
         <CardResumo titulo="Mensais" valor={vendas.mensais} cor="#f44336" />
       </div>
 
-      {/* 🔥 GRÁFICOS */}
       <div style={gridGraficos}>
         <div style={card}>
-          <h2>Produtos mais vendidos</h2>
+          <h2 style={h2Style}>Produtos mais vendidos</h2>
           <Bar data={dataMaisVendidos} />
         </div>
 
         <div style={card}>
-          <h2>Participação dos produtos</h2>
+          <h2 style={h2Style}>Participação dos produtos</h2>
           <Pie data={dataParticipacao} />
         </div>
       </div>
 
-      {/* 🔥 AÇÕES */}
       <div style={card}>
-        <h2>Registrar venda rápida</h2>
+        <h2 style={h2Style}>Registrar venda rápida</h2>
 
         <div style={acoes}>
           {vendas.produtos.map((p: any) => (
@@ -138,7 +134,6 @@ const page = {
   minHeight: "100vh",
 }
 
-/* MENU PADRÃO */
 function CardMenu({ navigate }: any) {
   return (
     <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
@@ -169,7 +164,6 @@ const botaoMenu = {
   fontWeight: "bold",
 }
 
-/* RESUMO */
 const resumoContainer = {
   display: "flex",
   gap: 20,
@@ -177,7 +171,6 @@ const resumoContainer = {
   marginBottom: 30,
 }
 
-/* GRID RESPONSIVO (TABLET 🔥) */
 const gridGraficos = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
@@ -185,7 +178,6 @@ const gridGraficos = {
   marginBottom: 30,
 }
 
-/* CARD PADRÃO */
 const card = {
   background: "#fff",
   padding: 20,
@@ -193,20 +185,17 @@ const card = {
   border: "1px solid #ddd",
 }
 
-/* AÇÕES */
 const acoes = {
   display: "flex",
   flexWrap: "wrap" as const,
   gap: 10,
 }
 
-/* AVISO */
 const aviso = {
   marginTop: 30,
   color: "#555",
 }
 
-/* CARD RESUMO */
 function CardResumo({ titulo, valor, cor }: any) {
   return (
     <div style={{
