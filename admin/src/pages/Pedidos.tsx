@@ -1,4 +1,3 @@
-// src/pages/Pedidos.tsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
@@ -64,24 +63,11 @@ export default function Pedidos() {
   }
 
   return (
-    <div style={{ padding: 40, background: "#f5f5f5", minHeight: "100vh" }}>
+    <div style={page}>
 
-      {/* ========================= */}
-      {/* MENU DE NAVEGAÇÃO         */}
-      {/* ========================= */}
-      <div style={{
-        display: "flex",
-        gap: 10,
-        marginBottom: 20,
-        flexWrap: "wrap"
-      }}>
-        <Botao onClick={() => navigate("/cozinha")}>🍳 Cozinha</Botao>
-        <Botao onClick={() => navigate("/produtos")}>🛒 Produtos</Botao>
-        <Botao onClick={() => navigate("/dashboard")}>📊 Dashboard</Botao>
-        <Botao onClick={() => navigate("/auditoria")}>📊 Auditoria</Botao>
-      </div>
+      <CardMenu navigate={navigate} />
 
-      <h1>Pedidos</h1>
+      <h1 style={h1Style}>📦 Pedidos</h1>
 
       {carregando && <p>Carregando pedidos...</p>}
 
@@ -96,18 +82,10 @@ export default function Pedidos() {
       )}
 
       {!carregando && !erro && pedidos.length > 0 && (
-        <ul style={{ listStyle: "none", padding: 0 }}>
+        <div style={gridPedidos}>
           {pedidos.map((pedido) => (
-            <li
-              key={pedido.id}
-              style={{
-                border: "1px solid #ccc",
-                marginBottom: 16,
-                padding: 16,
-                borderRadius: 6,
-                background: "#fff"
-              }}
-            >
+            <div key={pedido.id} style={card}>
+
               <div style={{ marginBottom: 8 }}>
                 <strong>ID:</strong> {pedido.id}
               </div>
@@ -143,32 +121,93 @@ export default function Pedidos() {
                 </ul>
               </div>
 
-              {/* Botões de status */}
-              <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
+              <div style={acoes}>
                 {pedido.status !== "PRONTO" && (
                   <Botao onClick={() => atualizarStatus(pedido.id, "PRONTO")} cor="#4caf50">
-                    Marcar como pronto
+                    ✔ Pronto
                   </Botao>
                 )}
 
                 {pedido.status !== "EM_PREPARO" && (
                   <Botao onClick={() => atualizarStatus(pedido.id, "EM_PREPARO")} cor="#ff9800">
-                    Marcar como em preparo
+                    🔥 Em preparo
                   </Botao>
                 )}
               </div>
 
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
 }
 
 /* ========================= */
-/* ESTILO PADRÃO DE BOTÕES   */
+/* 🎨 PADRÃO VISUAL GLOBAL   */
 /* ========================= */
+
+const page = {
+  padding: 20,
+  background: "#f5f5f5",
+  minHeight: "100vh",
+}
+
+/* MENU PADRÃO */
+function CardMenu({ navigate }: any) {
+  return (
+    <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+      <div style={{
+        background: "#111",
+        padding: 10,
+        borderRadius: 10,
+        display: "flex",
+        gap: 10,
+        flexWrap: "wrap"
+      }}>
+        <button onClick={() => navigate("/cozinha")} style={botaoMenu}>🍳 Cozinha</button>
+        <button onClick={() => navigate("/produtos")} style={botaoMenu}>🛒 Produtos</button>
+        <button onClick={() => navigate("/dashboard")} style={botaoMenu}>📊 Dashboard</button>
+        <button onClick={() => navigate("/auditoria")} style={botaoMenu}>📊 Auditoria</button>
+      </div>
+    </div>
+  )
+}
+
+const botaoMenu = {
+  padding: "8px 12px",
+  borderRadius: 6,
+  border: "none",
+  background: "#333",
+  color: "#fff",
+  cursor: "pointer",
+  fontWeight: "bold",
+}
+
+/* GRID RESPONSIVO (TABLET 🔥) */
+const gridPedidos = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+  gap: 20,
+}
+
+/* CARD PADRÃO */
+const card = {
+  background: "#fff",
+  padding: 20,
+  borderRadius: 10,
+  border: "1px solid #ddd",
+}
+
+/* AÇÕES */
+const acoes = {
+  marginTop: 12,
+  display: "flex",
+  gap: 10,
+  flexWrap: "wrap" as const,
+}
+
+/* BOTÃO PADRÃO */
 const botaoPadrao = {
   padding: "10px 15px",
   borderRadius: 8,
@@ -177,9 +216,9 @@ const botaoPadrao = {
   color: "#fff",
   cursor: "pointer",
   fontWeight: "bold",
-  transition: "background 0.3s"
 }
 
+/* BOTÃO */
 function Botao({ children, onClick, cor, type }: any) {
   return (
     <button
@@ -195,4 +234,23 @@ function Botao({ children, onClick, cor, type }: any) {
       {children}
     </button>
   )
+}
+
+/* ========================= */
+/* 🔥 TÍTULOS PADRÃO         */
+/* ========================= */
+
+const h1Style = {
+  fontSize: "28px",
+  fontWeight: "bold",
+  marginBottom: 20,
+  color: "#222",
+  textAlign: "center" as const,
+}
+
+const h2Style = {
+  fontSize: "20px",
+  fontWeight: "bold",
+  marginBottom: 15,
+  color: "#333",
 }
