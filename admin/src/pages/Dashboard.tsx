@@ -192,7 +192,7 @@ function Card({ titulo, valor, cor }: any) {
       background: cor,
       padding: 20,
       borderRadius: 12,
-      color: "#4e06f7",
+      color: "#f5f4f8",
       fontWeight: "bold",
       textAlign: "center"
     }}>
