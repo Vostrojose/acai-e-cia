@@ -144,7 +144,7 @@ export default function Dashboard() {
 
 const page = {
   padding: 20,
-  background: "#f5f5f5",
+  background: "#6d10f9a2",
   minHeight: "100vh",
 }
 
@@ -192,7 +192,7 @@ function Card({ titulo, valor, cor }: any) {
       background: cor,
       padding: 20,
       borderRadius: 12,
-      color: "#fff",
+      color: "#4e06f7",
       fontWeight: "bold",
       textAlign: "center"
     }}>
