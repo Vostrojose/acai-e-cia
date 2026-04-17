@@ -218,7 +218,7 @@ const cardAçai = {
 }
 
 const cardContent = {
-  background: "#fff",
+ background: "#6d10f9a2",
   borderRadius: 10,
   padding: 15,
 }
