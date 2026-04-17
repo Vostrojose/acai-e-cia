@@ -255,7 +255,7 @@ function PedidoCard({ pedido }: any) {
 
   return (
     <div style={{
-      border: '1px solid #ddd',
+      border: '1px solid #6d10f9a2',
       borderRadius: 10,
       padding: 15,
       marginBottom: 15
