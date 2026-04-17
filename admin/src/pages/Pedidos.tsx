@@ -141,7 +141,7 @@ export default function Pedidos() {
 
 const page = {
   padding: 20,
-  background: "#f5f5f5",
+  background: "#8110f2",
   minHeight: "100vh",
 }
 
