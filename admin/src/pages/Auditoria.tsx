@@ -1,11 +1,9 @@
-// src/pages/Auditoria.tsx
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import api from "../services/api"
 import Botao from "../components/Botao"
 import { Bar, Pie } from "react-chartjs-2"
 
-// Import e registro dos elementos do Chart.js
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -29,6 +27,7 @@ ChartJS.register(
 
 export default function Auditoria() {
   const navigate = useNavigate()
+
   const [vendas, setVendas] = useState<any>({
     diarias: 0,
     semanais: 0,
@@ -58,7 +57,6 @@ export default function Auditoria() {
     }
   }
 
-  // Gráfico de mais vendidos
   const dataMaisVendidos = {
     labels: vendas.produtos.map((p: any) => p.nome),
     datasets: [
@@ -70,7 +68,6 @@ export default function Auditoria() {
     ]
   }
 
-  // Gráfico de participação (pizza)
   const dataParticipacao = {
     labels: vendas.produtos.map((p: any) => p.nome),
     datasets: [
@@ -82,60 +79,145 @@ export default function Auditoria() {
   }
 
   return (
-    <div style={{ padding: 20, background: "#fafafa", minHeight: "100vh" }}>
-      {/* Menu de navegação */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
-        <Botao onClick={() => navigate("/cozinha")}>🍳 Cozinha</Botao>
-        <Botao onClick={() => navigate("/pedidos")}>📦 Pedidos</Botao>
-        <Botao onClick={() => navigate("/produtos")}>🛒 Produtos</Botao>
-        <Botao onClick={() => navigate("/dashboard")}>📊 Dashboard</Botao>
-      </div>
+    <div style={page}>
 
-      <h1>📊 Auditoria de Vendas</h1>
+      {/* 🔥 MENU PADRÃO */}
+      <CardMenu navigate={navigate} />
 
-      <div style={{ display: "flex", gap: 20, marginBottom: 30 }}>
+      <h1 style={{ marginBottom: 20 }}>📊 Auditoria de Vendas</h1>
+
+      {/* 🔥 RESUMO */}
+      <div style={resumoContainer}>
         <CardResumo titulo="Diárias" valor={vendas.diarias} cor="#4caf50" />
         <CardResumo titulo="Semanais" valor={vendas.semanais} cor="#ff9800" />
         <CardResumo titulo="Mensais" valor={vendas.mensais} cor="#f44336" />
       </div>
 
-      <h2>Produtos mais vendidos</h2>
-      <Bar data={dataMaisVendidos} />
+      {/* 🔥 GRÁFICOS */}
+      <div style={gridGraficos}>
+        <div style={card}>
+          <h2>Produtos mais vendidos</h2>
+          <Bar data={dataMaisVendidos} />
+        </div>
 
-      <h2 style={{ marginTop: 30 }}>Participação dos produtos</h2>
-      <Pie data={dataParticipacao} />
-
-      <h2 style={{ marginTop: 30 }}>Registrar venda rápida</h2>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-        {vendas.produtos.map((p: any) => (
-          <Botao key={p.nome} onClick={() => registrarVenda(p.nome)}>
-            {p.nome}
-          </Botao>
-        ))}
+        <div style={card}>
+          <h2>Participação dos produtos</h2>
+          <Pie data={dataParticipacao} />
+        </div>
       </div>
 
-      <p style={{ marginTop: 30, color: "#555" }}>
+      {/* 🔥 AÇÕES */}
+      <div style={card}>
+        <h2>Registrar venda rápida</h2>
+
+        <div style={acoes}>
+          {vendas.produtos.map((p: any) => (
+            <Botao key={p.nome} onClick={() => registrarVenda(p.nome)}>
+              {p.nome}
+            </Botao>
+          ))}
+        </div>
+      </div>
+
+      <p style={aviso}>
         ⚠️ Os pedidos entregues serão apagados ao final de cada mês. Apenas os indicadores
         consolidados permanecerão para orientar decisões estratégicas.
       </p>
+
     </div>
   )
 }
 
+/* ========================= */
+/* 🎨 PADRÃO VISUAL GLOBAL   */
+/* ========================= */
+
+const page = {
+  padding: 20,
+  background: "#f5f5f5",
+  minHeight: "100vh",
+}
+
+/* MENU PADRÃO */
+function CardMenu({ navigate }: any) {
+  return (
+    <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+      <div style={{
+        background: "#111",
+        padding: 10,
+        borderRadius: 10,
+        display: "flex",
+        gap: 10,
+        flexWrap: "wrap"
+      }}>
+        <button onClick={() => navigate("/cozinha")} style={botaoMenu}>🍳 Cozinha</button>
+        <button onClick={() => navigate("/pedidos")} style={botaoMenu}>📦 Pedidos</button>
+        <button onClick={() => navigate("/produtos")} style={botaoMenu}>🛒 Produtos</button>
+        <button onClick={() => navigate("/dashboard")} style={botaoMenu}>📈 Dashboard</button>
+      </div>
+    </div>
+  )
+}
+
+const botaoMenu = {
+  padding: "8px 12px",
+  borderRadius: 6,
+  border: "none",
+  background: "#333",
+  color: "#fff",
+  cursor: "pointer",
+  fontWeight: "bold",
+}
+
+/* RESUMO */
+const resumoContainer = {
+  display: "flex",
+  gap: 20,
+  flexWrap: "wrap" as const,
+  marginBottom: 30,
+}
+
+/* GRID RESPONSIVO (TABLET 🔥) */
+const gridGraficos = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+  gap: 20,
+  marginBottom: 30,
+}
+
+/* CARD PADRÃO */
+const card = {
+  background: "#fff",
+  padding: 20,
+  borderRadius: 10,
+  border: "1px solid #ddd",
+}
+
+/* AÇÕES */
+const acoes = {
+  display: "flex",
+  flexWrap: "wrap" as const,
+  gap: 10,
+}
+
+/* AVISO */
+const aviso = {
+  marginTop: 30,
+  color: "#555",
+}
+
+/* CARD RESUMO */
 function CardResumo({ titulo, valor, cor }: any) {
   return (
-    <div
-      style={{
-        background: cor,
-        padding: 20,
-        borderRadius: 10,
-        minWidth: 150,
-        textAlign: "center",
-        color: "#fff",
-        fontWeight: "bold",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.1)"
-      }}
-    >
+    <div style={{
+      background: cor,
+      padding: 20,
+      borderRadius: 10,
+      minWidth: 150,
+      textAlign: "center",
+      color: "#fff",
+      fontWeight: "bold"
+    }}>
       <strong>{titulo}</strong>
       <div style={{ fontSize: 24 }}>R$ {valor}</div>
     </div>
