@@ -130,7 +130,7 @@ export default function Auditoria() {
 
 const page = {
   padding: 20,
-  background: "#f5f5f5",
+  background: "#6d10f9a2",
   minHeight: "100vh",
 }
 
