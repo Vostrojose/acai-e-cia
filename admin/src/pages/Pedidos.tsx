@@ -192,7 +192,7 @@ const cardAçai = {
 
 /* 🔥 CONTEÚDO BRANCO */
 const cardContent = {
-  background: "#fff",
+  background: "#2815f7",
   borderRadius: 10,
   padding: 15,
 }
