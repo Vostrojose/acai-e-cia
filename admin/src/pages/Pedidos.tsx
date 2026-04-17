@@ -84,57 +84,49 @@ export default function Pedidos() {
       {!carregando && !erro && pedidos.length > 0 && (
         <div style={gridPedidos}>
           {pedidos.map((pedido) => (
-            <div key={pedido.id} style={card}>
+            <div key={pedido.id} style={cardAçai}>
 
-              <div style={{ marginBottom: 8 }}>
-                <strong>ID:</strong> {pedido.id}
-              </div>
+              {/* 🔥 CONTEÚDO INTERNO */}
+              <div style={cardContent}>
 
-              <div style={{ marginBottom: 8 }}>
-                <strong>Status:</strong> {pedido.status}
-              </div>
+                <div><strong>ID:</strong> {pedido.id}</div>
+                <div><strong>Status:</strong> {pedido.status}</div>
+                <div><strong>Total:</strong> R$ {pedido.total.toFixed(2)}</div>
 
-              <div style={{ marginBottom: 8 }}>
-                <strong>Total:</strong> R$ {pedido.total.toFixed(2)}
-              </div>
-
-              {pedido.telefone && (
-                <div style={{ marginBottom: 8 }}>
-                  <strong>Telefone:</strong> {pedido.telefone}
-                </div>
-              )}
-
-              {pedido.endereco && (
-                <div style={{ marginBottom: 8 }}>
-                  <strong>Endereço:</strong> {pedido.endereco}
-                </div>
-              )}
-
-              <div style={{ marginBottom: 8 }}>
-                <strong>Itens:</strong>
-                <ul style={{ marginTop: 4, paddingLeft: 16 }}>
-                  {pedido.itens.map((item) => (
-                    <li key={item.id}>
-                      {item.quantidade} × R$ {item.precoUnit.toFixed(2)} (Produto {item.produtoId})
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div style={acoes}>
-                {pedido.status !== "PRONTO" && (
-                  <Botao onClick={() => atualizarStatus(pedido.id, "PRONTO")} cor="#4caf50">
-                    ✔ Pronto
-                  </Botao>
+                {pedido.telefone && (
+                  <div><strong>Telefone:</strong> {pedido.telefone}</div>
                 )}
 
-                {pedido.status !== "EM_PREPARO" && (
-                  <Botao onClick={() => atualizarStatus(pedido.id, "EM_PREPARO")} cor="#ff9800">
-                    🔥 Em preparo
-                  </Botao>
+                {pedido.endereco && (
+                  <div><strong>Endereço:</strong> {pedido.endereco}</div>
                 )}
-              </div>
 
+                <div>
+                  <strong>Itens:</strong>
+                  <ul style={{ marginTop: 6, paddingLeft: 16 }}>
+                    {pedido.itens.map((item) => (
+                      <li key={item.id}>
+                        {item.quantidade} × R$ {item.precoUnit.toFixed(2)}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div style={acoes}>
+                  {pedido.status !== "PRONTO" && (
+                    <Botao onClick={() => atualizarStatus(pedido.id, "PRONTO")} cor="#4caf50">
+                      ✔ Pronto
+                    </Botao>
+                  )}
+
+                  {pedido.status !== "EM_PREPARO" && (
+                    <Botao onClick={() => atualizarStatus(pedido.id, "EM_PREPARO")} cor="#ff9800">
+                      🔥 Em preparo
+                    </Botao>
+                  )}
+                </div>
+
+              </div>
             </div>
           ))}
         </div>
@@ -144,7 +136,7 @@ export default function Pedidos() {
 }
 
 /* ========================= */
-/* 🎨 PADRÃO VISUAL GLOBAL   */
+/* 🎨 VISUAL                 */
 /* ========================= */
 
 const page = {
@@ -153,7 +145,7 @@ const page = {
   minHeight: "100vh",
 }
 
-/* MENU PADRÃO */
+/* MENU */
 function CardMenu({ navigate }: any) {
   return (
     <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
@@ -184,19 +176,25 @@ const botaoMenu = {
   fontWeight: "bold",
 }
 
-/* GRID RESPONSIVO (TABLET 🔥) */
+/* GRID */
 const gridPedidos = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
   gap: 20,
 }
 
-/* CARD PADRÃO */
-const card = {
+/* 🔥 CARD AÇAÍ */
+const cardAçai = {
+  background: "#4e06f7",
+  borderRadius: 12,
+  padding: 4,
+}
+
+/* 🔥 CONTEÚDO BRANCO */
+const cardContent = {
   background: "#fff",
-  padding: 20,
   borderRadius: 10,
-  border: "1px solid #ddd",
+  padding: 15,
 }
 
 /* AÇÕES */
@@ -207,7 +205,7 @@ const acoes = {
   flexWrap: "wrap" as const,
 }
 
-/* BOTÃO PADRÃO */
+/* BOTÃO */
 const botaoPadrao = {
   padding: "10px 15px",
   borderRadius: 8,
@@ -218,7 +216,6 @@ const botaoPadrao = {
   fontWeight: "bold",
 }
 
-/* BOTÃO */
 function Botao({ children, onClick, cor, type }: any) {
   return (
     <button
@@ -228,29 +225,17 @@ function Botao({ children, onClick, cor, type }: any) {
         ...botaoPadrao,
         background: cor || botaoPadrao.background
       }}
-      onMouseOver={(e) => (e.currentTarget.style.background = "#555")}
-      onMouseOut={(e) => (e.currentTarget.style.background = cor || "#333")}
     >
       {children}
     </button>
   )
 }
 
-/* ========================= */
-/* 🔥 TÍTULOS PADRÃO         */
-/* ========================= */
-
+/* TÍTULOS */
 const h1Style = {
   fontSize: "28px",
   fontWeight: "bold",
   marginBottom: 20,
   color: "#222",
   textAlign: "center" as const,
-}
-
-const h2Style = {
-  fontSize: "20px",
-  fontWeight: "bold",
-  marginBottom: 15,
-  color: "#333",
 }
