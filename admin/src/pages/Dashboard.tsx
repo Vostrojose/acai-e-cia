@@ -17,14 +17,21 @@ export default function Dashboard() {
   useEffect(() => {
     async function carregar() {
       try {
-        const res = await api.get("/pedidos")
-        const pedidos = res.data?.data || []
+        const resPedidos = await api.get("/pedidos")
+        const pedidos = resPedidos.data?.data || []
+
+        const resProdutos = await api.get("/produtos")
+        const listaProdutos = resProdutos.data?.data || []
+
+        /* 🔥 MAPA ID → NOME */
+        const mapaProdutos: any = {}
+        listaProdutos.forEach((p: any) => {
+          mapaProdutos[p.id] = p.nome
+        })
 
         const hoje = new Date()
 
-        /* ========================= */
-        /* 💰 TOTAL HOJE              */
-        /* ========================= */
+        /* 💰 TOTAL HOJE */
         const pedidosHoje = pedidos.filter((p: any) => {
           const data = new Date(p.criadoEm)
           return data.toDateString() === hoje.toDateString()
@@ -35,16 +42,12 @@ export default function Dashboard() {
           0
         )
 
-        /* ========================= */
-        /* 📦 PEDIDOS EM ABERTO       */
-        /* ========================= */
+        /* 📦 PEDIDOS EM ABERTO */
         const pedidosAbertos = pedidos.filter(
           (p: any) => p.status !== "ENTREGUE"
         ).length
 
-        /* ========================= */
-        /* 🔥 PRODUTO MAIS VENDIDO    */
-        /* ========================= */
+        /* 🔥 PRODUTO MAIS VENDIDO */
         const contador: any = {}
 
         pedidos.forEach((p: any) => {
@@ -60,13 +63,11 @@ export default function Dashboard() {
         Object.entries(contador).forEach(([id, qtd]: any) => {
           if (qtd > max) {
             max = qtd
-            produtoTop = id
+            produtoTop = `${mapaProdutos[id] || "Produto desconhecido"} (${qtd}x)`
           }
         })
 
-        /* ========================= */
-        /* ⏱ TEMPO MÉDIO             */
-        /* ========================= */
+        /* ⏱ TEMPO MÉDIO */
         const entregues = pedidos.filter(
           (p: any) => p.status === "ENTREGUE"
         )
@@ -80,9 +81,7 @@ export default function Dashboard() {
 
         const tempoMin = Math.round(tempoMedio / 60000)
 
-        /* ========================= */
-        /* 📈 TENDÊNCIA               */
-        /* ========================= */
+        /* 📈 TENDÊNCIA */
         const ontem = new Date()
         ontem.setDate(ontem.getDate() - 1)
 
