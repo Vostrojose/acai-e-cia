@@ -1,4 +1,3 @@
-// src/pages/Produtos.tsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
@@ -17,6 +16,7 @@ export default function Produtos() {
   const navigate = useNavigate();
 
   const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [busca, setBusca] = useState<string>(""); // 🔥 NOVO
   const [carregando, setCarregando] = useState<boolean>(false);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -53,34 +53,36 @@ export default function Produtos() {
     }
   }
 
-  return (
-    <div style={{ padding: 40, background: "#f5f5f5", minHeight: "100vh" }}>
+  /* 🔍 FILTRO */
+  const produtosFiltrados = produtos.filter((p) =>
+    p.nome.toLowerCase().includes(busca.toLowerCase())
+  );
 
-      {/* ========================= */}
-      {/* MENU DE NAVEGAÇÃO         */}
-      {/* ========================= */}
-      <div style={{
-        display: "flex",
-        gap: 10,
-        marginBottom: 20,
-        flexWrap: "wrap"
-      }}>
-        <Botao onClick={() => navigate("/cozinha")}>🍳 Cozinha</Botao>
-        <Botao onClick={() => navigate("/pedidos")}>📦 Pedidos</Botao>
-        <Botao onClick={() => navigate("/dashboard")}>📊 Dashboard</Botao>
-        <Botao onClick={() => navigate("/auditoria")}>📊 Auditoria</Botao>
+  return (
+    <div style={page}>
+
+      <CardMenu navigate={navigate} />
+
+      <h1 style={h1Style}>🍧 Painel do Cardápio</h1>
+
+      {/* FORM */}
+      <div style={card}>
+        <h2 style={h2Style}>Adicionar novo produto</h2>
+        <ProdutoForm onCreated={carregarProdutos} />
       </div>
 
-      <h1>Painel do Cardápio</h1>
+      {/* 🔍 BUSCA */}
+      <div style={buscaContainer}>
+        <input
+          type="text"
+          placeholder="🔍 Buscar produto..."
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          style={inputBusca}
+        />
+      </div>
 
-      {/* ========================= */}
-      {/* FORM CRIAÇÃO              */}
-      {/* ========================= */}
-      <ProdutoForm onCreated={carregarProdutos} />
-
-      {/* ========================= */}
-      {/* STATUS                    */}
-      {/* ========================= */}
+      {/* STATUS */}
       {carregando && <p>Carregando produtos...</p>}
 
       {erro && (
@@ -89,63 +91,169 @@ export default function Produtos() {
         </p>
       )}
 
-      {!carregando && !erro && produtos.length === 0 && (
+      {!carregando && !erro && produtosFiltrados.length === 0 && (
         <p>Nenhum produto encontrado.</p>
       )}
 
-      {/* ========================= */}
-      {/* LISTA                     */}
-      {/* ========================= */}
-      {!carregando && !erro && produtos.length > 0 && (
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {produtos.map((p) => (
-            <li
-              key={p.id}
-              style={{
-                border: "1px solid #ccc",
-                marginBottom: 12,
-                padding: 12,
-                borderRadius: 6,
-                background: "#fff"
-              }}
-            >
-              <div style={{ marginBottom: 6 }}>
-                <strong>{p.nome}</strong>
-              </div>
+      {/* LISTA */}
+      {!carregando && !erro && produtosFiltrados.length > 0 && (
+        <div style={grid}>
+          {produtosFiltrados.map((p) => (
+            <div key={p.id} style={cardAçai}>
 
-              <div style={{ marginBottom: 6 }}>
-                💰 R$ {p.preco.toFixed(2)}
-              </div>
+              <div style={cardContent}>
 
-              {p.descricao && (
-                <div style={{ marginBottom: 6 }}>
-                  {p.descricao}
+                <div style={{ marginBottom: 8 }}>
+                  <strong>{p.nome}</strong>
                 </div>
-              )}
 
-              {/* ========================= */}
-              {/* AÇÕES                     */}
-              {/* ========================= */}
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                <Botao onClick={() => remover(p.id)} cor="#f44336">
-                  Remover
-                </Botao>
+                <div style={{ marginBottom: 8 }}>
+                  💰 R$ {p.preco.toFixed(2)}
+                </div>
 
-                <Botao onClick={() => alert("Em breve: edição de preço")} cor="#2196f3">
-                  Editar preço
-                </Botao>
+                {p.descricao && (
+                  <div style={{ marginBottom: 8, color: "#555" }}>
+                    {p.descricao}
+                  </div>
+                )}
+
+                <div style={badges}>
+                  {p.ativo && <span style={badgeVerde}>Ativo</span>}
+                  {p.destaque && <span style={badgeRoxo}>Destaque</span>}
+                </div>
+
+                <div style={acoes}>
+                  <Botao onClick={() => remover(p.id)} cor="#f44336">
+                    Remover
+                  </Botao>
+
+                  <Botao onClick={() => alert("Em breve: edição de preço")} cor="#2196f3">
+                    Editar preço
+                  </Botao>
+                </div>
+
               </div>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
 }
 
 /* ========================= */
-/* ESTILO PADRÃO DE BOTÕES   */
+/* 🎨 VISUAL                 */
 /* ========================= */
+
+const page = {
+  padding: 20,
+  background: "#f5f5f5",
+  minHeight: "100vh",
+}
+
+/* 🔍 BUSCA */
+const buscaContainer = {
+  marginBottom: 20,
+}
+
+const inputBusca = {
+  width: "100%",
+  padding: "12px",
+  borderRadius: 10,
+  border: "1px solid #ccc",
+  fontSize: 16,
+}
+
+/* MENU */
+function CardMenu({ navigate }: any) {
+  return (
+    <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+      <div style={{
+        background: "#111",
+        padding: 10,
+        borderRadius: 10,
+        display: "flex",
+        gap: 10,
+        flexWrap: "wrap"
+      }}>
+        <button onClick={() => navigate("/cozinha")} style={botaoMenu}>🍳 Cozinha</button>
+        <button onClick={() => navigate("/pedidos")} style={botaoMenu}>📦 Pedidos</button>
+        <button onClick={() => navigate("/dashboard")} style={botaoMenu}>📊 Dashboard</button>
+        <button onClick={() => navigate("/auditoria")} style={botaoMenu}>📊 Auditoria</button>
+      </div>
+    </div>
+  )
+}
+
+const botaoMenu = {
+  padding: "8px 12px",
+  borderRadius: 6,
+  border: "none",
+  background: "#333",
+  color: "#fff",
+  cursor: "pointer",
+  fontWeight: "bold",
+}
+
+/* GRID */
+const grid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+  gap: 20,
+}
+
+/* CARD */
+const card = {
+  background: "#fff",
+  padding: 20,
+  borderRadius: 10,
+  marginBottom: 20,
+}
+
+/* CARD AÇAÍ */
+const cardAçai = {
+  background: "#4e06f7",
+  borderRadius: 12,
+  padding: 4,
+}
+
+const cardContent = {
+  background: "#fff",
+  borderRadius: 10,
+  padding: 15,
+}
+
+/* BADGES */
+const badges = {
+  display: "flex",
+  gap: 8,
+  marginBottom: 10,
+}
+
+const badgeVerde = {
+  background: "#4caf50",
+  color: "#fff",
+  padding: "4px 8px",
+  borderRadius: 6,
+  fontSize: 12,
+}
+
+const badgeRoxo = {
+  background: "#9c27b0",
+  color: "#fff",
+  padding: "4px 8px",
+  borderRadius: 6,
+  fontSize: 12,
+}
+
+/* AÇÕES */
+const acoes = {
+  display: "flex",
+  gap: 10,
+  flexWrap: "wrap" as const,
+}
+
+/* BOTÃO */
 const botaoPadrao = {
   padding: "10px 15px",
   borderRadius: 8,
@@ -154,7 +262,6 @@ const botaoPadrao = {
   color: "#fff",
   cursor: "pointer",
   fontWeight: "bold",
-  transition: "background 0.3s"
 }
 
 function Botao({ children, onClick, cor, type }: any) {
@@ -166,10 +273,22 @@ function Botao({ children, onClick, cor, type }: any) {
         ...botaoPadrao,
         background: cor || botaoPadrao.background
       }}
-      onMouseOver={(e) => (e.currentTarget.style.background = "#555")}
-      onMouseOut={(e) => (e.currentTarget.style.background = cor || "#333")}
     >
       {children}
     </button>
   )
+}
+
+/* TÍTULOS */
+const h1Style = {
+  fontSize: "28px",
+  fontWeight: "bold",
+  marginBottom: 20,
+  textAlign: "center" as const,
+}
+
+const h2Style = {
+  fontSize: "20px",
+  fontWeight: "bold",
+  marginBottom: 15,
 }
