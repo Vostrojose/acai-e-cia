@@ -53,15 +53,6 @@ export default function Pedidos() {
     carregarPedidos();
   }, []);
 
-  async function atualizarStatus(id: string, novoStatus: string) {
-    try {
-      await api.patch(`/pedidos/${id}/status`, { status: novoStatus });
-      carregarPedidos();
-    } catch (e: any) {
-      console.error("Erro ao atualizar status:", e);
-    }
-  }
-
   return (
     <div style={page}>
 
@@ -86,7 +77,6 @@ export default function Pedidos() {
           {pedidos.map((pedido) => (
             <div key={pedido.id} style={cardAçai}>
 
-              {/* 🔥 CONTEÚDO INTERNO */}
               <div style={cardContent}>
 
                 <div><strong>ID:</strong> {pedido.id}</div>
@@ -112,20 +102,6 @@ export default function Pedidos() {
                   </ul>
                 </div>
 
-                <div style={acoes}>
-                  {pedido.status !== "PRONTO" && (
-                    <Botao onClick={() => atualizarStatus(pedido.id, "PRONTO")} cor="#4caf50">
-                      ✔ Pronto
-                    </Botao>
-                  )}
-
-                  {pedido.status !== "EM_PREPARO" && (
-                    <Botao onClick={() => atualizarStatus(pedido.id, "EM_PREPARO")} cor="#ff9800">
-                      🔥 Em preparo
-                    </Botao>
-                  )}
-                </div>
-
               </div>
             </div>
           ))}
@@ -141,11 +117,10 @@ export default function Pedidos() {
 
 const page = {
   padding: 20,
-  background: "#8110f2",
+  background: "#f5f5f5",
   minHeight: "100vh",
 }
 
-/* MENU */
 function CardMenu({ navigate }: any) {
   return (
     <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
@@ -176,62 +151,26 @@ const botaoMenu = {
   fontWeight: "bold",
 }
 
-/* GRID */
 const gridPedidos = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
   gap: 20,
 }
 
-/* 🔥 CARD AÇAÍ */
+/* 🍇 CARD AÇAÍ */
 const cardAçai = {
   background: "#4e06f7",
   borderRadius: 12,
   padding: 4,
 }
 
-/* 🔥 CONTEÚDO BRANCO */
+/* 🔥 CONTEÚDO LEGÍVEL */
 const cardContent = {
-  background: "#2815f7",
+  background: "#fff",
   borderRadius: 10,
   padding: 15,
 }
 
-/* AÇÕES */
-const acoes = {
-  marginTop: 12,
-  display: "flex",
-  gap: 10,
-  flexWrap: "wrap" as const,
-}
-
-/* BOTÃO */
-const botaoPadrao = {
-  padding: "10px 15px",
-  borderRadius: 8,
-  border: "none",
-  background: "#333",
-  color: "#fff",
-  cursor: "pointer",
-  fontWeight: "bold",
-}
-
-function Botao({ children, onClick, cor, type }: any) {
-  return (
-    <button
-      type={type || "button"}
-      onClick={onClick}
-      style={{
-        ...botaoPadrao,
-        background: cor || botaoPadrao.background
-      }}
-    >
-      {children}
-    </button>
-  )
-}
-
-/* TÍTULOS */
 const h1Style = {
   fontSize: "28px",
   fontWeight: "bold",
