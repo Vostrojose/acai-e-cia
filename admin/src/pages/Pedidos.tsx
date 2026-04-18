@@ -166,7 +166,7 @@ const cardAçai = {
 
 /* 🔥 CONTEÚDO LEGÍVEL */
 const cardContent = {
-  background: "#0b67f2",
+  background: "#069bf862",
   borderRadius: 10,
   padding: 15,
 }

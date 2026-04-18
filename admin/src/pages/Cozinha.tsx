@@ -277,7 +277,7 @@ function PedidoCard({ pedido }: any) {
 
       {pedido.status === 'PRONTO' && (
         <>
-          <button style={{ background: '#2196f3', color: '#fff' }} onClick={() => atualizarStatus('ENTREGUE')}>
+          <button style={{ background: "#069bf862", color: '#fff' }} onClick={() => atualizarStatus('ENTREGUE')}>
             QUITADO
           </button>
 
