@@ -182,7 +182,7 @@ const grid = {
 };
 
 const card = {
-  background: "#fff",
+  background: "#e80e0e",
   padding: 20,
   borderRadius: 10,
   marginBottom: 20,
