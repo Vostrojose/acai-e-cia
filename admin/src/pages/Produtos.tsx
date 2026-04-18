@@ -171,7 +171,7 @@ export default function Produtos() {
 
 const page = {
   padding: 20,
-  background: "#f5f5f5",
+  background: "#6d10f9a2",
   minHeight: "100vh",
 };
 
@@ -195,7 +195,7 @@ const cardAçai = {
 };
 
 const cardContent = {
-  background: "#fff",
+  background: "#0b67f2",
   borderRadius: 10,
   padding: 15,
 };
