@@ -14,7 +14,7 @@ export default function Login() {
 
     try {
 
-      const res = await api.post("/login", {
+      const res = await api.post("/auth/login", { // ✅ CORREÇÃO
         email,
         senha
       })
@@ -23,7 +23,9 @@ export default function Login() {
 
       navigate("/dashboard")
 
-    } catch {
+    } catch (err: any) {
+
+      console.error("Erro login:", err.response?.data || err.message)
 
       alert("Login inválido")
 
