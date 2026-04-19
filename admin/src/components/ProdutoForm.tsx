@@ -27,6 +27,7 @@ export default function ProdutoForm({ onCreated }: any) {
       nome,
       descricao,
       preco,
+      ativo: true, // ✅ CORREÇÃO CRÍTICA
       ...dias
     });
 
