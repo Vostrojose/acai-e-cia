@@ -8,6 +8,7 @@ interface Produto {
   descricao?: string
   preco: number | string
   destaque: boolean
+  ativo?: boolean
 
   disponivelSeg: boolean
   disponivelTer: boolean
@@ -23,7 +24,9 @@ export default function CardapioSemana() {
   const [produtos, setProdutos] = useState<Produto[]>([])
 
   const hoje = new Date().getDay()
-  const destaque = produtos.find(p => p.destaque)
+
+  // ✅ CORREÇÃO: destaque respeita ativo
+  const destaque = produtos.find(p => p.destaque && p.ativo)
 
   useEffect(() => {
     async function loadProdutos() {
@@ -44,7 +47,6 @@ export default function CardapioSemana() {
     { nome: "Domingo", key: "disponivelDom", numero: 0 }
   ]
 
-  /* 🔥 ROTAÇÃO CORRETA DA SEMANA */
   const indexHoje = dias.findIndex(d => d.numero === hoje)
 
   const diasOrdenados = [
@@ -52,7 +54,6 @@ export default function CardapioSemana() {
     ...dias.slice(0, indexHoje)
   ]
 
-  /* 🔥 INTERESSE (SAFE) */
   function registrarInteresse(produto: Produto, dia: string) {
     const interesses = JSON.parse(localStorage.getItem('interesses') || '[]')
 
@@ -103,8 +104,9 @@ export default function CardapioSemana() {
 
       {diasOrdenados.map((dia) => {
 
+        // ✅ CORREÇÃO: respeita ativo
         const produtosDoDia = produtos.filter(
-          (produto) => produto[dia.key as keyof Produto]
+          (produto) => produto.ativo && produto[dia.key as keyof Produto]
         )
 
         if (produtosDoDia.length === 0) return null
