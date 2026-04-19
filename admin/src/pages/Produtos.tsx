@@ -67,7 +67,8 @@ export default function Produtos() {
   /* 🔄 ATIVAR / DESATIVAR     */
   /* ========================= */
   async function toggleAtivo(p: Produto) {
-    await api.put(`/produtos/${p.id}`, {
+    // ✅ CORREÇÃO: usa rota correta do backend
+    await api.patch(`/produtos/${p.id}/status`, {
       ativo: !p.ativo,
     });
     carregarProdutos();
