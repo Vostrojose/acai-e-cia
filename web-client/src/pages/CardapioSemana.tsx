@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import './CardapioSemana.css'
 
@@ -22,10 +23,10 @@ interface Produto {
 export default function CardapioSemana() {
 
   const [produtos, setProdutos] = useState<Produto[]>([])
+  const navigate = useNavigate()
 
   const hoje = new Date().getDay()
 
-  // ✅ CORREÇÃO: destaque respeita ativo
   const destaque = produtos.find(p => p.destaque && p.ativo)
 
   useEffect(() => {
@@ -74,6 +75,14 @@ export default function CardapioSemana() {
   return (
     <div className="cardapio-semana-page">
 
+      {/* 🔥 BOTÃO VOLTAR */}
+      <button
+        className="btn-voltar"
+        onClick={() => navigate('/')}
+      >
+        ← Voltar para o cardápio do dia
+      </button>
+
       <h1 className="titulo-semana">
         🍽️ Cardápio da Semana
       </h1>
@@ -104,7 +113,6 @@ export default function CardapioSemana() {
 
       {diasOrdenados.map((dia) => {
 
-        // ✅ CORREÇÃO: respeita ativo
         const produtosDoDia = produtos.filter(
           (produto) => produto.ativo && produto[dia.key as keyof Produto]
         )
