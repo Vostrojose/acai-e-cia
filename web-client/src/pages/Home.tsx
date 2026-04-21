@@ -32,10 +32,7 @@ export default function Home() {
   /* ============================= */
   /* 🧮 TOTAL DE ITENS (CORRIGIDO) */
   /* ============================= */
-  const totalItens = itens.reduce(
-    (total, item) => total + item.quantidade,
-    0
-  )
+  const totalItens = itens.reduce((total, item) => total + item.quantidade, 0)
 
   function animarAdicionar(event: React.MouseEvent<HTMLButtonElement>) {
     const carrinho = document.querySelector('.cart-floating') as HTMLElement
@@ -88,27 +85,34 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    if (origem) localStorage.setItem("origemPedido", origem)
+    if (origem) localStorage.setItem('origemPedido', origem)
   }, [origem])
 
   if (loading) return <p style={{ padding: 20 }}>Carregando...</p>
 
   const produtosDisponiveis = produtos.filter((produto) => {
     switch (hoje) {
-      case 0: return produto.disponivelDom
-      case 1: return produto.disponivelSeg
-      case 2: return produto.disponivelTer
-      case 3: return produto.disponivelQua
-      case 4: return produto.disponivelQui
-      case 5: return produto.disponivelSex
-      case 6: return produto.disponivelSab
-      default: return true
+      case 0:
+        return produto.disponivelDom
+      case 1:
+        return produto.disponivelSeg
+      case 2:
+        return produto.disponivelTer
+      case 3:
+        return produto.disponivelQua
+      case 4:
+        return produto.disponivelQui
+      case 5:
+        return produto.disponivelSex
+      case 6:
+        return produto.disponivelSab
+      default:
+        return true
     }
   })
 
   return (
     <div className="page">
-
       {/* 🛒 CARRINHO NOVO */}
       {totalItens > 0 && (
         <div className="cart-floating" onClick={() => navigate('/carrinho')}>
@@ -122,12 +126,16 @@ export default function Home() {
         <p className="subtitle">Monte seu pedido </p>
       </div>
 
+      <button
+        className="btn-semana"
+        onClick={() => navigate('/cardapio-semana')}
+      ></button>
+
       <div className="cardapio-container">
         <div className="cardapio-list">
           {produtosDisponiveis.map((produto) => {
-
             // 🔥 comparação segura de ID
-            const item = itens.find(i => String(i.id) === String(produto.id))
+            const item = itens.find((i) => String(i.id) === String(produto.id))
             const quantidade = item?.quantidade || 0
 
             return (
@@ -135,7 +143,9 @@ export default function Home() {
                 <div className="produto-info">
                   <div className="produto-header">
                     <div className="produto-nome">{produto.nome}</div>
-                    <div className="produto-preco">R$ {produto.preco.toFixed(2)}</div>
+                    <div className="produto-preco">
+                      R$ {produto.preco.toFixed(2)}
+                    </div>
                   </div>
 
                   {produto.descricao && (
@@ -163,7 +173,6 @@ export default function Home() {
           })}
         </div>
       </div>
-
     </div>
   )
 }
