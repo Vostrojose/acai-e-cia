@@ -1,0 +1,145 @@
+/* ========================= */
+/* CONTAINER GERAL           */
+/* ========================= */
+
+.checkout-container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* ========================= */
+/* TÍTULO                    */
+/* ========================= */
+
+.checkout-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* ========================= */
+/* CARDS                     */
+/* ========================= */
+
+.checkout-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* ========================= */
+/* INPUTS                    */
+/* ========================= */
+
+.checkout-input {
+  width: 100%;
+  padding: 12px;
+
+  border-radius: 10px;
+  border: 1px solid #ddd;
+
+  font-size: 16px;
+
+  margin-top: 8px;
+  margin-bottom: 12px;
+
+  outline: none;
+  transition: border 0.2s ease;
+}
+
+.checkout-input:focus {
+  border-color: #6A1B9A;
+}
+
+/* ========================= */
+/* SELECT                    */
+/* ========================= */
+
+.checkout-select {
+  width: 100%;
+  padding: 12px;
+
+  border-radius: 10px;
+  border: 1px solid #ddd;
+
+  font-size: 16px;
+
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+/* ========================= */
+/* BOTÃO PRINCIPAL           */
+/* ========================= */
+
+.checkout-button {
+  width: 100%;
+  padding: 16px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: linear-gradient(135deg, #00c853, #00e676);
+  color: white;
+
+  font-size: 16px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.checkout-button:active {
+  transform: scale(0.98);
+}
+
+/* ========================= */
+/* TOTAL                     */
+/* ========================= */
+
+.checkout-total {
+  text-align: center;
+}
+
+.checkout-total h2 {
+  font-size: 22px;
+  margin-top: 6px;
+}
+
+/* ========================= */
+/* QR CODE                   */
+/* ========================= */
+
+.checkout-qr {
+  text-align: center;
+}
+
+.checkout-qr img {
+  width: 100%;
+  max-width: 220px;
+  margin-top: 10px;
+}
+
+/* ========================= */
+/* MOBILE EXTRA              */
+/* ========================= */
+
+@media (max-width: 480px) {
+  .checkout-container {
+    padding: 12px;
+  }
+
+  .checkout-title {
+    font-size: 22px;
+  }
+
+  .checkout-card {
+    padding: 14px;
+  }
+}

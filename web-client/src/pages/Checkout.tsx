@@ -3,8 +3,9 @@ import api from '../services/api'
 import { useState } from 'react'
 
 import Container from '../components/ui/Container'
-import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
+
+import './Checkout.css'
 
 export default function Checkout() {
   const { itens, total } = useCart()
@@ -71,10 +72,7 @@ export default function Checkout() {
         }))
       }
 
-      console.log("📦 CRIANDO PEDIDO:", payload)
-
       const pedidoResponse = await api.post('/pedidos', payload)
-
       const pedidoId = pedidoResponse?.data?.data?.id
 
       if (!pedidoId) {
@@ -82,48 +80,25 @@ export default function Checkout() {
         return
       }
 
-      console.log("🧾 PEDIDO CRIADO:", pedidoId)
-
-      // 🔥 SALVA PARA USAR NO SUCESSO
       localStorage.setItem("pedidoId", pedidoId)
-
-      /* ============================= */
-      /* PIX                           */
-      /* ============================= */
 
       if (metodoPagamento === "PIX") {
         const res = await api.post('/pagamento/pix', { pedidoId })
-
-        console.log("💳 PIX GERADO:", res.data)
-
         setQrCode(res.data.data.qr_code_base64)
         return
       }
 
-      /* ============================= */
-      /* CHECKOUT (MP)                 */
-      /* ============================= */
-
       const pagamentoResponse = await api.post('/pagamento/checkout', { pedidoId })
-
       const initPoint = pagamentoResponse?.data?.data?.init_point
 
-      console.log("🚀 CHECKOUT MP:", initPoint)
-
       if (initPoint) {
-        // 🔥 REDIRECIONAMENTO SEGURO
         window.location.href = initPoint
       } else {
         alert('Erro ao iniciar pagamento')
       }
 
     } catch (error: any) {
-      console.error('❌ ERRO FINALIZAR PEDIDO:', error?.response?.data || error)
-
-      alert(
-        error?.response?.data?.message ||
-        'Erro ao processar pedido'
-      )
+      alert(error?.response?.data?.message || 'Erro ao processar pedido')
     } finally {
       setLoading(false)
     }
@@ -131,92 +106,79 @@ export default function Checkout() {
 
   return (
     <Container>
-      <h1 style={titulo}>💳 Checkout</h1>
 
-      <Card>
-        <p>Total do pedido</p>
-        <h2>R$ {(Number(total) || 0).toFixed(2)}</h2>
-      </Card>
+      <div className="checkout-container">
 
-      <Card>
-        <label>WhatsApp para confirmação</label>
-        <input
-          type="tel"
-          placeholder="(11) 99999-9999"
-          value={telefone}
-          onChange={(e) => setTelefone(e.target.value)}
-          style={input}
-        />
-      </Card>
+        <h1 className="checkout-title">💳 Checkout</h1>
 
-      <Card>
-        <label>Tipo de pedido</label>
-        <select
-          value={tipoPedido}
-          onChange={(e) => setTipoPedido(e.target.value as 'retirada' | 'entrega')}
-          style={input}
-        >
-          <option value="retirada">Retirada no local</option>
-          <option value="entrega">Entrega</option>
-        </select>
-      </Card>
+        <div className="checkout-card">
+          <p>Total do pedido</p>
+          <h2>R$ {(Number(total) || 0).toFixed(2)}</h2>
+        </div>
 
-      {tipoPedido === 'entrega' && (
-        <Card>
-          <label>Endereço de entrega</label>
+        <div className="checkout-card">
+          <label>WhatsApp para confirmação</label>
+          <input
+            type="tel"
+            placeholder="(11) 99999-9999"
+            value={telefone}
+            onChange={(e) => setTelefone(e.target.value)}
+            className="checkout-input"
+          />
+        </div>
 
-          <input placeholder="Rua" value={endereco.rua} onChange={(e) => setEndereco({ ...endereco, rua: e.target.value })} style={input} />
-          <input placeholder="Número" value={endereco.numero} onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })} style={input} />
-          <input placeholder="Bairro" value={endereco.bairro} onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })} style={input} />
-          <input placeholder="Cidade" value={endereco.cidade} onChange={(e) => setEndereco({ ...endereco, cidade: e.target.value })} style={input} />
-          <input placeholder="CEP" value={endereco.cep} onChange={(e) => setEndereco({ ...endereco, cep: e.target.value })} style={input} />
-        </Card>
-      )}
+        <div className="checkout-card">
+          <label>Tipo de pedido</label>
+          <select
+            value={tipoPedido}
+            onChange={(e) => setTipoPedido(e.target.value as 'retirada' | 'entrega')}
+            className="checkout-select"
+          >
+            <option value="retirada">Retirada no local</option>
+            <option value="entrega">Entrega</option>
+          </select>
+        </div>
 
-      <Card>
-        <label>Forma de pagamento</label>
+        {tipoPedido === 'entrega' && (
+          <div className="checkout-card">
+            <label>Endereço de entrega</label>
 
-        <select
-          value={metodoPagamento}
-          onChange={(e) => setMetodoPagamento(e.target.value as 'PIX' | 'CHECKOUT')}
-          style={input}
-        >
-          <option value="CHECKOUT">Cartão / Mercado Pago</option>
-          <option value="PIX">PIX</option>
-        </select>
-      </Card>
+            <input className="checkout-input" placeholder="Rua" value={endereco.rua} onChange={(e) => setEndereco({ ...endereco, rua: e.target.value })} />
+            <input className="checkout-input" placeholder="Número" value={endereco.numero} onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })} />
+            <input className="checkout-input" placeholder="Bairro" value={endereco.bairro} onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })} />
+            <input className="checkout-input" placeholder="Cidade" value={endereco.cidade} onChange={(e) => setEndereco({ ...endereco, cidade: e.target.value })} />
+            <input className="checkout-input" placeholder="CEP" value={endereco.cep} onChange={(e) => setEndereco({ ...endereco, cep: e.target.value })} />
+          </div>
+        )}
 
-      <div style={{ marginTop: 20 }}>
-        <Button variant="primary" onClick={finalizarPedido}>
-          {loading ? 'Processando...' : 'Confirmar Pedido'}
-        </Button>
+        <div className="checkout-card">
+          <label>Forma de pagamento</label>
+
+          <select
+            value={metodoPagamento}
+            onChange={(e) => setMetodoPagamento(e.target.value as 'PIX' | 'CHECKOUT')}
+            className="checkout-select"
+          >
+            <option value="CHECKOUT">Cartão / Mercado Pago</option>
+            <option value="PIX">PIX</option>
+          </select>
+        </div>
+
+        <div style={{ marginTop: 20 }}>
+          <Button onClick={finalizarPedido}>
+            {loading ? 'Processando...' : 'Confirmar Pedido'}
+          </Button>
+        </div>
+
+        {qrCode && (
+          <div className="checkout-card checkout-qr">
+            <p>Escaneie o QR Code:</p>
+            <img src={`data:image/png;base64,${qrCode}`} alt="QR Code" />
+          </div>
+        )}
+
       </div>
 
-      {qrCode && (
-        <Card>
-          <p>Escaneie o QR Code:</p>
-          <img src={`data:image/png;base64,${qrCode}`} alt="QR Code" />
-        </Card>
-      )}
     </Container>
   )
-}
-
-/* ========================= */
-/* ESTILOS                   */
-/* ========================= */
-
-const titulo = {
-  textAlign: 'center' as const,
-  fontSize: 28,
-  fontWeight: 'bold',
-}
-
-const input = {
-  width: '100%',
-  padding: 10,
-  marginTop: 8,
-  borderRadius: 6,
-  border: '1px solid #ccc',
-  marginBottom: 10,
 }
