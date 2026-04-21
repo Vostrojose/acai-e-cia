@@ -1,11 +1,11 @@
 import { useCart } from '../context/CartContext'
 import api from '../services/api'
 import { useState } from 'react'
-
 import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
+import '../assets/css/Checkout.css'
 
-import './Checkout.css'
+
 
 export default function Checkout() {
   const { itens, total } = useCart()

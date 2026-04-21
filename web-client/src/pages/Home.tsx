@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import api from '../services/api'
 import { useCart } from '../context/CartContext'
 import { useParams, useNavigate } from 'react-router-dom'
-import './Home.css'
+import '../assets/css/Home.css'
 
 interface Produto {
   id: string
@@ -110,7 +110,6 @@ export default function Home() {
 
   return (
     <div className="page">
-
       {/* 📅 BOTÃO CARDÁPIO SEMANA (SEMPRE VISÍVEL) */}
       <button
         className="btn-semana-floating"

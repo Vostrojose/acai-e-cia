@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
-import './CardapioSemana.css'
+import '../assets/css/CardapioSemana.css'
 
 interface Produto {
   id: string
