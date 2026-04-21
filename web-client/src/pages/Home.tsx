@@ -114,7 +114,7 @@ export default function Home() {
       {/* 📅 BOTÃO CARDÁPIO SEMANA (SEMPRE VISÍVEL) */}
       <button
         className="btn-semana-floating"
-        onClick={() => navigate('/cardapio-semana')}
+        onClick={() => navigate('/cardapioSemana')}
       >
         📅
       </button>
