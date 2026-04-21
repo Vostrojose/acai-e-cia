@@ -118,20 +118,21 @@ export default function Home() {
         <div className="cart-floating" onClick={() => navigate('/carrinho')}>
           🛒
           <span className="cart-badge">{totalItens}</span>
+          {/* 📅 BOTÃO CARDÁPIO SEMANA (FIXO) */}
+          <button
+            className="btn-semana-floating"
+            onClick={() => navigate('/cardapio-semana')}
+          >
+            📅
+          </button>
         </div>
       )}
 
       <div className="header">
-        <h1 className="title"> Açaí & Cia</h1>
+        <h1 className="title"> Açaí & Co</h1>
         <p className="subtitle">Monte seu pedido </p>
-        <button
-          className="btn-semana"
-          onClick={() => navigate('/cardapio-semana')}
-        >
-          📅 Ver cardápio da semana
-        </button>
       </div>
-      
+
       <div className="cardapio-container">
         <div className="cardapio-list">
           {produtosDisponiveis.map((produto) => {

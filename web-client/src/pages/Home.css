@@ -20,6 +20,8 @@
   margin-bottom: 10px;
   font-size: 28px;
   font-weight: 700;
+  text-align: center; /* 🔥 ESSENCIAL */
+  width: 100%; 
 }
 
 .subtitle {
