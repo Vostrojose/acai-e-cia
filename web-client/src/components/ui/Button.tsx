@@ -15,7 +15,7 @@ export default function Button({ children, onClick, variant = 'primary' }: Props
     },
 
     primary: {
-      background: '#4caf50',
+      background: '#06f1b3b3',
       color: '#fff',
     },
 
