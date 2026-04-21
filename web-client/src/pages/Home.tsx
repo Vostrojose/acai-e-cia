@@ -29,9 +29,6 @@ export default function Home() {
 
   const { adicionarItem, itens } = useCart()
 
-  /* ============================= */
-  /* 🧮 TOTAL DE ITENS (CORRIGIDO) */
-  /* ============================= */
   const totalItens = itens.reduce((total, item) => total + item.quantidade, 0)
 
   function animarAdicionar(event: React.MouseEvent<HTMLButtonElement>) {
@@ -113,18 +110,20 @@ export default function Home() {
 
   return (
     <div className="page">
+
+      {/* 📅 BOTÃO CARDÁPIO SEMANA (SEMPRE VISÍVEL) */}
+      <button
+        className="btn-semana-floating"
+        onClick={() => navigate('/cardapio-semana')}
+      >
+        📅
+      </button>
+
       {/* 🛒 CARRINHO NOVO */}
       {totalItens > 0 && (
         <div className="cart-floating" onClick={() => navigate('/carrinho')}>
           🛒
           <span className="cart-badge">{totalItens}</span>
-          {/* 📅 BOTÃO CARDÁPIO SEMANA (FIXO) */}
-          <button
-            className="btn-semana-floating"
-            onClick={() => navigate('/cardapio-semana')}
-          >
-            📅
-          </button>
         </div>
       )}
 
@@ -136,7 +135,6 @@ export default function Home() {
       <div className="cardapio-container">
         <div className="cardapio-list">
           {produtosDisponiveis.map((produto) => {
-            // 🔥 comparação segura de ID
             const item = itens.find((i) => String(i.id) === String(produto.id))
             const quantidade = item?.quantidade || 0
 
