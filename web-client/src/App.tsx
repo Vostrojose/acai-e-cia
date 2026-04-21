@@ -1,6 +1,7 @@
 import { CartProvider } from './context/CartContext'
 import AppRoutes from './routes/AppRoutes'
 
+
 function App() {
   return (
     <CartProvider>
