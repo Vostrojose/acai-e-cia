@@ -40,7 +40,7 @@ export default function Produtos() {
   }, []);
 
   /* ========================= */
-  /* 🔥 REMOVER                */
+  /* REMOVER                */
   /* ========================= */
   async function remover(id: string) {
     if (!confirm("Deseja remover este produto?")) return;
@@ -50,7 +50,7 @@ export default function Produtos() {
   }
 
   /* ========================= */
-  /* ✏️ EDITAR PREÇO           */
+  /*  EDITAR PREÇO           */
   /* ========================= */
   function iniciarEdicao(p: Produto) {
     setEditando(p.id);
@@ -64,10 +64,10 @@ export default function Produtos() {
   }
 
   /* ========================= */
-  /* 🔄 ATIVAR / DESATIVAR     */
+  /*  ATIVAR / DESATIVAR     */
   /* ========================= */
   async function toggleAtivo(p: Produto) {
-    // ✅ CORREÇÃO: usa rota correta do backend
+    //  CORREÇÃO: usa rota correta do backend
     await api.patch(`/produtos/${p.id}/status`, {
       ativo: !p.ativo,
     });
@@ -75,7 +75,7 @@ export default function Produtos() {
   }
 
   /* ========================= */
-  /* 🔍 FILTRO                 */
+  /* FILTRO                 */
   /* ========================= */
   const produtosFiltrados = produtos.filter((p) =>
     p.nome.toLowerCase().includes(busca.toLowerCase())
@@ -86,7 +86,7 @@ export default function Produtos() {
 
       <CardMenu navigate={navigate} />
 
-      <h1 style={h1Style}>🍧 Painel do Cardápio</h1>
+      <h1 style={h1Style}> Painel do Cardápio</h1>
 
       {/* FORM */}
       <div style={card}>
@@ -167,7 +167,7 @@ export default function Produtos() {
 }
 
 /* ========================= */
-/* 🎨 VISUAL                 */
+/* VISUAL                 */
 /* ========================= */
 
 const page = {
@@ -179,7 +179,7 @@ const page = {
 const grid = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-  gap: 20,
+  gap: 40,
 };
 
 const card = {
