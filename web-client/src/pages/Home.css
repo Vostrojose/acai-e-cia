@@ -285,7 +285,7 @@
   100% { transform: scale(1); }
 }
 .btn-semana-floating {
-  position: relative;
+  position: fixed;
   top: 20px;
   right: 80px; /* 🔥 afastado do carrinho */
 
