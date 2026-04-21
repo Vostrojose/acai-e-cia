@@ -23,13 +23,19 @@ export default function ProdutoForm({ onCreated }: any) {
   async function salvar(e: any) {
     e.preventDefault();
 
-    await api.post("/produtos", {
+    // 🔥 GARANTE QUE ativo SEMPRE será true
+    const payload = {
       nome,
       descricao,
       preco,
-      ativo: true, // ✅ CORREÇÃO CRÍTICA
-      ...dias
-    });
+      ...dias,
+      ativo: true // sempre por último para não ser sobrescrito
+    };
+
+    // 🔍 DEBUG (pode remover depois)
+    console.log("📦 PAYLOAD ENVIADO:", payload);
+
+    await api.post("/produtos", payload);
 
     setNome("");
     setDescricao("");
