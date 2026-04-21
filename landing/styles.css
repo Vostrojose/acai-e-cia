@@ -101,7 +101,7 @@ h2 {
 
 .download {
   background: linear-gradient(135deg, #ff9800, #ff5722);
-  color: #fff;
+  color: #000000;
 }
 
 /* ===========================
@@ -115,7 +115,7 @@ h2 {
   margin-top: 30px;
   font-size: 0.9rem;
   opacity: 0.7;
-  color: #fdfcfc;
+  color: #f67708;
 }
 
 .developer-info {
