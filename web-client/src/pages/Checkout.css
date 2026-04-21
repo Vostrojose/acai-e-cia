@@ -77,9 +77,11 @@
 /* ========================= */
 /* BOTÃO PRINCIPAL           */
 /* ========================= */
-
 .checkout-button {
   width: 100%;
+  max-width: 400px;   /* 🔥 limita largura */
+  margin: 0 auto;     /* 🔥 centraliza */
+
   padding: 16px;
 
   border: none;
@@ -94,11 +96,11 @@
   cursor: pointer;
 
   transition: all 0.2s ease;
+
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
 .checkout-button:active {
   transform: scale(0.98);
 }
