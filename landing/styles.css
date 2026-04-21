@@ -4,7 +4,7 @@
 :root {
   --bg-gradient: linear-gradient(135deg, #4b2e83, #7b3ff2);
   --text-main: #0d0101;
-  --accent-1: #f67708;   /* laranja/energia */
+  --accent-1: #f8f5fa;   /* laranja/energia */
   --accent-2: #f8f5fa;   /* roxo profundo */
   --shadow: rgba(0,0,0,0.25);
   --font-main: 'Poppins', Arial, Helvetica, sans-serif;
