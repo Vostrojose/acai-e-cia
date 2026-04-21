@@ -131,12 +131,7 @@ export default function Home() {
           📅 Ver cardápio da semana
         </button>
       </div>
-
-      <button
-        className="btn-semana"
-        onClick={() => navigate('/cardapio-semana')}
-      ></button>
-
+      
       <div className="cardapio-container">
         <div className="cardapio-list">
           {produtosDisponiveis.map((produto) => {
