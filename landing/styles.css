@@ -46,7 +46,7 @@ h1 {
   font-weight: 800;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--accent-2);
+  color: var(--accent-1);
 }
 
 h2 {
@@ -54,7 +54,7 @@ h2 {
   font-size: 1.5rem;
   font-weight: 400;
   letter-spacing: 1px;
-  color: var(--accent-2);
+  color: var(--accent-1);
   font-style: italic;
 }
 
@@ -62,7 +62,7 @@ h2 {
   margin-bottom: 35px;
   font-size: 1rem;
   opacity: 0.85;
-  color: var(--accent-1);
+  color: var(--accent-2);
 }
 
 /* ===========================
