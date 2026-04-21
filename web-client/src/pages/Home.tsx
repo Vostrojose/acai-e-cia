@@ -124,6 +124,12 @@ export default function Home() {
       <div className="header">
         <h1 className="title"> Açaí & Cia</h1>
         <p className="subtitle">Monte seu pedido </p>
+        <button
+          className="btn-semana"
+          onClick={() => navigate('/cardapio-semana')}
+        >
+          📅 Ver cardápio da semana
+        </button>
       </div>
 
       <button
