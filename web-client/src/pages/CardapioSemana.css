@@ -222,3 +222,27 @@
   }
 
 }
+
+.btn-voltar {
+  margin-bottom: 15px;
+  padding: 10px 14px;
+
+  background: #6A1B9A;
+  color: white;
+
+  border: none;
+  border-radius: 10px;
+
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.btn-voltar:hover {
+  background: #7B1FA2;
+}
+
+.btn-voltar:active {
+  transform: scale(0.95);
+}
