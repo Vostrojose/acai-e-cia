@@ -1,6 +1,6 @@
 import { useCart } from '../context/CartContext'
 import { useNavigate } from 'react-router-dom'
-import '../assets/css/Carrinho.css'
+import './assets/css/Carrinho.css'
 
 export default function Carrinho() {
   const { itens, total, removerItem, limparCarrinho } = useCart()
