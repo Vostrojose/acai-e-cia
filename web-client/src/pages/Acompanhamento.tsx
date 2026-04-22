@@ -6,6 +6,8 @@ import { useCart } from '../context/CartContext'
 
 import '../assets/css/Acompanhamento.css'
 
+
+
 const socketUrl = 'https://api.acaiecompanhia.com.br'
 
 export default function Acompanhamento() {
