@@ -1,0 +1,173 @@
+/* ========================= */
+/* CONTAINER GERAL           */
+/* ========================= */
+
+.acompanhamento-page {
+  min-height: 100vh;
+  padding: 20px;
+
+  background: linear-gradient(180deg, #4A148C 0%, #6A1B9A 100%);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ========================= */
+/* CARD PRINCIPAL            */
+/* ========================= */
+
+.acompanhamento-card {
+  width: 100%;
+  max-width: 420px;
+
+  background: #fff;
+  border-radius: 18px;
+
+  padding: 24px;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+
+  text-align: center;
+}
+
+/* ========================= */
+/* TÍTULO                    */
+/* ========================= */
+
+.acompanhamento-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* ========================= */
+/* BLOCO INFO                */
+/* ========================= */
+
+.acompanhamento-bloco {
+  margin-bottom: 18px;
+}
+
+.acompanhamento-label {
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 4px;
+}
+
+.acompanhamento-valor {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  word-break: break-all;
+}
+
+/* ========================= */
+/* STATUS                    */
+/* ========================= */
+
+.acompanhamento-status {
+  margin-top: 20px;
+  padding: 14px;
+  border-radius: 12px;
+
+  font-weight: bold;
+  font-size: 18px;
+
+  display: inline-block;
+  min-width: 200px;
+}
+
+/* 🎯 CORES POR STATUS */
+
+.status-AGUARDANDO_PAGAMENTO {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-RECEBIDO {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.status-EM_PREPARO {
+  background: #ffeeba;
+  color: #856404;
+}
+
+.status-PRONTO {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-ENTREGUE {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.status-CANCELADO {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* ========================= */
+/* LOADING                   */
+/* ========================= */
+
+.acompanhamento-loading {
+  text-align: center;
+  color: #fff;
+  font-size: 18px;
+}
+
+/* ========================= */
+/* ANIMAÇÃO STATUS           */
+/* ========================= */
+
+.status-EM_PREPARO,
+.status-RECEBIDO {
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+/* ========================= */
+/* MOBILE EXTRA              */
+/* ========================= */
+
+@media (max-width: 480px) {
+  .acompanhamento-card {
+    padding: 20px;
+  }
+
+  .acompanhamento-title {
+    font-size: 22px;
+  }
+
+  .acompanhamento-valor {
+    font-size: 16px;
+  }
+}
+
+/* ========================= */
+/* PROGRESSO                 */
+/* ========================= */
+
+.progress-container {
+  margin-top: 20px;
+  width: 100%;
+  height: 10px;
+  background: #eee;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(135deg, #00c853, #00e676);
+  transition: width 0.4s ease;
+}
