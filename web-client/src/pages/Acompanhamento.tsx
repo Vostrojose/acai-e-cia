@@ -3,7 +3,6 @@ import { io } from 'socket.io-client'
 import { useParams } from 'react-router-dom'
 import api from '../services/api'
 import { useCart } from '../context/CartContext'
-
 import '../assets/css/Acompanhamento.css'
 
 
