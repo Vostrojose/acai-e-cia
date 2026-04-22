@@ -128,23 +128,7 @@ Em breve confirmaremos seu pedido.
       <p>Status:</p>
       <h2>{status}</h2>
 
-      <a
-        href={whatsappLink}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          display: "inline-block",
-          marginTop: 20,
-          padding: "15px 25px",
-          backgroundColor: "#25D366",
-          color: "white",
-          textDecoration: "none",
-          borderRadius: 8,
-          fontWeight: "bold"
-        }}
-      >
-        📲 Confirmar no WhatsApp
-      </a>
+      
     </div>
   )
 }
