@@ -121,7 +121,7 @@ export default function Acompanhamento() {
             Número do pedido
           </div>
           <div className="acompanhamento-valor">
-            {pedido.id}
+           #{pedido.codigo?.toString().padStart(4, '0') || '----'}
           </div>
         </div>
 

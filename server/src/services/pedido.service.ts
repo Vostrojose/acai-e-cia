@@ -71,23 +71,34 @@ class PedidoService {
       }
     })
 
-    const pedidoCriado = await prisma.$transaction(async (tx) => {
-      return tx.pedido.create({
-        data: {
-          total: totalCalculado,
-          telefone: data.telefone,
-          origem: data.origem
-            ? (data.origem as OrigemPedido)
-            : undefined,
-          endereco: data.endereco,
-          status: StatusPedido.AGUARDANDO_PAGAMENTO,
-          itens: { create: itensParaCriar },
-        },
-        include: {
-          itens: true,
-        },
-      })
-    })
+   const pedidoCriado = await prisma.$transaction(async (tx) => {
+
+  const ultimo = await tx.pedido.findFirst({
+    orderBy: { codigo: 'desc' },
+    select: { codigo: true },
+  })
+
+  const novoCodigo = (ultimo?.codigo || 1000) + 1
+
+  return tx.pedido.create({
+    data: {
+      codigo: novoCodigo, // ✅ NOVO CAMPO
+
+      total: totalCalculado,
+      telefone: data.telefone,
+      origem: data.origem
+        ? (data.origem as OrigemPedido)
+        : undefined,
+      endereco: data.endereco,
+      status: StatusPedido.AGUARDANDO_PAGAMENTO,
+      itens: { create: itensParaCriar },
+    },
+    include: {
+      itens: true,
+    },
+  })
+
+})
 
     return pedidoCriado
   }
