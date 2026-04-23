@@ -10,6 +10,7 @@ interface Produto {
   descricao?: string
   preco: number
   ativo: boolean
+
   disponivelSeg: boolean
   disponivelTer: boolean
   disponivelQua: boolean
@@ -17,6 +18,16 @@ interface Produto {
   disponivelSex: boolean
   disponivelSab: boolean
   disponivelDom: boolean
+
+  // 🔥 CORREÇÃO AQUI
+  adicionais?: {
+    id: string
+    nome: string
+    preco: number
+    ativo: boolean
+  }[]
+
+  temAdicionais?: boolean
 }
 
 export default function Home() {
@@ -31,22 +42,18 @@ export default function Home() {
 
   const totalItens = itens.reduce((total, item) => total + item.quantidade, 0)
 
-  /* ============================= */
-  /* 🔥 MODAL ADICIONAIS           */
-  /* ============================= */
-
   const [produtoSelecionado, setProdutoSelecionado] = useState<any>(null)
   const [adicionaisSelecionados, setAdicionaisSelecionados] = useState<any[]>([])
 
-  function abrirModalProduto(produto: any, event: any) {
-    animarAdicionar(event)
+  function abrirPopup(produto: any) {
     setProdutoSelecionado(produto)
     setAdicionaisSelecionados([])
   }
 
-  /* ============================= */
-  /* 🔥 NOVO: ID ÚNICO POR ITEM    */
-  /* ============================= */
+  function fecharPopup() {
+    setProdutoSelecionado(null)
+  }
+
   function gerarIdItem(produto: any, adicionais: any[]) {
     const adicionaisOrdenados = [...adicionais].sort((a, b) =>
       a.nome.localeCompare(b.nome)
@@ -59,6 +66,17 @@ export default function Home() {
     )
   }
 
+  function adicionarDireto(produto: any) {
+    const idUnico = gerarIdItem(produto, [])
+
+    adicionarItem({
+      id: idUnico,
+      nome: produto.nome,
+      preco: produto.preco,
+      adicionais: []
+    })
+  }
+
   function confirmarProduto() {
     const adicionaisTotal = adicionaisSelecionados.reduce(
       (acc, item) => acc + item.preco,
@@ -68,41 +86,13 @@ export default function Home() {
     const idUnico = gerarIdItem(produtoSelecionado, adicionaisSelecionados)
 
     adicionarItem({
-      id: idUnico, // 🔥 CORREÇÃO PRINCIPAL
+      id: idUnico,
       nome: produtoSelecionado.nome,
       preco: produtoSelecionado.preco + adicionaisTotal,
       adicionais: adicionaisSelecionados
     })
 
-    setProdutoSelecionado(null)
-  }
-
-  /* ============================= */
-
-  function animarAdicionar(event: React.MouseEvent<HTMLButtonElement>) {
-    const carrinho = document.querySelector('.cart-floating') as HTMLElement
-    if (!carrinho) return
-
-    const origem = event.currentTarget.getBoundingClientRect()
-    const destino = carrinho.getBoundingClientRect()
-
-    const bolinha = document.createElement('div')
-    bolinha.className = 'fly-item'
-
-    document.body.appendChild(bolinha)
-
-    bolinha.style.left = `${origem.left}px`
-    bolinha.style.top = `${origem.top}px`
-
-    requestAnimationFrame(() => {
-      bolinha.style.transform = `translate(${destino.left - origem.left}px, ${destino.top - origem.top}px) scale(0.3)`
-      bolinha.style.opacity = '0'
-    })
-
-    carrinho.classList.add('pulse')
-    setTimeout(() => carrinho.classList.remove('pulse'), 400)
-
-    setTimeout(() => bolinha.remove(), 600)
+    fecharPopup()
   }
 
   useEffect(() => {
@@ -115,6 +105,9 @@ export default function Home() {
           .map((produto: Produto) => ({
             ...produto,
             preco: Number(produto.preco),
+
+            // 🔥 CORREÇÃO SEGURA
+            temAdicionais: (produto.adicionais?.length ?? 0) > 0
           }))
           .filter((produto: Produto) => produto.ativo)
 
@@ -166,7 +159,7 @@ export default function Home() {
       )}
 
       <div className="header">
-        <h1 className="title"> Açaí & Co</h1>
+        <h1 className="title">Açaí & Co</h1>
         <p className="subtitle">Monte seu pedido</p>
       </div>
 
@@ -185,6 +178,7 @@ export default function Home() {
 
             return (
               <div key={produto.id} className="produto-card">
+
                 <div className="produto-info">
                   <div className="produto-header">
                     <div className="produto-nome">{produto.nome}</div>
@@ -201,13 +195,27 @@ export default function Home() {
                 </div>
 
                 <div className="produto-acoes">
-                  <button
-                    className={quantidade ? 'add-btn-added' : 'add-btn'}
-                    onClick={(e) => abrirModalProduto(produto, e)}
-                  >
-                    {quantidade ? `✔ ${quantidade}` : '+ Adicionar'}
-                  </button>
+
+                  {!produto.temAdicionais && (
+                    <button
+                      className="add-btn"
+                      onClick={() => adicionarDireto(produto)}
+                    >
+                      + Adicionar
+                    </button>
+                  )}
+
+                  {produto.temAdicionais && (
+                    <button
+                      className={quantidade ? 'add-btn-added' : 'add-btn'}
+                      onClick={() => abrirPopup(produto)}
+                    >
+                      {quantidade ? `✔ ${quantidade}` : 'Escolher adicionais'}
+                    </button>
+                  )}
+
                 </div>
+
               </div>
             )
           })}
@@ -215,44 +223,40 @@ export default function Home() {
       </div>
 
       {produtoSelecionado && (
-        <div className="modal">
-          <div className="modal-content">
+        <div className="popup-adicionais">
 
-            <h2>{produtoSelecionado.nome}</h2>
+          <h3>{produtoSelecionado.nome}</h3>
 
-            <p>Escolha adicionais:</p>
+          {[
+            { nome: 'Ovo', preco: 2 },
+            { nome: 'Queijo coalho', preco: 6 },
+            { nome: 'Orégano', preco: 1 }
+          ].map((add, i) => (
+            <label key={i}>
+              <input
+                type="checkbox"
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setAdicionaisSelecionados(prev => [...prev, add])
+                  } else {
+                    setAdicionaisSelecionados(prev =>
+                      prev.filter(a => a.nome !== add.nome)
+                    )
+                  }
+                }}
+              />
+              {add.nome} (+R$ {add.preco})
+            </label>
+          ))}
 
-            {[
-              { nome: 'Ovo', preco: 2 },
-              { nome: 'Queijo coalho', preco: 6 },
-              { nome: 'Orégano', preco: 1 }
-            ].map((add, i) => (
-              <label key={i} style={{ display: 'block', marginTop: 8 }}>
-                <input
-                  type="checkbox"
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setAdicionaisSelecionados(prev => [...prev, add])
-                    } else {
-                      setAdicionaisSelecionados(prev =>
-                        prev.filter(a => a.nome !== add.nome)
-                      )
-                    }
-                  }}
-                />
-                {add.nome} (+R$ {add.preco})
-              </label>
-            ))}
+          <button onClick={confirmarProduto}>
+            Confirmar
+          </button>
 
-            <button onClick={confirmarProduto}>
-              Confirmar
-            </button>
+          <button onClick={fecharPopup}>
+            Fechar
+          </button>
 
-            <button onClick={() => setProdutoSelecionado(null)}>
-              Cancelar
-            </button>
-
-          </div>
         </div>
       )}
 
