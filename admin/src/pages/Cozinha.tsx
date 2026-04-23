@@ -135,9 +135,7 @@ export default function Cozinha() {
   )
 }
 
-/* ========================= */
-/* COMPONENTES RESTAURADOS */
-/* ========================= */
+/* COMPONENTES */
 
 function CardMenu({ navigate }: any) {
   return (
@@ -205,6 +203,7 @@ function Coluna({ titulo, pedidos }: any) {
 }
 
 /* PEDIDO */
+
 function PedidoCard({ pedido }: any) {
   const [tempo, setTempo] = useState('')
 
@@ -241,7 +240,6 @@ function PedidoCard({ pedido }: any) {
 
       <div style={{ marginTop: 10 }}>
         <strong>Itens:</strong>
-
         <ul style={{ marginTop: 5, paddingLeft: 15 }}>
           {pedido.itens?.map((item: any) => (
             <li key={item.id}>
@@ -269,9 +267,31 @@ function PedidoCard({ pedido }: any) {
       )}
 
       {pedido.status === 'PRONTO' && (
-        <button style={{ background: "#069bf862", color: '#fff' }} onClick={() => atualizarStatus('ENTREGUE')}>
-          QUITADO
-        </button>
+        <>
+          <button
+            style={{ background: "#069bf862", color: '#fff' }}
+            onClick={() => atualizarStatus('ENTREGUE')}
+          >
+            QUITADO
+          </button>
+
+          {pedido.telefone && (
+            <button
+              style={{
+                background: '#25D366',
+                color: '#fff',
+                marginLeft: 10
+              }}
+              onClick={() => {
+                const numero = pedido.telefone.replace(/\D/g, '')
+                const mensagem = encodeURIComponent(`Seu pedido #${pedido.codigo} está PRONTO! 🎉`)
+                window.open(`https://wa.me/55${numero}?text=${mensagem}`, '_blank')
+              }}
+            >
+              📲 WhatsApp
+            </button>
+          )}
+        </>
       )}
     </div>
   )
