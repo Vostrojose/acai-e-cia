@@ -13,6 +13,7 @@ class PedidoService {
     itens: {
       produtoId: string
       quantidade: number
+      adicionais?: { nome: string; preco: number }[] // 🔥 NOVO
     }[]
     telefone?: string
     origem?: string
@@ -22,14 +23,6 @@ class PedidoService {
     if (!Array.isArray(data.itens) || data.itens.length === 0) {
       throw new AppError('Pedido precisa conter ao menos um item.', 400)
     }
-
-    const idsDuplicados = new Set<string>()
-    data.itens.forEach((i) => {
-      if (idsDuplicados.has(i.produtoId)) {
-        throw new AppError('Produto duplicado no pedido.', 400)
-      }
-      idsDuplicados.add(i.produtoId)
-    })
 
     data.itens.forEach((item) => {
       if (!item.produtoId || item.produtoId.length < 10) {
@@ -59,15 +52,30 @@ class PedidoService {
 
       if (!produto) throw new AppError('Produto não encontrado.', 400)
 
-      const preco = Number(produto.preco)
-      const subtotal = preco * item.quantidade
+      const precoBase = Number(produto.preco)
+
+      const adicionaisTotal = (item.adicionais || []).reduce(
+        (acc, add) => acc + Number(add.preco),
+        0
+      )
+
+      const precoFinal = precoBase + adicionaisTotal
+      const subtotal = precoFinal * item.quantidade
 
       totalCalculado += subtotal
 
       return {
         produtoId: produto.id,
         quantidade: item.quantidade,
-        precoUnit: preco,
+        precoUnit: precoFinal,
+
+        // 🔥 SALVAR ADICIONAIS
+        adicionais: {
+          create: (item.adicionais || []).map((add) => ({
+            nome: add.nome,
+            preco: add.preco
+          }))
+        }
       }
     })
 
@@ -94,12 +102,16 @@ class PedidoService {
             : undefined,
           endereco: data.endereco,
           status: StatusPedido.AGUARDANDO_PAGAMENTO,
-          itens: { create: itensParaCriar },
+
+          itens: {
+            create: itensParaCriar
+          },
         },
         include: {
           itens: {
             include: {
-              produto: true // ✅ CRÍTICO
+              produto: true,
+              adicionais: true // 🔥 CRÍTICO
             }
           },
         },
@@ -127,35 +139,14 @@ class PedidoService {
       include: {
         itens: {
           include: {
-            produto: true // ✅ CRÍTICO
+            produto: true,
+            adicionais: true // 🔥 CRÍTICO
           }
         }
       },
     })
 
     if (!pedido) throw new AppError('Pedido não encontrado.', 404)
-
-    return pedido
-  }
-
-  async buscarPorIdComProdutos(id: string) {
-    const cleanId = id.trim()
-
-    const pedido = await prisma.pedido.findFirst({
-      where: {
-        OR: [
-          { id: cleanId },
-          { externalReference: cleanId }
-        ]
-      },
-      include: {
-        itens: {
-          include: {
-            produto: true,
-          },
-        },
-      },
-    })
 
     return pedido
   }
@@ -175,7 +166,8 @@ class PedidoService {
       include: {
         itens: {
           include: {
-            produto: true // ✅ CRÍTICO
+            produto: true,
+            adicionais: true // 🔥 CRÍTICO
           }
         }
       },
@@ -189,40 +181,6 @@ class PedidoService {
   }
 
   /* ============================= */
-  /* PAGAMENTO */
-  /* ============================= */
-
-  async atualizarPagamento(externalReference: string, novoStatus: StatusPagamento) {
-
-    if (!Object.values(StatusPagamento).includes(novoStatus)) {
-      throw new AppError('Status de pagamento inválido.', 400)
-    }
-
-    const pedido = await prisma.pedido.findFirst({
-      where: {
-        OR: [
-          { id: externalReference },
-          { externalReference }
-        ]
-      },
-    })
-
-    if (!pedido) throw new AppError('Pedido não encontrado.', 404)
-
-    return prisma.pedido.update({
-      where: { id: pedido.id },
-      data: { statusPagamento: novoStatus },
-      include: {
-        itens: {
-          include: {
-            produto: true // ✅ CRÍTICO
-          }
-        }
-      },
-    })
-  }
-
-  /* ============================= */
   /* LISTAR */
   /* ============================= */
 
@@ -232,40 +190,13 @@ class PedidoService {
       include: {
         itens: {
           include: {
-            produto: true // ✅ CRÍTICO
+            produto: true,
+            adicionais: true // 🔥 CRÍTICO
           }
         }
       },
       orderBy: { criadoEm: 'desc' },
     })
-  }
-
-  /* ============================= */
-  /* DASHBOARD */
-  /* ============================= */
-
-  async dashboardPedidos() {
-    const pedidos = await prisma.pedido.groupBy({
-      by: ['status'],
-      _count: { status: true },
-    })
-
-    const base: Record<StatusPedido, number> = {
-      AGUARDANDO_PAGAMENTO: 0,
-      RECEBIDO: 0,
-      EM_PREPARO: 0,
-      PRONTO: 0,
-      ENTREGUE: 0,
-      CANCELADO: 0,
-    }
-
-    pedidos.forEach((item) => {
-      base[item.status] = item._count.status
-    })
-
-    const total = Object.values(base).reduce((acc, curr) => acc + curr, 0)
-
-    return { ...base, TOTAL: total }
   }
 }
 

@@ -149,3 +149,13 @@
     padding: 14px;
   }
 }
+
+.checkout-item {
+  margin-bottom: 10px;
+}
+
+.checkout-adicional {
+  font-size: 12px;
+  color: #6A1B9A;
+  margin-left: 8px;
+}

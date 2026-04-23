@@ -31,6 +31,54 @@ export default function Home() {
 
   const totalItens = itens.reduce((total, item) => total + item.quantidade, 0)
 
+  /* ============================= */
+  /* 🔥 MODAL ADICIONAIS           */
+  /* ============================= */
+
+  const [produtoSelecionado, setProdutoSelecionado] = useState<any>(null)
+  const [adicionaisSelecionados, setAdicionaisSelecionados] = useState<any[]>([])
+
+  function abrirModalProduto(produto: any, event: any) {
+    animarAdicionar(event)
+    setProdutoSelecionado(produto)
+    setAdicionaisSelecionados([])
+  }
+
+  /* ============================= */
+  /* 🔥 NOVO: ID ÚNICO POR ITEM    */
+  /* ============================= */
+  function gerarIdItem(produto: any, adicionais: any[]) {
+    const adicionaisOrdenados = [...adicionais].sort((a, b) =>
+      a.nome.localeCompare(b.nome)
+    )
+
+    return (
+      produto.id +
+      '-' +
+      JSON.stringify(adicionaisOrdenados.map(a => a.nome))
+    )
+  }
+
+  function confirmarProduto() {
+    const adicionaisTotal = adicionaisSelecionados.reduce(
+      (acc, item) => acc + item.preco,
+      0
+    )
+
+    const idUnico = gerarIdItem(produtoSelecionado, adicionaisSelecionados)
+
+    adicionarItem({
+      id: idUnico, // 🔥 CORREÇÃO PRINCIPAL
+      nome: produtoSelecionado.nome,
+      preco: produtoSelecionado.preco + adicionaisTotal,
+      adicionais: adicionaisSelecionados
+    })
+
+    setProdutoSelecionado(null)
+  }
+
+  /* ============================= */
+
   function animarAdicionar(event: React.MouseEvent<HTMLButtonElement>) {
     const carrinho = document.querySelector('.cart-floating') as HTMLElement
     if (!carrinho) return
@@ -89,28 +137,20 @@ export default function Home() {
 
   const produtosDisponiveis = produtos.filter((produto) => {
     switch (hoje) {
-      case 0:
-        return produto.disponivelDom
-      case 1:
-        return produto.disponivelSeg
-      case 2:
-        return produto.disponivelTer
-      case 3:
-        return produto.disponivelQua
-      case 4:
-        return produto.disponivelQui
-      case 5:
-        return produto.disponivelSex
-      case 6:
-        return produto.disponivelSab
-      default:
-        return true
+      case 0: return produto.disponivelDom
+      case 1: return produto.disponivelSeg
+      case 2: return produto.disponivelTer
+      case 3: return produto.disponivelQua
+      case 4: return produto.disponivelQui
+      case 5: return produto.disponivelSex
+      case 6: return produto.disponivelSab
+      default: return true
     }
   })
 
   return (
     <div className="page">
-      {/* 📅 BOTÃO CARDÁPIO SEMANA (SEMPRE VISÍVEL) */}
+
       <button
         className="btn-semana-floating"
         onClick={() => navigate('/cardapio')}
@@ -118,7 +158,6 @@ export default function Home() {
         📅
       </button>
 
-      {/* 🛒 CARRINHO NOVO */}
       {totalItens > 0 && (
         <div className="cart-floating" onClick={() => navigate('/carrinho')}>
           🛒
@@ -128,14 +167,21 @@ export default function Home() {
 
       <div className="header">
         <h1 className="title"> Açaí & Co</h1>
-        <p className="subtitle">Monte seu pedido </p>
+        <p className="subtitle">Monte seu pedido</p>
       </div>
 
       <div className="cardapio-container">
         <div className="cardapio-list">
           {produtosDisponiveis.map((produto) => {
-            const item = itens.find((i) => String(i.id) === String(produto.id))
-            const quantidade = item?.quantidade || 0
+
+            const itensMesmoProduto = itens.filter(i =>
+              String(i.id).includes(produto.id)
+            )
+
+            const quantidade = itensMesmoProduto.reduce(
+              (acc, item) => acc + item.quantidade,
+              0
+            )
 
             return (
               <div key={produto.id} className="produto-card">
@@ -148,21 +194,16 @@ export default function Home() {
                   </div>
 
                   {produto.descricao && (
-                    <div className="produto-descricao">{produto.descricao}</div>
+                    <div className="produto-descricao">
+                      {produto.descricao}
+                    </div>
                   )}
                 </div>
 
                 <div className="produto-acoes">
                   <button
                     className={quantidade ? 'add-btn-added' : 'add-btn'}
-                    onClick={(e) => {
-                      animarAdicionar(e)
-                      adicionarItem({
-                        id: produto.id,
-                        nome: produto.nome,
-                        preco: produto.preco,
-                      })
-                    }}
+                    onClick={(e) => abrirModalProduto(produto, e)}
                   >
                     {quantidade ? `✔ ${quantidade}` : '+ Adicionar'}
                   </button>
@@ -172,6 +213,49 @@ export default function Home() {
           })}
         </div>
       </div>
+
+      {produtoSelecionado && (
+        <div className="modal">
+          <div className="modal-content">
+
+            <h2>{produtoSelecionado.nome}</h2>
+
+            <p>Escolha adicionais:</p>
+
+            {[
+              { nome: 'Ovo', preco: 2 },
+              { nome: 'Queijo coalho', preco: 6 },
+              { nome: 'Orégano', preco: 1 }
+            ].map((add, i) => (
+              <label key={i} style={{ display: 'block', marginTop: 8 }}>
+                <input
+                  type="checkbox"
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setAdicionaisSelecionados(prev => [...prev, add])
+                    } else {
+                      setAdicionaisSelecionados(prev =>
+                        prev.filter(a => a.nome !== add.nome)
+                      )
+                    }
+                  }}
+                />
+                {add.nome} (+R$ {add.preco})
+              </label>
+            ))}
+
+            <button onClick={confirmarProduto}>
+              Confirmar
+            </button>
+
+            <button onClick={() => setProdutoSelecionado(null)}>
+              Cancelar
+            </button>
+
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }

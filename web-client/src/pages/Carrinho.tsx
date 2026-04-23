@@ -29,11 +29,23 @@ export default function Carrinho() {
           {itens.map(item => (
             <div key={item.id} className="carrinho-card">
 
-              <div>
+              <div className="carrinho-info">
                 <strong>{item.nome}</strong>
+
                 <p>
                   {item.quantidade}x R$ {item.preco.toFixed(2)}
                 </p>
+
+                {/* 🔥 ADICIONAIS */}
+                {item.adicionais && item.adicionais.length > 0 && (
+                  <div className="carrinho-adicionais">
+                    {item.adicionais.map((add: any, index: number) => (
+                      <div key={index}>
+                        + {add.nome}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <button

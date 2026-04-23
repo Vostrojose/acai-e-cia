@@ -140,3 +140,25 @@
     font-size: 22px;
   }
 }
+
+.cart-item {
+  background: #fff;
+  padding: 14px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cart-item-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-adicionais {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #6A1B9A;
+}

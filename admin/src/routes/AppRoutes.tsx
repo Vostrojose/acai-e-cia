@@ -4,8 +4,11 @@ import Dashboard from '../pages/Dashboard'
 import Produtos from '../pages/Produtos'
 import Pedidos from '../pages/Pedidos'
 import Cozinha from '../pages/Cozinha'
-import Auditoria from '../pages/Auditoria' // ✅ ADICIONADO
+import Auditoria from '../pages/Auditoria'
 import Login from '../pages/Login'
+
+// 🔥 NOVA TELA DE ADICIONAIS
+import Adicionais from '../pages/Adicionais'
 
 import PrivateRoute from './PrivateRoute'
 
@@ -54,6 +57,16 @@ export default function AppRoutes() {
         }
       />
 
+      {/* 🔥 NOVA ROTA ADICIONAIS */}
+      <Route
+        path="/produtos/:id/adicionais"
+        element={
+          <PrivateRoute>
+            <Adicionais />
+          </PrivateRoute>
+        }
+      />
+
       {/* ========================= */}
       {/* PEDIDOS                   */}
       {/* ========================= */}
@@ -67,7 +80,7 @@ export default function AppRoutes() {
       />
 
       {/* ========================= */}
-      {/* AUDITORIA (NOVO)          */}
+      {/* AUDITORIA                 */}
       {/* ========================= */}
       <Route
         path="/auditoria"

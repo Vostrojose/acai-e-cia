@@ -40,7 +40,7 @@ export default function Produtos() {
   }, []);
 
   /* ========================= */
-  /* REMOVER                */
+  /* REMOVER                   */
   /* ========================= */
   async function remover(id: string) {
     if (!confirm("Deseja remover este produto?")) return;
@@ -50,7 +50,7 @@ export default function Produtos() {
   }
 
   /* ========================= */
-  /*  EDITAR PREÇO           */
+  /* EDITAR PREÇO              */
   /* ========================= */
   function iniciarEdicao(p: Produto) {
     setEditando(p.id);
@@ -64,10 +64,9 @@ export default function Produtos() {
   }
 
   /* ========================= */
-  /*  ATIVAR / DESATIVAR     */
+  /* ATIVAR / DESATIVAR        */
   /* ========================= */
   async function toggleAtivo(p: Produto) {
-    //  CORREÇÃO: usa rota correta do backend
     await api.patch(`/produtos/${p.id}/status`, {
       ativo: !p.ativo,
     });
@@ -75,7 +74,7 @@ export default function Produtos() {
   }
 
   /* ========================= */
-  /* FILTRO                 */
+  /* FILTRO                    */
   /* ========================= */
   const produtosFiltrados = produtos.filter((p) =>
     p.nome.toLowerCase().includes(busca.toLowerCase())
@@ -156,6 +155,15 @@ export default function Produtos() {
                 <button onClick={() => remover(p.id)} style={btnVermelho}>
                   🗑 Remover
                 </button>
+
+                {/* 🔥 NOVO BOTÃO (ADICIONAIS) */}
+                <button
+                  onClick={() => navigate(`/produtos/${p.id}/adicionais`)}
+                  style={btnAzul}
+                >
+                  ➕ Adicionais
+                </button>
+
               </div>
 
             </div>
@@ -167,7 +175,7 @@ export default function Produtos() {
 }
 
 /* ========================= */
-/* VISUAL                 */
+/* VISUAL                    */
 /* ========================= */
 
 const page = {

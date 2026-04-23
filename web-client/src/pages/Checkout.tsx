@@ -5,8 +5,6 @@ import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
 import '../assets/css/Checkout.css'
 
-
-
 export default function Checkout() {
   const { itens, total } = useCart()
 
@@ -62,13 +60,17 @@ export default function Checkout() {
         ? `${endereco.rua}, ${endereco.numero} - ${endereco.bairro}, ${endereco.cidade} - ${endereco.cep}`
         : null
 
+      /* ============================= */
+      /* 🔥 CORREÇÃO CRÍTICA AQUI      */
+      /* ============================= */
       const payload = {
         telefone: telefoneLimpo,
         origem,
         endereco: enderecoString,
         itens: itens.map((item) => ({
-          produtoId: item.id,
-          quantidade: item.quantidade
+          produtoId: item.id.split('-')[0], // 🔥 pega ID real do produto
+          quantidade: item.quantidade,
+          adicionais: item.adicionais || [] // 🔥 envia adicionais
         }))
       }
 
@@ -111,8 +113,33 @@ export default function Checkout() {
 
         <h1 className="checkout-title">💳 Checkout</h1>
 
+        {/* 🔥 RESUMO COM ADICIONAIS */}
         <div className="checkout-card">
-          <p>Total do pedido</p>
+          <h3>Resumo do pedido</h3>
+
+          {itens.map(item => (
+            <div key={item.id} className="checkout-item">
+
+              <strong>
+                {item.quantidade}x {item.nome}
+              </strong>
+
+              {/* 🔥 ADICIONAIS */}
+              {item.adicionais?.map((add: any, i: number) => (
+                <div key={i} className="checkout-adicional">
+                  + {add.nome}
+                </div>
+              ))}
+
+              <div>
+                R$ {(item.preco * item.quantidade).toFixed(2)}
+              </div>
+
+            </div>
+          ))}
+
+          <hr />
+
           <h2>R$ {(Number(total) || 0).toFixed(2)}</h2>
         </div>
 
