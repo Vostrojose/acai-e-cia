@@ -73,10 +73,15 @@ class PedidoService {
 
    const pedidoCriado = await prisma.$transaction(async (tx) => {
 
-  const ultimo = await tx.pedido.findFirst({
-    orderBy: { codigo: 'desc' },
-    select: { codigo: true },
-  })
+const ultimo = await tx.pedido.findFirst({
+  where: {
+    codigo: {
+      not: null
+    }
+  },
+  orderBy: { codigo: 'desc' },
+  select: { codigo: true },
+})
 
   const novoCodigo = (ultimo?.codigo || 1000) + 1
 
