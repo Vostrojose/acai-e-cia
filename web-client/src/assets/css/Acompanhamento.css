@@ -170,3 +170,29 @@
   background: linear-gradient(135deg, #00c853, #00e676);
   transition: width 0.4s ease;
 }
+
+.acompanhamento-btn-sair {
+  margin-top: 20px;
+  width: 100%;
+  padding: 14px;
+
+  background: linear-gradient(135deg, #ff5252, #ff1744);
+  color: #fff;
+
+  border: none;
+  border-radius: 12px;
+
+  font-size: 16px;
+  font-weight: bold;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.acompanhamento-btn-sair:hover {
+  transform: scale(1.02);
+}
+
+.acompanhamento-btn-sair:active {
+  transform: scale(0.97);
+}

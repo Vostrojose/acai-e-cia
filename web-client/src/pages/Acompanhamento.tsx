@@ -5,8 +5,6 @@ import api from '../services/api'
 import { useCart } from '../context/CartContext'
 import '../assets/css/Acompanhamento.css'
 
-
-
 const socketUrl = 'https://api.acaiecompanhia.com.br'
 
 export default function Acompanhamento() {
@@ -68,6 +66,30 @@ export default function Acompanhamento() {
   }, [id])
 
   /* ============================= */
+  /* AUTO SAÍDA (UX MELHORADO)     */
+  /* ============================= */
+  useEffect(() => {
+    if (status === 'ENTREGUE') {
+      const timer = setTimeout(() => {
+        window.location.href = '/m/1'
+      }, 5000) // 5 segundos
+
+      return () => clearTimeout(timer)
+    }
+  }, [status])
+
+  /* ============================= */
+  /* FUNÇÃO SAIR                   */
+  /* ============================= */
+  function sairDoApp() {
+    try {
+      window.close()
+    } catch {}
+
+    window.location.href = '/m/1'
+  }
+
+  /* ============================= */
   /* STATUS FORMATADO              */
   /* ============================= */
   function getStatusInfo(status: string | null) {
@@ -121,7 +143,7 @@ export default function Acompanhamento() {
             Número do pedido
           </div>
           <div className="acompanhamento-valor">
-           #{pedido.codigo?.toString().padStart(4, '0') || '----'}
+            #{pedido.codigo?.toString().padStart(4, '0') || '----'}
           </div>
         </div>
 
@@ -145,8 +167,8 @@ export default function Acompanhamento() {
         </div>
 
         {/* ========================= */}
-        /* BARRA DE PROGRESSO        */
-        /* ========================= */
+        {/* BARRA DE PROGRESSO        */}
+        {/* ========================= */}
 
         <div className="progress-container">
           <div
@@ -154,6 +176,19 @@ export default function Acompanhamento() {
             style={{ width: `${statusInfo.progresso}%` }}
           />
         </div>
+
+        {/* ========================= */}
+        {/* BOTÃO SAIR                */}
+        {/* ========================= */}
+
+        {status === 'ENTREGUE' && (
+          <button
+            className="acompanhamento-btn-sair"
+            onClick={sairDoApp}
+          >
+            🚪 Finalizar / Sair
+          </button>
+        )}
 
       </div>
 
