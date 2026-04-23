@@ -1,19 +1,40 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import api from '../services/api'
 
 export default function Sucesso() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { limparCarrinho } = useCart()
 
+  const [codigo, setCodigo] = useState<number | null>(null)
+
   /* ============================= */
-  /* 🧹 LIMPAR CARRINHO APÓS PAGAMENTO */
+  /* 🧹 LIMPAR CARRINHO */
   /* ============================= */
   useEffect(() => {
     limparCarrinho()
     localStorage.removeItem('pedidoId')
   }, [limparCarrinho])
+
+  /* ============================= */
+  /* 🔎 BUSCAR PEDIDO */
+  /* ============================= */
+  useEffect(() => {
+    if (!id) return
+
+    async function carregarPedido() {
+      try {
+        const res = await api.get(`/pedidos/${id}`)
+        setCodigo(res.data.data.codigo)
+      } catch (err) {
+        console.error('Erro ao buscar pedido:', err)
+      }
+    }
+
+    carregarPedido()
+  }, [id])
 
   return (
     <div style={{
@@ -46,12 +67,13 @@ export default function Sucesso() {
         </p>
 
         <h2 style={{ wordBreak: 'break-all' }}>
-          {id}
+          {codigo
+            ? `#${codigo.toString().padStart(4, '0')}`
+            : 'Carregando...'}
         </h2>
 
         <div style={{ marginTop: 30 }}>
 
-          {/* 📡 VER PEDIDO */}
           <button
             onClick={() => navigate(`/acompanhamento/${id}`)}
             style={btn('#333')}
@@ -59,7 +81,6 @@ export default function Sucesso() {
             📡 Acompanhar pedido
           </button>
 
-          {/* 🛒 CARDÁPIO DO DIA */}
           <button
             onClick={() => navigate('/m/1')}
             style={btn('#4CAF50')}
@@ -67,7 +88,6 @@ export default function Sucesso() {
             🛒 Cardápio de hoje
           </button>
 
-          {/* 📅 CARDÁPIO DA SEMANA */}
           <button
             onClick={() => navigate('/cardapio')}
             style={btn('#FF9800')}
