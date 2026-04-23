@@ -18,7 +18,6 @@ export default function Cozinha() {
     } catch {}
   }
 
-  /* SOCKET */
   useEffect(() => {
     const socket = io('https://api.acaiecompanhia.com.br', {
       transports: ['websocket'],
@@ -56,7 +55,6 @@ export default function Cozinha() {
 
     return () => {
       socket.disconnect()
-
       if (intervaloSom.current) {
         clearInterval(intervaloSom.current)
         intervaloSom.current = null
@@ -64,7 +62,6 @@ export default function Cozinha() {
     }
   }, [])
 
-  /* SOM */
   useEffect(() => {
     const temPedidoNovo = pedidos.some((p) => p.status === 'RECEBIDO')
 
@@ -92,26 +89,22 @@ export default function Cozinha() {
   const entregues = ordenar(pedidos.filter((p) => p.status === 'ENTREGUE'))
 
   return (
-    <div
-      style={{
-        padding: 20,
-        background: '#6d10f9a2',
-        minHeight: '100vh',
-        width: '100%',
-        boxSizing: 'border-box',
-      }}
-    >
+    <div style={{
+      padding: 20,
+      background: '#6d10f9a2',
+      minHeight: '100vh',
+      width: '100%',
+      boxSizing: 'border-box',
+    }}>
       <CardMenu navigate={navigate} />
 
-      <div
-        style={{
-          display: 'flex',
-          gap: 20,
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          marginBottom: 20,
-        }}
-      >
+      <div style={{
+        display: 'flex',
+        gap: 20,
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        marginBottom: 20,
+      }}>
         <CardRelogio />
 
         <CardStatus titulo="🆕 Novos" valor={novos.length} cor="#f44336" />
@@ -123,14 +116,11 @@ export default function Cozinha() {
         </div>
       </div>
 
-      {/* GRID CORRIGIDO */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr',
-          gap: 40,
-        }}
-      >
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr 1fr',
+        gap: 40,
+      }}>
         <Coluna titulo="🆕 Novos Pedidos" pedidos={novos} />
         <Coluna titulo="👨‍🍳 Em Preparo" pedidos={preparo} />
         <Coluna titulo="✅ Prontos" pedidos={prontos} />
@@ -138,25 +128,30 @@ export default function Cozinha() {
 
       {mostrarEntregues && (
         <div style={{ marginTop: 30 }}>
-          <Coluna titulo="📦 Entregues" pedidos={entregues} reduzido />
+          <Coluna titulo="📦 Entregues" pedidos={entregues} />
         </div>
       )}
     </div>
   )
 }
 
-/* BOTÃO MENU */
-const botaoMenu = {
-  padding: '8px 12px',
-  borderRadius: 6,
-  border: 'none',
-  background: '#333',
-  color: '#fff',
-  cursor: 'pointer',
-  fontWeight: 'bold',
+/* ========================= */
+/* COMPONENTES RESTAURADOS */
+/* ========================= */
+
+function CardMenu({ navigate }: any) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+      <div style={{ background: '#111', padding: 10, borderRadius: 10, display: 'flex', gap: 10 }}>
+        <button onClick={() => navigate('/auditoria')} style={botaoMenu}>📊 Auditoria</button>
+        <button onClick={() => navigate('/pedidos')} style={botaoMenu}>📦 Pedidos</button>
+        <button onClick={() => navigate('/produtos')} style={botaoMenu}>🛒 Produtos</button>
+        <button onClick={() => navigate('/dashboard')} style={botaoMenu}>📈 Dashboard</button>
+      </div>
+    </div>
+  )
 }
 
-/* RELÓGIO */
 function CardRelogio() {
   const [hora, setHora] = useState(new Date())
 
@@ -181,21 +176,6 @@ function CardRelogio() {
   )
 }
 
-/* MENU */
-function CardMenu({ navigate }: any) {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-      <div style={{ background: '#111', padding: 10, borderRadius: 10, display: 'flex', gap: 10 }}>
-        <button onClick={() => navigate('/auditoria')} style={botaoMenu}>📊 Auditoria</button>
-        <button onClick={() => navigate('/pedidos')} style={botaoMenu}>📦 Pedidos</button>
-        <button onClick={() => navigate('/produtos')} style={botaoMenu}>🛒 Produtos</button>
-        <button onClick={() => navigate('/dashboard')} style={botaoMenu}>📈 Dashboard</button>
-      </div>
-    </div>
-  )
-}
-
-/* STATUS */
 function CardStatus({ titulo, valor, cor }: any) {
   return (
     <div style={{
@@ -213,7 +193,6 @@ function CardStatus({ titulo, valor, cor }: any) {
   )
 }
 
-/* COLUNA */
 function Coluna({ titulo, pedidos }: any) {
   return (
     <div style={{ background: '#4e06f798', borderRadius: 10, padding: 20 }}>
@@ -243,12 +222,6 @@ function PedidoCard({ pedido }: any) {
     return () => clearInterval(interval)
   }, [pedido])
 
-  function enviarWhatsApp(telefone: string) {
-    const numero = telefone.replace(/\D/g, '')
-    const mensagem = encodeURIComponent('Seu pedido está PRONTO!')
-    window.open(`https://wa.me/55${numero}?text=${mensagem}`, '_blank')
-  }
-
   async function atualizarStatus(status: string) {
     await api.patch(`/pedidos/${pedido.id}/status`, { status })
   }
@@ -260,8 +233,28 @@ function PedidoCard({ pedido }: any) {
       padding: 15,
       marginBottom: 15
     }}>
-      <h3>Pedido #{pedido.id.slice(0, 6)}</h3>
+      <h3>
+        Pedido #{pedido.codigo?.toString().padStart(4, '0') || '----'}
+      </h3>
+
       <p>{pedido.status} – ⏱ {tempo}</p>
+
+      <div style={{ marginTop: 10 }}>
+        <strong>Itens:</strong>
+
+        <ul style={{ marginTop: 5, paddingLeft: 15 }}>
+          {pedido.itens?.map((item: any) => (
+            <li key={item.id}>
+              {item.quantidade}x {item.produto?.nome}
+              {item.produto?.descricao && (
+                <span style={{ color: '#666', fontSize: 12 }}>
+                  {' '}– {item.produto.descricao}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
 
       {pedido.status === 'RECEBIDO' && (
         <button style={{ background: '#ff9800', color: '#fff' }} onClick={() => atualizarStatus('EM_PREPARO')}>
@@ -276,19 +269,20 @@ function PedidoCard({ pedido }: any) {
       )}
 
       {pedido.status === 'PRONTO' && (
-        <>
-          <button style={{ background: "#069bf862", color: '#fff' }} onClick={() => atualizarStatus('ENTREGUE')}>
-            QUITADO
-          </button>
-
-          {pedido.telefone && (
-            <button style={{ background: '#25D366', color: '#fff', marginLeft: 10 }}
-              onClick={() => enviarWhatsApp(pedido.telefone)}>
-              📲 WhatsApp
-            </button>
-          )}
-        </>
+        <button style={{ background: "#069bf862", color: '#fff' }} onClick={() => atualizarStatus('ENTREGUE')}>
+          QUITADO
+        </button>
       )}
     </div>
   )
+}
+
+const botaoMenu = {
+  padding: '8px 12px',
+  borderRadius: 6,
+  border: 'none',
+  background: '#333',
+  color: '#fff',
+  cursor: 'pointer',
+  fontWeight: 'bold',
 }

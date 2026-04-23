@@ -71,45 +71,47 @@ class PedidoService {
       }
     })
 
-   const pedidoCriado = await prisma.$transaction(async (tx) => {
+    const pedidoCriado = await prisma.$transaction(async (tx) => {
 
-const ultimo = await tx.pedido.findFirst({
-  where: {
-    codigo: {
-      not: null
-    }
-  },
-  orderBy: { codigo: 'desc' },
-  select: { codigo: true },
-})
+      const ultimo = await tx.pedido.findFirst({
+        where: {
+          codigo: { not: null }
+        },
+        orderBy: { codigo: 'desc' },
+        select: { codigo: true },
+      })
 
-  const novoCodigo = (ultimo?.codigo || 1000) + 1
+      const novoCodigo = (ultimo?.codigo || 1000) + 1
 
-  return tx.pedido.create({
-    data: {
-      codigo: novoCodigo, // ✅ NOVO CAMPO
+      return tx.pedido.create({
+        data: {
+          codigo: novoCodigo,
 
-      total: totalCalculado,
-      telefone: data.telefone,
-      origem: data.origem
-        ? (data.origem as OrigemPedido)
-        : undefined,
-      endereco: data.endereco,
-      status: StatusPedido.AGUARDANDO_PAGAMENTO,
-      itens: { create: itensParaCriar },
-    },
-    include: {
-      itens: true,
-    },
-  })
+          total: totalCalculado,
+          telefone: data.telefone,
+          origem: data.origem
+            ? (data.origem as OrigemPedido)
+            : undefined,
+          endereco: data.endereco,
+          status: StatusPedido.AGUARDANDO_PAGAMENTO,
+          itens: { create: itensParaCriar },
+        },
+        include: {
+          itens: {
+            include: {
+              produto: true // ✅ CRÍTICO
+            }
+          },
+        },
+      })
 
-})
+    })
 
     return pedidoCriado
   }
 
   /* ============================= */
-  /* BUSCAR (BLINDADO) */
+  /* BUSCAR */
   /* ============================= */
 
   async buscarPorId(id: string) {
@@ -122,7 +124,13 @@ const ultimo = await tx.pedido.findFirst({
           { externalReference: cleanId }
         ]
       },
-      include: { itens: true },
+      include: {
+        itens: {
+          include: {
+            produto: true // ✅ CRÍTICO
+          }
+        }
+      },
     })
 
     if (!pedido) throw new AppError('Pedido não encontrado.', 404)
@@ -164,7 +172,13 @@ const ultimo = await tx.pedido.findFirst({
     const atualizado = await prisma.pedido.update({
       where: { id },
       data: { status: novoStatus },
-      include: { itens: true },
+      include: {
+        itens: {
+          include: {
+            produto: true // ✅ CRÍTICO
+          }
+        }
+      },
     })
 
     try {
@@ -198,7 +212,13 @@ const ultimo = await tx.pedido.findFirst({
     return prisma.pedido.update({
       where: { id: pedido.id },
       data: { statusPagamento: novoStatus },
-      include: { itens: true },
+      include: {
+        itens: {
+          include: {
+            produto: true // ✅ CRÍTICO
+          }
+        }
+      },
     })
   }
 
@@ -209,7 +229,13 @@ const ultimo = await tx.pedido.findFirst({
   async listarPedidos(status?: string) {
     return prisma.pedido.findMany({
       where: status ? { status: status as StatusPedido } : undefined,
-      include: { itens: true },
+      include: {
+        itens: {
+          include: {
+            produto: true // ✅ CRÍTICO
+          }
+        }
+      },
       orderBy: { criadoEm: 'desc' },
     })
   }
