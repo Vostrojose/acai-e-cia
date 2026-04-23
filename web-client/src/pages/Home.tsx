@@ -19,7 +19,6 @@ interface Produto {
   disponivelSab: boolean
   disponivelDom: boolean
 
-  // 🔥 CORREÇÃO AQUI
   adicionais?: {
     id: string
     nome: string
@@ -42,10 +41,10 @@ export default function Home() {
 
   const totalItens = itens.reduce((total, item) => total + item.quantidade, 0)
 
-  const [produtoSelecionado, setProdutoSelecionado] = useState<any>(null)
+  const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(null)
   const [adicionaisSelecionados, setAdicionaisSelecionados] = useState<any[]>([])
 
-  function abrirPopup(produto: any) {
+  function abrirPopup(produto: Produto) {
     setProdutoSelecionado(produto)
     setAdicionaisSelecionados([])
   }
@@ -54,7 +53,7 @@ export default function Home() {
     setProdutoSelecionado(null)
   }
 
-  function gerarIdItem(produto: any, adicionais: any[]) {
+  function gerarIdItem(produto: Produto, adicionais: any[]) {
     const adicionaisOrdenados = [...adicionais].sort((a, b) =>
       a.nome.localeCompare(b.nome)
     )
@@ -62,11 +61,11 @@ export default function Home() {
     return (
       produto.id +
       '-' +
-      JSON.stringify(adicionaisOrdenados.map(a => a.nome))
+      JSON.stringify(adicionaisOrdenados.map(a => a.id))
     )
   }
 
-  function adicionarDireto(produto: any) {
+  function adicionarDireto(produto: Produto) {
     const idUnico = gerarIdItem(produto, [])
 
     adicionarItem({
@@ -78,8 +77,10 @@ export default function Home() {
   }
 
   function confirmarProduto() {
+    if (!produtoSelecionado) return
+
     const adicionaisTotal = adicionaisSelecionados.reduce(
-      (acc, item) => acc + item.preco,
+      (acc, item) => acc + Number(item.preco),
       0
     )
 
@@ -105,8 +106,6 @@ export default function Home() {
           .map((produto: Produto) => ({
             ...produto,
             preco: Number(produto.preco),
-
-            // 🔥 CORREÇÃO SEGURA
             temAdicionais: (produto.adicionais?.length ?? 0) > 0
           }))
           .filter((produto: Produto) => produto.ativo)
@@ -227,27 +226,29 @@ export default function Home() {
 
           <h3>{produtoSelecionado.nome}</h3>
 
-          {[
-            { nome: 'Ovo', preco: 2 },
-            { nome: 'Queijo coalho', preco: 6 },
-            { nome: 'Orégano', preco: 1 }
-          ].map((add, i) => (
-            <label key={i}>
-              <input
-                type="checkbox"
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setAdicionaisSelecionados(prev => [...prev, add])
-                  } else {
-                    setAdicionaisSelecionados(prev =>
-                      prev.filter(a => a.nome !== add.nome)
-                    )
-                  }
-                }}
-              />
-              {add.nome} (+R$ {add.preco})
-            </label>
-          ))}
+          {produtoSelecionado.adicionais?.length ? (
+            produtoSelecionado.adicionais
+              .filter(add => add.ativo)
+              .map((add) => (
+                <label key={add.id}>
+                  <input
+                    type="checkbox"
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setAdicionaisSelecionados(prev => [...prev, add])
+                      } else {
+                        setAdicionaisSelecionados(prev =>
+                          prev.filter(a => a.id !== add.id)
+                        )
+                      }
+                    }}
+                  />
+                  {add.nome} (+R$ {Number(add.preco).toFixed(2)})
+                </label>
+              ))
+          ) : (
+            <p>Sem adicionais disponíveis</p>
+          )}
 
           <button onClick={confirmarProduto}>
             Confirmar
