@@ -1,189 +1,101 @@
-import prisma from '../lib/prisma'
-import { StatusPedido, StatusPagamento, OrigemPedido } from '@prisma/client'
-import { AppError } from '../utils/AppError'
-import { getIO } from '../websocket/socket'
+import prisma from '../services/prisma'
+import { StatusPedido, StatusPagamento } from '@prisma/client'
 
 class PedidoService {
 
   /* ============================= */
-  /* CRIAR PEDIDO */
+  /* CRIAR PEDIDO                  */
   /* ============================= */
+  async criarPedido(data: any) {
+    const { itens, telefone, endereco, origem } = data
 
-  async criarPedido(data: {
-    itens: {
-      produtoId: string
-      quantidade: number
-      adicionais?: { nome: string; preco: number }[] // 🔥 NOVO
-    }[]
-    telefone?: string
-    origem?: string
-    endereco?: string
-  }) {
-
-    if (!Array.isArray(data.itens) || data.itens.length === 0) {
-      throw new AppError('Pedido precisa conter ao menos um item.', 400)
+    if (!itens || itens.length === 0) {
+      throw new Error('Pedido sem itens')
     }
 
-    data.itens.forEach((item) => {
-      if (!item.produtoId || item.produtoId.length < 10) {
-        throw new AppError('produtoId inválido.', 400)
-      }
-      if (!Number.isInteger(item.quantidade) || item.quantidade <= 0) {
-        throw new AppError('Quantidade inválida.', 400)
-      }
-    })
+    let total = 0
 
-    const produtosIds = data.itens.map((i) => i.produtoId)
-
-    const produtos = await prisma.produto.findMany({
-      where: { id: { in: produtosIds }, ativo: true },
-    })
-
-    if (produtos.length !== produtosIds.length) {
-      throw new AppError('Um ou mais produtos são inválidos.', 400)
-    }
-
-    const produtosMap = new Map(produtos.map((p) => [p.id, p]))
-
-    let totalCalculado = 0
-
-    const itensParaCriar = data.itens.map((item) => {
-      const produto = produtosMap.get(item.produtoId)
-
-      if (!produto) throw new AppError('Produto não encontrado.', 400)
-
-      const precoBase = Number(produto.preco)
-
-      const adicionaisTotal = (item.adicionais || []).reduce(
-        (acc, add) => acc + Number(add.preco),
-        0
-      )
-
-      const precoFinal = precoBase + adicionaisTotal
-      const subtotal = precoFinal * item.quantidade
-
-      totalCalculado += subtotal
-
-      return {
-        produtoId: produto.id,
-        quantidade: item.quantidade,
-        precoUnit: precoFinal,
-
-        // 🔥 SALVAR ADICIONAIS
-        adicionais: {
-          create: (item.adicionais || []).map((add) => ({
-            nome: add.nome,
-            preco: add.preco
-          }))
-        }
-      }
-    })
-
-    const pedidoCriado = await prisma.$transaction(async (tx) => {
-
-      const ultimo = await tx.pedido.findFirst({
-        where: {
-          codigo: { not: null }
-        },
-        orderBy: { codigo: 'desc' },
-        select: { codigo: true },
+    /* ============================= */
+    /* CALCULAR TOTAL                */
+    /* ============================= */
+    for (const item of itens) {
+      const produto = await prisma.produto.findUnique({
+        where: { id: item.produtoId }
       })
 
-      const novoCodigo = (ultimo?.codigo || 1000) + 1
+      if (!produto) {
+        throw new Error('Produto não encontrado')
+      }
 
-      return tx.pedido.create({
+      let precoItem = Number(produto.preco)
+
+      if (item.adicionais?.length) {
+        for (const add of item.adicionais) {
+          precoItem += Number(add.preco)
+        }
+      }
+
+      total += precoItem * item.quantidade
+    }
+
+    /* ============================= */
+    /* CRIAR PEDIDO                 */
+    /* ============================= */
+    const pedido = await prisma.pedido.create({
+      data: {
+        telefone,
+        endereco,
+        origem,
+        total
+      }
+    })
+
+    /* ============================= */
+    /* CRIAR ITENS + ADICIONAIS     */
+    /* ============================= */
+    for (const item of itens) {
+      const produto = await prisma.produto.findUnique({
+        where: { id: item.produtoId }
+      })
+
+      if (!produto) {
+        throw new Error('Produto não encontrado')
+      }
+
+      let precoUnit = Number(produto.preco)
+
+      if (item.adicionais?.length) {
+        for (const add of item.adicionais) {
+          precoUnit += Number(add.preco)
+        }
+      }
+
+      const itemCriado = await prisma.itemPedido.create({
         data: {
-          codigo: novoCodigo,
-
-          total: totalCalculado,
-          telefone: data.telefone,
-          origem: data.origem
-            ? (data.origem as OrigemPedido)
-            : undefined,
-          endereco: data.endereco,
-          status: StatusPedido.AGUARDANDO_PAGAMENTO,
-
-          itens: {
-            create: itensParaCriar
-          },
-        },
-        include: {
-          itens: {
-            include: {
-              produto: true,
-              adicionais: true // 🔥 CRÍTICO
-            }
-          },
-        },
+          pedidoId: pedido.id,
+          produtoId: item.produtoId,
+          quantidade: item.quantidade,
+          precoUnit
+        }
       })
 
-    })
-
-    return pedidoCriado
-  }
-
-  /* ============================= */
-  /* BUSCAR */
-  /* ============================= */
-
-  async buscarPorId(id: string) {
-    const cleanId = id.trim()
-
-    const pedido = await prisma.pedido.findFirst({
-      where: {
-        OR: [
-          { id: cleanId },
-          { externalReference: cleanId }
-        ]
-      },
-      include: {
-        itens: {
-          include: {
-            produto: true,
-            adicionais: true // 🔥 CRÍTICO
-          }
-        }
-      },
-    })
-
-    if (!pedido) throw new AppError('Pedido não encontrado.', 404)
+      if (item.adicionais?.length) {
+        await prisma.itemPedidoAdicional.createMany({
+          data: item.adicionais.map((add: any) => ({
+            nome: add.nome,
+            preco: add.preco,
+            itemPedidoId: itemCriado.id
+          }))
+        })
+      }
+    }
 
     return pedido
   }
 
   /* ============================= */
-  /* STATUS */
+  /* LISTAR PEDIDOS                */
   /* ============================= */
-
-  async atualizarStatus(id: string, novoStatus: StatusPedido) {
-    const pedido = await prisma.pedido.findUnique({ where: { id } })
-
-    if (!pedido) throw new AppError('Pedido não encontrado.', 404)
-
-    const atualizado = await prisma.pedido.update({
-      where: { id },
-      data: { status: novoStatus },
-      include: {
-        itens: {
-          include: {
-            produto: true,
-            adicionais: true // 🔥 CRÍTICO
-          }
-        }
-      },
-    })
-
-    try {
-      getIO().emit('pedido_atualizado', atualizado)
-    } catch {}
-
-    return atualizado
-  }
-
-  /* ============================= */
-  /* LISTAR */
-  /* ============================= */
-
   async listarPedidos(status?: string) {
     return prisma.pedido.findMany({
       where: status ? { status: status as StatusPedido } : undefined,
@@ -191,11 +103,109 @@ class PedidoService {
         itens: {
           include: {
             produto: true,
-            adicionais: true // 🔥 CRÍTICO
+            adicionais: true
           }
         }
       },
-      orderBy: { criadoEm: 'desc' },
+      orderBy: {
+        criadoEm: 'desc'
+      }
+    })
+  }
+
+  /* ============================= */
+  /* BUSCAR POR ID                 */
+  /* ============================= */
+  async buscarPorId(id: string) {
+    return prisma.pedido.findUnique({
+      where: { id }
+    })
+  }
+
+  /* ============================= */
+  /* BUSCAR COMPLETO (IMPORTANTE)  */
+  /* ============================= */
+  async buscarPorIdComProdutos(id: string) {
+    return prisma.pedido.findUnique({
+      where: { id },
+      include: {
+        itens: {
+          include: {
+            produto: true,
+            adicionais: true
+          }
+        }
+      }
+    })
+  }
+
+  /* ============================= */
+  /* ATUALIZAR STATUS              */
+  /* ============================= */
+  async atualizarStatus(id: string, status: StatusPedido) {
+    return prisma.pedido.update({
+      where: { id },
+      data: { status }
+    })
+  }
+
+  /* ============================= */
+  /* ATUALIZAR PAGAMENTO           */
+  /* ============================= */
+  async atualizarPagamento(
+    id: string,
+    statusPagamento: string,
+    pagamentoId?: string
+  ) {
+    let pagamentoEnum: StatusPagamento
+    let statusPedido: StatusPedido
+
+    switch (statusPagamento?.toLowerCase()) {
+      case 'approved':
+      case 'aprovado':
+        pagamentoEnum = StatusPagamento.APROVADO
+        statusPedido = StatusPedido.RECEBIDO
+        break
+
+      case 'pending':
+      case 'pendente':
+        pagamentoEnum = StatusPagamento.PENDENTE
+        statusPedido = StatusPedido.AGUARDANDO_PAGAMENTO
+        break
+
+      case 'rejected':
+      case 'recusado':
+        pagamentoEnum = StatusPagamento.RECUSADO
+        statusPedido = StatusPedido.CANCELADO
+        break
+
+      case 'cancelled':
+      case 'cancelado':
+        pagamentoEnum = StatusPagamento.CANCELADO
+        statusPedido = StatusPedido.CANCELADO
+        break
+
+      default:
+        pagamentoEnum = StatusPagamento.PENDENTE
+        statusPedido = StatusPedido.AGUARDANDO_PAGAMENTO
+    }
+
+    return prisma.pedido.update({
+      where: { id },
+      data: {
+        statusPagamento: pagamentoEnum,
+        pagamentoId,
+        status: statusPedido
+      }
+    })
+  }
+
+  /* ============================= */
+  /* REMOVER PEDIDO                */
+  /* ============================= */
+  async removerPedido(id: string) {
+    return prisma.pedido.delete({
+      where: { id }
     })
   }
 }
