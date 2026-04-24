@@ -61,24 +61,22 @@ export default function Checkout() {
         : null
 
       /* ============================= */
-      /* 🔥 PAYLOAD FINAL CORRETO      */
+      /* 🔥 ITENS COM ADICIONAIS CORRETOS */
       /* ============================= */
+      const itensFormatados = itens.map((item) => ({
+        produtoId: item.produtoId,
+        quantidade: item.quantidade,
+        adicionais: (item.adicionais || []).map((a: any) => ({
+          nome: a.nome,
+          preco: Number(a.preco)
+        }))
+      }))
+
       const payload = {
         telefone: telefoneLimpo,
         origem,
         endereco: enderecoString,
-
-        itens: itens.map((item) => ({
-          produtoId: item.produtoId, // 🔥 CORREÇÃO CRÍTICA
-
-          quantidade: item.quantidade,
-
-          // 🔥 AGORA FUNCIONA COM BACKEND
-          adicionais: item.adicionais?.map((a: any) => ({
-            nome: a.nome,
-            preco: Number(a.preco)
-          })) || []
-        }))
+        itens: itensFormatados
       }
 
       console.log('📦 PAYLOAD ENVIADO:', JSON.stringify(payload, null, 2))
@@ -119,6 +117,18 @@ export default function Checkout() {
     }
   }
 
+  /* ============================= */
+  /* 🔥 TOTAL REAL (COM ADICIONAIS) */
+  /* ============================= */
+  const totalReal = itens.reduce((acc, item) => {
+    const adicionaisTotal = (item.adicionais || []).reduce(
+      (soma: number, add: any) => soma + Number(add.preco),
+      0
+    )
+
+    return acc + (item.preco * item.quantidade)
+  }, 0)
+
   return (
     <Container>
 
@@ -136,9 +146,10 @@ export default function Checkout() {
                 {item.quantidade}x {item.nome}
               </strong>
 
+              {/* 🔥 MOSTRAR ADICIONAIS COM VALOR */}
               {item.adicionais?.map((add: any, i: number) => (
                 <div key={i} className="checkout-adicional">
-                  + {add.nome}
+                  + {add.nome} (R$ {Number(add.preco).toFixed(2)})
                 </div>
               ))}
 
@@ -151,7 +162,8 @@ export default function Checkout() {
 
           <hr />
 
-          <h2>R$ {(Number(total) || 0).toFixed(2)}</h2>
+          {/* 🔥 TOTAL CORRETO */}
+          <h2>R$ {(Number(totalReal) || 0).toFixed(2)}</h2>
         </div>
 
         <div className="checkout-card">
