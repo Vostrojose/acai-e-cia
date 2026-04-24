@@ -8,6 +8,7 @@ const client = new MercadoPagoConfig({
 });
 
 class PagamentoService {
+
   /* ========================= */
   /* PIX */
   /* ========================= */
@@ -35,15 +36,15 @@ class PagamentoService {
     const payment = new Payment(client);
 
     try {
-      const valor = Number(pedido.total.toString());
+      const valor = Number(pedido.total);
 
       const response = await payment.create({
         body: {
           transaction_amount: valor,
-          description: `Pedido #${pedido.id}`,
+          description: `Pedido #${pedido.codigo ?? pedido.id}`,
           payment_method_id: "pix",
           payer: {
-            email: "josemsilva1984@gmail.com", // 🔴 colocar email real
+            email: "josemsilva1984@gmail.com",
           },
           external_reference: pedido.id,
           notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
@@ -65,6 +66,7 @@ class PagamentoService {
         qr_code_base64:
           response.point_of_interaction?.transaction_data?.qr_code_base64,
       };
+
     } catch (error) {
       console.error("🔥 ERRO COMPLETO PIX:", error);
       throw new AppError("Erro ao gerar pagamento PIX", 500);
@@ -75,8 +77,16 @@ class PagamentoService {
   /* CHECKOUT (CARTÃO / BOLETO / ETC) */
   /* ========================= */
   async criarCheckout(pedidoId: string) {
+
     const pedido = await prisma.pedido.findUnique({
       where: { id: pedidoId },
+      include: {
+        itens: {
+          include: {
+            produto: true,
+          },
+        },
+      },
     });
 
     if (!pedido) {
@@ -90,18 +100,22 @@ class PagamentoService {
     const preference = new Preference(client);
 
     try {
-      const valor = Number(pedido.total.toString());
+
+      /* ========================= */
+      /* 🔥 ITENS CORRETOS (COM ADICIONAIS) */
+      /* ========================= */
+      const itensFormatados = pedido.itens.map((item) => ({
+        title: item.produto.nome,
+        quantity: item.quantidade,
+        unit_price: Number(item.precoUnit), // 🔥 inclui adicionais
+        currency_id: "BRL",
+      }));
+
+      console.log("🧾 ITENS MP:", itensFormatados);
 
       const response = await preference.create({
         body: {
-          items: [
-            {
-              title: `Pedido #${pedido.id}`,
-              quantity: 1,
-              unit_price: valor,
-              currency_id: "BRL",
-            } as any,
-          ],
+          items: itensFormatados as any,
           external_reference: pedido.id,
           notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
           back_urls: {
@@ -110,7 +124,7 @@ class PagamentoService {
             pending: "https://pedido.acaiecompanhia.com.br/pendente",
           },
           payer: {
-            email: "josemsilva1984@gmail.com", // 🔴 colocar email real
+            email: "josemsilva1984@gmail.com",
           },
         },
       });
@@ -118,6 +132,7 @@ class PagamentoService {
       return {
         init_point: response.init_point,
       };
+
     } catch (error) {
       console.error("🔥 ERRO COMPLETO CHECKOUT:", error);
       throw new AppError("Erro ao criar checkout", 500);
