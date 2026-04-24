@@ -61,18 +61,26 @@ export default function Checkout() {
         : null
 
       /* ============================= */
-      /* 🔥 CORREÇÃO CRÍTICA AQUI      */
+      /* 🔥 PAYLOAD CORRIGIDO          */
       /* ============================= */
       const payload = {
         telefone: telefoneLimpo,
         origem,
         endereco: enderecoString,
         itens: itens.map((item) => ({
-          produtoId: item.id.split('-')[0], // 🔥 pega ID real do produto
+          produtoId: item.id.split('-')[0], // ✔ ID real
+
           quantidade: item.quantidade,
-          adicionais: item.adicionais || [] // 🔥 envia adicionais
+
+          // 🔥 CORREÇÃO CRÍTICA
+          adicionais: item.adicionais?.map((a: any) => ({
+            nome: a.nome,
+            preco: Number(a.preco)
+          })) || []
         }))
       }
+
+      console.log('📦 PAYLOAD ENVIADO:', payload)
 
       const pedidoResponse = await api.post('/pedidos', payload)
       const pedidoId = pedidoResponse?.data?.data?.id
@@ -100,6 +108,7 @@ export default function Checkout() {
       }
 
     } catch (error: any) {
+      console.error('❌ ERRO COMPLETO:', error?.response?.data)
       alert(error?.response?.data?.message || 'Erro ao processar pedido')
     } finally {
       setLoading(false)
@@ -113,7 +122,6 @@ export default function Checkout() {
 
         <h1 className="checkout-title">💳 Checkout</h1>
 
-        {/* 🔥 RESUMO COM ADICIONAIS */}
         <div className="checkout-card">
           <h3>Resumo do pedido</h3>
 
@@ -124,7 +132,6 @@ export default function Checkout() {
                 {item.quantidade}x {item.nome}
               </strong>
 
-              {/* 🔥 ADICIONAIS */}
               {item.adicionais?.map((add: any, i: number) => (
                 <div key={i} className="checkout-adicional">
                   + {add.nome}
