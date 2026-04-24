@@ -21,56 +21,82 @@ export default function Adicionais() {
   const [novoPreco, setNovoPreco] = useState(0)
 
   const [loading, setLoading] = useState(false)
+  const [salvando, setSalvando] = useState(false)
 
   /* ============================= */
   /* CARREGAR ADICIONAIS           */
   /* ============================= */
   async function carregar() {
     try {
+      if (!id) return
+
       setLoading(true)
 
       const res = await api.get(`/produtos/${id}`)
       setAdicionais(res.data.data.adicionais || [])
 
-    } catch (err) {
-      console.error('Erro ao carregar adicionais')
+    } catch (err: any) {
+      console.error('Erro ao carregar adicionais:', err?.response?.data)
+      alert('Erro ao carregar adicionais')
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    carregar()
-  }, [])
+    if (id) carregar()
+  }, [id])
 
   /* ============================= */
   /* CRIAR                         */
   /* ============================= */
   async function criar() {
-    if (!nome || preco <= 0) {
-      alert('Preencha nome e preço corretamente')
-      return
+    try {
+      if (!nome || preco <= 0) {
+        alert('Preencha nome e preço corretamente')
+        return
+      }
+
+      if (!id) {
+        alert('Produto não identificado')
+        return
+      }
+
+      setSalvando(true)
+
+      await api.post('/adicionais', {
+        nome,
+        preco,
+        produtoId: id
+      })
+
+      setNome('')
+      setPreco(0)
+
+      await carregar()
+
+    } catch (err: any) {
+      console.error('Erro ao criar adicional:', err?.response?.data)
+      alert(err?.response?.data?.message || 'Erro ao criar adicional')
+    } finally {
+      setSalvando(false)
     }
-
-    await api.post('/adicionais', {
-      nome,
-      preco,
-      produtoId: id
-    })
-
-    setNome('')
-    setPreco(0)
-    carregar()
   }
 
   /* ============================= */
   /* REMOVER                       */
   /* ============================= */
   async function remover(adicionalId: string) {
-    if (!confirm('Deseja remover este adicional?')) return
+    try {
+      if (!confirm('Deseja remover este adicional?')) return
 
-    await api.delete(`/adicionais/${adicionalId}`)
-    carregar()
+      await api.delete(`/adicionais/${adicionalId}`)
+      await carregar()
+
+    } catch (err: any) {
+      console.error('Erro ao remover adicional:', err?.response?.data)
+      alert('Erro ao remover adicional')
+    }
   }
 
   /* ============================= */
@@ -82,23 +108,35 @@ export default function Adicionais() {
   }
 
   async function salvarPreco(adicionalId: string) {
-    await api.put(`/adicionais/${adicionalId}`, {
-      preco: novoPreco
-    })
+    try {
+      await api.put(`/adicionais/${adicionalId}`, {
+        preco: novoPreco
+      })
 
-    setEditando(null)
-    carregar()
+      setEditando(null)
+      await carregar()
+
+    } catch (err: any) {
+      console.error('Erro ao atualizar preço:', err?.response?.data)
+      alert('Erro ao atualizar preço')
+    }
   }
 
   /* ============================= */
   /* ATIVAR / DESATIVAR            */
   /* ============================= */
   async function toggleAtivo(a: Adicional) {
-    await api.patch(`/adicionais/${a.id}/status`, {
-      ativo: !a.ativo
-    })
+    try {
+      await api.patch(`/adicionais/${a.id}/status`, {
+        ativo: !a.ativo
+      })
 
-    carregar()
+      await carregar()
+
+    } catch (err: any) {
+      console.error('Erro ao alterar status:', err?.response?.data)
+      alert('Erro ao alterar status')
+    }
   }
 
   return (
@@ -131,8 +169,12 @@ export default function Adicionais() {
           style={input}
         />
 
-        <button onClick={criar} style={btnVerde}>
-          ➕ Adicionar
+        <button
+          onClick={criar}
+          style={btnVerde}
+          disabled={salvando}
+        >
+          {salvando ? 'Salvando...' : '➕ Adicionar'}
         </button>
       </div>
 
