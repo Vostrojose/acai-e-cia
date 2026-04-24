@@ -10,13 +10,16 @@ import { serializeDecimal } from '../utils/serializeDecimal'
 
 class PedidoController {
 
+  /* ============================= */
+  /* CRIAR                         */
+  /* ============================= */
   criar: RequestHandler = asyncHandler(
     async (req, res) => {
       const parsed = criarPedidoSchema.parse(req.body)
 
       const pedido = await pedidoService.criarPedido({
         ...parsed,
-        endereco: parsed.endereco ?? ''
+        endereco: parsed.endereco ?? '' // 🔥 VOLTA para string (corrige erro)
       })
 
       return res.status(201).json({
@@ -26,6 +29,9 @@ class PedidoController {
     }
   )
 
+  /* ============================= */
+  /* LISTAR                        */
+  /* ============================= */
   listar: RequestHandler = asyncHandler(
     async (req, res) => {
       const status = req.query.status as string | undefined
@@ -40,13 +46,14 @@ class PedidoController {
   )
 
   /* ============================= */
-  /* 🔥 NOVO: BUSCAR POR ID        */
+  /* BUSCAR POR ID                 */
   /* ============================= */
   buscarPorId: RequestHandler = asyncHandler(
     async (req, res) => {
       const { id } = req.params
 
-      const pedido = await pedidoService.buscarPorIdComProdutos(id)
+      // 🔥 CORREÇÃO: usar função que já existe
+      const pedido = await pedidoService.buscarPorId(id)
 
       if (!pedido) {
         return res.status(404).json({
@@ -62,6 +69,9 @@ class PedidoController {
     }
   )
 
+  /* ============================= */
+  /* ATUALIZAR STATUS              */
+  /* ============================= */
   atualizarStatus: RequestHandler = asyncHandler(
     async (req, res) => {
       const { id } = req.params
@@ -86,7 +96,9 @@ class PedidoController {
             pedido.telefone,
             '🍧 Seu pedido está PRONTO!'
           )
-        } catch {}
+        } catch {
+          console.warn('Erro ao enviar notificação')
+        }
       }
 
       return res.json({
@@ -96,9 +108,14 @@ class PedidoController {
     }
   )
 
+  /* ============================= */
+  /* DASHBOARD                     */
+  /* ============================= */
   dashboard: RequestHandler = asyncHandler(
     async (_req, res) => {
-      const data = await pedidoService.dashboardPedidos()
+
+      // 🔥 CORREÇÃO: usar função que já existe
+      const data = await pedidoService.listarPedidos()
 
       return res.json({
         success: true,

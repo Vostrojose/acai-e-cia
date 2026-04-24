@@ -4,9 +4,13 @@ import { asyncHandler } from '../utils/asyncHandler'
 import { criarProdutoSchema } from '../validators/produto.schema'
 import { AppError } from '../utils/AppError'
 import prisma from '../services/prisma'
-import { serializeDecimal } from '../utils/serializeDecimal' // ✅ NOVO
+import { serializeDecimal } from '../utils/serializeDecimal'
 
 class ProdutoController {
+
+  /* ============================= */
+  /* CRIAR                         */
+  /* ============================= */
   criar = asyncHandler(async (req: Request, res: Response) => {
     const data = criarProdutoSchema.parse(req.body)
 
@@ -14,21 +18,50 @@ class ProdutoController {
 
     return res.status(201).json({
       success: true,
-      data: serializeDecimal(produto), // ✅ CORREÇÃO
+      data: serializeDecimal(produto),
     })
   })
 
-listar = asyncHandler(async (req: Request, res: Response) => {
-  const produtos = await produtoService.listarProdutos()
+  /* ============================= */
+  /* LISTAR                        */
+  /* ============================= */
+  listar = asyncHandler(async (req: Request, res: Response) => {
+    const produtos = await produtoService.listarProdutos()
 
-  console.log("📦 PRODUTOS:", produtos)
+    console.log("📦 PRODUTOS:", produtos)
 
-  return res.json({
-    success: true,
-    data: produtos // 🔥 SEM serializeDecimal
+    return res.json({
+      success: true,
+      data: produtos
+    })
   })
-})
 
+  /* ============================= */
+  /* 🔥 NOVO: BUSCAR POR ID        */
+  /* ============================= */
+  buscarPorId = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params
+
+    const produto = await prisma.produto.findUnique({
+      where: { id },
+      include: {
+        adicionais: true // 🔥 ESSENCIAL
+      }
+    })
+
+    if (!produto) {
+      throw new AppError('Produto não encontrado', 404)
+    }
+
+    return res.json({
+      success: true,
+      data: serializeDecimal(produto)
+    })
+  })
+
+  /* ============================= */
+  /* ALTERAR STATUS                */
+  /* ============================= */
   alterarStatus = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const { ativo } = req.body
@@ -41,10 +74,13 @@ listar = asyncHandler(async (req: Request, res: Response) => {
 
     return res.json({
       success: true,
-      data: serializeDecimal(produto), // ✅ CORREÇÃO
+      data: serializeDecimal(produto),
     })
   })
 
+  /* ============================= */
+  /* REMOVER                       */
+  /* ============================= */
   remover = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
 
@@ -55,6 +91,9 @@ listar = asyncHandler(async (req: Request, res: Response) => {
     })
   })
 
+  /* ============================= */
+  /* ATUALIZAR                     */
+  /* ============================= */
   atualizar = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
 
@@ -65,10 +104,13 @@ listar = asyncHandler(async (req: Request, res: Response) => {
 
     return res.json({
       success: true,
-      data: serializeDecimal(produto), // ✅ CORREÇÃO
+      data: serializeDecimal(produto),
     })
   })
 
+  /* ============================= */
+  /* DELETAR                       */
+  /* ============================= */
   deletar = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
 

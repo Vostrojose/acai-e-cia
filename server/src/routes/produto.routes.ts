@@ -8,18 +8,18 @@ const router = Router();
 =================================
 ROTAS PÚBLICAS (CLIENTES)
 =================================
-Clientes podem listar os produtos disponíveis no cardápio
 */
 
 // GET /api/produtos
 router.get("/", produtoController.listar);
 
+// 🔥 CORREÇÃO AQUI
+router.get("/:id", produtoController.buscarPorId);
+
 /*
 =================================
 ROTAS PROTEGIDAS (ADMIN)
 =================================
-Apenas usuários autenticados podem criar,
-editar, alterar status ou remover produtos
 */
 
 // POST /api/produtos
@@ -34,9 +34,4 @@ router.patch("/:id/status", ensureAuthenticated, produtoController.alterarStatus
 // DELETE /api/produtos/:id
 router.delete("/:id", ensureAuthenticated, produtoController.deletar);
 
-/*
-=================================
-EXPORTAÇÃO DAS ROTAS
-=================================
-*/
 export default router;
