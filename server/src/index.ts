@@ -14,6 +14,8 @@ import { errorMiddleware } from "./middlewares/error.middleware";
 import { httpLogger } from "./middlewares/logger.middleware";
 import { initSocket } from "./websocket/socket";
 
+import adicionalRoutes from "./routes/adicional.routes";
+
 const app = express();
 
 /* =================================
@@ -46,6 +48,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/pedidos", pedidoRoutes);
 app.use("/api/produtos", produtoRoutes);
 app.use("/api/pagamento", pagamentoRoutes);
+
+app.use("/api/adicionais", adicionalRoutes);
 
 /* =================================
    HEALTH CHECK
