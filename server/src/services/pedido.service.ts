@@ -39,6 +39,15 @@ class PedidoService {
     }
 
     /* ============================= */
+    /* GERAR CÓDIGO SEQUENCIAL       */
+    /* ============================= */
+    const ultimoPedido = await prisma.pedido.findFirst({
+      orderBy: { codigo: 'desc' }
+    })
+
+    const proximoCodigo = (ultimoPedido?.codigo ?? 1000) + 1
+
+    /* ============================= */
     /* CRIAR PEDIDO                 */
     /* ============================= */
     const pedido = await prisma.pedido.create({
@@ -46,7 +55,8 @@ class PedidoService {
         telefone,
         endereco,
         origem,
-        total
+        total,
+        codigo: proximoCodigo
       }
     })
 
