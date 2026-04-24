@@ -15,8 +15,10 @@ class PedidoService {
 
     let total = 0
 
+    const itensCalculados: any[] = []
+
     /* ============================= */
-    /* CALCULAR TOTAL                */
+    /* CALCULAR TOTAL CORRETO        */
     /* ============================= */
     for (const item of itens) {
       const produto = await prisma.produto.findUnique({
@@ -27,30 +29,38 @@ class PedidoService {
         throw new Error('Produto não encontrado')
       }
 
-      let precoItem = Number(produto.preco)
+      const adicionais = item.adicionais || []
 
-      if (item.adicionais?.length) {
-        for (const add of item.adicionais) {
-          precoItem += Number(add.preco)
-        }
-      }
+      const totalAdicionais = adicionais.reduce(
+        (soma: number, add: any) => soma + Number(add.preco),
+        0
+      )
 
-      total += precoItem * item.quantidade
+      const precoUnit = Number(produto.preco) + totalAdicionais
+
+      total += precoUnit * item.quantidade
+
+      itensCalculados.push({
+        produtoId: item.produtoId,
+        quantidade: item.quantidade,
+        precoUnit,
+        adicionais
+      })
     }
 
     /* ============================= */
     /* GERAR CÓDIGO SEQUENCIAL       */
     /* ============================= */
-   const ultimoPedido = await prisma.pedido.findFirst({
-  where: {
-    codigo: {
-      not: null
-    }
-  },
-  orderBy: {
-    codigo: 'desc'
-  }
-})
+    const ultimoPedido = await prisma.pedido.findFirst({
+      where: {
+        codigo: {
+          not: null
+        }
+      },
+      orderBy: {
+        codigo: 'desc'
+      }
+    })
 
     const proximoCodigo = (ultimoPedido?.codigo ?? 1000) + 1
 
@@ -68,35 +78,20 @@ class PedidoService {
     })
 
     /* ============================= */
-    /* CRIAR ITENS + ADICIONAIS     */
+    /* SALVAR ITENS + ADICIONAIS     */
     /* ============================= */
-    for (const item of itens) {
-      const produto = await prisma.produto.findUnique({
-        where: { id: item.produtoId }
-      })
-
-      if (!produto) {
-        throw new Error('Produto não encontrado')
-      }
-
-      let precoUnit = Number(produto.preco)
-
-      if (item.adicionais?.length) {
-        for (const add of item.adicionais) {
-          precoUnit += Number(add.preco)
-        }
-      }
+    for (const item of itensCalculados) {
 
       const itemCriado = await prisma.itemPedido.create({
         data: {
           pedidoId: pedido.id,
           produtoId: item.produtoId,
           quantidade: item.quantidade,
-          precoUnit
+          precoUnit: item.precoUnit
         }
       })
 
-      if (item.adicionais?.length) {
+      if (item.adicionais.length > 0) {
         await prisma.itemPedidoAdicional.createMany({
           data: item.adicionais.map((add: any) => ({
             nome: add.nome,
