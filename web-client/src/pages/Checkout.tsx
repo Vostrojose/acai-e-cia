@@ -73,10 +73,10 @@ export default function Checkout() {
           quantidade: item.quantidade,
 
           // 🔥 CORREÇÃO CRÍTICA
-          adicionais: item.adicionais?.map((a: any) => ({
-            nome: a.nome,
-            preco: Number(a.preco)
-          })) || []
+         // adicionais: item.adicionais?.map((a: any) => ({
+          //  nome: a.nome,
+          //  preco: Number(a.preco)
+         // })) || []
         }))
       }
 
