@@ -88,6 +88,7 @@ class PagamentoService {
         },
       },
     });
+    console.log("🔥 ITENS DO PEDIDO:", pedido?.itens);
 
     if (!pedido) {
       throw new AppError("Pedido não encontrado", 404);
