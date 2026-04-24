@@ -70,6 +70,7 @@ export default function Home() {
 
     adicionarItem({
       id: idUnico,
+      produtoId: produto.id, // 🔥 CORREÇÃO CRÍTICA
       nome: produto.nome,
       preco: produto.preco,
       adicionais: []
@@ -88,6 +89,7 @@ export default function Home() {
 
     adicionarItem({
       id: idUnico,
+      produtoId: produtoSelecionado.id, // 🔥 CORREÇÃO CRÍTICA
       nome: produtoSelecionado.nome,
       preco: produtoSelecionado.preco + adicionaisTotal,
       adicionais: adicionaisSelecionados
@@ -167,7 +169,7 @@ export default function Home() {
           {produtosDisponiveis.map((produto) => {
 
             const itensMesmoProduto = itens.filter(i =>
-              String(i.id).includes(produto.id)
+              i.produtoId === produto.id // 🔥 MELHORADO (antes era includes)
             )
 
             const quantidade = itensMesmoProduto.reduce(

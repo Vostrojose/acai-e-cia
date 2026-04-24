@@ -1,20 +1,17 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 
-/* ============================= */
-/* 🔥 NOVO: TIPO ADICIONAL       */
-/* ============================= */
-interface Adicional {
-  nome: string
-  preco: number
-}
-
 interface Item {
   id: string
+  produtoId: string // 🔥 NOVO (ESSENCIAL)
   nome: string
   preco: number
   quantidade: number
-  adicionais?: Adicional[] // 🔥 NOVO (opcional → não quebra nada)
+  adicionais?: {
+    id: string
+    nome: string
+    preco: number
+  }[]
 }
 
 interface CartContextData {
@@ -28,10 +25,6 @@ interface CartContextData {
 const CartContext = createContext({} as CartContextData)
 
 export function CartProvider({ children }: { children: ReactNode }) {
-
-  /* ============================= */
-  /* 🔥 Persistência segura         */
-  /* ============================= */
   const [itens, setItens] = useState<Item[]>(() => {
     try {
       const data = localStorage.getItem('carrinho')
@@ -41,80 +34,32 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   })
 
-  /* ============================= */
-  /* 💾 SALVAR NO LOCALSTORAGE     */
-  /* ============================= */
   useEffect(() => {
     localStorage.setItem('carrinho', JSON.stringify(itens))
   }, [itens])
 
-  /* ============================= */
-  /* 🔥 ADICIONAR ITEM (ATUALIZADO)*/
-  /* ============================= */
   function adicionarItem(item: Omit<Item, 'quantidade'>) {
-    const itemId = String(item.id)
+    setItens((prev) => {
+      const index = prev.findIndex(i => i.id === item.id)
 
-    setItens((prevItens) => {
-      const index = prevItens.findIndex(
-        (i) => String(i.id) === itemId
-      )
-
-      /* ============================= */
-      /* 🔁 ITEM JÁ EXISTE             */
-      /* ============================= */
       if (index !== -1) {
-        const novosItens = [...prevItens]
-
-        novosItens[index] = {
-          ...novosItens[index],
-          quantidade: novosItens[index].quantidade + 1,
-
-          // 🔥 NOVO: preserva adicionais
-          adicionais:
-            item.adicionais && item.adicionais.length > 0
-              ? item.adicionais
-              : novosItens[index].adicionais || []
-        }
-
-        return novosItens
+        const novos = [...prev]
+        novos[index].quantidade += 1
+        return novos
       }
 
-      /* ============================= */
-      /* 🆕 NOVO ITEM                 */
-      /* ============================= */
-      return [
-        ...prevItens,
-        {
-          ...item,
-          id: itemId,
-          quantidade: 1,
-          adicionais: item.adicionais || [] // 🔥 NOVO
-        }
-      ]
+      return [...prev, { ...item, quantidade: 1 }]
     })
   }
 
-  /* ============================= */
-  /* ❌ REMOVER ITEM               */
-  /* ============================= */
   function removerItem(id: string) {
-    const itemId = String(id)
-
-    setItens((prev) =>
-      prev.filter((item) => String(item.id) !== itemId)
-    )
+    setItens((prev) => prev.filter(i => i.id !== id))
   }
 
-  /* ============================= */
-  /* 🧹 LIMPAR CARRINHO            */
-  /* ============================= */
   function limparCarrinho() {
     setItens([])
   }
 
-  /* ============================= */
-  /* 💰 TOTAL                     */
-  /* ============================= */
   const total = itens.reduce(
     (acc, item) => acc + item.preco * item.quantidade,
     0
@@ -122,13 +67,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{
-        itens,
-        adicionarItem,
-        removerItem,
-        limparCarrinho,
-        total,
-      }}
+      value={{ itens, adicionarItem, removerItem, limparCarrinho, total }}
     >
       {children}
     </CartContext.Provider>

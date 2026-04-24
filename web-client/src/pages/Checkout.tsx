@@ -61,26 +61,27 @@ export default function Checkout() {
         : null
 
       /* ============================= */
-      /* 🔥 PAYLOAD CORRIGIDO          */
+      /* 🔥 PAYLOAD FINAL CORRETO      */
       /* ============================= */
       const payload = {
         telefone: telefoneLimpo,
         origem,
         endereco: enderecoString,
+
         itens: itens.map((item) => ({
-          produtoId: item.id.split('-')[0], // ✔ ID real
+          produtoId: item.produtoId, // 🔥 CORREÇÃO CRÍTICA
 
           quantidade: item.quantidade,
 
-          // 🔥 CORREÇÃO CRÍTICA
-         // adicionais: item.adicionais?.map((a: any) => ({
-          //  nome: a.nome,
-          //  preco: Number(a.preco)
-         // })) || []
+          // 🔥 AGORA FUNCIONA COM BACKEND
+          adicionais: item.adicionais?.map((a: any) => ({
+            nome: a.nome,
+            preco: Number(a.preco)
+          })) || []
         }))
       }
 
-      console.log('📦 PAYLOAD ENVIADO:', payload)
+      console.log('📦 PAYLOAD ENVIADO:', JSON.stringify(payload, null, 2))
 
       const pedidoResponse = await api.post('/pedidos', payload)
       const pedidoId = pedidoResponse?.data?.data?.id
@@ -108,7 +109,10 @@ export default function Checkout() {
       }
 
     } catch (error: any) {
-      console.error('❌ ERRO COMPLETO:', error?.response?.data)
+      console.error('❌ ERRO COMPLETO:', error)
+      console.error('❌ RESPONSE:', error?.response)
+      console.error('❌ DATA:', error?.response?.data)
+
       alert(error?.response?.data?.message || 'Erro ao processar pedido')
     } finally {
       setLoading(false)
