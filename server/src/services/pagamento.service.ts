@@ -88,7 +88,7 @@ class PagamentoService {
         },
       },
     });
-    console.log("🔥 ITENS DO PEDIDO:", pedido?.itens);
+    console.log("🔥 ITENS DO PEDIDO:", pedido?.itens); // remover
 
     if (!pedido) {
       throw new AppError("Pedido não encontrado", 404);
