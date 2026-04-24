@@ -74,7 +74,7 @@ class PagamentoService {
   }
 
   /* ========================= */
-  /* CHECKOUT (CARTÃO / BOLETO / ETC) */
+  /* CHECKOUT */
   /* ========================= */
   async criarCheckout(pedidoId: string) {
 
@@ -84,11 +84,13 @@ class PagamentoService {
         itens: {
           include: {
             produto: true,
-          },
-        },
-      },
+            adicionais: true
+          }
+        }
+      }
     });
-    console.log("🔥 ITENS DO PEDIDO:", pedido?.itens); // remover
+
+    console.log("🔥 ITENS DO PEDIDO:", pedido?.itens);
 
     if (!pedido) {
       throw new AppError("Pedido não encontrado", 404);
@@ -102,15 +104,33 @@ class PagamentoService {
 
     try {
 
-      /* ========================= */
-      /* 🔥 ITENS CORRETOS (COM ADICIONAIS) */
-      /* ========================= */
-      const itensFormatados = pedido.itens.map((item) => ({
-        title: item.produto.nome,
-        quantity: item.quantidade,
-        unit_price: Number(item.precoUnit), // 🔥 inclui adicionais
-        currency_id: "BRL",
-      }));
+      const itensFormatados = pedido.itens.map((item) => {
+
+        const adicionais = item.adicionais || [];
+
+        const totalAdicionais = adicionais.reduce(
+          (soma: number, add: any) => soma + Number(add.preco),
+          0
+        );
+
+        /* 🔥 BLINDAGEM REAL */
+        const precoBase = Number(item.precoUnit || item.produto.preco);
+        const precoFinal = precoBase; // já inclui adicionais no precoUnit
+
+        console.log("🧾 ITEM MP CALCULO:", {
+          produto: item.produto.nome,
+          precoBase,
+          adicionais: totalAdicionais,
+          precoFinal
+        });
+
+        return {
+          title: item.produto.nome,
+          quantity: item.quantidade,
+          unit_price: precoFinal,
+          currency_id: "BRL",
+        };
+      });
 
       console.log("🧾 ITENS MP:", itensFormatados);
 
@@ -127,7 +147,7 @@ class PagamentoService {
           payer: {
             email: "josemsilva1984@gmail.com",
           },
-        },
+        } as any,
       });
 
       return {
