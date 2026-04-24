@@ -70,7 +70,7 @@ export default function Home() {
 
     adicionarItem({
       id: idUnico,
-      produtoId: produto.id, // 🔥 CORREÇÃO CRÍTICA
+      produtoId: produto.id,
       nome: produto.nome,
       preco: produto.preco,
       adicionais: []
@@ -89,7 +89,7 @@ export default function Home() {
 
     adicionarItem({
       id: idUnico,
-      produtoId: produtoSelecionado.id, // 🔥 CORREÇÃO CRÍTICA
+      produtoId: produtoSelecionado.id,
       nome: produtoSelecionado.nome,
       preco: produtoSelecionado.preco + adicionaisTotal,
       adicionais: adicionaisSelecionados
@@ -169,7 +169,7 @@ export default function Home() {
           {produtosDisponiveis.map((produto) => {
 
             const itensMesmoProduto = itens.filter(i =>
-              i.produtoId === produto.id // 🔥 MELHORADO (antes era includes)
+              i.produtoId === produto.id
             )
 
             const quantidade = itensMesmoProduto.reduce(
@@ -211,7 +211,7 @@ export default function Home() {
                       className={quantidade ? 'add-btn-added' : 'add-btn'}
                       onClick={() => abrirPopup(produto)}
                     >
-                      {quantidade ? `✔ ${quantidade}` : 'Escolher adicionais'}
+                      {quantidade ? `✔ ${quantidade}` : 'Escolher'}
                     </button>
                   )}
 
@@ -223,43 +223,57 @@ export default function Home() {
         </div>
       </div>
 
+      {/* 🔥 POPUP MELHORADO */}
       {produtoSelecionado && (
-        <div className="popup-adicionais">
+        <div className="popup-overlay" onClick={fecharPopup}>
+          <div className="popup-adicionais" onClick={(e) => e.stopPropagation()}>
 
-          <h3>{produtoSelecionado.nome}</h3>
+            <h3>{produtoSelecionado.nome}</h3>
 
-          {produtoSelecionado.adicionais?.length ? (
-            produtoSelecionado.adicionais
-              .filter(add => add.ativo)
-              .map((add) => (
-                <label key={add.id}>
-                  <input
-                    type="checkbox"
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setAdicionaisSelecionados(prev => [...prev, add])
-                      } else {
-                        setAdicionaisSelecionados(prev =>
-                          prev.filter(a => a.id !== add.id)
-                        )
-                      }
-                    }}
-                  />
-                  {add.nome} (+R$ {Number(add.preco).toFixed(2)})
-                </label>
-              ))
-          ) : (
-            <p>Sem adicionais disponíveis</p>
-          )}
+            <p style={{ marginBottom: 10 }}>
+              Escolha adicionais (opcional)
+            </p>
 
-          <button onClick={confirmarProduto}>
-            Confirmar
-          </button>
+            {produtoSelecionado.adicionais?.filter(a => a.ativo).map((add) => (
+              <label key={add.id} style={{ display: 'block', marginBottom: 8 }}>
+                <input
+                  type="checkbox"
+                  checked={adicionaisSelecionados.some(a => a.id === add.id)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setAdicionaisSelecionados(prev => [...prev, add])
+                    } else {
+                      setAdicionaisSelecionados(prev =>
+                        prev.filter(a => a.id !== add.id)
+                      )
+                    }
+                  }}
+                />
+                {add.nome} (+R$ {Number(add.preco).toFixed(2)})
+              </label>
+            ))}
 
-          <button onClick={fecharPopup}>
-            Fechar
-          </button>
+            {/* 🔥 BOTÕES MELHORADOS */}
+            <div style={{ marginTop: 20 }}>
 
+              <button onClick={confirmarProduto}>
+                Confirmar
+              </button>
+
+              <button onClick={() => {
+                setAdicionaisSelecionados([])
+                confirmarProduto()
+              }}>
+                Sem adicionais
+              </button>
+
+              <button onClick={fecharPopup}>
+                Cancelar
+              </button>
+
+            </div>
+
+          </div>
         </div>
       )}
 
