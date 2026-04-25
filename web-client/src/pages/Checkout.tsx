@@ -61,7 +61,7 @@ export default function Checkout() {
         : null
 
       /* ============================= */
-      /* 🔥 ENVIO CORRETO DOS ADICIONAIS */
+      /* ENVIO CORRETO (NÃO MEXER)    */
       /* ============================= */
       const itensFormatados = itens.map((item) => ({
         produtoId: item.produtoId,
@@ -118,10 +118,17 @@ export default function Checkout() {
   }
 
   /* ============================= */
-  /* 🔥 TOTAL SEM DUPLICAÇÃO       */
+  /* 🔥 TOTAL CORRETO (VISUAL)     */
   /* ============================= */
   const totalReal = itens.reduce((acc, item) => {
-    return acc + (Number(item.preco) * item.quantidade)
+    const adicionaisTotal = (item.adicionais || []).reduce(
+      (soma: number, add: any) => soma + Number(add.preco),
+      0
+    )
+
+    const precoExibicao = Number(item.preco) + adicionaisTotal
+
+    return acc + (precoExibicao * item.quantidade)
   }, 0)
 
   return (
@@ -135,6 +142,13 @@ export default function Checkout() {
           <h3>Resumo do pedido</h3>
 
           {itens.map(item => {
+
+            const adicionaisTotal = (item.adicionais || []).reduce(
+              (soma: number, add: any) => soma + Number(add.preco),
+              0
+            )
+
+            const precoExibicao = Number(item.preco) + adicionaisTotal
 
             return (
               <div key={item.id} className="checkout-item">
@@ -150,7 +164,7 @@ export default function Checkout() {
                 ))}
 
                 <div>
-                  R$ {(Number(item.preco) * item.quantidade).toFixed(2)}
+                  R$ {(precoExibicao * item.quantidade).toFixed(2)}
                 </div>
 
               </div>
