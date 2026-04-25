@@ -113,13 +113,16 @@ class PagamentoService {
           0
         );
 
-        /* 🔥 BLINDAGEM REAL */
-        const precoBase = Number(item.precoUnit || item.produto.preco);
-        const precoFinal = precoBase; // já inclui adicionais no precoUnit
+        /* ============================= */
+        /* 🔥 CORREÇÃO AQUI              */
+        /* ============================= */
+
+        const precoProduto = Number(item.produto.preco);
+        const precoFinal = Number((precoProduto + totalAdicionais).toFixed(2));
 
         console.log("🧾 ITEM MP CALCULO:", {
           produto: item.produto.nome,
-          precoBase,
+          precoProduto,
           adicionais: totalAdicionais,
           precoFinal
         });
