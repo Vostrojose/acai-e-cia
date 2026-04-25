@@ -93,24 +93,19 @@ export default function Cozinha() {
       padding: 20,
       background: '#6d10f9a2',
       minHeight: '100vh',
-      width: '100%',
-      boxSizing: 'border-box',
     }}>
       <CardMenu navigate={navigate} />
 
       <div style={{
         display: 'flex',
         gap: 20,
-        alignItems: 'center',
         flexWrap: 'wrap',
         marginBottom: 20,
       }}>
         <CardRelogio />
-
         <CardStatus titulo="🆕 Novos" valor={novos.length} cor="#f44336" />
         <CardStatus titulo="👨‍🍳 Em preparo" valor={preparo.length} cor="#ff9800" />
         <CardStatus titulo="✅ Prontos" valor={prontos.length} cor="#4caf50" />
-
         <div onClick={() => setMostrarEntregues(!mostrarEntregues)}>
           <CardStatus titulo="📦 Entregues" valor={entregues.length} cor="#9e9e9e" />
         </div>
@@ -119,7 +114,7 @@ export default function Cozinha() {
       <div style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr 1fr',
-        gap: 40,
+        gap: 30,
       }}>
         <Coluna titulo="🆕 Novos Pedidos" pedidos={novos} />
         <Coluna titulo="👨‍🍳 Em Preparo" pedidos={preparo} />
@@ -159,15 +154,7 @@ function CardRelogio() {
   }, [])
 
   return (
-    <div style={{
-      background: '#111',
-      color: '#fff',
-      padding: 8,
-      borderRadius: 10,
-      minWidth: 130,
-      textAlign: 'center'
-    }}>
-      <div>{hora.toLocaleDateString('pt-BR', { weekday: 'long' }).toUpperCase()}</div>
+    <div style={{ background: '#111', color: '#fff', padding: 10, borderRadius: 10 }}>
       <div>{hora.toLocaleDateString('pt-BR')}</div>
       <div>{hora.toLocaleTimeString('pt-BR')}</div>
     </div>
@@ -193,7 +180,7 @@ function CardStatus({ titulo, valor, cor }: any) {
 
 function Coluna({ titulo, pedidos }: any) {
   return (
-    <div style={{ background: '#4e06f798', borderRadius: 10, padding: 20 }}>
+    <div style={{ background: '#ffffff', borderRadius: 10, padding: 15 }}>
       <h2>{titulo}</h2>
       {pedidos.map((pedido: any) => (
         <PedidoCard key={pedido.id} pedido={pedido} />
@@ -202,16 +189,14 @@ function Coluna({ titulo, pedidos }: any) {
   )
 }
 
-/* PEDIDO */
+/* 🔥 PEDIDO COM ADICIONAIS */
 
 function PedidoCard({ pedido }: any) {
   const [tempo, setTempo] = useState('')
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const inicio = new Date(
-        pedido.atualizadoEm || pedido.updatedAt || pedido.criadoEm
-      )
+      const inicio = new Date(pedido.criadoEm)
       const diff = Date.now() - inicio.getTime()
       const minutos = Math.floor(diff / 60000)
       const segundos = Math.floor((diff % 60000) / 1000)
@@ -227,71 +212,52 @@ function PedidoCard({ pedido }: any) {
 
   return (
     <div style={{
-      border: '1px solid #6d10f9a2',
+      border: '1px solid #ddd',
       borderRadius: 10,
-      padding: 15,
-      marginBottom: 15
+      padding: 12,
+      marginBottom: 12
     }}>
-      <h3>
-        Pedido #{pedido.codigo?.toString().padStart(4, '0') || '----'}
-      </h3>
-
+      <h3>Pedido #{pedido.codigo}</h3>
       <p>{pedido.status} – ⏱ {tempo}</p>
 
-      <div style={{ marginTop: 10 }}>
-        <strong>Itens:</strong>
-        <ul style={{ marginTop: 5, paddingLeft: 15 }}>
-          {pedido.itens?.map((item: any) => (
-            <li key={item.id}>
-              {item.quantidade}x {item.produto?.nome}
-              {item.produto?.descricao && (
-                <span style={{ color: '#666', fontSize: 12 }}>
-                  {' '}– {item.produto.descricao}
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <strong>Itens:</strong>
+
+      {pedido.itens?.map((item: any) => (
+        <div key={item.id} style={{ marginBottom: 8 }}>
+          <div>
+            <strong>{item.quantidade}x {item.produto?.nome}</strong>
+            {item.produto?.descricao && (
+              <span style={{ fontSize: 12 }}> – {item.produto.descricao}</span>
+            )}
+          </div>
+
+          {/* 🔥 ADICIONAIS */}
+          {item.adicionais?.length > 0 && (
+            <div style={{ marginLeft: 10 }}>
+              {item.adicionais.map((add: any) => (
+                <div key={add.id}>+ {add.nome}</div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
 
       {pedido.status === 'RECEBIDO' && (
-        <button style={{ background: '#ff9800', color: '#fff' }} onClick={() => atualizarStatus('EM_PREPARO')}>
+        <button onClick={() => atualizarStatus('EM_PREPARO')}>
           Iniciar preparo
         </button>
       )}
 
       {pedido.status === 'EM_PREPARO' && (
-        <button style={{ background: '#4caf50', color: '#fff' }} onClick={() => atualizarStatus('PRONTO')}>
+        <button onClick={() => atualizarStatus('PRONTO')}>
           Marcar pronto
         </button>
       )}
 
       {pedido.status === 'PRONTO' && (
-        <>
-          <button
-            style={{ background: "#069bf862", color: '#fff' }}
-            onClick={() => atualizarStatus('ENTREGUE')}
-          >
-            QUITADO
-          </button>
-
-          {pedido.telefone && (
-            <button
-              style={{
-                background: '#25D366',
-                color: '#fff',
-                marginLeft: 10
-              }}
-              onClick={() => {
-                const numero = pedido.telefone.replace(/\D/g, '')
-                const mensagem = encodeURIComponent(`Seu pedido #${pedido.codigo} está PRONTO! 🎉`)
-                window.open(`https://wa.me/55${numero}?text=${mensagem}`, '_blank')
-              }}
-            >
-              📲 WhatsApp
-            </button>
-          )}
-        </>
+        <button onClick={() => atualizarStatus('ENTREGUE')}>
+          Entregar
+        </button>
       )}
     </div>
   )
@@ -304,5 +270,4 @@ const botaoMenu = {
   background: '#333',
   color: '#fff',
   cursor: 'pointer',
-  fontWeight: 'bold',
 }
