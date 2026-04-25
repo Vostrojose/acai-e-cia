@@ -36,7 +36,10 @@ class PagamentoService {
     const payment = new Payment(client);
 
     try {
-      const valor = Number(pedido.total);
+      const valor =
+        typeof pedido.total === "object"
+          ? Number(pedido.total.toString())
+          : Number(pedido.total);
 
       const response = await payment.create({
         body: {
@@ -90,7 +93,7 @@ class PagamentoService {
       }
     });
 
-    console.log("🔥 ITENS DO PEDIDO:", pedido?.itens);
+    console.log("🔥 ITENS DO PEDIDO:", JSON.stringify(pedido?.itens, null, 2));
 
     if (!pedido) {
       throw new AppError("Pedido não encontrado", 404);
@@ -104,27 +107,30 @@ class PagamentoService {
 
     try {
 
+      /* ========================= */
+      /* 🔥 USO CORRETO DO precoUnit */
+      /* ========================= */
       const itensFormatados = pedido.itens.map((item) => {
 
-        const adicionais = item.adicionais || [];
+        if (!item.precoUnit) {
+          throw new Error(`precoUnit não encontrado no item ${item.id}`);
+        }
 
-        const totalAdicionais = adicionais.reduce(
-          (soma: number, add: any) => soma + Number(add.preco),
-          0
-        );
+        const precoFinal =
+          typeof item.precoUnit === "object"
+            ? Number(item.precoUnit.toString())
+            : Number(item.precoUnit);
 
-        /* ============================= */
-        /* 🔥 CORREÇÃO AQUI              */
-        /* ============================= */
+        if (isNaN(precoFinal)) {
+          throw new Error(`precoUnit inválido no item ${item.id}`);
+        }
 
-        const precoProduto = Number(item.produto.preco);
-        const precoFinal = Number((precoProduto + totalAdicionais).toFixed(2));
-
-        console.log("🧾 ITEM MP CALCULO:", {
+        console.log("🔥 USANDO PRECOUNIT REAL:", {
+          itemId: item.id,
           produto: item.produto.nome,
-          precoProduto,
-          adicionais: totalAdicionais,
-          precoFinal
+          bruto: item.precoUnit,
+          convertido: precoFinal,
+          quantidade: item.quantidade
         });
 
         return {
@@ -135,8 +141,7 @@ class PagamentoService {
         };
       });
 
-      console.log("🧾 ITENS MP:", itensFormatados);
-      console.log("🧾 ITENS MP FINAL:", JSON.stringify(itensFormatados, null, 2));
+      console.log("📦 ITENS MP FINAL:", JSON.stringify(itensFormatados, null, 2));
 
       const response = await preference.create({
         body: {
