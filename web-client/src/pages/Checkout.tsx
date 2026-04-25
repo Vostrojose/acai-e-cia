@@ -126,7 +126,9 @@ export default function Checkout() {
       0
     )
 
-    return acc + (item.preco * item.quantidade)
+    const precoCompleto = item.preco + adicionaisTotal
+
+    return acc + (precoCompleto * item.quantidade)
   }, 0)
 
   return (
@@ -139,30 +141,38 @@ export default function Checkout() {
         <div className="checkout-card">
           <h3>Resumo do pedido</h3>
 
-          {itens.map(item => (
-            <div key={item.id} className="checkout-item">
+          {itens.map(item => {
 
-              <strong>
-                {item.quantidade}x {item.nome}
-              </strong>
+            const adicionaisTotal = (item.adicionais || []).reduce(
+              (soma: number, add: any) => soma + Number(add.preco),
+              0
+            )
 
-              {/* 🔥 MOSTRAR ADICIONAIS COM VALOR */}
-              {item.adicionais?.map((add: any, i: number) => (
-                <div key={i} className="checkout-adicional">
-                  + {add.nome} (R$ {Number(add.preco).toFixed(2)})
+            const precoCompleto = item.preco + adicionaisTotal
+
+            return (
+              <div key={item.id} className="checkout-item">
+
+                <strong>
+                  {item.quantidade}x {item.nome}
+                </strong>
+
+                {item.adicionais?.map((add: any, i: number) => (
+                  <div key={i} className="checkout-adicional">
+                    + {add.nome} (R$ {Number(add.preco).toFixed(2)})
+                  </div>
+                ))}
+
+                <div>
+                  R$ {(precoCompleto * item.quantidade).toFixed(2)}
                 </div>
-              ))}
 
-              <div>
-                R$ {(item.preco * item.quantidade).toFixed(2)}
               </div>
-
-            </div>
-          ))}
+            )
+          })}
 
           <hr />
 
-          {/* 🔥 TOTAL CORRETO */}
           <h2>R$ {(Number(totalReal) || 0).toFixed(2)}</h2>
         </div>
 
