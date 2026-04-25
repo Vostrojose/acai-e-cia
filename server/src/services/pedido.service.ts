@@ -73,6 +73,7 @@ class PedidoService {
     /* CRIAR ITENS + ADICIONAIS      */
     /* ============================= */
     for (const item of itens) {
+
       const produto = await prisma.produto.findUnique({
         where: { id: item.produtoId }
       })
@@ -81,10 +82,10 @@ class PedidoService {
         throw new Error('Produto não encontrado')
       }
 
-      const adicionais = item.adicionais || []
+      const adicionais = Array.isArray(item.adicionais) ? item.adicionais : []
 
       const totalAdicionais = adicionais.reduce(
-        (soma: number, add: any) => soma + Number(add.preco),
+        (soma: number, add: any) => soma + Number(add.preco || 0),
         0
       )
 
@@ -111,7 +112,6 @@ class PedidoService {
         console.log("✅ ADICIONAIS SALVOS:", adicionais)
       } else {
         console.log("⚠️ ITEM SEM ADICIONAIS")
-        console.log("🔥 VERSAO NOVA DO PEDIDO SERVICE ATIVA")
       }
     }
 
@@ -137,14 +137,24 @@ class PedidoService {
   }
 
   /* ============================= */
-  /* BUSCAR POR ID                 */
+  /* BUSCAR POR ID (CORRIGIDO)     */
   /* ============================= */
   async buscarPorId(id: string) {
-    return prisma.pedido.findUnique({ where: { id } })
+    return prisma.pedido.findUnique({
+      where: { id },
+      include: {
+        itens: {
+          include: {
+            produto: true,
+            adicionais: true
+          }
+        }
+      }
+    })
   }
 
   /* ============================= */
-  /* BUSCAR COMPLETO (IMPORTANTE)  */
+  /* BUSCAR COMPLETO (mantido)     */
   /* ============================= */
   async buscarPorIdComProdutos(id: string) {
     return prisma.pedido.findUnique({
@@ -174,6 +184,7 @@ class PedidoService {
   /* ATUALIZAR PAGAMENTO           */
   /* ============================= */
   async atualizarPagamento(id: string, statusPagamento: string, pagamentoId?: string) {
+
     let pagamentoEnum: StatusPagamento
     let statusPedido: StatusPedido
 
