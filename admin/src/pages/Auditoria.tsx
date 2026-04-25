@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import api from "../services/api"
 import Botao from "../components/Botao"
@@ -35,48 +35,118 @@ export default function Auditoria() {
     produtos: []
   })
 
-  useEffect(() => {
-    async function carregarAuditoria() {
-      try {
-        const res = await api.get("/auditoria")
-        setVendas(res.data)
-      } catch (err) {
-        console.error("Erro ao carregar auditoria", err)
-      }
+  const [loading, setLoading] = useState(true)
+  const [erro, setErro] = useState<string | null>(null)
+  const [loadingVenda, setLoadingVenda] = useState(false)
+
+  /* ============================= */
+  /* CARREGAMENTO PROFISSIONAL     */
+  /* ============================= */
+
+  async function carregarAuditoria() {
+    try {
+      setLoading(true)
+      const res = await api.get("/auditoria")
+
+      const data = res.data?.data || res.data
+
+      setVendas({
+        diarias: Number(data?.diarias || 0),
+        semanais: Number(data?.semanais || 0),
+        mensais: Number(data?.mensais || 0),
+        produtos: Array.isArray(data?.produtos) ? data.produtos : []
+      })
+
+      setErro(null)
+    } catch (err) {
+      console.error("Erro auditoria:", err)
+      setErro("Erro ao carregar dados")
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     carregarAuditoria()
   }, [])
 
+  /* ============================= */
+  /* REGISTRAR VENDA (SEGURO)      */
+  /* ============================= */
+
   async function registrarVenda(produto: string) {
     try {
+      setLoadingVenda(true)
+
       await api.post("/auditoria/venda", { produto })
-      const res = await api.get("/auditoria")
-      setVendas(res.data)
+
+      await carregarAuditoria()
     } catch {
       alert("Erro ao registrar venda")
+    } finally {
+      setLoadingVenda(false)
     }
   }
 
-  const dataMaisVendidos = {
-    labels: vendas.produtos.map((p: any) => p.nome),
+  /* ============================= */
+  /* FORMATADOR MONETÁRIO          */
+  /* ============================= */
+
+  const moeda = (valor: number) =>
+    new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL"
+    }).format(valor)
+
+  /* ============================= */
+  /* DADOS MEMOIZADOS              */
+  /* ============================= */
+
+  const produtos = vendas.produtos || []
+
+  const dataMaisVendidos = useMemo(() => ({
+    labels: produtos.map((p: any) => p.nome),
     datasets: [
       {
         label: "Mais vendidos",
-        data: vendas.produtos.map((p: any) => p.qtd),
+        data: produtos.map((p: any) => p.qtd),
         backgroundColor: "#4caf50"
       }
     ]
-  }
+  }), [produtos])
 
-  const dataParticipacao = {
-    labels: vendas.produtos.map((p: any) => p.nome),
+  const dataParticipacao = useMemo(() => ({
+    labels: produtos.map((p: any) => p.nome),
     datasets: [
       {
-        data: vendas.produtos.map((p: any) => p.qtd),
-        backgroundColor: ["#4caf50", "#ff9800", "#f44336", "#2196f3", "#9c27b0"]
+        data: produtos.map((p: any) => p.qtd),
+        backgroundColor: [
+          "#4caf50",
+          "#ff9800",
+          "#f44336",
+          "#2196f3",
+          "#9c27b0",
+          "#00bcd4"
+        ]
       }
     ]
+  }), [produtos])
+
+  /* ============================= */
+  /* LOADING / ERRO                */
+  /* ============================= */
+
+  if (loading) {
+    return <div style={page}>Carregando auditoria...</div>
   }
+
+  if (erro) {
+    return <div style={page}>{erro}</div>
+  }
+
+  /* ============================= */
+  /* RENDER                        */
+  /* ============================= */
 
   return (
     <div style={page}>
@@ -86,20 +156,20 @@ export default function Auditoria() {
       <h1 style={h1Style}>📊 Auditoria de Vendas</h1>
 
       <div style={resumoContainer}>
-        <CardResumo titulo="Diárias" valor={vendas.diarias} cor="#4caf50" />
-        <CardResumo titulo="Semanais" valor={vendas.semanais} cor="#ff9800" />
-        <CardResumo titulo="Mensais" valor={vendas.mensais} cor="#f44336" />
+        <CardResumo titulo="Diárias" valor={moeda(vendas.diarias)} cor="#4caf50" />
+        <CardResumo titulo="Semanais" valor={moeda(vendas.semanais)} cor="#ff9800" />
+        <CardResumo titulo="Mensais" valor={moeda(vendas.mensais)} cor="#f44336" />
       </div>
 
       <div style={gridGraficos}>
         <div style={card}>
           <h2 style={h2Style}>Produtos mais vendidos</h2>
-          <Bar data={dataMaisVendidos} />
+          {produtos.length > 0 ? <Bar data={dataMaisVendidos} /> : "Sem dados"}
         </div>
 
         <div style={card}>
           <h2 style={h2Style}>Participação dos produtos</h2>
-          <Pie data={dataParticipacao} />
+          {produtos.length > 0 ? <Pie data={dataParticipacao} /> : "Sem dados"}
         </div>
       </div>
 
@@ -107,8 +177,12 @@ export default function Auditoria() {
         <h2 style={h2Style}>Registrar venda rápida</h2>
 
         <div style={acoes}>
-          {vendas.produtos.map((p: any) => (
-            <Botao key={p.nome} onClick={() => registrarVenda(p.nome)}>
+          {produtos.map((p: any) => (
+            <Botao
+              key={p.nome}
+              onClick={() => registrarVenda(p.nome)}
+              disabled={loadingVenda}
+            >
               {p.nome}
             </Botao>
           ))}
@@ -116,8 +190,7 @@ export default function Auditoria() {
       </div>
 
       <p style={aviso}>
-        ⚠️ Os pedidos entregues serão apagados ao final de cada mês. Apenas os indicadores
-        consolidados permanecerão para orientar decisões estratégicas.
+        ⚠️ Os pedidos entregues serão apagados ao final de cada mês.
       </p>
 
     </div>
@@ -125,14 +198,8 @@ export default function Auditoria() {
 }
 
 /* ========================= */
-/* 🎨 PADRÃO VISUAL GLOBAL   */
+/* COMPONENTES               */
 /* ========================= */
-
-const page = {
-  padding: 20,
-  background: "#6d10f9a2",
-  minHeight: "100vh",
-}
 
 function CardMenu({ navigate }: any) {
   return (
@@ -154,48 +221,6 @@ function CardMenu({ navigate }: any) {
   )
 }
 
-const botaoMenu = {
-  padding: "8px 12px",
-  borderRadius: 6,
-  border: "none",
-  background: "#333",
-  color: "#fff",
-  cursor: "pointer",
-  fontWeight: "bold",
-}
-
-const resumoContainer = {
-  display: "flex",
-  gap: 20,
-  flexWrap: "wrap" as const,
-  marginBottom: 30,
-}
-
-const gridGraficos = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-  gap: 20,
-  marginBottom: 30,
-}
-
-const card = {
-  background: "#fff",
-  padding: 20,
-  borderRadius: 10,
-  border: "1px solid #ddd",
-}
-
-const acoes = {
-  display: "flex",
-  flexWrap: "wrap" as const,
-  gap: 10,
-}
-
-const aviso = {
-  marginTop: 30,
-  color: "#555",
-}
-
 function CardResumo({ titulo, valor, cor }: any) {
   return (
     <div style={{
@@ -208,29 +233,23 @@ function CardResumo({ titulo, valor, cor }: any) {
       fontWeight: "bold"
     }}>
       <strong>{titulo}</strong>
-      <div style={{ fontSize: 24 }}>R$ {valor}</div>
+      <div style={{ fontSize: 24 }}>{valor}</div>
     </div>
   )
 }
 
 /* ========================= */
-/* 🔥 TÍTULOS PADRÃO         */
+/* ESTILOS                   */
 /* ========================= */
 
-const h1Style = {
-  fontSize: "28px",
-  fontWeight: "bold",
-  marginBottom: 20,
-  color: "#222",
-  textAlign: "center" as const,
-}
-
-const h2Style = {
-  fontSize: "20px",
-  fontWeight: "bold",
-  marginBottom: 15,
-  color: "#333",
-}
-
+const page = { padding: 20, background: "#6d10f9a2", minHeight: "100vh" }
+const botaoMenu = { padding: "8px 12px", borderRadius: 6, border: "none", background: "#333", color: "#fff", cursor: "pointer", fontWeight: "bold" }
+const resumoContainer = { display: "flex", gap: 20, flexWrap: "wrap" as const, marginBottom: 30 }
+const gridGraficos = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20, marginBottom: 30 }
+const card = { background: "#fff", padding: 20, borderRadius: 10, border: "1px solid #ddd" }
+const acoes = { display: "flex", flexWrap: "wrap" as const, gap: 10 }
+const aviso = { marginTop: 30, color: "#555" }
+const h1Style = { fontSize: "28px", fontWeight: "bold", marginBottom: 20, textAlign: "center" as const }
+const h2Style = { fontSize: "20px", fontWeight: "bold", marginBottom: 15 }
 
 
