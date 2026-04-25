@@ -3,6 +3,9 @@ import { StatusPedido, StatusPagamento } from '@prisma/client'
 
 class PedidoService {
 
+  /* ============================= */
+  /* CRIAR PEDIDO                  */
+  /* ============================= */
   async criarPedido(data: any) {
     const { itens, telefone, endereco, origem } = data
 
@@ -13,53 +16,43 @@ class PedidoService {
     let total = 0
 
     /* ============================= */
-    /* CALCULAR TOTAL (CORRETO)      */
+    /* CALCULAR TOTAL                */
     /* ============================= */
-    const itensCalculados = []
-
     for (const item of itens) {
       const produto = await prisma.produto.findUnique({
-        where: { id: item.produtoId },
+        where: { id: item.produtoId }
       })
 
       if (!produto) {
-        throw new Error("Produto não encontrado")
+        throw new Error('Produto não encontrado')
       }
 
-      const adicionais = Array.isArray(item.adicionais)
-        ? item.adicionais
-        : []
+      let precoItem = Number(produto.preco)
 
-      const totalAdicionais = adicionais.reduce(
-        (soma: number, add: any) => soma + Number(add.preco || 0),
-        0
-      )
+      console.log("🔥 ADICIONAIS RECEBIDOS (TOTAL):", item.adicionais)
+      console.log("🔥 ADICIONAIS RECEBIDOS NO BACK:", JSON.stringify(item.adicionais, null, 2))
 
-      const precoUnit = Number(produto.preco) + totalAdicionais
+      if (item.adicionais?.length) {
+        for (const add of item.adicionais) {
+          precoItem += Number(add.preco)
+        }
+      }
 
-      total += precoUnit * item.quantidade
-
-      itensCalculados.push({
-        produto,
-        quantidade: item.quantidade,
-        precoUnit,
-        adicionais
-      })
-
-      console.log("🔥 CALCULO ITEM:", {
-        produto: Number(produto.preco),
-        adicionaisRecebidos: adicionais,
-        totalAdicionais,
-        precoFinal: precoUnit
-      })
+      total += precoItem * item.quantidade
     }
 
     /* ============================= */
-    /* GERAR CÓDIGO                 */
+    /* GERAR CÓDIGO SEQUENCIAL       */
     /* ============================= */
     const ultimoPedido = await prisma.pedido.findFirst({
-      where: { codigo: { not: null } },
-      orderBy: { codigo: 'desc' }
+      where: {
+        codigo: {
+          not: null
+        }
+      },
+      orderBy: {
+        codigo: 'desc'
+      }
     })
 
     const proximoCodigo = (ultimoPedido?.codigo ?? 1000) + 1
@@ -80,27 +73,50 @@ class PedidoService {
     /* ============================= */
     /* CRIAR ITENS + ADICIONAIS     */
     /* ============================= */
-    for (const item of itensCalculados) {
+    for (const item of itens) {
+      const produto = await prisma.produto.findUnique({
+        where: { id: item.produtoId }
+      })
+
+      if (!produto) {
+        throw new Error('Produto não encontrado')
+      }
+
+      console.log("🔥 ADICIONAIS RECEBIDOS (ITEM):", item.adicionais)
+
+      let precoUnit = Number(produto.preco)
+
+      const adicionais = item.adicionais || []
+
+      const totalAdicionais = adicionais.reduce(
+        (soma: number, add: any) => soma + Number(add.preco),
+        0
+      )
+
+      precoUnit += totalAdicionais
 
       const itemCriado = await prisma.itemPedido.create({
         data: {
           pedidoId: pedido.id,
-          produtoId: item.produto.id,
+          produtoId: item.produtoId,
           quantidade: item.quantidade,
-          precoUnit: item.precoUnit
+          precoUnit
         }
       })
 
-      if (item.adicionais.length > 0) {
+      /* ============================= */
+      /* SALVAR ADICIONAIS             */
+      /* ============================= */
+      if (adicionais.length > 0) {
         await prisma.itemPedidoAdicional.createMany({
-          data: item.adicionais.map((add: any) => ({
+          data: adicionais.map((add: any) => ({
             nome: add.nome,
             preco: Number(add.preco),
             itemPedidoId: itemCriado.id
           }))
         })
 
-        console.log("✅ ADICIONAIS SALVOS:", item.adicionais)
+        console.log("✅ ADICIONAIS SALVOS:", adicionais)
       } else {
         console.log("⚠️ ITEM SEM ADICIONAIS")
       }
@@ -109,7 +125,121 @@ class PedidoService {
     return pedido
   }
 
-  /* resto do código permanece igual */
+  /* ============================= */
+  /* LISTAR PEDIDOS                */
+  /* ============================= */
+  async listarPedidos(status?: string) {
+    return prisma.pedido.findMany({
+      where: status ? { status: status as StatusPedido } : undefined,
+      include: {
+        itens: {
+          include: {
+            produto: true,
+            adicionais: true
+          }
+        }
+      },
+      orderBy: {
+        criadoEm: 'desc'
+      }
+    })
+  }
+
+  /* ============================= */
+  /* BUSCAR POR ID                 */
+  /* ============================= */
+  async buscarPorId(id: string) {
+    return prisma.pedido.findUnique({
+      where: { id }
+    })
+  }
+
+  /* ============================= */
+  /* BUSCAR COMPLETO (IMPORTANTE)  */
+  /* ============================= */
+  async buscarPorIdComProdutos(id: string) {
+    return prisma.pedido.findUnique({
+      where: { id },
+      include: {
+        itens: {
+          include: {
+            produto: true,
+            adicionais: true
+          }
+        }
+      }
+    })
+  }
+
+  /* ============================= */
+  /* ATUALIZAR STATUS              */
+  /* ============================= */
+  async atualizarStatus(id: string, status: StatusPedido) {
+    return prisma.pedido.update({
+      where: { id },
+      data: { status }
+    })
+  }
+
+  /* ============================= */
+  /* ATUALIZAR PAGAMENTO           */
+  /* ============================= */
+  async atualizarPagamento(
+    id: string,
+    statusPagamento: string,
+    pagamentoId?: string
+  ) {
+    let pagamentoEnum: StatusPagamento
+    let statusPedido: StatusPedido
+
+    switch (statusPagamento?.toLowerCase()) {
+      case 'approved':
+      case 'aprovado':
+        pagamentoEnum = StatusPagamento.APROVADO
+        statusPedido = StatusPedido.RECEBIDO
+        break
+
+      case 'pending':
+      case 'pendente':
+        pagamentoEnum = StatusPagamento.PENDENTE
+        statusPedido = StatusPedido.AGUARDANDO_PAGAMENTO
+        break
+
+      case 'rejected':
+      case 'recusado':
+        pagamentoEnum = StatusPagamento.RECUSADO
+        statusPedido = StatusPedido.CANCELADO
+        break
+
+      case 'cancelled':
+      case 'cancelado':
+        pagamentoEnum = StatusPagamento.CANCELADO
+        statusPedido = StatusPedido.CANCELADO
+        break
+
+      default:
+        pagamentoEnum = StatusPagamento.PENDENTE
+        statusPedido = StatusPedido.AGUARDANDO_PAGAMENTO
+    }
+
+    return prisma.pedido.update({
+      where: { id },
+      data: {
+        statusPagamento: pagamentoEnum,
+        pagamentoId,
+        status: statusPedido
+      }
+    })
+  }
+
+  /* ============================= */
+  /* REMOVER PEDIDO                */
+  /* ============================= */
+  async removerPedido(id: string) {
+    return prisma.pedido.delete({
+      where: { id }
+    })
+  }
 }
 
 export default new PedidoService()
