@@ -58,11 +58,7 @@ export default function Home() {
       a.nome.localeCompare(b.nome)
     )
 
-    return (
-      produto.id +
-      '-' +
-      JSON.stringify(adicionaisOrdenados.map(a => a.id))
-    )
+    return produto.id + '-' + JSON.stringify(adicionaisOrdenados.map(a => a.id))
   }
 
   function adicionarDireto(produto: Produto) {
@@ -72,7 +68,7 @@ export default function Home() {
       id: idUnico,
       produtoId: produto.id,
       nome: produto.nome,
-      preco: produto.preco,
+      preco: produto.preco, // 🔥 SEM adicionais
       adicionais: []
     })
   }
@@ -80,18 +76,13 @@ export default function Home() {
   function confirmarProduto() {
     if (!produtoSelecionado) return
 
-    const adicionaisTotal = adicionaisSelecionados.reduce(
-      (acc, item) => acc + Number(item.preco),
-      0
-    )
-
     const idUnico = gerarIdItem(produtoSelecionado, adicionaisSelecionados)
 
     adicionarItem({
       id: idUnico,
       produtoId: produtoSelecionado.id,
       nome: produtoSelecionado.nome,
-      preco: produtoSelecionado.preco + adicionaisTotal,
+      preco: produtoSelecionado.preco, // 🔥 NÃO soma adicionais aqui
       adicionais: adicionaisSelecionados
     })
 
@@ -145,13 +136,6 @@ export default function Home() {
   return (
     <div className="page">
 
-      <button
-        className="btn-semana-floating"
-        onClick={() => navigate('/cardapio')}
-      >
-        📅
-      </button>
-
       {totalItens > 0 && (
         <div className="cart-floating" onClick={() => navigate('/carrinho')}>
           🛒
@@ -168,74 +152,43 @@ export default function Home() {
         <div className="cardapio-list">
           {produtosDisponiveis.map((produto) => {
 
-            const itensMesmoProduto = itens.filter(i =>
-              i.produtoId === produto.id
-            )
-
-            const quantidade = itensMesmoProduto.reduce(
-              (acc, item) => acc + item.quantidade,
-              0
-            )
+            const quantidade = itens
+              .filter(i => i.produtoId === produto.id)
+              .reduce((acc, item) => acc + item.quantidade, 0)
 
             return (
               <div key={produto.id} className="produto-card">
 
                 <div className="produto-info">
                   <div className="produto-header">
-                    <div className="produto-nome">{produto.nome}</div>
-                    <div className="produto-preco">
-                      R$ {produto.preco.toFixed(2)}
-                    </div>
+                    <div>{produto.nome}</div>
+                    <div>R$ {produto.preco.toFixed(2)}</div>
                   </div>
-
-                  {produto.descricao && (
-                    <div className="produto-descricao">
-                      {produto.descricao}
-                    </div>
-                  )}
                 </div>
 
-                <div className="produto-acoes">
-
-                  {!produto.temAdicionais && (
-                    <button
-                      className="add-btn"
-                      onClick={() => adicionarDireto(produto)}
-                    >
-                      + Adicionar
-                    </button>
-                  )}
-
-                  {produto.temAdicionais && (
-                    <button
-                      className={quantidade ? 'add-btn-added' : 'add-btn'}
-                      onClick={() => abrirPopup(produto)}
-                    >
-                      {quantidade ? `✔ ${quantidade}` : 'Escolher'}
-                    </button>
-                  )}
-
-                </div>
-
+                {!produto.temAdicionais ? (
+                  <button onClick={() => adicionarDireto(produto)}>
+                    + Adicionar
+                  </button>
+                ) : (
+                  <button onClick={() => abrirPopup(produto)}>
+                    {quantidade ? `✔ ${quantidade}` : 'Escolher'}
+                  </button>
+                )}
               </div>
             )
           })}
         </div>
       </div>
 
-      {/* 🔥 POPUP MELHORADO */}
       {produtoSelecionado && (
         <div className="popup-overlay" onClick={fecharPopup}>
           <div className="popup-adicionais" onClick={(e) => e.stopPropagation()}>
 
             <h3>{produtoSelecionado.nome}</h3>
 
-            <p style={{ marginBottom: 10 }}>
-              Escolha adicionais (opcional)
-            </p>
-
             {produtoSelecionado.adicionais?.filter(a => a.ativo).map((add) => (
-              <label key={add.id} style={{ display: 'block', marginBottom: 8 }}>
+              <label key={add.id}>
                 <input
                   type="checkbox"
                   checked={adicionaisSelecionados.some(a => a.id === add.id)}
@@ -253,30 +206,12 @@ export default function Home() {
               </label>
             ))}
 
-            {/* 🔥 BOTÕES MELHORADOS */}
-            <div style={{ marginTop: 20 }}>
-
-              <button onClick={confirmarProduto}>
-                Confirmar
-              </button>
-
-              <button onClick={() => {
-                setAdicionaisSelecionados([])
-                confirmarProduto()
-              }}>
-                Sem adicionais
-              </button>
-
-              <button onClick={fecharPopup}>
-                Cancelar
-              </button>
-
-            </div>
+            <button onClick={confirmarProduto}>Confirmar</button>
+            <button onClick={fecharPopup}>Cancelar</button>
 
           </div>
         </div>
       )}
-
     </div>
   )
 }

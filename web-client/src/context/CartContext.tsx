@@ -5,7 +5,7 @@ interface Item {
   id: string
   produtoId: string
   nome: string
-  preco: number // 🔥 AGORA É O PREÇO FINAL (produto + adicionais)
+  preco: number // 🔥 PREÇO BASE
   quantidade: number
   adicionais?: {
     id: string
@@ -39,24 +39,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('carrinho', JSON.stringify(itens))
   }, [itens])
 
-  /* ============================= */
-  /* 🔥 ADICIONAR ITEM CORRIGIDO   */
-  /* ============================= */
   function adicionarItem(item: Omit<Item, 'quantidade'>) {
     setItens((prev) => {
-
-      /* 🔥 CALCULAR PREÇO FINAL COM ADICIONAIS */
-      const totalAdicionais = (item.adicionais || []).reduce(
-        (soma, add) => soma + Number(add.preco),
-        0
-      )
-
-      const precoFinal = Number(item.preco) + totalAdicionais
-
-      const itemComPreco = {
-        ...item,
-        preco: precoFinal // 🔥 agora inclui adicionais
-      }
 
       const index = prev.findIndex(i => i.id === item.id)
 
@@ -66,7 +50,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         return novos
       }
 
-      return [...prev, { ...itemComPreco, quantidade: 1 }]
+      return [...prev, { ...item, quantidade: 1 }]
     })
   }
 
@@ -78,11 +62,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItens([])
   }
 
-  /* ============================= */
-  /* 🔥 TOTAL CORRETO              */
-  /* ============================= */
   const total = itens.reduce(
-    (acc, item) => acc + item.preco * item.quantidade,
+    (acc, item) => {
+      const adicionaisTotal = (item.adicionais || []).reduce(
+        (soma, add) => soma + Number(add.preco),
+        0
+      )
+
+      return acc + (item.preco + adicionaisTotal) * item.quantidade
+    },
     0
   )
 
