@@ -63,23 +63,36 @@ export default function Checkout() {
       /* ============================= */
       /* ENVIO CORRETO (NÃO MEXER)    */
       /* ============================= */
-      const itensFormatados = itens.map((item) => ({
-        produtoId: item.produtoId,
-        quantidade: item.quantidade,
-        adicionais: (item.adicionais || []).map((a: any) => ({
-          nome: a.nome,
-          preco: Number(a.preco)
-        }))
-      }))
+      /* ============================= */
+/* ENVIO CORRETO (BLINDADO)     */
+/* ============================= */
 
-      const payload = {
-        telefone: telefoneLimpo,
-        origem,
-        endereco: enderecoString,
-        itens: itensFormatados
-      }
+const itensFormatados = itens.map((item) => {
+  const adicionaisSeguro = Array.isArray(item.adicionais)
+    ? item.adicionais
+    : []
 
-      console.log('📦 PAYLOAD ENVIADO:', JSON.stringify(payload, null, 2))
+  return {
+    produtoId: item.produtoId,
+    quantidade: item.quantidade,
+
+    adicionais: adicionaisSeguro.map((a: any) => ({
+      nome: a?.nome ?? '',
+      preco: Number(a?.preco ?? 0)
+    }))
+  }
+})
+
+const payload = {
+  telefone: telefoneLimpo,
+  origem,
+  endereco: enderecoString,
+  itens: itensFormatados
+}
+
+console.log('🔥 ITENS ORIGINAIS:', JSON.stringify(itens, null, 2))
+console.log('🔥 ITENS FORMATADOS:', JSON.stringify(itensFormatados, null, 2))
+console.log('📦 PAYLOAD ENVIADO:', JSON.stringify(payload, null, 2))
 
       const pedidoResponse = await api.post('/pedidos', payload)
       const pedidoId = pedidoResponse?.data?.data?.id
