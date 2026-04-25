@@ -13,22 +13,31 @@ class PedidoController {
   /* ============================= */
   /* CRIAR                         */
   /* ============================= */
-  criar: RequestHandler = asyncHandler(
-    async (req, res) => {
-      const parsed = criarPedidoSchema.parse(req.body)
+criar: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const parsed = criarPedidoSchema.parse(req.body)
 
-      const pedido = await pedidoService.criarPedido({
-        ...parsed,
-        endereco: parsed.endereco ?? '' // 🔥 VOLTA para string (corrige erro)
-      })
+    const pedido = await pedidoService.criarPedido({
+      ...parsed,
+      endereco: parsed.endereco ?? ''
+    })
 
-      return res.status(201).json({
-        success: true,
-        data: serializeDecimal(pedido),
-      })
+    /* 🔥 BUSCAR PEDIDO COMPLETO */
+    const pedidoCompleto = await pedidoService.buscarPorId(pedido.id)
+
+    /* 🔥 EMITIR SOCKET COM DADOS COMPLETOS */
+    try {
+      getIO().emit('novo_pedido', pedidoCompleto)
+    } catch {
+      console.warn('WebSocket não iniciado')
     }
-  )
 
+    return res.status(201).json({
+      success: true,
+      data: serializeDecimal(pedidoCompleto),
+    })
+  }
+)
   /* ============================= */
   /* LISTAR                        */
   /* ============================= */
