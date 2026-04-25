@@ -98,6 +98,19 @@ export default function Cozinha() {
         <Coluna titulo="✅ PRONTOS" pedidos={prontos} />
       </div>
 
+      {/* 🔥 CORREÇÃO: MOSTRAR ENTREGUES ABAIXO */}
+      {mostrarEntregues && (
+        <div style={{ marginTop: 20 }}>
+          <div style={theme.column}>
+            <h2 style={theme.title}>📦 ENTREGUES HOJE</h2>
+
+            {entregues.map((pedido: any) => (
+              <PedidoCard key={pedido.id} pedido={pedido} />
+            ))}
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
@@ -239,7 +252,7 @@ function PedidoCard({ pedido }: any) {
   )
 }
 
-/* ESTILOS AUXILIARES */
+/* ESTILOS */
 
 const headerGrid = {
   display: 'flex',
