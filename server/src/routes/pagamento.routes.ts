@@ -24,7 +24,7 @@ router.post("/pix", async (req, res) => {
   try {
     const { pedidoId } = pagamentoSchema.parse(req.body);
 
-    const pedido = await PedidoService.buscarPorIdComProdutos(pedidoId);
+    const pedido = await PedidoService.buscarPorId(pedidoId);
 
     if (!pedido) {
       throw new AppError("Pedido não encontrado.", 404);
@@ -58,7 +58,7 @@ router.post("/checkout", async (req, res) => {
 
     const { pedidoId } = pagamentoSchema.parse(req.body);
 
-    const pedido = await PedidoService.buscarPorIdComProdutos(pedidoId);
+    const pedido = await PedidoService.buscarPorId(pedidoId);
 
     if (!pedido) {
       throw new AppError("Pedido não encontrado.", 404);
@@ -133,7 +133,7 @@ router.post("/webhook", async (req, res) => {
 
       if (!pedido) return res.sendStatus(200);
 
-      // 🔥 BLOQUEIO DE DUPLICIDADE (ADICIONADO)
+      /* 🔥 BLOQUEIO DUPLICIDADE */
       if (pedido.status === StatusPedido.RECEBIDO) {
         console.log("⚠️ Pedido já confirmado, ignorando webhook duplicado");
         return res.sendStatus(200);
@@ -148,15 +148,18 @@ router.post("/webhook", async (req, res) => {
         return res.sendStatus(200);
       }
 
-      const pedidoAtualizado = await PedidoService.atualizarStatus(
+      await PedidoService.atualizarStatus(
         pedido.id,
         StatusPedido.RECEBIDO
       );
 
+      /* 🔥 BUSCAR COMPLETO PARA SOCKET (PROFISSIONAL) */
+      const pedidoCompleto = await PedidoService.buscarPorId(pedido.id);
+
       try {
         const io = getIO();
-        io.emit("novo_pedido", pedidoAtualizado);
-        io.emit("pedido_atualizado", pedidoAtualizado);
+        io.emit("novo_pedido", pedidoCompleto);
+        io.emit("pedido_atualizado", pedidoCompleto);
       } catch {
         console.warn("WebSocket não inicializado.");
       }

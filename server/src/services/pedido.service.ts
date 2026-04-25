@@ -4,7 +4,7 @@ import { StatusPedido, StatusPagamento } from '@prisma/client'
 class PedidoService {
 
   /* ============================= */
-  /* CRIAR PEDIDO                  */
+  /* CRIAR PEDIDO (PROFISSIONAL)   */
   /* ============================= */
   async criarPedido(data: any) {
     const { itens, telefone, endereco, origem } = data
@@ -13,113 +13,91 @@ class PedidoService {
       throw new Error('Pedido sem itens')
     }
 
-    let total = 0
+    return await prisma.$transaction(async (tx) => {
 
-    /* ============================= */
-    /* CALCULAR TOTAL                */
-    /* ============================= */
-    for (const item of itens) {
-      const produto = await prisma.produto.findUnique({
-        where: { id: item.produtoId }
+      let total = 0
+
+      const ultimoPedido = await tx.pedido.findFirst({
+        where: { codigo: { not: null } },
+        orderBy: { codigo: 'desc' }
       })
 
-      if (!produto) {
-        throw new Error("Produto não encontrado")
-      }
+      const proximoCodigo = (ultimoPedido?.codigo ?? 1000) + 1
 
-      const adicionais = Array.isArray(item.adicionais) ? item.adicionais : []
-
-      const totalAdicionais = adicionais.reduce(
-        (soma: number, add: any) => soma + Number(add.preco || 0),
-        0
-      )
-
-      const precoUnit = Number(produto.preco) + totalAdicionais
-
-      total += precoUnit * item.quantidade
-
-      console.log("🔥 CALCULO ITEM:", {
-        produto: Number(produto.preco),
-        adicionaisRecebidos: adicionais,
-        totalAdicionais,
-        precoFinal: precoUnit
-      })
-    }
-
-    /* ============================= */
-    /* GERAR CÓDIGO SEQUENCIAL       */
-    /* ============================= */
-    const ultimoPedido = await prisma.pedido.findFirst({
-      where: { codigo: { not: null } },
-      orderBy: { codigo: 'desc' }
-    })
-
-    const proximoCodigo = (ultimoPedido?.codigo ?? 1000) + 1
-
-    /* ============================= */
-    /* CRIAR PEDIDO                  */
-    /* ============================= */
-    const pedido = await prisma.pedido.create({
-      data: {
-        telefone,
-        endereco,
-        origem,
-        total,
-        codigo: proximoCodigo
-      }
-    })
-
-    /* ============================= */
-    /* CRIAR ITENS + ADICIONAIS      */
-    /* ============================= */
-    for (const item of itens) {
-
-      const produto = await prisma.produto.findUnique({
-        where: { id: item.produtoId }
-      })
-
-      if (!produto) {
-        throw new Error('Produto não encontrado')
-      }
-
-      const adicionais = Array.isArray(item.adicionais) ? item.adicionais : []
-
-      const totalAdicionais = adicionais.reduce(
-        (soma: number, add: any) => soma + Number(add.preco || 0),
-        0
-      )
-
-      const precoUnit = Number(produto.preco) + totalAdicionais
-
-      const itemCriado = await prisma.itemPedido.create({
+      const pedido = await tx.pedido.create({
         data: {
-          pedidoId: pedido.id,
-          produtoId: item.produtoId,
-          quantidade: item.quantidade,
-          precoUnit
+          telefone,
+          endereco,
+          origem,
+          total: 0,
+          codigo: proximoCodigo
         }
       })
 
-      if (adicionais.length > 0) {
-        await prisma.itemPedidoAdicional.createMany({
-          data: adicionais.map((add: any) => ({
-            nome: add.nome,
-            preco: Number(add.preco),
-            itemPedidoId: itemCriado.id
-          }))
+      for (const item of itens) {
+
+        const produto = await tx.produto.findUnique({
+          where: { id: item.produtoId }
         })
 
-        console.log("✅ ADICIONAIS SALVOS:", adicionais)
-      } else {
-        console.log("⚠️ ITEM SEM ADICIONAIS")
-      }
-    }
+        if (!produto) {
+          throw new Error("Produto não encontrado")
+        }
 
-    return pedido
+        const adicionais = Array.isArray(item.adicionais) ? item.adicionais : []
+
+        const totalAdicionais = adicionais.reduce(
+          (soma: number, add: any) => soma + Number(add.preco || 0),
+          0
+        )
+
+        const precoUnit = Number(produto.preco) + totalAdicionais
+
+        total += precoUnit * item.quantidade
+
+        const itemCriado = await tx.itemPedido.create({
+          data: {
+            pedidoId: pedido.id,
+            produtoId: produto.id,
+            quantidade: item.quantidade,
+            precoUnit
+          }
+        })
+
+        if (adicionais.length > 0) {
+          await tx.itemPedidoAdicional.createMany({
+            data: adicionais.map((add: any) => ({
+              nome: add.nome,
+              preco: Number(add.preco),
+              itemPedidoId: itemCriado.id
+            }))
+          })
+        }
+      }
+
+      /* 🔥 ATUALIZA TOTAL */
+      await tx.pedido.update({
+        where: { id: pedido.id },
+        data: { total }
+      })
+
+      /* 🔥 RETORNA COMPLETO */
+      return await tx.pedido.findUnique({
+        where: { id: pedido.id },
+        include: {
+          itens: {
+            include: {
+              produto: true,
+              adicionais: true
+            }
+          }
+        }
+      })
+    })
   }
 
   /* ============================= */
-  /* LISTAR PEDIDOS                */
+  /* LISTAR                        */
   /* ============================= */
   async listarPedidos(status?: string) {
     return prisma.pedido.findMany({
@@ -137,26 +115,9 @@ class PedidoService {
   }
 
   /* ============================= */
-  /* BUSCAR POR ID (CORRIGIDO)     */
+  /* BUSCAR POR ID                 */
   /* ============================= */
   async buscarPorId(id: string) {
-    return prisma.pedido.findUnique({
-      where: { id },
-      include: {
-        itens: {
-          include: {
-            produto: true,
-            adicionais: true
-          }
-        }
-      }
-    })
-  }
-
-  /* ============================= */
-  /* BUSCAR COMPLETO (mantido)     */
-  /* ============================= */
-  async buscarPorIdComProdutos(id: string) {
     return prisma.pedido.findUnique({
       where: { id },
       include: {
@@ -195,19 +156,8 @@ class PedidoService {
         statusPedido = StatusPedido.RECEBIDO
         break
       case 'pending':
-      case 'pendente':
         pagamentoEnum = StatusPagamento.PENDENTE
         statusPedido = StatusPedido.AGUARDANDO_PAGAMENTO
-        break
-      case 'rejected':
-      case 'recusado':
-        pagamentoEnum = StatusPagamento.RECUSADO
-        statusPedido = StatusPedido.CANCELADO
-        break
-      case 'cancelled':
-      case 'cancelado':
-        pagamentoEnum = StatusPagamento.CANCELADO
-        statusPedido = StatusPedido.CANCELADO
         break
       default:
         pagamentoEnum = StatusPagamento.PENDENTE
@@ -224,9 +174,6 @@ class PedidoService {
     })
   }
 
-  /* ============================= */
-  /* REMOVER PEDIDO                */
-  /* ============================= */
   async removerPedido(id: string) {
     return prisma.pedido.delete({ where: { id } })
   }

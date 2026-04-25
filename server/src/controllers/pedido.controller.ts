@@ -10,24 +10,17 @@ import { serializeDecimal } from '../utils/serializeDecimal'
 
 class PedidoController {
 
-  /* ============================= */
-  /* CRIAR                         */
-  /* ============================= */
-criar: RequestHandler = asyncHandler(
-  async (req, res) => {
+  criar: RequestHandler = asyncHandler(async (req, res) => {
+
     const parsed = criarPedidoSchema.parse(req.body)
 
-    const pedido = await pedidoService.criarPedido({
+    const pedidoCompleto = await pedidoService.criarPedido({
       ...parsed,
       endereco: parsed.endereco ?? ''
     })
 
-    /* 🔥 BUSCAR PEDIDO COMPLETO */
-    const pedidoCompleto = await pedidoService.buscarPorId(pedido.id)
-
-    /* 🔥 EMITIR SOCKET COM DADOS COMPLETOS */
     try {
-      getIO().emit('novo_pedido', pedidoCompleto)
+      getIO().emit('novo_pedido', serializeDecimal(pedidoCompleto))
     } catch {
       console.warn('WebSocket não iniciado')
     }
@@ -36,102 +29,77 @@ criar: RequestHandler = asyncHandler(
       success: true,
       data: serializeDecimal(pedidoCompleto),
     })
-  }
-)
-  /* ============================= */
-  /* LISTAR                        */
-  /* ============================= */
-  listar: RequestHandler = asyncHandler(
-    async (req, res) => {
-      const status = req.query.status as string | undefined
+  })
 
-      const pedidos = await pedidoService.listarPedidos(status)
+  listar: RequestHandler = asyncHandler(async (req, res) => {
+    const status = req.query.status as string | undefined
+    const pedidos = await pedidoService.listarPedidos(status)
 
-      return res.json({
-        success: true,
-        data: serializeDecimal(pedidos),
+    return res.json({
+      success: true,
+      data: serializeDecimal(pedidos),
+    })
+  })
+
+  buscarPorId: RequestHandler = asyncHandler(async (req, res) => {
+    const { id } = req.params
+
+    const pedido = await pedidoService.buscarPorId(id)
+
+    if (!pedido) {
+      return res.status(404).json({
+        success: false,
+        message: 'Pedido não encontrado',
       })
     }
-  )
 
-  /* ============================= */
-  /* BUSCAR POR ID                 */
-  /* ============================= */
-  buscarPorId: RequestHandler = asyncHandler(
-    async (req, res) => {
-      const { id } = req.params
+    return res.json({
+      success: true,
+      data: serializeDecimal(pedido),
+    })
+  })
 
-      // 🔥 CORREÇÃO: usar função que já existe
-      const pedido = await pedidoService.buscarPorId(id)
+  atualizarStatus: RequestHandler = asyncHandler(async (req, res) => {
 
-      if (!pedido) {
-        return res.status(404).json({
-          success: false,
-          message: 'Pedido não encontrado',
-        })
-      }
+    const { id } = req.params
+    const data = atualizarStatusSchema.parse(req.body)
 
-      return res.json({
-        success: true,
-        data: serializeDecimal(pedido),
-      })
+    await pedidoService.atualizarStatus(id, data.status as StatusPedido)
+
+    const pedidoCompleto = await pedidoService.buscarPorId(id)
+    const serializado = serializeDecimal(pedidoCompleto)
+
+    try {
+      getIO().emit('pedido_atualizado', serializado)
+    } catch {
+      console.warn('WebSocket não iniciado')
     }
-  )
 
-  /* ============================= */
-  /* ATUALIZAR STATUS              */
-  /* ============================= */
-  atualizarStatus: RequestHandler = asyncHandler(
-    async (req, res) => {
-      const { id } = req.params
-      const data = atualizarStatusSchema.parse(req.body)
-
-      const pedido = await pedidoService.atualizarStatus(
-        id,
-        data.status as StatusPedido
-      )
-
-      const serializado = serializeDecimal(pedido)
-
+    if (pedidoCompleto?.status === StatusPedido.PRONTO && pedidoCompleto.telefone) {
       try {
-        getIO().emit('pedido_atualizado', serializado)
+        await NotificationService.enviarMensagem(
+          pedidoCompleto.telefone,
+          '🍧 Seu pedido está PRONTO!'
+        )
       } catch {
-        console.warn('WebSocket não iniciado')
+        console.warn('Erro ao enviar notificação')
       }
-
-      if (pedido.status === StatusPedido.PRONTO && pedido.telefone) {
-        try {
-          await NotificationService.enviarMensagem(
-            pedido.telefone,
-            '🍧 Seu pedido está PRONTO!'
-          )
-        } catch {
-          console.warn('Erro ao enviar notificação')
-        }
-      }
-
-      return res.json({
-        success: true,
-        data: serializado,
-      })
     }
-  )
 
-  /* ============================= */
-  /* DASHBOARD                     */
-  /* ============================= */
-  dashboard: RequestHandler = asyncHandler(
-    async (_req, res) => {
+    return res.json({
+      success: true,
+      data: serializado,
+    })
+  })
 
-      // 🔥 CORREÇÃO: usar função que já existe
-      const data = await pedidoService.listarPedidos()
+  dashboard: RequestHandler = asyncHandler(async (_req, res) => {
+    const data = await pedidoService.listarPedidos()
 
-      return res.json({
-        success: true,
-        data: serializeDecimal(data),
-      })
-    }
-  )
+    return res.json({
+      success: true,
+      data: serializeDecimal(data),
+    })
+  })
 }
 
 export default new PedidoController()
