@@ -24,41 +24,40 @@ class PedidoService {
       })
 
       if (!produto) {
-        throw new Error('Produto não encontrado')
+        throw new Error("Produto não encontrado")
       }
 
-      let precoItem = Number(produto.preco)
+      const adicionais = Array.isArray(item.adicionais) ? item.adicionais : []
 
-      console.log("🔥 ADICIONAIS RECEBIDOS (TOTAL):", item.adicionais)
-      console.log("🔥 ADICIONAIS RECEBIDOS NO BACK:", JSON.stringify(item.adicionais, null, 2))
+      const totalAdicionais = adicionais.reduce(
+        (soma: number, add: any) => soma + Number(add.preco || 0),
+        0
+      )
 
-      if (item.adicionais?.length) {
-        for (const add of item.adicionais) {
-          precoItem += Number(add.preco)
-        }
-      }
+      const precoUnit = Number(produto.preco) + totalAdicionais
 
-      total += precoItem * item.quantidade
+      total += precoUnit * item.quantidade
+
+      console.log("🔥 CALCULO ITEM:", {
+        produto: Number(produto.preco),
+        adicionaisRecebidos: adicionais,
+        totalAdicionais,
+        precoFinal: precoUnit
+      })
     }
 
     /* ============================= */
     /* GERAR CÓDIGO SEQUENCIAL       */
     /* ============================= */
     const ultimoPedido = await prisma.pedido.findFirst({
-      where: {
-        codigo: {
-          not: null
-        }
-      },
-      orderBy: {
-        codigo: 'desc'
-      }
+      where: { codigo: { not: null } },
+      orderBy: { codigo: 'desc' }
     })
 
     const proximoCodigo = (ultimoPedido?.codigo ?? 1000) + 1
 
     /* ============================= */
-    /* CRIAR PEDIDO                 */
+    /* CRIAR PEDIDO                  */
     /* ============================= */
     const pedido = await prisma.pedido.create({
       data: {
@@ -71,7 +70,7 @@ class PedidoService {
     })
 
     /* ============================= */
-    /* CRIAR ITENS + ADICIONAIS     */
+    /* CRIAR ITENS + ADICIONAIS      */
     /* ============================= */
     for (const item of itens) {
       const produto = await prisma.produto.findUnique({
@@ -82,10 +81,6 @@ class PedidoService {
         throw new Error('Produto não encontrado')
       }
 
-      console.log("🔥 ADICIONAIS RECEBIDOS (ITEM):", item.adicionais)
-
-      let precoUnit = Number(produto.preco)
-
       const adicionais = item.adicionais || []
 
       const totalAdicionais = adicionais.reduce(
@@ -93,7 +88,7 @@ class PedidoService {
         0
       )
 
-      precoUnit += totalAdicionais
+      const precoUnit = Number(produto.preco) + totalAdicionais
 
       const itemCriado = await prisma.itemPedido.create({
         data: {
@@ -104,9 +99,6 @@ class PedidoService {
         }
       })
 
-      /* ============================= */
-      /* SALVAR ADICIONAIS             */
-      /* ============================= */
       if (adicionais.length > 0) {
         await prisma.itemPedidoAdicional.createMany({
           data: adicionais.map((add: any) => ({
@@ -139,9 +131,7 @@ class PedidoService {
           }
         }
       },
-      orderBy: {
-        criadoEm: 'desc'
-      }
+      orderBy: { criadoEm: 'desc' }
     })
   }
 
@@ -149,9 +139,7 @@ class PedidoService {
   /* BUSCAR POR ID                 */
   /* ============================= */
   async buscarPorId(id: string) {
-    return prisma.pedido.findUnique({
-      where: { id }
-    })
+    return prisma.pedido.findUnique({ where: { id } })
   }
 
   /* ============================= */
@@ -184,11 +172,7 @@ class PedidoService {
   /* ============================= */
   /* ATUALIZAR PAGAMENTO           */
   /* ============================= */
-  async atualizarPagamento(
-    id: string,
-    statusPagamento: string,
-    pagamentoId?: string
-  ) {
+  async atualizarPagamento(id: string, statusPagamento: string, pagamentoId?: string) {
     let pagamentoEnum: StatusPagamento
     let statusPedido: StatusPedido
 
@@ -198,25 +182,21 @@ class PedidoService {
         pagamentoEnum = StatusPagamento.APROVADO
         statusPedido = StatusPedido.RECEBIDO
         break
-
       case 'pending':
       case 'pendente':
         pagamentoEnum = StatusPagamento.PENDENTE
         statusPedido = StatusPedido.AGUARDANDO_PAGAMENTO
         break
-
       case 'rejected':
       case 'recusado':
         pagamentoEnum = StatusPagamento.RECUSADO
         statusPedido = StatusPedido.CANCELADO
         break
-
       case 'cancelled':
       case 'cancelado':
         pagamentoEnum = StatusPagamento.CANCELADO
         statusPedido = StatusPedido.CANCELADO
         break
-
       default:
         pagamentoEnum = StatusPagamento.PENDENTE
         statusPedido = StatusPedido.AGUARDANDO_PAGAMENTO
@@ -236,9 +216,7 @@ class PedidoService {
   /* REMOVER PEDIDO                */
   /* ============================= */
   async removerPedido(id: string) {
-    return prisma.pedido.delete({
-      where: { id }
-    })
+    return prisma.pedido.delete({ where: { id } })
   }
 }
 
