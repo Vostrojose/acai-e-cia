@@ -1,7 +1,5 @@
 import { Router } from "express";
 import pedidoController from "../controllers/pedido.controller";
-import { ensureAuthenticated } from "../middlewares/auth.middleware";
-import { ensureAdmin } from "../middlewares/ensureAdmin";
 
 const router = Router();
 
@@ -16,27 +14,19 @@ router.post("/", pedidoController.criar);
 router.get("/", pedidoController.listar);
 
 /**
- * 🔥 IMPORTANTE: rota dinâmica vem DEPOIS das fixas
- */
-
-/**
- * Dashboard
+ * Dashboard (livre)
+ * 🔥 IMPORTANTE: rota fixa vem antes da dinâmica
  */
 router.get("/dashboard", pedidoController.dashboard);
 
 /**
- * Buscar pedido por ID
+ * Buscar pedido por ID (livre)
  */
 router.get("/:id", pedidoController.buscarPorId);
 
 /**
- * 🔐 Atualizar status (PROTEGIDO)
+ * 🔥 COZINHA ALTERA STATUS (SEM LOGIN)
  */
-router.patch(
-  "/:id/status",
-  ensureAuthenticated,
-  ensureAdmin,
-  pedidoController.atualizarStatus
-);
+router.patch("/:id/status", pedidoController.atualizarStatus);
 
 export default router;
