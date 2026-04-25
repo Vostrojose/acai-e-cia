@@ -74,26 +74,23 @@ export default function Home() {
   }
 
   /* ============================= */
-  /* 🔥 CORREÇÃO PRINCIPAL AQUI     */
+  /* 🔥 CORREÇÃO DEFINITIVA        */
   /* ============================= */
   function confirmarProduto() {
     if (!produtoSelecionado) return
 
-    const idUnico = gerarIdItem(produtoSelecionado, adicionaisSelecionados)
+    const adicionais = [...adicionaisSelecionados] // 🔥 GARANTE DADO CORRETO
 
-    const totalAdicionais = adicionaisSelecionados.reduce(
-      (soma, add) => soma + Number(add.preco),
-      0
-    )
+    console.log("🔥 ENVIANDO ADICIONAIS:", adicionais)
 
-    const precoFinal = Number(produtoSelecionado.preco) + totalAdicionais
+    const idUnico = gerarIdItem(produtoSelecionado, adicionais)
 
     adicionarItem({
       id: idUnico,
       produtoId: produtoSelecionado.id,
       nome: produtoSelecionado.nome,
-      preco: precoFinal, // 🔥 AGORA SOMA CORRETAMENTE
-      adicionais: adicionaisSelecionados
+      preco: produtoSelecionado.preco, // 🚨 NÃO SOMAR AQUI
+      adicionais: adicionais
     })
 
     fecharPopup()
@@ -172,7 +169,6 @@ export default function Home() {
 
                 <div className="produto-info">
 
-                  {/* 🔥 CORREÇÃO VISUAL MOBILE */}
                   <div className="produto-header">
                     <span className="produto-nome">{produto.nome}</span>
                     <span className="produto-preco">
