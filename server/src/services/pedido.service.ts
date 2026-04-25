@@ -30,6 +30,7 @@ class PedidoService {
       let precoItem = Number(produto.preco)
 
       console.log("🔥 ADICIONAIS RECEBIDOS (TOTAL):", item.adicionais)
+      console.log("🔥 ADICIONAIS RECEBIDOS NO BACK:", JSON.stringify(item.adicionais, null, 2))
 
       if (item.adicionais?.length) {
         for (const add of item.adicionais) {
