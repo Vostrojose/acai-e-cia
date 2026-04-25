@@ -15,10 +15,8 @@ class PedidoService {
 
     let total = 0
 
-    const itensCalculados: any[] = []
-
     /* ============================= */
-    /* CALCULAR TOTAL CORRETO        */
+    /* CALCULAR TOTAL                */
     /* ============================= */
     for (const item of itens) {
       const produto = await prisma.produto.findUnique({
@@ -29,23 +27,17 @@ class PedidoService {
         throw new Error('Produto não encontrado')
       }
 
-      const adicionais = item.adicionais || []
+      let precoItem = Number(produto.preco)
 
-      const totalAdicionais = adicionais.reduce(
-        (soma: number, add: any) => soma + Number(add.preco),
-        0
-      )
+      console.log("🔥 ADICIONAIS RECEBIDOS (TOTAL):", item.adicionais)
 
-      const precoUnit = Number(produto.preco) + totalAdicionais
+      if (item.adicionais?.length) {
+        for (const add of item.adicionais) {
+          precoItem += Number(add.preco)
+        }
+      }
 
-      total += precoUnit * item.quantidade
-
-      itensCalculados.push({
-        produtoId: item.produtoId,
-        quantidade: item.quantidade,
-        precoUnit,
-        adicionais
-      })
+      total += precoItem * item.quantidade
     }
 
     /* ============================= */
@@ -78,27 +70,54 @@ class PedidoService {
     })
 
     /* ============================= */
-    /* SALVAR ITENS + ADICIONAIS     */
+    /* CRIAR ITENS + ADICIONAIS     */
     /* ============================= */
-    for (const item of itensCalculados) {
+    for (const item of itens) {
+      const produto = await prisma.produto.findUnique({
+        where: { id: item.produtoId }
+      })
+
+      if (!produto) {
+        throw new Error('Produto não encontrado')
+      }
+
+      console.log("🔥 ADICIONAIS RECEBIDOS (ITEM):", item.adicionais)
+
+      let precoUnit = Number(produto.preco)
+
+      const adicionais = item.adicionais || []
+
+      const totalAdicionais = adicionais.reduce(
+        (soma: number, add: any) => soma + Number(add.preco),
+        0
+      )
+
+      precoUnit += totalAdicionais
 
       const itemCriado = await prisma.itemPedido.create({
         data: {
           pedidoId: pedido.id,
           produtoId: item.produtoId,
           quantidade: item.quantidade,
-          precoUnit: item.precoUnit
+          precoUnit
         }
       })
 
-      if (item.adicionais.length > 0) {
+      /* ============================= */
+      /* SALVAR ADICIONAIS             */
+      /* ============================= */
+      if (adicionais.length > 0) {
         await prisma.itemPedidoAdicional.createMany({
-          data: item.adicionais.map((add: any) => ({
+          data: adicionais.map((add: any) => ({
             nome: add.nome,
-            preco: add.preco,
+            preco: Number(add.preco),
             itemPedidoId: itemCriado.id
           }))
         })
+
+        console.log("✅ ADICIONAIS SALVOS:", adicionais)
+      } else {
+        console.log("⚠️ ITEM SEM ADICIONAIS")
       }
     }
 
