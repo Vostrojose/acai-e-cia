@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { theme } from "../assets/styles/adminTheme";
 
 type ItemPedido = {
   id: string;
@@ -27,7 +28,7 @@ export default function Pedidos() {
   const navigate = useNavigate();
 
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
-  const [carregando, setCarregando] = useState<boolean>(false);
+  const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
   async function carregarPedidos() {
@@ -37,7 +38,7 @@ export default function Pedidos() {
     try {
       const res = await api.get("/pedidos");
 
-      if (res.data && res.data.success && Array.isArray(res.data.data)) {
+      if (res.data?.success && Array.isArray(res.data.data)) {
         setPedidos(res.data.data);
       } else {
         setErro("Resposta inesperada do servidor.");
@@ -54,17 +55,19 @@ export default function Pedidos() {
   }, []);
 
   return (
-    <div style={page}>
+    <div style={theme.page}>
 
       <CardMenu navigate={navigate} />
 
-      <h1 style={h1Style}>📦 Pedidos</h1>
+      <h1 style={{ ...theme.title, textAlign: "center" }}>
+        📦 Pedidos
+      </h1>
 
       {carregando && <p>Carregando pedidos...</p>}
 
       {erro && (
-        <p style={{ color: "red", marginBottom: 16 }}>
-          Erro: {erro}
+        <p style={{ color: "#ff5252", marginBottom: 16 }}>
+          ❌ {erro}
         </p>
       )}
 
@@ -75,34 +78,45 @@ export default function Pedidos() {
       {!carregando && !erro && pedidos.length > 0 && (
         <div style={gridPedidos}>
           {pedidos.map((pedido) => (
-            <div key={pedido.id} style={cardAçai}>
+            <div key={pedido.id} style={theme.card}>
 
-              <div style={cardContent}>
+              <div style={linha}><strong>ID:</strong> {pedido.id}</div>
 
-                <div><strong>ID:</strong> {pedido.id}</div>
-                <div><strong>Status:</strong> {pedido.status}</div>
-                <div><strong>Total:</strong> R$ {pedido.total.toFixed(2)}</div>
-
-                {pedido.telefone && (
-                  <div><strong>Telefone:</strong> {pedido.telefone}</div>
-                )}
-
-                {pedido.endereco && (
-                  <div><strong>Endereço:</strong> {pedido.endereco}</div>
-                )}
-
-                <div>
-                  <strong>Itens:</strong>
-                  <ul style={{ marginTop: 6, paddingLeft: 16 }}>
-                    {pedido.itens.map((item) => (
-                      <li key={item.id}>
-                        {item.quantidade} × R$ {item.precoUnit.toFixed(2)}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
+              <div style={linha}>
+                <strong>Status:</strong>{" "}
+                <span style={badgeStatus(pedido.status)}>
+                  {pedido.status}
+                </span>
               </div>
+
+              <div style={linha}>
+                <strong>Total:</strong> R$ {pedido.total.toFixed(2)}
+              </div>
+
+              {pedido.telefone && (
+                <div style={linha}>
+                  <strong>Telefone:</strong> {pedido.telefone}
+                </div>
+              )}
+
+              {pedido.endereco && (
+                <div style={linha}>
+                  <strong>Endereço:</strong> {pedido.endereco}
+                </div>
+              )}
+
+              <div style={{ marginTop: 10 }}>
+                <strong>Itens:</strong>
+
+                <ul style={listaItens}>
+                  {pedido.itens.map((item) => (
+                    <li key={item.id}>
+                      {item.quantidade} × R$ {item.precoUnit.toFixed(2)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
             </div>
           ))}
         </div>
@@ -111,70 +125,69 @@ export default function Pedidos() {
   );
 }
 
-/* ========================= */
-/* 🎨 VISUAL                 */
-/* ========================= */
-
-const page = {
-  padding: 20,
-  background: "#6d10f9a2",
-  minHeight: "100vh",
-}
+/* COMPONENTES */
 
 function CardMenu({ navigate }: any) {
   return (
     <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
       <div style={{
-        background: "#111",
+        background: "#000",
         padding: 10,
         borderRadius: 10,
         display: "flex",
         gap: 10,
         flexWrap: "wrap"
       }}>
-        <button onClick={() => navigate("/cozinha")} style={botaoMenu}>🍳 Cozinha</button>
-        <button onClick={() => navigate("/produtos")} style={botaoMenu}>🛒 Produtos</button>
-        <button onClick={() => navigate("/dashboard")} style={botaoMenu}>📊 Dashboard</button>
-        <button onClick={() => navigate("/auditoria")} style={botaoMenu}>📊 Auditoria</button>
+        <button style={btnMenu} onClick={() => navigate("/cozinha")}>🍳</button>
+        <button style={btnMenu} onClick={() => navigate("/produtos")}>🛒</button>
+        <button style={btnMenu} onClick={() => navigate("/dashboard")}>📊</button>
+        <button style={btnMenu} onClick={() => navigate("/auditoria")}>📈</button>
       </div>
     </div>
-  )
+  );
 }
 
-const botaoMenu = {
-  padding: "8px 12px",
-  borderRadius: 6,
-  border: "none",
-  background: "#333",
-  color: "#fff",
-  cursor: "pointer",
-  fontWeight: "bold",
-}
+/* ESTILOS */
 
 const gridPedidos = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
   gap: 20,
-}
+};
 
-/* 🍇 CARD AÇAÍ */
-const cardAçai = {
-  background: "#4e06f7",
-  borderRadius: 12,
-  padding: 4,
-}
+const linha = {
+  marginBottom: 6,
+  fontSize: 15,
+};
 
-/* 🔥 CONTEÚDO LEGÍVEL */
-const cardContent = {
-  background: "#069bf862",
-  borderRadius: 10,
-  padding: 15,
-}
+const listaItens = {
+  marginTop: 6,
+  paddingLeft: 16,
+};
 
-const h1Style = {
-  fontSize: "28px",
-  fontWeight: "bold",
-  marginBottom: 20,
-  color: "#222",
-  textAlign: "center" as const,
+const btnMenu = {
+  background: "#333",
+  color: "#fff",
+  border: "none",
+  padding: "10px 12px",
+  borderRadius: 6,
+  fontSize: 16,
+  cursor: "pointer",
+};
+
+/* BADGE STATUS */
+
+function badgeStatus(status: string) {
+  switch (status) {
+    case "RECEBIDO":
+      return { background: "#e53935", padding: "4px 8px", borderRadius: 6 }
+    case "EM_PREPARO":
+      return { background: "#fb8c00", padding: "4px 8px", borderRadius: 6 }
+    case "PRONTO":
+      return { background: "#43a047", padding: "4px 8px", borderRadius: 6 }
+    case "ENTREGUE":
+      return { background: "#2196f3", padding: "4px 8px", borderRadius: 6 }
+    default:
+      return { background: "#777", padding: "4px 8px", borderRadius: 6 }
+  }
 }

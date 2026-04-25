@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import api from "../services/api"
+import { theme } from "../assets/styles/adminTheme"
 
 export default function Dashboard() {
 
@@ -23,7 +24,6 @@ export default function Dashboard() {
         const resProdutos = await api.get("/produtos")
         const listaProdutos = resProdutos.data?.data || []
 
-        /* 🔥 MAPA ID → NOME */
         const mapaProdutos: any = {}
         listaProdutos.forEach((p: any) => {
           mapaProdutos[p.id] = p.nome
@@ -31,7 +31,6 @@ export default function Dashboard() {
 
         const hoje = new Date()
 
-        /* 💰 TOTAL HOJE */
         const pedidosHoje = pedidos.filter((p: any) => {
           const data = new Date(p.criadoEm)
           return data.toDateString() === hoje.toDateString()
@@ -42,12 +41,10 @@ export default function Dashboard() {
           0
         )
 
-        /* 📦 PEDIDOS EM ABERTO */
         const pedidosAbertos = pedidos.filter(
           (p: any) => p.status !== "ENTREGUE"
         ).length
 
-        /* 🔥 PRODUTO MAIS VENDIDO */
         const contador: any = {}
 
         pedidos.forEach((p: any) => {
@@ -63,11 +60,10 @@ export default function Dashboard() {
         Object.entries(contador).forEach(([id, qtd]: any) => {
           if (qtd > max) {
             max = qtd
-            produtoTop = `${mapaProdutos[id] || "Produto desconhecido"} (${qtd}x)`
+            produtoTop = `${mapaProdutos[id] || "Produto"} (${qtd}x)`
           }
         })
 
-        /* ⏱ TEMPO MÉDIO */
         const entregues = pedidos.filter(
           (p: any) => p.status === "ENTREGUE"
         )
@@ -81,7 +77,6 @@ export default function Dashboard() {
 
         const tempoMin = Math.round(tempoMedio / 60000)
 
-        /* 📈 TENDÊNCIA */
         const ontem = new Date()
         ontem.setDate(ontem.getDate() - 1)
 
@@ -114,11 +109,13 @@ export default function Dashboard() {
   }, [])
 
   return (
-    <div style={page}>
+    <div style={theme.page}>
 
       <CardMenu navigate={navigate} />
 
-      <h1 style={h1Style}>📊 Dashboard</h1>
+      <h1 style={{ ...theme.title, textAlign: "center" }}>
+        📊 Dashboard
+      </h1>
 
       <div style={grid}>
 
@@ -138,74 +135,59 @@ export default function Dashboard() {
   )
 }
 
-/* ========================= */
-/* 🎨 VISUAL                 */
-/* ========================= */
-
-const page = {
-  padding: 20,
-  background: "#6d10f9a2",
-  minHeight: "100vh",
-}
+/* COMPONENTES */
 
 function CardMenu({ navigate }: any) {
   return (
     <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
       <div style={{
-        background: "#111",
+        background: "#000",
         padding: 10,
         borderRadius: 10,
         display: "flex",
         gap: 10,
         flexWrap: "wrap"
       }}>
-        <button onClick={() => navigate("/cozinha")} style={botaoMenu}>🍳 Cozinha</button>
-        <button onClick={() => navigate("/pedidos")} style={botaoMenu}>📦 Pedidos</button>
-        <button onClick={() => navigate("/produtos")} style={botaoMenu}>🛒 Produtos</button>
-        <button onClick={() => navigate("/auditoria")} style={botaoMenu}>📊 Auditoria</button>
+        <button style={btnMenu} onClick={() => navigate("/cozinha")}>🍳</button>
+        <button style={btnMenu} onClick={() => navigate("/pedidos")}>📦</button>
+        <button style={btnMenu} onClick={() => navigate("/produtos")}>🛒</button>
+        <button style={btnMenu} onClick={() => navigate("/auditoria")}>📊</button>
       </div>
     </div>
   )
 }
 
-const botaoMenu = {
-  padding: "8px 12px",
-  borderRadius: 6,
-  border: "none",
-  background: "#333",
-  color: "#fff",
-  cursor: "pointer",
-  fontWeight: "bold",
-}
-
-/* GRID */
-const grid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-  gap: 20,
-}
-
-/* CARD */
 function Card({ titulo, valor, cor }: any) {
   return (
     <div style={{
       background: cor,
       padding: 20,
       borderRadius: 12,
-      color: "#f5f4f8",
+      color: "#fff",
       fontWeight: "bold",
-      textAlign: "center"
+      textAlign: "center",
+      fontSize: 18
     }}>
       <div style={{ marginBottom: 10 }}>{titulo}</div>
-      <div style={{ fontSize: 22 }}>{valor}</div>
+      <div style={{ fontSize: 24 }}>{valor}</div>
     </div>
   )
 }
 
-/* TÍTULO */
-const h1Style = {
-  fontSize: "28px",
-  fontWeight: "bold",
-  marginBottom: 20,
-  textAlign: "center" as const,
+/* ESTILOS */
+
+const grid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: 20,
+}
+
+const btnMenu = {
+  background: "#333",
+  color: "#fff",
+  border: "none",
+  padding: "10px 12px",
+  borderRadius: 6,
+  fontSize: 16,
+  cursor: "pointer"
 }

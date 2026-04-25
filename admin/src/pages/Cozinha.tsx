@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { io } from 'socket.io-client'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import { theme } from '../assets/styles/adminTheme'
 
 export default function Cozinha() {
   const [pedidos, setPedidos] = useState<any[]>([])
@@ -76,20 +77,11 @@ export default function Cozinha() {
   const entregues = ordenar(pedidos.filter((p) => p.status === 'ENTREGUE'))
 
   return (
-    <div style={{
-      padding: 20,
-      background: '#1a1a1a',
-      minHeight: '100vh',
-      color: '#fff'
-    }}>
+    <div style={theme.page}>
+
       <CardMenu navigate={navigate} />
 
-      <div style={{
-        display: 'flex',
-        gap: 20,
-        flexWrap: 'wrap',
-        marginBottom: 20,
-      }}>
+      <div style={headerGrid}>
         <CardRelogio />
         <CardStatus titulo="🆕 Novos" valor={novos.length} cor="#e53935" />
         <CardStatus titulo="👨‍🍳 Preparo" valor={preparo.length} cor="#fb8c00" />
@@ -100,15 +92,12 @@ export default function Cozinha() {
         </div>
       </div>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr 1fr',
-        gap: 20,
-      }}>
+      <div style={colunas}>
         <Coluna titulo="🆕 NOVOS" pedidos={novos} />
         <Coluna titulo="👨‍🍳 PREPARO" pedidos={preparo} />
         <Coluna titulo="✅ PRONTOS" pedidos={prontos} />
       </div>
+
     </div>
   )
 }
@@ -119,9 +108,9 @@ function CardMenu({ navigate }: any) {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
       <div style={{ background: '#000', padding: 10, borderRadius: 10, display: 'flex', gap: 10 }}>
-        <button onClick={() => navigate('/auditoria')} style={btnMenu}>📊</button>
-        <button onClick={() => navigate('/pedidos')} style={btnMenu}>📦</button>
-        <button onClick={() => navigate('/produtos')} style={btnMenu}>🛒</button>
+        <button style={btnMenu} onClick={() => navigate('/auditoria')}>📊</button>
+        <button style={btnMenu} onClick={() => navigate('/pedidos')}>📦</button>
+        <button style={btnMenu} onClick={() => navigate('/produtos')}>🛒</button>
       </div>
     </div>
   )
@@ -136,7 +125,7 @@ function CardRelogio() {
   }, [])
 
   return (
-    <div style={{ background: '#000', padding: 12, borderRadius: 10, textAlign: 'center', fontSize: 18 }}>
+    <div style={{ ...theme.card, textAlign: 'center' }}>
       <div>{hora.toLocaleDateString('pt-BR')}</div>
       <div style={{ fontSize: 22 }}>{hora.toLocaleTimeString('pt-BR')}</div>
     </div>
@@ -151,7 +140,6 @@ function CardStatus({ titulo, valor, cor }: any) {
       borderRadius: 12,
       minWidth: 140,
       textAlign: 'center',
-      fontSize: 18,
       fontWeight: 'bold'
     }}>
       <div>{titulo}</div>
@@ -162,8 +150,9 @@ function CardStatus({ titulo, valor, cor }: any) {
 
 function Coluna({ titulo, pedidos }: any) {
   return (
-    <div style={{ background: '#2a2a2a', borderRadius: 12, padding: 15 }}>
-      <h2 style={{ fontSize: 22 }}>{titulo}</h2>
+    <div style={theme.column}>
+      <h2 style={theme.title}>{titulo}</h2>
+
       {pedidos.map((pedido: any) => (
         <PedidoCard key={pedido.id} pedido={pedido} />
       ))}
@@ -191,18 +180,10 @@ function PedidoCard({ pedido }: any) {
   }
 
   return (
-    <div style={{
-      background: '#111',
-      borderRadius: 12,
-      padding: 15,
-      marginBottom: 15,
-      border: '2px solid #444'
-    }}>
-      <h3 style={{ fontSize: 20 }}>
-        Pedido #{pedido.codigo}
-      </h3>
+    <div style={theme.card}>
+      <h3>Pedido #{pedido.codigo}</h3>
 
-      <p style={{ fontSize: 14, color: '#ccc' }}>
+      <p style={theme.textMuted}>
         {pedido.status} – ⏱ {tempo}
       </p>
 
@@ -222,29 +203,27 @@ function PedidoCard({ pedido }: any) {
         </div>
       ))}
 
-      {/* BOTÕES */}
-
       {pedido.status === 'RECEBIDO' && (
-        <button style={btnPreparo} onClick={() => atualizarStatus('EM_PREPARO')}>
+        <button style={{ ...theme.button, ...theme.buttonWarning }} onClick={() => atualizarStatus('EM_PREPARO')}>
           INICIAR
         </button>
       )}
 
       {pedido.status === 'EM_PREPARO' && (
-        <button style={btnPronto} onClick={() => atualizarStatus('PRONTO')}>
+        <button style={{ ...theme.button, ...theme.buttonSuccess }} onClick={() => atualizarStatus('PRONTO')}>
           PRONTO
         </button>
       )}
 
       {pedido.status === 'PRONTO' && (
         <>
-          <button style={btnEntregar} onClick={() => atualizarStatus('ENTREGUE')}>
+          <button style={{ ...theme.button, ...theme.buttonPrimary }} onClick={() => atualizarStatus('ENTREGUE')}>
             ENTREGUE
           </button>
 
           {pedido.telefone && (
             <button
-              style={btnWhatsapp}
+              style={{ ...theme.button, ...theme.buttonWhatsapp }}
               onClick={() => {
                 const numero = pedido.telefone.replace(/\D/g, '')
                 const mensagem = encodeURIComponent(`Seu pedido #${pedido.codigo} está PRONTO! 🎉`)
@@ -260,7 +239,20 @@ function PedidoCard({ pedido }: any) {
   )
 }
 
-/* ESTILOS */
+/* ESTILOS AUXILIARES */
+
+const headerGrid = {
+  display: 'flex',
+  gap: 20,
+  flexWrap: 'wrap' as const,
+  marginBottom: 20
+}
+
+const colunas = {
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr 1fr',
+  gap: 20
+}
 
 const btnMenu = {
   background: '#333',
@@ -268,49 +260,6 @@ const btnMenu = {
   border: 'none',
   padding: '10px 12px',
   borderRadius: 6,
-  fontSize: 16
-}
-
-const btnPreparo = {
-  background: '#fb8c00',
-  color: '#fff',
-  border: 'none',
-  padding: 12,
-  marginTop: 10,
-  borderRadius: 8,
   fontSize: 16,
-  width: '100%'
-}
-
-const btnPronto = {
-  background: '#43a047',
-  color: '#fff',
-  border: 'none',
-  padding: 12,
-  marginTop: 10,
-  borderRadius: 8,
-  fontSize: 16,
-  width: '100%'
-}
-
-const btnEntregar = {
-  background: '#2196f3',
-  color: '#fff',
-  border: 'none',
-  padding: 12,
-  marginTop: 10,
-  borderRadius: 8,
-  fontSize: 16,
-  width: '100%'
-}
-
-const btnWhatsapp = {
-  background: '#25D366',
-  color: '#fff',
-  border: 'none',
-  padding: 12,
-  marginTop: 10,
-  borderRadius: 8,
-  fontSize: 16,
-  width: '100%'
+  cursor: 'pointer'
 }

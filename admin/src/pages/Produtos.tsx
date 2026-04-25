@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import ProdutoForm from "../components/ProdutoForm";
+import { theme } from "../assets/styles/adminTheme";
 
 type Produto = {
   id: string;
@@ -39,9 +40,6 @@ export default function Produtos() {
     carregarProdutos();
   }, []);
 
-  /* ========================= */
-  /* REMOVER                   */
-  /* ========================= */
   async function remover(id: string) {
     if (!confirm("Deseja remover este produto?")) return;
 
@@ -49,9 +47,6 @@ export default function Produtos() {
     carregarProdutos();
   }
 
-  /* ========================= */
-  /* EDITAR PREÇO              */
-  /* ========================= */
   function iniciarEdicao(p: Produto) {
     setEditando(p.id);
     setNovoPreco(p.preco);
@@ -63,9 +58,6 @@ export default function Produtos() {
     carregarProdutos();
   }
 
-  /* ========================= */
-  /* ATIVAR / DESATIVAR        */
-  /* ========================= */
   async function toggleAtivo(p: Produto) {
     await api.patch(`/produtos/${p.id}/status`, {
       ativo: !p.ativo,
@@ -73,23 +65,22 @@ export default function Produtos() {
     carregarProdutos();
   }
 
-  /* ========================= */
-  /* FILTRO                    */
-  /* ========================= */
   const produtosFiltrados = produtos.filter((p) =>
     p.nome.toLowerCase().includes(busca.toLowerCase())
   );
 
   return (
-    <div style={page}>
+    <div style={theme.page}>
 
       <CardMenu navigate={navigate} />
 
-      <h1 style={h1Style}> Painel do Cardápio</h1>
+      <h1 style={{ ...theme.title, textAlign: "center" }}>
+        🛒 Painel do Cardápio
+      </h1>
 
       {/* FORM */}
-      <div style={card}>
-        <h2 style={h2Style}>Adicionar novo produto</h2>
+      <div style={theme.card}>
+        <h2 style={theme.title}>Adicionar novo produto</h2>
         <ProdutoForm onCreated={carregarProdutos} />
       </div>
 
@@ -104,69 +95,82 @@ export default function Produtos() {
       </div>
 
       {carregando && <p>Carregando...</p>}
-      {erro && <p style={{ color: "red" }}>{erro}</p>}
+      {erro && <p style={{ color: "#ff5252" }}>{erro}</p>}
 
       {/* LISTA */}
       <div style={grid}>
         {produtosFiltrados.map((p) => (
-          <div key={p.id} style={cardAçai}>
-            <div style={cardContent}>
+          <div key={p.id} style={theme.card}>
 
-              <strong>{p.nome}</strong>
+            <strong style={{ fontSize: 18 }}>{p.nome}</strong>
 
-              {/* PREÇO */}
-              {editando === p.id ? (
-                <div>
-                  <input
-                    type="number"
-                    value={novoPreco}
-                    onChange={(e) => setNovoPreco(Number(e.target.value))}
-                    style={inputPreco}
-                  />
-                  <button onClick={() => salvarPreco(p.id)} style={btnVerde}>
-                    Salvar
-                  </button>
-                </div>
-              ) : (
-                <p>💰 R$ {p.preco.toFixed(2)}</p>
-              )}
+            {/* PREÇO */}
+            {editando === p.id ? (
+              <>
+                <input
+                  type="number"
+                  value={novoPreco}
+                  onChange={(e) => setNovoPreco(Number(e.target.value))}
+                  style={input}
+                />
 
-              {p.descricao && <p>{p.descricao}</p>}
-
-              {/* STATUS */}
-              <div style={{ marginBottom: 10 }}>
-                {p.ativo ? (
-                  <span style={badgeVerde}>Ativo</span>
-                ) : (
-                  <span style={badgeCinza}>Inativo</span>
-                )}
-              </div>
-
-              {/* AÇÕES */}
-              <div style={acoes}>
-                <button onClick={() => iniciarEdicao(p)} style={btnAzul}>
-                  ✏️ Editar preço
-                </button>
-
-                <button onClick={() => toggleAtivo(p)} style={btnAmarelo}>
-                  🔄 Ativar/Desativar
-                </button>
-
-                <button onClick={() => remover(p.id)} style={btnVermelho}>
-                  🗑 Remover
-                </button>
-
-                {/* 🔥 NOVO BOTÃO (ADICIONAIS) */}
                 <button
-                  onClick={() => navigate(`/produtos/${p.id}/adicionais`)}
-                  style={btnAzul}
+                  onClick={() => salvarPreco(p.id)}
+                  style={{ ...theme.button, ...theme.buttonSuccess }}
                 >
-                  ➕ Adicionais
+                  Salvar
                 </button>
+              </>
+            ) : (
+              <p style={theme.textMuted}>
+                💰 R$ {p.preco.toFixed(2)}
+              </p>
+            )}
 
-              </div>
+            {p.descricao && (
+              <p style={theme.textMuted}>{p.descricao}</p>
+            )}
 
+            {/* STATUS */}
+            <div style={{ marginBottom: 10 }}>
+              {p.ativo ? (
+                <span style={badgeVerde}>Ativo</span>
+              ) : (
+                <span style={badgeCinza}>Inativo</span>
+              )}
             </div>
+
+            {/* AÇÕES */}
+            <div style={acoes}>
+              <button
+                onClick={() => iniciarEdicao(p)}
+                style={{ ...theme.button, ...theme.buttonPrimary }}
+              >
+                ✏️ Editar preço
+              </button>
+
+              <button
+                onClick={() => toggleAtivo(p)}
+                style={{ ...theme.button, ...theme.buttonWarning }}
+              >
+                🔄 Ativar/Desativar
+              </button>
+
+              <button
+                onClick={() => remover(p.id)}
+                style={{ ...theme.button, background: "#e53935", color: "#fff" }}
+              >
+                🗑 Remover
+              </button>
+
+              <button
+                onClick={() => navigate(`/produtos/${p.id}/adicionais`)}
+                style={{ ...theme.button, ...theme.buttonPrimary }}
+              >
+                ➕ Adicionais
+              </button>
+            </div>
+
           </div>
         ))}
       </div>
@@ -174,92 +178,72 @@ export default function Produtos() {
   );
 }
 
-/* ========================= */
-/* VISUAL                    */
-/* ========================= */
+/* COMPONENTES */
 
-const page = {
-  padding: 20,
-  background: "#6d10f9a2",
-  minHeight: "100vh",
-};
+function CardMenu({ navigate }: any) {
+  return (
+    <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+      <div style={{
+        background: "#000",
+        padding: 10,
+        borderRadius: 10,
+        display: "flex",
+        gap: 10,
+        flexWrap: "wrap"
+      }}>
+        <button style={btnMenu} onClick={() => navigate("/cozinha")}>🍳</button>
+        <button style={btnMenu} onClick={() => navigate("/pedidos")}>📦</button>
+        <button style={btnMenu} onClick={() => navigate("/dashboard")}>📊</button>
+        <button style={btnMenu} onClick={() => navigate("/auditoria")}>📈</button>
+      </div>
+    </div>
+  );
+}
+
+/* ESTILOS */
 
 const grid = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-  gap: 40,
-};
-
-const card = {
-  background: "#069bf862",
-  padding: 20,
-  borderRadius: 10,
-  marginBottom: 20,
-};
-
-const cardAçai = {
-  background: "#4e06f7",
-  borderRadius: 12,
-  padding: 4,
-};
-
-const cardContent = {
-  background: "#069bf862",
-  borderRadius: 10,
-  padding: 15,
+  gap: 20,
 };
 
 const input = {
   width: "100%",
-  padding: 10,
+  padding: 12,
   borderRadius: 8,
-  border: "1px solid #ccc",
-};
-
-const inputPreco = {
-  width: "100%",
-  padding: 8,
-  marginBottom: 5,
+  border: "none",
+  marginBottom: 10,
+  fontSize: 16
 };
 
 const acoes = {
   display: "flex",
   flexDirection: "column" as const,
-  gap: 5,
+  gap: 8,
+  marginTop: 10
 };
 
 const badgeVerde = {
-  background: "#4caf50",
+  background: "#43a047",
   color: "#fff",
-  padding: "4px 8px",
-  borderRadius: 6,
+  padding: "4px 10px",
+  borderRadius: 6
 };
 
 const badgeCinza = {
-  background: "#999",
+  background: "#777",
   color: "#fff",
-  padding: "4px 8px",
-  borderRadius: 6,
+  padding: "4px 10px",
+  borderRadius: 6
 };
 
-/* BOTÕES */
-const btnVerde = { background: "#4caf50", color: "#fff", padding: 8 };
-const btnAzul = { background: "#2196f3", color: "#fff", padding: 8 };
-const btnAmarelo = { background: "#ff9800", color: "#fff", padding: 8 };
-const btnVermelho = { background: "#f44336", color: "#fff", padding: 8 };
-
-/* MENU */
-function CardMenu({ navigate }: any) {
-  return (
-    <div style={{ marginBottom: 20 }}>
-      <button onClick={() => navigate("/cozinha")}>Cozinha</button>
-      <button onClick={() => navigate("/pedidos")}>Pedidos</button>
-      <button onClick={() => navigate("/dashboard")}>Dashboard</button>
-      <button onClick={() => navigate("/auditoria")}>Auditoria</button>
-    </div>
-  );
-}
-
-/* TITULOS */
-const h1Style = { textAlign: "center" as const };
-const h2Style = {};
+const btnMenu = {
+  background: "#333",
+  color: "#fff",
+  border: "none",
+  padding: "10px 12px",
+  borderRadius: 6,
+  fontSize: 16,
+  cursor: "pointer"
+};

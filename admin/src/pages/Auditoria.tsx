@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import api from "../services/api"
 import Botao from "../components/Botao"
+import { theme } from "../assets/styles/adminTheme"
 import { Bar, Pie } from "react-chartjs-2"
 
 import {
@@ -39,10 +40,6 @@ export default function Auditoria() {
   const [erro, setErro] = useState<string | null>(null)
   const [loadingVenda, setLoadingVenda] = useState(false)
 
-  /* ============================= */
-  /* CARREGAMENTO PROFISSIONAL     */
-  /* ============================= */
-
   async function carregarAuditoria() {
     try {
       setLoading(true)
@@ -59,7 +56,7 @@ export default function Auditoria() {
 
       setErro(null)
     } catch (err) {
-      console.error("Erro auditoria:", err)
+      console.error(err)
       setErro("Erro ao carregar dados")
     } finally {
       setLoading(false)
@@ -70,37 +67,21 @@ export default function Auditoria() {
     carregarAuditoria()
   }, [])
 
-  /* ============================= */
-  /* REGISTRAR VENDA (SEGURO)      */
-  /* ============================= */
-
   async function registrarVenda(produto: string) {
     try {
       setLoadingVenda(true)
-
       await api.post("/auditoria/venda", { produto })
-
       await carregarAuditoria()
-    } catch {
-      alert("Erro ao registrar venda")
     } finally {
       setLoadingVenda(false)
     }
   }
-
-  /* ============================= */
-  /* FORMATADOR MONETÁRIO          */
-  /* ============================= */
 
   const moeda = (valor: number) =>
     new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL"
     }).format(valor)
-
-  /* ============================= */
-  /* DADOS MEMOIZADOS              */
-  /* ============================= */
 
   const produtos = vendas.produtos || []
 
@@ -132,28 +113,22 @@ export default function Auditoria() {
     ]
   }), [produtos])
 
-  /* ============================= */
-  /* LOADING / ERRO                */
-  /* ============================= */
-
   if (loading) {
-    return <div style={page}>Carregando auditoria...</div>
+    return <div style={theme.page}>Carregando auditoria...</div>
   }
 
   if (erro) {
-    return <div style={page}>{erro}</div>
+    return <div style={theme.page}>{erro}</div>
   }
 
-  /* ============================= */
-  /* RENDER                        */
-  /* ============================= */
-
   return (
-    <div style={page}>
+    <div style={theme.page}>
 
       <CardMenu navigate={navigate} />
 
-      <h1 style={h1Style}>📊 Auditoria de Vendas</h1>
+      <h1 style={{ ...theme.title, textAlign: "center" }}>
+        📊 Auditoria de Vendas
+      </h1>
 
       <div style={resumoContainer}>
         <CardResumo titulo="Diárias" valor={moeda(vendas.diarias)} cor="#4caf50" />
@@ -162,19 +137,19 @@ export default function Auditoria() {
       </div>
 
       <div style={gridGraficos}>
-        <div style={card}>
-          <h2 style={h2Style}>Produtos mais vendidos</h2>
+        <div style={theme.card}>
+          <h2 style={theme.title}>Produtos mais vendidos</h2>
           {produtos.length > 0 ? <Bar data={dataMaisVendidos} /> : "Sem dados"}
         </div>
 
-        <div style={card}>
-          <h2 style={h2Style}>Participação dos produtos</h2>
+        <div style={theme.card}>
+          <h2 style={theme.title}>Participação dos produtos</h2>
           {produtos.length > 0 ? <Pie data={dataParticipacao} /> : "Sem dados"}
         </div>
       </div>
 
-      <div style={card}>
-        <h2 style={h2Style}>Registrar venda rápida</h2>
+      <div style={theme.card}>
+        <h2 style={theme.title}>Registrar venda rápida</h2>
 
         <div style={acoes}>
           {produtos.map((p: any) => (
@@ -197,25 +172,23 @@ export default function Auditoria() {
   )
 }
 
-/* ========================= */
-/* COMPONENTES               */
-/* ========================= */
+/* COMPONENTES */
 
 function CardMenu({ navigate }: any) {
   return (
     <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
       <div style={{
-        background: "#111",
+        background: "#000",
         padding: 10,
         borderRadius: 10,
         display: "flex",
         gap: 10,
         flexWrap: "wrap"
       }}>
-        <button onClick={() => navigate("/cozinha")} style={botaoMenu}>🍳 Cozinha</button>
-        <button onClick={() => navigate("/pedidos")} style={botaoMenu}>📦 Pedidos</button>
-        <button onClick={() => navigate("/produtos")} style={botaoMenu}>🛒 Produtos</button>
-        <button onClick={() => navigate("/dashboard")} style={botaoMenu}>📈 Dashboard</button>
+        <button onClick={() => navigate("/cozinha")} style={btnMenu}>🍳</button>
+        <button onClick={() => navigate("/pedidos")} style={btnMenu}>📦</button>
+        <button onClick={() => navigate("/produtos")} style={btnMenu}>🛒</button>
+        <button onClick={() => navigate("/dashboard")} style={btnMenu}>📈</button>
       </div>
     </div>
   )
@@ -226,30 +199,54 @@ function CardResumo({ titulo, valor, cor }: any) {
     <div style={{
       background: cor,
       padding: 20,
-      borderRadius: 10,
+      borderRadius: 12,
       minWidth: 150,
       textAlign: "center",
       color: "#fff",
-      fontWeight: "bold"
+      fontWeight: "bold",
+      fontSize: 18
     }}>
-      <strong>{titulo}</strong>
-      <div style={{ fontSize: 24 }}>{valor}</div>
+      <div>{titulo}</div>
+      <div style={{ fontSize: 26 }}>{valor}</div>
     </div>
   )
 }
 
-/* ========================= */
-/* ESTILOS                   */
-/* ========================= */
+/* ESTILOS */
 
-const page = { padding: 20, background: "#6d10f9a2", minHeight: "100vh" }
-const botaoMenu = { padding: "8px 12px", borderRadius: 6, border: "none", background: "#333", color: "#fff", cursor: "pointer", fontWeight: "bold" }
-const resumoContainer = { display: "flex", gap: 20, flexWrap: "wrap" as const, marginBottom: 30 }
-const gridGraficos = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20, marginBottom: 30 }
-const card = { background: "#fff", padding: 20, borderRadius: 10, border: "1px solid #ddd" }
-const acoes = { display: "flex", flexWrap: "wrap" as const, gap: 10 }
-const aviso = { marginTop: 30, color: "#555" }
-const h1Style = { fontSize: "28px", fontWeight: "bold", marginBottom: 20, textAlign: "center" as const }
-const h2Style = { fontSize: "20px", fontWeight: "bold", marginBottom: 15 }
+const resumoContainer = {
+  display: "flex",
+  gap: 20,
+  flexWrap: "wrap" as const,
+  marginBottom: 30
+}
+
+const gridGraficos = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+  gap: 20,
+  marginBottom: 30
+}
+
+const acoes = {
+  display: "flex",
+  flexWrap: "wrap" as const,
+  gap: 10
+}
+
+const aviso = {
+  marginTop: 30,
+  color: "#ccc"
+}
+
+const btnMenu = {
+  background: "#333",
+  color: "#fff",
+  border: "none",
+  padding: "10px 12px",
+  borderRadius: 6,
+  fontSize: 16,
+  cursor: "pointer"
+}
 
 

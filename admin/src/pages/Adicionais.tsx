@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import { theme } from '../assets/styles/adminTheme'
 
 type Adicional = {
   id: string
@@ -23,20 +24,16 @@ export default function Adicionais() {
   const [loading, setLoading] = useState(false)
   const [salvando, setSalvando] = useState(false)
 
-  /* ============================= */
-  /* CARREGAR ADICIONAIS           */
-  /* ============================= */
   async function carregar() {
     try {
       if (!id) return
-
       setLoading(true)
 
       const res = await api.get(`/produtos/${id}`)
       setAdicionais(res.data.data.adicionais || [])
 
     } catch (err: any) {
-      console.error('Erro ao carregar adicionais:', err?.response?.data)
+      console.error(err)
       alert('Erro ao carregar adicionais')
     } finally {
       setLoading(false)
@@ -47,20 +44,14 @@ export default function Adicionais() {
     if (id) carregar()
   }, [id])
 
-  /* ============================= */
-  /* CRIAR                         */
-  /* ============================= */
   async function criar() {
     try {
       if (!nome || preco <= 0) {
-        alert('Preencha nome e preço corretamente')
+        alert('Preencha corretamente')
         return
       }
 
-      if (!id) {
-        alert('Produto não identificado')
-        return
-      }
+      if (!id) return
 
       setSalvando(true)
 
@@ -75,87 +66,60 @@ export default function Adicionais() {
 
       await carregar()
 
-    } catch (err: any) {
-      console.error('Erro ao criar adicional:', err?.response?.data)
-      alert(err?.response?.data?.message || 'Erro ao criar adicional')
     } finally {
       setSalvando(false)
     }
   }
 
-  /* ============================= */
-  /* REMOVER                       */
-  /* ============================= */
   async function remover(adicionalId: string) {
-    try {
-      if (!confirm('Deseja remover este adicional?')) return
+    if (!confirm('Remover adicional?')) return
 
-      await api.delete(`/adicionais/${adicionalId}`)
-      await carregar()
-
-    } catch (err: any) {
-      console.error('Erro ao remover adicional:', err?.response?.data)
-      alert('Erro ao remover adicional')
-    }
+    await api.delete(`/adicionais/${adicionalId}`)
+    await carregar()
   }
 
-  /* ============================= */
-  /* EDITAR PREÇO                  */
-  /* ============================= */
   function iniciarEdicao(a: Adicional) {
     setEditando(a.id)
     setNovoPreco(a.preco)
   }
 
   async function salvarPreco(adicionalId: string) {
-    try {
-      await api.put(`/adicionais/${adicionalId}`, {
-        preco: novoPreco
-      })
+    await api.put(`/adicionais/${adicionalId}`, {
+      preco: novoPreco
+    })
 
-      setEditando(null)
-      await carregar()
-
-    } catch (err: any) {
-      console.error('Erro ao atualizar preço:', err?.response?.data)
-      alert('Erro ao atualizar preço')
-    }
+    setEditando(null)
+    await carregar()
   }
 
-  /* ============================= */
-  /* ATIVAR / DESATIVAR            */
-  /* ============================= */
   async function toggleAtivo(a: Adicional) {
-    try {
-      await api.patch(`/adicionais/${a.id}/status`, {
-        ativo: !a.ativo
-      })
+    await api.patch(`/adicionais/${a.id}/status`, {
+      ativo: !a.ativo
+    })
 
-      await carregar()
-
-    } catch (err: any) {
-      console.error('Erro ao alterar status:', err?.response?.data)
-      alert('Erro ao alterar status')
-    }
+    await carregar()
   }
 
   return (
-    <div style={page}>
+    <div style={theme.page}>
 
-      <button onClick={() => navigate('/produtos')} style={btnVoltar}>
+      <button
+        onClick={() => navigate('/produtos')}
+        style={{ ...theme.button, ...theme.buttonPrimary, marginBottom: 20 }}
+      >
         ← Voltar
       </button>
 
-      <h1 style={title}>Adicionais do Produto</h1>
+      <h1 style={{ ...theme.title, textAlign: 'center' }}>
+        Adicionais do Produto
+      </h1>
 
-      {/* ========================= */}
-      {/* FORM                     */}
-      {/* ========================= */}
-      <div style={card}>
+      {/* FORM */}
+      <div style={theme.card}>
         <h3>Novo adicional</h3>
 
         <input
-          placeholder="Nome (Ex: Ovo)"
+          placeholder="Nome"
           value={nome}
           onChange={(e) => setNome(e.target.value)}
           style={input}
@@ -163,7 +127,7 @@ export default function Adicionais() {
 
         <input
           type="number"
-          placeholder="Preço (Ex: 2)"
+          placeholder="Preço"
           value={preco}
           onChange={(e) => setPreco(Number(e.target.value))}
           style={input}
@@ -171,42 +135,44 @@ export default function Adicionais() {
 
         <button
           onClick={criar}
-          style={btnVerde}
           disabled={salvando}
+          style={{ ...theme.button, ...theme.buttonSuccess }}
         >
           {salvando ? 'Salvando...' : '➕ Adicionar'}
         </button>
       </div>
 
-      {/* ========================= */}
-      {/* LISTA                    */}
-      {/* ========================= */}
       {loading && <p>Carregando...</p>}
 
+      {/* LISTA */}
       <div style={grid}>
         {adicionais.map((a) => (
-          <div key={a.id} style={cardItem}>
+          <div key={a.id} style={theme.card}>
 
-            <strong>{a.nome}</strong>
+            <strong style={{ fontSize: 18 }}>{a.nome}</strong>
 
-            {/* PREÇO */}
             {editando === a.id ? (
-              <div>
+              <>
                 <input
                   type="number"
                   value={novoPreco}
                   onChange={(e) => setNovoPreco(Number(e.target.value))}
                   style={input}
                 />
-                <button onClick={() => salvarPreco(a.id)} style={btnVerde}>
+
+                <button
+                  onClick={() => salvarPreco(a.id)}
+                  style={{ ...theme.button, ...theme.buttonSuccess }}
+                >
                   Salvar
                 </button>
-              </div>
+              </>
             ) : (
-              <p>💰 R$ {Number(a.preco).toFixed(2)}</p>
+              <p style={theme.textMuted}>
+                💰 R$ {Number(a.preco).toFixed(2)}
+              </p>
             )}
 
-            {/* STATUS */}
             <div>
               {a.ativo ? (
                 <span style={badgeVerde}>Ativo</span>
@@ -215,17 +181,25 @@ export default function Adicionais() {
               )}
             </div>
 
-            {/* AÇÕES */}
             <div style={acoes}>
-              <button onClick={() => iniciarEdicao(a)} style={btnAzul}>
-                ✏️ Editar preço
+              <button
+                onClick={() => iniciarEdicao(a)}
+                style={{ ...theme.button, ...theme.buttonPrimary }}
+              >
+                ✏️ Editar
               </button>
 
-              <button onClick={() => toggleAtivo(a)} style={btnAmarelo}>
-                🔄 Ativar/Desativar
+              <button
+                onClick={() => toggleAtivo(a)}
+                style={{ ...theme.button, ...theme.buttonWarning }}
+              >
+                🔄 Status
               </button>
 
-              <button onClick={() => remover(a.id)} style={btnVermelho}>
+              <button
+                onClick={() => remover(a.id)}
+                style={{ ...theme.button, background: '#e53935', color: '#fff' }}
+              >
                 🗑 Remover
               </button>
             </div>
@@ -233,32 +207,13 @@ export default function Adicionais() {
           </div>
         ))}
       </div>
-
     </div>
   )
 }
 
 /* ========================= */
-/* ESTILO                   */
+/* ESTILO LOCAL LIMPO        */
 /* ========================= */
-
-const page = {
-  padding: 20,
-  background: '#5e00ff',
-  minHeight: '100vh',
-  color: '#fff'
-}
-
-const title = {
-  textAlign: 'center' as const
-}
-
-const card = {
-  background: '#ffffff22',
-  padding: 20,
-  borderRadius: 10,
-  marginBottom: 20
-}
 
 const grid = {
   display: 'grid',
@@ -266,43 +221,30 @@ const grid = {
   gap: 20
 }
 
-const cardItem = {
-  background: '#ffffff22',
-  padding: 15,
-  borderRadius: 10
-}
-
 const input = {
   width: '100%',
-  padding: 10,
+  padding: 12,
   marginBottom: 10,
   borderRadius: 8,
-  border: 'none'
+  border: 'none',
+  fontSize: 16
 }
 
 const acoes = {
   display: 'flex',
   flexDirection: 'column' as const,
-  gap: 5,
+  gap: 8,
   marginTop: 10
 }
 
-/* BOTÕES */
-const btnVerde = { background: '#4caf50', color: '#fff', padding: 8 }
-const btnAzul = { background: '#2196f3', color: '#fff', padding: 8 }
-const btnAmarelo = { background: '#ff9800', color: '#fff', padding: 8 }
-const btnVermelho = { background: '#f44336', color: '#fff', padding: 8 }
-const btnVoltar = { marginBottom: 10 }
-
-/* BADGES */
 const badgeVerde = {
-  background: '#4caf50',
-  padding: '4px 8px',
+  background: '#43a047',
+  padding: '4px 10px',
   borderRadius: 6
 }
 
 const badgeCinza = {
-  background: '#999',
-  padding: '4px 8px',
+  background: '#777',
+  padding: '4px 10px',
   borderRadius: 6
 }
