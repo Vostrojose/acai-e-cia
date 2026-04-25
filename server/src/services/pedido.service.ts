@@ -111,6 +111,7 @@ class PedidoService {
         console.log("✅ ADICIONAIS SALVOS:", adicionais)
       } else {
         console.log("⚠️ ITEM SEM ADICIONAIS")
+        console.log("🔥 VERSAO NOVA DO PEDIDO SERVICE ATIVA")
       }
     }
 
