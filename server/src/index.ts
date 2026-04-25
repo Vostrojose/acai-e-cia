@@ -50,6 +50,9 @@ app.use("/api/produtos", produtoRoutes);
 app.use("/api/pagamento", pagamentoRoutes);
 
 app.use("/api/adicionais", adicionalRoutes);
+app.use(express.json({ limit: '1mb' }))
+
+
 
 /* =================================
    HEALTH CHECK
@@ -82,3 +85,4 @@ initSocket(server);
 server.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
+
