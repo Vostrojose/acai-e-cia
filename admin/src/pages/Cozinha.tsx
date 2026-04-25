@@ -62,19 +62,6 @@ export default function Cozinha() {
     }
   }, [])
 
-  useEffect(() => {
-    const temPedidoNovo = pedidos.some((p) => p.status === 'RECEBIDO')
-
-    if (temPedidoNovo && !intervaloSom.current) {
-      intervaloSom.current = setInterval(tocarSom, 60000)
-    }
-
-    if (!temPedidoNovo && intervaloSom.current) {
-      clearInterval(intervaloSom.current)
-      intervaloSom.current = null
-    }
-  }, [pedidos])
-
   function ordenar(lista: any[]) {
     return [...lista].sort(
       (a, b) =>
@@ -91,8 +78,9 @@ export default function Cozinha() {
   return (
     <div style={{
       padding: 20,
-      background: '#6d10f9a2',
+      background: '#1a1a1a',
       minHeight: '100vh',
+      color: '#fff'
     }}>
       <CardMenu navigate={navigate} />
 
@@ -103,29 +91,24 @@ export default function Cozinha() {
         marginBottom: 20,
       }}>
         <CardRelogio />
-        <CardStatus titulo="🆕 Novos" valor={novos.length} cor="#f44336" />
-        <CardStatus titulo="👨‍🍳 Em preparo" valor={preparo.length} cor="#ff9800" />
-        <CardStatus titulo="✅ Prontos" valor={prontos.length} cor="#4caf50" />
+        <CardStatus titulo="🆕 Novos" valor={novos.length} cor="#e53935" />
+        <CardStatus titulo="👨‍🍳 Preparo" valor={preparo.length} cor="#fb8c00" />
+        <CardStatus titulo="✅ Prontos" valor={prontos.length} cor="#43a047" />
+
         <div onClick={() => setMostrarEntregues(!mostrarEntregues)}>
-          <CardStatus titulo="📦 Entregues" valor={entregues.length} cor="#9e9e9e" />
+          <CardStatus titulo="📦 Entregues" valor={entregues.length} cor="#757575" />
         </div>
       </div>
 
       <div style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr 1fr',
-        gap: 30,
+        gap: 20,
       }}>
-        <Coluna titulo="🆕 Novos Pedidos" pedidos={novos} />
-        <Coluna titulo="👨‍🍳 Em Preparo" pedidos={preparo} />
-        <Coluna titulo="✅ Prontos" pedidos={prontos} />
+        <Coluna titulo="🆕 NOVOS" pedidos={novos} />
+        <Coluna titulo="👨‍🍳 PREPARO" pedidos={preparo} />
+        <Coluna titulo="✅ PRONTOS" pedidos={prontos} />
       </div>
-
-      {mostrarEntregues && (
-        <div style={{ marginTop: 30 }}>
-          <Coluna titulo="📦 Entregues" pedidos={entregues} />
-        </div>
-      )}
     </div>
   )
 }
@@ -135,11 +118,10 @@ export default function Cozinha() {
 function CardMenu({ navigate }: any) {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-      <div style={{ background: '#111', padding: 10, borderRadius: 10, display: 'flex', gap: 10 }}>
-        <button onClick={() => navigate('/auditoria')} style={botaoMenu}>📊 Auditoria</button>
-        <button onClick={() => navigate('/pedidos')} style={botaoMenu}>📦 Pedidos</button>
-        <button onClick={() => navigate('/produtos')} style={botaoMenu}>🛒 Produtos</button>
-        <button onClick={() => navigate('/dashboard')} style={botaoMenu}>📈 Dashboard</button>
+      <div style={{ background: '#000', padding: 10, borderRadius: 10, display: 'flex', gap: 10 }}>
+        <button onClick={() => navigate('/auditoria')} style={btnMenu}>📊</button>
+        <button onClick={() => navigate('/pedidos')} style={btnMenu}>📦</button>
+        <button onClick={() => navigate('/produtos')} style={btnMenu}>🛒</button>
       </div>
     </div>
   )
@@ -154,9 +136,9 @@ function CardRelogio() {
   }, [])
 
   return (
-    <div style={{ background: '#111', color: '#fff', padding: 10, borderRadius: 10 }}>
+    <div style={{ background: '#000', padding: 12, borderRadius: 10, textAlign: 'center', fontSize: 18 }}>
       <div>{hora.toLocaleDateString('pt-BR')}</div>
-      <div>{hora.toLocaleTimeString('pt-BR')}</div>
+      <div style={{ fontSize: 22 }}>{hora.toLocaleTimeString('pt-BR')}</div>
     </div>
   )
 }
@@ -165,31 +147,29 @@ function CardStatus({ titulo, valor, cor }: any) {
   return (
     <div style={{
       background: cor,
-      padding: 12,
-      borderRadius: 10,
-      minWidth: 120,
+      padding: 16,
+      borderRadius: 12,
+      minWidth: 140,
       textAlign: 'center',
-      color: '#fff',
+      fontSize: 18,
       fontWeight: 'bold'
     }}>
-      <strong>{titulo}</strong>
-      <div style={{ fontSize: 26 }}>{valor}</div>
+      <div>{titulo}</div>
+      <div style={{ fontSize: 32 }}>{valor}</div>
     </div>
   )
 }
 
 function Coluna({ titulo, pedidos }: any) {
   return (
-    <div style={{ background: '#ffffff', borderRadius: 10, padding: 15 }}>
-      <h2>{titulo}</h2>
+    <div style={{ background: '#2a2a2a', borderRadius: 12, padding: 15 }}>
+      <h2 style={{ fontSize: 22 }}>{titulo}</h2>
       {pedidos.map((pedido: any) => (
         <PedidoCard key={pedido.id} pedido={pedido} />
       ))}
     </div>
   )
 }
-
-/* 🔥 PEDIDO COM ADICIONAIS */
 
 function PedidoCard({ pedido }: any) {
   const [tempo, setTempo] = useState('')
@@ -212,28 +192,28 @@ function PedidoCard({ pedido }: any) {
 
   return (
     <div style={{
-      border: '1px solid #ddd',
-      borderRadius: 10,
-      padding: 12,
-      marginBottom: 12
+      background: '#111',
+      borderRadius: 12,
+      padding: 15,
+      marginBottom: 15,
+      border: '2px solid #444'
     }}>
-      <h3>Pedido #{pedido.codigo}</h3>
-      <p>{pedido.status} – ⏱ {tempo}</p>
+      <h3 style={{ fontSize: 20 }}>
+        Pedido #{pedido.codigo}
+      </h3>
 
-      <strong>Itens:</strong>
+      <p style={{ fontSize: 14, color: '#ccc' }}>
+        {pedido.status} – ⏱ {tempo}
+      </p>
 
       {pedido.itens?.map((item: any) => (
         <div key={item.id} style={{ marginBottom: 8 }}>
-          <div>
-            <strong>{item.quantidade}x {item.produto?.nome}</strong>
-            {item.produto?.descricao && (
-              <span style={{ fontSize: 12 }}> – {item.produto.descricao}</span>
-            )}
-          </div>
+          <strong style={{ fontSize: 18 }}>
+            {item.quantidade}x {item.produto?.nome}
+          </strong>
 
-          {/* 🔥 ADICIONAIS */}
           {item.adicionais?.length > 0 && (
-            <div style={{ marginLeft: 10 }}>
+            <div style={{ marginLeft: 10, color: '#ffcc80' }}>
               {item.adicionais.map((add: any) => (
                 <div key={add.id}>+ {add.nome}</div>
               ))}
@@ -242,32 +222,95 @@ function PedidoCard({ pedido }: any) {
         </div>
       ))}
 
+      {/* BOTÕES */}
+
       {pedido.status === 'RECEBIDO' && (
-        <button onClick={() => atualizarStatus('EM_PREPARO')}>
-          Iniciar preparo
+        <button style={btnPreparo} onClick={() => atualizarStatus('EM_PREPARO')}>
+          INICIAR
         </button>
       )}
 
       {pedido.status === 'EM_PREPARO' && (
-        <button onClick={() => atualizarStatus('PRONTO')}>
-          Marcar pronto
+        <button style={btnPronto} onClick={() => atualizarStatus('PRONTO')}>
+          PRONTO
         </button>
       )}
 
       {pedido.status === 'PRONTO' && (
-        <button onClick={() => atualizarStatus('ENTREGUE')}>
-          Entregar
-        </button>
+        <>
+          <button style={btnEntregar} onClick={() => atualizarStatus('ENTREGUE')}>
+            ENTREGUE
+          </button>
+
+          {pedido.telefone && (
+            <button
+              style={btnWhatsapp}
+              onClick={() => {
+                const numero = pedido.telefone.replace(/\D/g, '')
+                const mensagem = encodeURIComponent(`Seu pedido #${pedido.codigo} está PRONTO! 🎉`)
+                window.open(`https://wa.me/55${numero}?text=${mensagem}`, '_blank')
+              }}
+            >
+              📲 WhatsApp
+            </button>
+          )}
+        </>
       )}
     </div>
   )
 }
 
-const botaoMenu = {
-  padding: '8px 12px',
-  borderRadius: 6,
-  border: 'none',
+/* ESTILOS */
+
+const btnMenu = {
   background: '#333',
   color: '#fff',
-  cursor: 'pointer',
+  border: 'none',
+  padding: '10px 12px',
+  borderRadius: 6,
+  fontSize: 16
+}
+
+const btnPreparo = {
+  background: '#fb8c00',
+  color: '#fff',
+  border: 'none',
+  padding: 12,
+  marginTop: 10,
+  borderRadius: 8,
+  fontSize: 16,
+  width: '100%'
+}
+
+const btnPronto = {
+  background: '#43a047',
+  color: '#fff',
+  border: 'none',
+  padding: 12,
+  marginTop: 10,
+  borderRadius: 8,
+  fontSize: 16,
+  width: '100%'
+}
+
+const btnEntregar = {
+  background: '#2196f3',
+  color: '#fff',
+  border: 'none',
+  padding: 12,
+  marginTop: 10,
+  borderRadius: 8,
+  fontSize: 16,
+  width: '100%'
+}
+
+const btnWhatsapp = {
+  background: '#25D366',
+  color: '#fff',
+  border: 'none',
+  padding: 12,
+  marginTop: 10,
+  borderRadius: 8,
+  fontSize: 16,
+  width: '100%'
 }
