@@ -74,24 +74,32 @@ export default function Home() {
   }
 
   /* ============================= */
-  /* 🔥 CORREÇÃO DEFINITIVA        */
+  /* 🔥 CORREÇÃO DEFINITIVA REAL   */
   /* ============================= */
   function confirmarProduto() {
     if (!produtoSelecionado) return
 
-    const adicionais = [...adicionaisSelecionados] // 🔥 GARANTE DADO CORRETO
+    // 🔥 CLONE REAL DOS ADICIONAIS (ESSENCIAL)
+    const adicionaisClonados = (adicionaisSelecionados || []).map((a: any) => ({
+      id: a.id,
+      nome: a.nome,
+      preco: Number(a.preco)
+    }))
 
-    console.log("🔥 ENVIANDO ADICIONAIS:", adicionais)
+    console.log("🔥 ENVIANDO ADICIONAIS:", adicionaisClonados)
 
-    const idUnico = gerarIdItem(produtoSelecionado, adicionais)
+    const idUnico = gerarIdItem(produtoSelecionado, adicionaisClonados)
 
     adicionarItem({
       id: idUnico,
       produtoId: produtoSelecionado.id,
       nome: produtoSelecionado.nome,
-      preco: produtoSelecionado.preco, // 🚨 NÃO SOMAR AQUI
-      adicionais: adicionais
+      preco: produtoSelecionado.preco,
+      adicionais: adicionaisClonados
     })
+
+    // 🔥 LIMPA SOMENTE DEPOIS
+    setAdicionaisSelecionados([])
 
     fecharPopup()
   }
