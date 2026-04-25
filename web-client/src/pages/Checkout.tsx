@@ -6,7 +6,7 @@ import Button from '../components/ui/Button'
 import '../assets/css/Checkout.css'
 
 export default function Checkout() {
-  const { itens, total } = useCart()
+  const { itens } = useCart()
 
   const [telefone, setTelefone] = useState('')
   const [loading, setLoading] = useState(false)
@@ -61,7 +61,7 @@ export default function Checkout() {
         : null
 
       /* ============================= */
-      /* 🔥 ITENS COM ADICIONAIS CORRETOS */
+      /* 🔥 ENVIO CORRETO DOS ADICIONAIS */
       /* ============================= */
       const itensFormatados = itens.map((item) => ({
         produtoId: item.produtoId,
@@ -118,17 +118,10 @@ export default function Checkout() {
   }
 
   /* ============================= */
-  /* 🔥 TOTAL REAL (COM ADICIONAIS) */
+  /* 🔥 TOTAL SEM DUPLICAÇÃO       */
   /* ============================= */
   const totalReal = itens.reduce((acc, item) => {
-    const adicionaisTotal = (item.adicionais || []).reduce(
-      (soma: number, add: any) => soma + Number(add.preco),
-      0
-    )
-
-    const precoCompleto = item.preco + adicionaisTotal
-
-    return acc + (precoCompleto * item.quantidade)
+    return acc + (Number(item.preco) * item.quantidade)
   }, 0)
 
   return (
@@ -142,13 +135,6 @@ export default function Checkout() {
           <h3>Resumo do pedido</h3>
 
           {itens.map(item => {
-
-            const adicionaisTotal = (item.adicionais || []).reduce(
-              (soma: number, add: any) => soma + Number(add.preco),
-              0
-            )
-
-            const precoCompleto = item.preco + adicionaisTotal
 
             return (
               <div key={item.id} className="checkout-item">
@@ -164,7 +150,7 @@ export default function Checkout() {
                 ))}
 
                 <div>
-                  R$ {(precoCompleto * item.quantidade).toFixed(2)}
+                  R$ {(Number(item.preco) * item.quantidade).toFixed(2)}
                 </div>
 
               </div>
