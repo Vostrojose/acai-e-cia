@@ -10,19 +10,47 @@ type Produto = {
   descricao?: string;
   preco: number;
   ativo?: boolean;
-  destaque?: boolean;
 };
 
 export default function Produtos() {
   const navigate = useNavigate();
 
   const [produtos, setProdutos] = useState<Produto[]>([]);
-  const [busca, setBusca] = useState<string>("");
+  const [busca, setBusca] = useState("");
   const [editando, setEditando] = useState<string | null>(null);
-  const [novoPreco, setNovoPreco] = useState<number>(0);
+  const [novoPreco, setNovoPreco] = useState(0);
 
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+
+  /* 🔐 AUTH */
+  const [logado, setLogado] = useState(false);
+  const [mostrarLogin, setMostrarLogin] = useState(false);
+  const [senha, setSenha] = useState("");
+
+  useEffect(() => {
+    const auth = localStorage.getItem("admin_auth");
+    if (auth === "true") setLogado(true);
+  }, []);
+
+  function exigirLogin(callback: () => void) {
+    if (!logado) {
+      setMostrarLogin(true);
+      return;
+    }
+    callback();
+  }
+
+  function login() {
+    if (senha === "admin123") {
+      localStorage.setItem("admin_auth", "true");
+      setLogado(true);
+      setMostrarLogin(false);
+      setSenha("");
+    } else {
+      alert("Senha incorreta");
+    }
+  }
 
   async function carregarProdutos() {
     setCarregando(true);
@@ -41,28 +69,35 @@ export default function Produtos() {
   }, []);
 
   async function remover(id: string) {
-    if (!confirm("Deseja remover este produto?")) return;
-
-    await api.delete(`/produtos/${id}`);
-    carregarProdutos();
+    exigirLogin(async () => {
+      if (!confirm("Deseja remover este produto?")) return;
+      await api.delete(`/produtos/${id}`);
+      carregarProdutos();
+    });
   }
 
   function iniciarEdicao(p: Produto) {
-    setEditando(p.id);
-    setNovoPreco(p.preco);
+    exigirLogin(() => {
+      setEditando(p.id);
+      setNovoPreco(p.preco);
+    });
   }
 
   async function salvarPreco(id: string) {
-    await api.put(`/produtos/${id}`, { preco: novoPreco });
-    setEditando(null);
-    carregarProdutos();
+    exigirLogin(async () => {
+      await api.put(`/produtos/${id}`, { preco: novoPreco });
+      setEditando(null);
+      carregarProdutos();
+    });
   }
 
   async function toggleAtivo(p: Produto) {
-    await api.patch(`/produtos/${p.id}/status`, {
-      ativo: !p.ativo,
+    exigirLogin(async () => {
+      await api.patch(`/produtos/${p.id}/status`, {
+        ativo: !p.ativo,
+      });
+      carregarProdutos();
     });
-    carregarProdutos();
   }
 
   const produtosFiltrados = produtos.filter((p) =>
@@ -78,33 +113,34 @@ export default function Produtos() {
         🛒 Painel do Cardápio
       </h1>
 
-      {/* FORM */}
       <div style={theme.card}>
         <h2 style={theme.title}>Adicionar novo produto</h2>
-        <ProdutoForm onCreated={carregarProdutos} />
+        <button
+          style={{ ...theme.button, ...theme.buttonPrimary }}
+          onClick={() => exigirLogin(() => {})}
+        >
+          🔐 Fazer login para cadastrar
+        </button>
+
+        {logado && <ProdutoForm onCreated={carregarProdutos} />}
       </div>
 
-      {/* BUSCA */}
-      <div style={{ marginBottom: 20 }}>
-        <input
-          placeholder="🔍 Buscar produto..."
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          style={input}
-        />
-      </div>
+      <input
+        placeholder="🔍 Buscar produto..."
+        value={busca}
+        onChange={(e) => setBusca(e.target.value)}
+        style={input}
+      />
 
       {carregando && <p>Carregando...</p>}
       {erro && <p style={{ color: "#ff5252" }}>{erro}</p>}
 
-      {/* LISTA */}
       <div style={grid}>
         {produtosFiltrados.map((p) => (
           <div key={p.id} style={theme.card}>
 
-            <strong style={{ fontSize: 18 }}>{p.nome}</strong>
+            <strong>{p.nome}</strong>
 
-            {/* PREÇO */}
             {editando === p.id ? (
               <>
                 <input
@@ -113,7 +149,6 @@ export default function Produtos() {
                   onChange={(e) => setNovoPreco(Number(e.target.value))}
                   style={input}
                 />
-
                 <button
                   onClick={() => salvarPreco(p.id)}
                   style={{ ...theme.button, ...theme.buttonSuccess }}
@@ -122,80 +157,52 @@ export default function Produtos() {
                 </button>
               </>
             ) : (
-              <p style={theme.textMuted}>
-                💰 R$ {p.preco.toFixed(2)}
-              </p>
+              <p>💰 R$ {p.preco.toFixed(2)}</p>
             )}
 
-            {p.descricao && (
-              <p style={theme.textMuted}>{p.descricao}</p>
-            )}
-
-            {/* STATUS */}
-            <div style={{ marginBottom: 10 }}>
-              {p.ativo ? (
-                <span style={badgeVerde}>Ativo</span>
-              ) : (
-                <span style={badgeCinza}>Inativo</span>
-              )}
-            </div>
-
-            {/* AÇÕES */}
             <div style={acoes}>
-              <button
-                onClick={() => iniciarEdicao(p)}
-                style={{ ...theme.button, ...theme.buttonPrimary }}
-              >
-                ✏️ Editar preço
+              <button onClick={() => iniciarEdicao(p)} style={btn}>
+                ✏️ Editar
               </button>
 
-              <button
-                onClick={() => toggleAtivo(p)}
-                style={{ ...theme.button, ...theme.buttonWarning }}
-              >
-                🔄 Ativar/Desativar
+              <button onClick={() => toggleAtivo(p)} style={btn}>
+                🔄 Status
               </button>
 
-              <button
-                onClick={() => remover(p.id)}
-                style={{ ...theme.button, background: "#e53935", color: "#fff" }}
-              >
+              <button onClick={() => remover(p.id)} style={btnDanger}>
                 🗑 Remover
-              </button>
-
-              <button
-                onClick={() => navigate(`/produtos/${p.id}/adicionais`)}
-                style={{ ...theme.button, ...theme.buttonPrimary }}
-              >
-                ➕ Adicionais
               </button>
             </div>
 
           </div>
         ))}
       </div>
-    </div>
-  );
-}
 
-/* COMPONENTES */
+      {/* 🔐 MODAL LOGIN */}
+      {mostrarLogin && (
+        <div style={overlay}>
+          <div style={modal}>
+            <h2>🔐 Login Admin</h2>
 
-function CardMenu({ navigate }: any) {
-  return (
-    <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
-      <div style={{
-        background: "#000",
-        padding: 10,
-        borderRadius: 10,
-        display: "flex",
-        gap: 10,
-        flexWrap: "wrap"
-      }}>
-        <button style={btnMenu} onClick={() => navigate("/cozinha")}>🍳</button>
-        <button style={btnMenu} onClick={() => navigate("/pedidos")}>📦</button>
-        <button style={btnMenu} onClick={() => navigate("/dashboard")}>📊</button>
-        <button style={btnMenu} onClick={() => navigate("/auditoria")}>📈</button>
-      </div>
+            <input
+              type="password"
+              placeholder="Digite a senha"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              style={input}
+            />
+
+            <button onClick={login} style={btn}>
+              Entrar
+            </button>
+
+            <button onClick={() => setMostrarLogin(false)} style={btnDanger}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
@@ -214,36 +221,55 @@ const input = {
   borderRadius: 8,
   border: "none",
   marginBottom: 10,
-  fontSize: 16
 };
 
 const acoes = {
   display: "flex",
   flexDirection: "column" as const,
   gap: 8,
-  marginTop: 10
 };
 
-const badgeVerde = {
-  background: "#43a047",
+const btn = {
+  background: "#2196f3",
   color: "#fff",
-  padding: "4px 10px",
-  borderRadius: 6
-};
-
-const badgeCinza = {
-  background: "#777",
-  color: "#fff",
-  padding: "4px 10px",
-  borderRadius: 6
-};
-
-const btnMenu = {
-  background: "#333",
-  color: "#fff",
+  padding: 10,
   border: "none",
-  padding: "10px 12px",
   borderRadius: 6,
-  fontSize: 16,
-  cursor: "pointer"
 };
+
+const btnDanger = {
+  background: "#e53935",
+  color: "#fff",
+  padding: 10,
+  border: "none",
+  borderRadius: 6,
+};
+
+const overlay = {
+  position: "fixed" as const,
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  background: "rgba(0,0,0,0.8)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+};
+
+const modal = {
+  background: "#111",
+  padding: 20,
+  borderRadius: 10,
+  width: 300,
+  color: "#fff",
+};
+
+function CardMenu({ navigate }: any) {
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <button onClick={() => navigate("/cozinha")}>Cozinha</button>
+      <button onClick={() => navigate("/pedidos")}>Pedidos</button>
+    </div>
+  );
+}
