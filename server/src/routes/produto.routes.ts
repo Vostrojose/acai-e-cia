@@ -1,6 +1,7 @@
 import { Router } from "express";
 import produtoController from "../controllers/produto.controller";
 import { ensureAuthenticated } from "../middlewares/auth.middleware";
+import { ensureAdmin } from "../middlewares/ensureAdmin";
 
 const router = Router();
 
@@ -10,10 +11,10 @@ ROTAS PÚBLICAS (CLIENTES)
 =================================
 */
 
-// GET /api/produtos
+// Listar produtos
 router.get("/", produtoController.listar);
 
-// 🔥 CORREÇÃO AQUI
+// Buscar produto por ID
 router.get("/:id", produtoController.buscarPorId);
 
 /*
@@ -22,16 +23,36 @@ ROTAS PROTEGIDAS (ADMIN)
 =================================
 */
 
-// POST /api/produtos
-router.post("/", ensureAuthenticated, produtoController.criar);
+// Criar produto
+router.post(
+  "/",
+  ensureAuthenticated,
+  ensureAdmin,
+  produtoController.criar
+);
 
-// PUT /api/produtos/:id
-router.put("/:id", ensureAuthenticated, produtoController.atualizar);
+// Atualizar produto
+router.put(
+  "/:id",
+  ensureAuthenticated,
+  ensureAdmin,
+  produtoController.atualizar
+);
 
-// PATCH /api/produtos/:id/status
-router.patch("/:id/status", ensureAuthenticated, produtoController.alterarStatus);
+// Alterar status
+router.patch(
+  "/:id/status",
+  ensureAuthenticated,
+  ensureAdmin,
+  produtoController.alterarStatus
+);
 
-// DELETE /api/produtos/:id
-router.delete("/:id", ensureAuthenticated, produtoController.deletar);
+// Deletar produto
+router.delete(
+  "/:id",
+  ensureAuthenticated,
+  ensureAdmin,
+  produtoController.deletar
+);
 
 export default router;

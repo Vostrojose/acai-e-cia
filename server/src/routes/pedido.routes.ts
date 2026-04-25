@@ -1,36 +1,42 @@
 import { Router } from "express";
 import pedidoController from "../controllers/pedido.controller";
+import { ensureAuthenticated } from "../middlewares/auth.middleware";
+import { ensureAdmin } from "../middlewares/ensureAdmin";
 
 const router = Router();
 
 /**
- * Criar novo pedido
- * POST /api/pedidos
+ * Criar novo pedido (cliente)
  */
 router.post("/", pedidoController.criar);
 
 /**
- * Listar todos os pedidos
- * GET /api/pedidos
+ * Listar pedidos (cozinha)
  */
 router.get("/", pedidoController.listar);
 
 /**
- * 🔥 NOVO: Buscar pedido por ID
- * GET /api/pedidos/:id
+ * 🔥 IMPORTANTE: rota dinâmica vem DEPOIS das fixas
+ */
+
+/**
+ * Dashboard
+ */
+router.get("/dashboard", pedidoController.dashboard);
+
+/**
+ * Buscar pedido por ID
  */
 router.get("/:id", pedidoController.buscarPorId);
 
 /**
- * Atualizar status de um pedido
- * PATCH /api/pedidos/:id/status
+ * 🔐 Atualizar status (PROTEGIDO)
  */
-router.patch("/:id/status", pedidoController.atualizarStatus);
-
-/**
- * Dashboard de pedidos
- * GET /api/pedidos/dashboard
- */
-router.get("/dashboard", pedidoController.dashboard);
+router.patch(
+  "/:id/status",
+  ensureAuthenticated,
+  ensureAdmin,
+  pedidoController.atualizarStatus
+);
 
 export default router;

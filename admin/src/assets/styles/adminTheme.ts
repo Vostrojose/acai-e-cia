@@ -56,5 +56,10 @@ export const theme = {
   buttonWhatsapp: {
     background: '#25D366',
     color: '#fff'
+  }, 
+
+  buttonDanger: {
+    background: "#e53935",
+    color: "#fff"
   }
 }

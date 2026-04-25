@@ -24,36 +24,61 @@ export default function Produtos() {
   const [erro, setErro] = useState<string | null>(null);
 
   /* 🔐 AUTH */
-  const [logado, setLogado] = useState(false);
   const [mostrarLogin, setMostrarLogin] = useState(false);
+  const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
-  useEffect(() => {
-    const auth = localStorage.getItem("admin_auth");
-    if (auth === "true") setLogado(true);
-  }, []);
+  function temToken() {
+    return !!localStorage.getItem("token");
+  }
 
+  function logout() {
+    localStorage.removeItem("token");
+    alert("Sessão encerrada");
+  }
+
+  /* ============================= */
+  /* 🔐 LOGIN REAL                 */
+  /* ============================= */
+  async function login() {
+    try {
+      const res = await api.post("/auth/login", {
+        email,
+        senha,
+      });
+
+      const token = res.data.data.token;
+
+      localStorage.setItem("token", token);
+
+      // limpa campos
+      setEmail("");
+      setSenha("");
+      setMostrarLogin(false);
+
+    } catch {
+      alert("Credenciais inválidas");
+    }
+  }
+
+  /* ============================= */
+  /* 🔐 VERIFICA TOKEN             */
+  /* ============================= */
   function exigirLogin(callback: () => void) {
-    if (!logado) {
+    if (!temToken()) {
       setMostrarLogin(true);
       return;
     }
     callback();
   }
 
-  function login() {
-    if (senha === "admin123") {
-      localStorage.setItem("admin_auth", "true");
-      setLogado(true);
-      setMostrarLogin(false);
-      setSenha("");
-    } else {
-      alert("Senha incorreta");
-    }
-  }
-
+  /* ============================= */
+  /* 📦 PRODUTOS                   */
+  /* ============================= */
   async function carregarProdutos() {
     setCarregando(true);
+    setErro(null);
+
     try {
       const res = await api.get("/produtos");
       setProdutos(res.data.data || []);
@@ -113,8 +138,19 @@ export default function Produtos() {
         🛒 Painel do Cardápio
       </h1>
 
+      {/* 🔐 BOTÃO LOGOUT */}
+      {temToken() && (
+        <button
+          onClick={logout}
+          style={{ ...theme.button, ...theme.buttonDanger, marginBottom: 10 }}
+        >
+          🚪 Sair
+        </button>
+      )}
+
       <div style={theme.card}>
         <h2 style={theme.title}>Adicionar novo produto</h2>
+
         <button
           style={{ ...theme.button, ...theme.buttonPrimary }}
           onClick={() => exigirLogin(() => {})}
@@ -122,7 +158,9 @@ export default function Produtos() {
           🔐 Fazer login para cadastrar
         </button>
 
-        {logado && <ProdutoForm onCreated={carregarProdutos} />}
+        {temToken() && (
+          <ProdutoForm onCreated={carregarProdutos} />
+        )}
       </div>
 
       <input
@@ -178,15 +216,23 @@ export default function Produtos() {
         ))}
       </div>
 
-      {/* 🔐 MODAL LOGIN */}
+      {/* 🔐 LOGIN MODAL */}
       {mostrarLogin && (
         <div style={overlay}>
           <div style={modal}>
             <h2>🔐 Login Admin</h2>
 
             <input
+              type="email"
+              placeholder="Digite seu email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={input}
+            />
+
+            <input
               type="password"
-              placeholder="Digite a senha"
+              placeholder="Digite sua senha"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               style={input}
@@ -196,7 +242,10 @@ export default function Produtos() {
               Entrar
             </button>
 
-            <button onClick={() => setMostrarLogin(false)} style={btnDanger}>
+            <button
+              onClick={() => setMostrarLogin(false)}
+              style={btnDanger}
+            >
               Cancelar
             </button>
           </div>
@@ -207,7 +256,9 @@ export default function Produtos() {
   );
 }
 
-/* ESTILOS */
+/* ========================= */
+/* 🎨 ESTILOS                */
+/* ========================= */
 
 const grid = {
   display: "grid",
