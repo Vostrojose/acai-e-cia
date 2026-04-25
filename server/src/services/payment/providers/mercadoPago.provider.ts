@@ -69,19 +69,27 @@ export class MercadoPagoProvider {
       throw new Error('Pedido sem itens')
 
     if (!process.env.FRONT_URL) throw new Error('FRONT_URL não configurado')
-
     if (!process.env.BASE_URL) throw new Error('BASE_URL não configurado')
 
     try {
       /* ============================= */
-      /* FORMATAR ITENS (BLINDADO)     */
+      /* 🔥 ITENS CORRIGIDOS           */
       /* ============================= */
 
       const itensFormatados = pedido.itens.map((item: any) => {
-        const preco = Number(Number(item.precoUnit).toFixed(2))
+        const precoProduto = Number(item.produto?.preco || item.preco || 0)
+
+        const adicionais = item.adicionais || []
+
+        const totalAdicionais = adicionais.reduce(
+          (soma: number, add: any) => soma + Number(add.preco),
+          0
+        )
+
+        const precoFinal = Number((precoProduto + totalAdicionais).toFixed(2))
         const quantidade = Number(item.quantidade)
 
-        if (!preco || preco <= 0 || isNaN(preco)) {
+        if (!precoFinal || precoFinal <= 0 || isNaN(precoFinal)) {
           throw new Error(`Preço inválido no item ${item.produtoId}`)
         }
 
@@ -89,20 +97,27 @@ export class MercadoPagoProvider {
           throw new Error(`Quantidade inválida no item ${item.produtoId}`)
         }
 
+        console.log('🔥 ITEM CORRIGIDO:', {
+          produto: item.produto?.nome,
+          precoProduto,
+          adicionais: totalAdicionais,
+          precoFinal,
+        })
+
         return {
           title: String(
             item.produto?.nome ||
               item.nome ||
-              `Produto ${item.produtoId || 'sem-id'}`,
+              `Produto ${item.produtoId || 'sem-id'}`
           ),
           quantity: quantidade,
-          unit_price: preco,
+          unit_price: precoFinal,
           currency_id: 'BRL',
         }
       })
 
       /* ============================= */
-      /* VALIDAÇÃO SEGURA (FLOAT FIX)  */
+      /* VALIDAÇÃO SEGURA              */
       /* ============================= */
 
       const totalCalculado = itensFormatados.reduce(
@@ -125,7 +140,7 @@ export class MercadoPagoProvider {
       }
 
       /* ============================= */
-      /* DEBUG (ESSENCIAL AGORA)       */
+      /* PAYLOAD MP                    */
       /* ============================= */
 
       const payload = {
@@ -152,10 +167,6 @@ export class MercadoPagoProvider {
       }
 
       console.log('📦 PAYLOAD MP:', JSON.stringify(payload, null, 2))
-
-      /* ============================= */
-      /* CRIAR PREFERENCE              */
-      /* ============================= */
 
       const response = await this.preference.create({
         body: payload,
