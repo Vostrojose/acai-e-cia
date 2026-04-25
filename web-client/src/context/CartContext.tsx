@@ -3,9 +3,9 @@ import type { ReactNode } from 'react'
 
 interface Item {
   id: string
-  produtoId: string // 🔥 NOVO (ESSENCIAL)
+  produtoId: string
   nome: string
-  preco: number
+  preco: number // 🔥 AGORA É O PREÇO FINAL (produto + adicionais)
   quantidade: number
   adicionais?: {
     id: string
@@ -25,6 +25,7 @@ interface CartContextData {
 const CartContext = createContext({} as CartContextData)
 
 export function CartProvider({ children }: { children: ReactNode }) {
+
   const [itens, setItens] = useState<Item[]>(() => {
     try {
       const data = localStorage.getItem('carrinho')
@@ -38,8 +39,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('carrinho', JSON.stringify(itens))
   }, [itens])
 
+  /* ============================= */
+  /* 🔥 ADICIONAR ITEM CORRIGIDO   */
+  /* ============================= */
   function adicionarItem(item: Omit<Item, 'quantidade'>) {
     setItens((prev) => {
+
+      /* 🔥 CALCULAR PREÇO FINAL COM ADICIONAIS */
+      const totalAdicionais = (item.adicionais || []).reduce(
+        (soma, add) => soma + Number(add.preco),
+        0
+      )
+
+      const precoFinal = Number(item.preco) + totalAdicionais
+
+      const itemComPreco = {
+        ...item,
+        preco: precoFinal // 🔥 agora inclui adicionais
+      }
+
       const index = prev.findIndex(i => i.id === item.id)
 
       if (index !== -1) {
@@ -48,7 +66,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         return novos
       }
 
-      return [...prev, { ...item, quantidade: 1 }]
+      return [...prev, { ...itemComPreco, quantidade: 1 }]
     })
   }
 
@@ -60,6 +78,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItens([])
   }
 
+  /* ============================= */
+  /* 🔥 TOTAL CORRETO              */
+  /* ============================= */
   const total = itens.reduce(
     (acc, item) => acc + item.preco * item.quantidade,
     0
@@ -67,7 +88,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ itens, adicionarItem, removerItem, limparCarrinho, total }}
+      value={{
+        itens,
+        adicionarItem,
+        removerItem,
+        limparCarrinho,
+        total
+      }}
     >
       {children}
     </CartContext.Provider>
