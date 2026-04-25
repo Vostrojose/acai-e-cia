@@ -15,6 +15,7 @@ import { httpLogger } from "./middlewares/logger.middleware";
 import { initSocket } from "./websocket/socket";
 
 import adicionalRoutes from "./routes/adicional.routes";
+import auditoriaRoutes from "./routes/auditoria.routes"
 
 const app = express();
 
@@ -67,6 +68,8 @@ app.get("/", (req, res) => {
    MIDDLEWARE DE ERRO
 ================================= */
 app.use(errorMiddleware);
+
+app.use("/api/auditoria", auditoriaRoutes)
 
 /* =================================
    SERVIDOR HTTP
