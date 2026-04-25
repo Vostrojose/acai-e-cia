@@ -45,10 +45,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const index = prev.findIndex(i => i.id === item.id)
 
       if (index !== -1) {
-        const novos = [...prev]
-        novos[index].quantidade += 1
-        return novos
-      }
+  const novos = [...prev]
+
+  // 🔥 mantém adicionais intactos
+  novos[index] = {
+    ...novos[index],
+    quantidade: novos[index].quantidade + 1
+  }
+
+  return novos
+}
 
       return [...prev, { ...item, quantidade: 1 }]
     })

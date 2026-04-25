@@ -142,6 +142,7 @@ class PagamentoService {
       });
 
       console.log("📦 ITENS MP FINAL:", JSON.stringify(itensFormatados, null, 2));
+      console.log("🔥 ITENS ENVIADOS PARA MP:", JSON.stringify(itensFormatados, null, 2))
 
       const response = await preference.create({
         body: {
