@@ -68,21 +68,31 @@ export default function Home() {
       id: idUnico,
       produtoId: produto.id,
       nome: produto.nome,
-      preco: produto.preco, // 🔥 SEM adicionais
+      preco: produto.preco,
       adicionais: []
     })
   }
 
+  /* ============================= */
+  /* 🔥 CORREÇÃO PRINCIPAL AQUI     */
+  /* ============================= */
   function confirmarProduto() {
     if (!produtoSelecionado) return
 
     const idUnico = gerarIdItem(produtoSelecionado, adicionaisSelecionados)
 
+    const totalAdicionais = adicionaisSelecionados.reduce(
+      (soma, add) => soma + Number(add.preco),
+      0
+    )
+
+    const precoFinal = Number(produtoSelecionado.preco) + totalAdicionais
+
     adicionarItem({
       id: idUnico,
       produtoId: produtoSelecionado.id,
       nome: produtoSelecionado.nome,
-      preco: produtoSelecionado.preco, // 🔥 NÃO soma adicionais aqui
+      preco: precoFinal, // 🔥 AGORA SOMA CORRETAMENTE
       adicionais: adicionaisSelecionados
     })
 
@@ -150,6 +160,7 @@ export default function Home() {
 
       <div className="cardapio-container">
         <div className="cardapio-list">
+
           {produtosDisponiveis.map((produto) => {
 
             const quantidade = itens
@@ -160,24 +171,40 @@ export default function Home() {
               <div key={produto.id} className="produto-card">
 
                 <div className="produto-info">
+
+                  {/* 🔥 CORREÇÃO VISUAL MOBILE */}
                   <div className="produto-header">
-                    <div>{produto.nome}</div>
-                    <div>R$ {produto.preco.toFixed(2)}</div>
+                    <span className="produto-nome">{produto.nome}</span>
+                    <span className="produto-preco">
+                      R$ {produto.preco.toFixed(2)}
+                    </span>
                   </div>
+
+                  {produto.descricao && (
+                    <div className="produto-descricao">
+                      {produto.descricao}
+                    </div>
+                  )}
+
                 </div>
 
                 {!produto.temAdicionais ? (
-                  <button onClick={() => adicionarDireto(produto)}>
+                  <button className="add-btn" onClick={() => adicionarDireto(produto)}>
                     + Adicionar
                   </button>
                 ) : (
-                  <button onClick={() => abrirPopup(produto)}>
+                  <button
+                    className={quantidade ? "add-btn-added" : "add-btn"}
+                    onClick={() => abrirPopup(produto)}
+                  >
                     {quantidade ? `✔ ${quantidade}` : 'Escolher'}
                   </button>
                 )}
+
               </div>
             )
           })}
+
         </div>
       </div>
 
