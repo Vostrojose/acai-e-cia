@@ -163,13 +163,16 @@ export default function Produtos() {
 
         <button
           style={{ ...theme.button, ...theme.buttonPrimary }}
-          onClick={() => exigirLogin(() => {})}
+          onClick={() => exigirLogin(() => setMostrarLogin(true))}
         >
           🔐 Fazer login para cadastrar
         </button>
 
         {temToken() && (
-          <ProdutoForm onCreated={carregarProdutos} />
+          <ProdutoForm 
+        onCreated={carregarProdutos} 
+         exigirLogin={exigirLogin}
+       />
         )}
       </div>
 

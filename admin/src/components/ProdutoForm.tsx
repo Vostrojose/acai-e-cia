@@ -1,7 +1,7 @@
 import { useState } from "react";
 import api from "../services/api";
 
-export default function ProdutoForm({ onCreated }: any) {
+export default function ProdutoForm({ onCreated, exigirLogin }: any) {
   const [nome, setNome] = useState("");
   const [descricao, setDescricao] = useState("");
   const [preco, setPreco] = useState(0);
@@ -21,18 +21,17 @@ export default function ProdutoForm({ onCreated }: any) {
   }
 
   async function salvar(e: any) {
-    e.preventDefault();
+  e.preventDefault();
 
-    // 🔥 GARANTE QUE ativo SEMPRE será true
+  exigirLogin(async () => {
     const payload = {
       nome,
       descricao,
       preco,
       ...dias,
-      ativo: true // sempre por último para não ser sobrescrito
+      ativo: true
     };
 
-    // 🔍 DEBUG (pode remover depois)
     console.log("📦 PAYLOAD ENVIADO:", payload);
 
     await api.post("/produtos", payload);
@@ -42,7 +41,8 @@ export default function ProdutoForm({ onCreated }: any) {
     setPreco(0);
 
     onCreated();
-  }
+  });
+}
 
   return (
     <form onSubmit={salvar} style={{ marginTop: 20 }}>
