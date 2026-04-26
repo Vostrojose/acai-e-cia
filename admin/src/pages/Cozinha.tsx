@@ -16,10 +16,11 @@ export default function Cozinha() {
       audio.play().catch(() => {})
     } catch {}
   }
-useEffect(() => {
+
+ useEffect((): (() => void) => {
   const socket = io('https://api.acaiecompanhia.com.br')
 
-  async function carregarPedidos(): Promise<void> {
+  const carregarPedidos = async () => {
     try {
       const res = await api.get('/pedidos')
       setPedidos(res.data?.data || [])
@@ -32,7 +33,18 @@ useEffect(() => {
 
   socket.on('novo_pedido', (pedido: any) => {
     tocarSom()
-    setPedidos((prev) => [pedido, ...prev])
+
+    setPedidos((prev) => {
+      const index = prev.findIndex((p) => p.id === pedido.id)
+
+      if (index !== -1) {
+        const copia = [...prev]
+        copia[index] = pedido
+        return copia
+      }
+
+      return [pedido, ...prev]
+    })
   })
 
   socket.on('pedido_atualizado', (pedidoAtualizado: any) => {
