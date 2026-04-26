@@ -28,7 +28,8 @@ api.interceptors.response.use(
 
       localStorage.removeItem("token")
 
-      window.location.href = "/produtos"
+     // 🔥 NÃO redireciona mais
+     // deixa o modal controlar o login
     }
 
     return Promise.reject(error)
