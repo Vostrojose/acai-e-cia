@@ -19,11 +19,8 @@ class PedidoController {
       endereco: parsed.endereco ?? ''
     })
 
-    try {
-      getIO().emit('novo_pedido', serializeDecimal(pedidoCompleto))
-    } catch {
-      console.warn('WebSocket não iniciado')
-    }
+    // ❌ REMOVIDO: não emitir socket aqui
+    // O pedido ainda está aguardando pagamento
 
     return res.status(201).json({
       success: true,
@@ -79,7 +76,7 @@ class PedidoController {
       try {
         await NotificationService.enviarMensagem(
           pedidoCompleto.telefone,
-          '🍧 Seu pedido está PRONTO!'
+          ' Seu pedido está PRONTO!'
         )
       } catch {
         console.warn('Erro ao enviar notificação')
