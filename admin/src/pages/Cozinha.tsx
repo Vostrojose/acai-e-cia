@@ -176,10 +176,10 @@ export default function Cozinha() {
 function CardMenu({ navigate }: any) {
   return (
     <div style={{ marginBottom: 20 }}>
-      <button onClick={() => navigate('/pedidos')}>Pedidos</button>
-      <button onClick={() => navigate('/produtos')}>Produtos</button>
-      <button onClick={() => navigate('/auditoria')}>Auditoria</button>
-      <button onClick={() => navigate('/dashboard')}>Dashboard</button>
+       <button style={btnMenu} onClick={() => navigate("/pedidos")}>🍳</button>
+        <button style={btnMenu} onClick={() => navigate("/produtos")}>🛒</button>
+        <button style={btnMenu} onClick={() => navigate("/dashboard")}>📊</button>
+        <button style={btnMenu} onClick={() => navigate("/auditoria")}>📈</button>
       
     </div>
   )
@@ -232,7 +232,7 @@ function PedidoCard({ pedido }: any) {
     const numero = pedido.telefone.replace(/\D/g, '')
 
     const mensagem = encodeURIComponent(
-      `🍧 Pedido #${pedido.codigo}\nSeu pedido está PRONTO para retirada!`
+      ` Pedido #${pedido.codigo}\nSeu pedido está PRONTO para retirada!`
     )
 
     window.open(`https://wa.me/55${numero}?text=${mensagem}`, '_blank')
@@ -303,3 +303,12 @@ const colunas = {
   gridTemplateColumns: '1fr 1fr 1fr',
   gap: 20
 }
+const btnMenu = {
+  background: "#333",
+  color: "#fff",
+  border: "none",
+  padding: "10px 12px",
+  borderRadius: 6,
+  fontSize: 16,
+  cursor: "pointer",
+};
