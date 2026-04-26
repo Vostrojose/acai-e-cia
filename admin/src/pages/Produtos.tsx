@@ -57,13 +57,22 @@ export default function Produtos() {
       // limpa campos
       setEmail("");
       setSenha("");
+    // 🔥 FECHA O MODAL PRIMEIRO
       setMostrarLogin(false);
 
-      // 🔥 EXECUTA AÇÃO PENDENTE
-      if (acaoPendente) {
-        acaoPendente();
-        setAcaoPendente(null);
-      }
+    // 🔥 LIMPA CAMPOS
+      setEmail("");
+      setSenha("");
+
+     // 🔥 EXECUTA DEPOIS (com pequeno delay)
+     if (acaoPendente) {
+     const acao = acaoPendente;
+     setAcaoPendente(null);
+
+     setTimeout(() => {
+     acao();
+    }, 0);
+    }
 
     } catch {
       alert("Credenciais inválidas");
