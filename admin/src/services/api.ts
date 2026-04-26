@@ -10,8 +10,9 @@ api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token")
 
   if (token) {
-    config.headers = config.headers || {}
-    config.headers.Authorization = `Bearer ${token}`
+    // 🔥 forma correta (compatível com Axios + TS)
+    config.headers = config.headers ?? {}
+    ;(config.headers as any).Authorization = `Bearer ${token}`
   }
 
   return config
@@ -22,13 +23,11 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
 
-    if (error.response?.status === 401) {
-      console.warn("⚠️ Token inválido ou expirado")
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      console.warn("⚠️ Token inválido, expirado ou sem permissão")
 
-      // 🔥 remove token
       localStorage.removeItem("token")
 
-      // 🔥 redireciona para login (ou produtos)
       window.location.href = "/produtos"
     }
 
