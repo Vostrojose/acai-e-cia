@@ -153,8 +153,10 @@ router.post("/webhook", async (req, res) => {
         StatusPedido.RECEBIDO
       );
 
-      /* 🔥 BUSCAR COMPLETO PARA SOCKET (PROFISSIONAL) */
-      const pedidoCompleto = await PedidoService.buscarPorId(pedido.id);
+      /* 🔥 CORREÇÃO: BUSCAR COMPLETO COM PRODUTOS E ADICIONAIS */
+      const pedidoCompleto = await PedidoService.buscarPorIdComProdutos(
+        pedido.id
+      );
 
       try {
         const io = getIO();

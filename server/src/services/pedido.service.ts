@@ -115,9 +115,26 @@ class PedidoService {
   }
 
   /* ============================= */
-  /* BUSCAR POR ID                 */
+  /* BUSCAR POR ID (COMPLETO)      */
   /* ============================= */
   async buscarPorId(id: string) {
+    return prisma.pedido.findUnique({
+      where: { id },
+      include: {
+        itens: {
+          include: {
+            produto: true,
+            adicionais: true
+          }
+        }
+      }
+    })
+  }
+
+  /* ============================= */
+  /* 🔥 NOVO: BUSCAR COMPLETO PADRÃO */
+  /* ============================= */
+  async buscarPorIdComProdutos(id: string) {
     return prisma.pedido.findUnique({
       where: { id },
       include: {
@@ -174,6 +191,9 @@ class PedidoService {
     })
   }
 
+  /* ============================= */
+  /* REMOVER                       */
+  /* ============================= */
   async removerPedido(id: string) {
     return prisma.pedido.delete({ where: { id } })
   }
