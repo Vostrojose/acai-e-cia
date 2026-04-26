@@ -17,49 +17,87 @@ export default function Cozinha() {
     } catch {}
   }
 
- useEffect((): (() => void) => {
-  const socket = io('https://api.acaiecompanhia.com.br')
+  /* ============================= */
+  /* 🔥 WAKE LOCK (ANTI SLEEP)     */
+  /* ============================= */
+  useEffect(() => {
+    let wakeLock: any = null
 
-  const carregarPedidos = async () => {
-    try {
-      const res = await api.get('/pedidos')
-      setPedidos(res.data?.data || [])
-    } catch (err) {
-      console.error('Erro ao carregar pedidos', err)
+    async function ativarWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await (navigator as any).wakeLock.request('screen')
+          console.log('🔒 Wake Lock ativo')
+        }
+      } catch {}
     }
-  }
 
-  carregarPedidos()
+    ativarWakeLock()
 
-  socket.on('novo_pedido', (pedido: any) => {
-    tocarSom()
-
-    setPedidos((prev) => {
-      const index = prev.findIndex((p) => p.id === pedido.id)
-
-      if (index !== -1) {
-        const copia = [...prev]
-        copia[index] = pedido
-        return copia
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        ativarWakeLock()
       }
-
-      return [pedido, ...prev]
     })
-  })
 
-  socket.on('pedido_atualizado', (pedidoAtualizado: any) => {
-    setPedidos((prev) =>
-      prev.map((p) =>
-        p.id === pedidoAtualizado.id ? pedidoAtualizado : p
+    return () => {
+      wakeLock?.release()
+    }
+  }, [])
+
+  /* ============================= */
+  /* 🔥 SOCKET + FALLBACK          */
+  /* ============================= */
+  useEffect((): (() => void) => {
+    const socket = io('https://api.acaiecompanhia.com.br', {
+      transports: ['websocket'],
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+    })
+
+    const carregarPedidos = async () => {
+      try {
+        const res = await api.get('/pedidos')
+        setPedidos(res.data?.data || [])
+      } catch {}
+    }
+
+    carregarPedidos()
+
+    socket.on('novo_pedido', (pedido: any) => {
+      tocarSom()
+
+      setPedidos((prev) => {
+        const index = prev.findIndex((p) => p.id === pedido.id)
+
+        if (index !== -1) {
+          const copia = [...prev]
+          copia[index] = pedido
+          return copia
+        }
+
+        return [pedido, ...prev]
+      })
+    })
+
+    socket.on('pedido_atualizado', (pedidoAtualizado: any) => {
+      setPedidos((prev) =>
+        prev.map((p) =>
+          p.id === pedidoAtualizado.id ? pedidoAtualizado : p
+        )
       )
-    )
-  })
+    })
 
-  return () => {
-    socket.disconnect()
-  }
+    /* 🔥 FALLBACK (GARANTE ATUALIZAÇÃO) */
+    const intervalo = setInterval(carregarPedidos, 10000)
 
-}, [])
+    return () => {
+      socket.disconnect()
+      clearInterval(intervalo)
+    }
+  }, [])
 
   function ordenar(lista: any[]) {
     return [...lista].sort(
@@ -201,26 +239,23 @@ function PedidoCard({ pedido }: any) {
     <div style={theme.card}>
       <strong>Pedido #{pedido.codigo}</strong>
 
-   {pedido.itens?.map((item: any) => (
-  <div key={item.id} style={{ marginBottom: 8 }}>
+      {pedido.itens?.map((item: any) => (
+        <div key={item.id} style={{ marginBottom: 8 }}>
+          <strong>
+            {item.quantidade}x {item.produto?.nome}
+          </strong>
 
-    <strong>
-      {item.quantidade}x {item.produto?.nome}
-    </strong>
-
-    {/* 🔥 ADICIONAIS */}
-    {item.adicionais?.length > 0 && (
-      <div style={{ marginLeft: 10, color: '#ffcc80' }}>
-        {item.adicionais.map((add: any) => (
-          <div key={add.id}>
-            + {add.nome}
-          </div>
-        ))}
-      </div>
-    )}
-
-  </div>
-))}
+          {item.adicionais?.length > 0 && (
+            <div style={{ marginLeft: 10, color: '#ffcc80' }}>
+              {item.adicionais.map((add: any) => (
+                <div key={add.id}>
+                  + {add.nome}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
 
       {pedido.status === 'RECEBIDO' && (
         <button onClick={() => atualizarStatus('EM_PREPARO')}>
