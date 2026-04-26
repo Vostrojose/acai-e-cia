@@ -20,7 +20,7 @@ export default function AppRoutes() {
       {/* ========================= */}
       {/* LOGIN (PÚBLICO)          */}
       {/* ========================= */}
-      {/*<Route path="/login" element={<Login />} />*/}
+      <Route path="/login" element={<Login />} />
 
       {/* ========================= */}
       {/* ROTA PRINCIPAL            */}

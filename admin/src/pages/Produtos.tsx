@@ -28,7 +28,7 @@ export default function Produtos() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
-  // 🔥 NOVO: ação pendente
+  // 🔥 ação pendente
   const [acaoPendente, setAcaoPendente] = useState<null | (() => void)>(null);
 
   function temToken() {
@@ -41,7 +41,15 @@ export default function Produtos() {
   }
 
   /* ============================= */
-  /* 🔐 LOGIN REAL                 */
+  /* 🔐 REAUTENTICAÇÃO             */
+  /* ============================= */
+  function exigirReautenticacao(callback: () => void) {
+    setAcaoPendente(() => callback);
+    setMostrarLogin(true);
+  }
+
+  /* ============================= */
+  /* 🔐 LOGIN                      */
   /* ============================= */
   async function login() {
     try {
@@ -57,22 +65,19 @@ export default function Produtos() {
       // limpa campos
       setEmail("");
       setSenha("");
-    // 🔥 FECHA O MODAL PRIMEIRO
+
+      // fecha modal
       setMostrarLogin(false);
 
-    // 🔥 LIMPA CAMPOS
-      setEmail("");
-      setSenha("");
+      // executa ação depois
+      if (acaoPendente) {
+        const acao = acaoPendente;
+        setAcaoPendente(null);
 
-     // 🔥 EXECUTA DEPOIS (com pequeno delay)
-     if (acaoPendente) {
-     const acao = acaoPendente;
-     setAcaoPendente(null);
-
-     setTimeout(() => {
-     acao();
-    }, 0);
-    }
+        setTimeout(() => {
+          acao();
+        }, 0);
+      }
 
     } catch {
       alert("Credenciais inválidas");
@@ -80,11 +85,11 @@ export default function Produtos() {
   }
 
   /* ============================= */
-  /* 🔐 VERIFICA TOKEN             */
+  /* 🔐 LOGIN INICIAL              */
   /* ============================= */
   function exigirLogin(callback: () => void) {
     if (!temToken()) {
-      setAcaoPendente(() => callback); // 🔥 guarda ação
+      setAcaoPendente(() => callback);
       setMostrarLogin(true);
       return;
     }
@@ -112,8 +117,12 @@ export default function Produtos() {
     carregarProdutos();
   }, []);
 
+  /* ============================= */
+  /* 🔥 AÇÕES PROTEGIDAS           */
+  /* ============================= */
+
   async function remover(id: string) {
-    exigirLogin(async () => {
+    exigirReautenticacao(async () => {
       if (!confirm("Deseja remover este produto?")) return;
       await api.delete(`/produtos/${id}`);
       carregarProdutos();
@@ -121,14 +130,14 @@ export default function Produtos() {
   }
 
   function iniciarEdicao(p: Produto) {
-    exigirLogin(() => {
+    exigirReautenticacao(() => {
       setEditando(p.id);
       setNovoPreco(p.preco);
     });
   }
 
   async function salvarPreco(id: string) {
-    exigirLogin(async () => {
+    exigirReautenticacao(async () => {
       await api.put(`/produtos/${id}`, { preco: novoPreco });
       setEditando(null);
       carregarProdutos();
@@ -136,7 +145,7 @@ export default function Produtos() {
   }
 
   async function toggleAtivo(p: Produto) {
-    exigirLogin(async () => {
+    exigirReautenticacao(async () => {
       await api.patch(`/produtos/${p.id}/status`, {
         ativo: !p.ativo,
       });
@@ -157,7 +166,6 @@ export default function Produtos() {
         🛒 Painel do Cardápio
       </h1>
 
-      {/* 🔐 BOTÃO LOGOUT */}
       {temToken() && (
         <button
           onClick={logout}
@@ -172,16 +180,16 @@ export default function Produtos() {
 
         <button
           style={{ ...theme.button, ...theme.buttonPrimary }}
-          onClick={() => exigirLogin(() => setMostrarLogin(true))}
+          onClick={() => setMostrarLogin(true)}
         >
           🔐 Fazer login para cadastrar
         </button>
 
         {temToken() && (
           <ProdutoForm 
-        onCreated={carregarProdutos} 
-         exigirLogin={exigirLogin}
-       />
+            onCreated={carregarProdutos} 
+            exigirLogin={exigirReautenticacao}
+          />
         )}
       </div>
 
@@ -238,7 +246,6 @@ export default function Produtos() {
         ))}
       </div>
 
-      {/* 🔐 LOGIN MODAL */}
       {mostrarLogin && (
         <div style={overlay}>
           <div style={modal}>
@@ -340,7 +347,7 @@ const modal = {
 
 function CardMenu({ navigate, exigirLogin }: any) {
   return (
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+    <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
       <div style={{
         background: "#000",
         padding: 10,
