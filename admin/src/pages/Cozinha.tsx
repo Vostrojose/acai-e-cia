@@ -303,6 +303,11 @@ const colunas = {
   gridTemplateColumns: '1fr 1fr 1fr',
   gap: 20
 }
+const linha = {
+  marginBottom: 6,
+  fontSize: 15,
+};
+
 const btnMenu = {
   background: "#333",
   color: "#fff",
