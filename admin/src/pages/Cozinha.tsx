@@ -175,12 +175,20 @@ export default function Cozinha() {
 
 function CardMenu({ navigate }: any) {
   return (
-    <div style={{ marginBottom: 20 }}>
-       <button style={btnMenu} onClick={() => navigate("/pedidos")}>🍳</button>
+     <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+      <div style={{
+        background: "#000",
+        padding: 10,
+        borderRadius: 10,
+        display: "flex",
+        gap: 10,
+        flexWrap: "wrap"
+      }}>
+        <button style={btnMenu} onClick={() => navigate("/pedido")}>🍳</button>
         <button style={btnMenu} onClick={() => navigate("/produtos")}>🛒</button>
         <button style={btnMenu} onClick={() => navigate("/dashboard")}>📊</button>
         <button style={btnMenu} onClick={() => navigate("/auditoria")}>📈</button>
-      
+      </div>
     </div>
   )
 }
