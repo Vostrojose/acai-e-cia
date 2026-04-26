@@ -201,11 +201,26 @@ function PedidoCard({ pedido }: any) {
     <div style={theme.card}>
       <strong>Pedido #{pedido.codigo}</strong>
 
-      {pedido.itens?.map((item: any) => (
-        <div key={item.id}>
-          {item.quantidade}x {item.produto?.nome}
-        </div>
-      ))}
+   {pedido.itens?.map((item: any) => (
+  <div key={item.id} style={{ marginBottom: 8 }}>
+
+    <strong>
+      {item.quantidade}x {item.produto?.nome}
+    </strong>
+
+    {/* 🔥 ADICIONAIS */}
+    {item.adicionais?.length > 0 && (
+      <div style={{ marginLeft: 10, color: '#ffcc80' }}>
+        {item.adicionais.map((add: any) => (
+          <div key={add.id}>
+            + {add.nome}
+          </div>
+        ))}
+      </div>
+    )}
+
+  </div>
+))}
 
       {pedido.status === 'RECEBIDO' && (
         <button onClick={() => atualizarStatus('EM_PREPARO')}>
