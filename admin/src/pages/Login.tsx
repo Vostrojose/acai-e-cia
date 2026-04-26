@@ -19,9 +19,11 @@ export default function Login() {
         senha
       })
 
-      localStorage.setItem("token", res.data.token)
+      //localStorage.setItem("token", res.data.token)
+      sessionStorage.setItem("token", res.data.token)
 
-      navigate("/dashboard")
+      //navigate("/dashboard")
+      navigate("/", { replace: true })
 
     } catch (err: any) {
 
