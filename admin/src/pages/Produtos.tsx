@@ -132,7 +132,7 @@ export default function Produtos() {
   return (
     <div style={theme.page}>
 
-      <CardMenu navigate={navigate} />
+      <CardMenu navigate={navigate} exigirLogin={exigirLogin} />
 
       <h1 style={{ ...theme.title, textAlign: "center" }}>
         🛒 Painel do Cardápio
@@ -316,7 +316,7 @@ const modal = {
   color: "#fff",
 };
 
-function CardMenu({ navigate }: any) {
+function CardMenu({ navigate, exigirLogin }: any) {
   return (
       <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
       <div style={{
@@ -331,6 +331,7 @@ function CardMenu({ navigate }: any) {
         <button onClick={() => navigate("/pedidos")} style={btnMenu}>📦</button>
         <button onClick={() => navigate("/dashboard")} style={btnMenu}>📈</button>
         <button onClick={() => navigate("/auditoria")} style={btnMenu}>📊</button>
+        <button onClick={() => exigirLogin(() => navigate("/change-password"))}>🔑</button>
       </div>
     </div>
   );

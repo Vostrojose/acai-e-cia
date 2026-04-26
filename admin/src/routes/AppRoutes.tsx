@@ -6,6 +6,7 @@ import Pedidos from '../pages/Pedidos'
 import Cozinha from '../pages/Cozinha'
 import Auditoria from '../pages/Auditoria'
 import Login from '../pages/Login'
+import ChangePassword from "../pages/ChangePassword";
 
 // 🔥 NOVA TELA DE ADICIONAIS
 import Adicionais from '../pages/Adicionais'
@@ -102,6 +103,8 @@ export default function AppRoutes() {
           </PrivateRoute>
         }
       />
+
+      <Route path="/change-password" element={<ChangePassword />} />
 
     </Routes>
   )

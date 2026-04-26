@@ -8,11 +8,11 @@ class AuthService {
     const usuario = await prisma.usuario.findUnique({
       where: { email },
     })
-
+    
     if (!usuario) {
+      console.log('❌ USUARIO NÃO ENCONTRADO')
       throw new AppError('Credenciais inválidas.', 401)
     }
-
     const senhaValida = await bcrypt.compare(senha, usuario.senha)
 
     if (!senhaValida) {

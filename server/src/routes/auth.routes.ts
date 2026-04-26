@@ -1,46 +1,56 @@
-import { Router, Request, Response } from "express";
-import jwt from "jsonwebtoken";
+import { Router } from "express";
+import authController from "../controllers/auth.controller";
+import { ensureAuth } from "../middlewares/ensureAuth";
+import bcrypt from "bcryptjs";
+import prisma from "../lib/prisma";
 
 const router = Router();
 
-/**
- * Login de administrador
- * POST /api/auth/login
- */
-router.post("/login", (req: Request, res: Response) => {
-  console.log("BODY:", req.body);
-  console.log("ADMIN_EMAIL:", process.env.ADMIN_EMAIL);
-  console.log("ADMIN_PASSWORD:", process.env.ADMIN_PASSWORD);
-  console.log("JWT_SECRET:", process.env.JWT_SECRET);
+// 🔐 LOGIN
+router.post("/login", authController.login);
 
-  const email = req.body.email?.trim();
-  const senha = req.body.senha?.trim();
+// 🔒 CHANGE PASSWORD
+router.put("/change-password", ensureAuth, async (req, res) => {
+  try {
+    const { senhaAtual, novaSenha } = req.body;
 
-  if (
-    email !== process.env.ADMIN_EMAIL ||
-    senha !== process.env.ADMIN_PASSWORD
-  ) {
-    return res.status(401).json({
-      message: "Credenciais inválidas",
-      debug: {
-        emailRecebido: email,
-        senhaRecebida: senha,
-        envEmail: process.env.ADMIN_EMAIL,
-        envSenha: process.env.ADMIN_PASSWORD,
-      },
+    if (!senhaAtual || !novaSenha) {
+      return res.status(400).json({ message: "Dados obrigatórios" });
+    }
+
+    if (novaSenha.length < 6) {
+      return res.status(400).json({ message: "Nova senha muito curta" });
+    }
+
+    const userId = (req as any).user.id;
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: userId },
     });
+
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    const senhaValida = await bcrypt.compare(senhaAtual, usuario.senha);
+
+    if (!senhaValida) {
+      return res.status(400).json({ message: "Senha atual incorreta" });
+    }
+
+    const novaHash = await bcrypt.hash(novaSenha, 10);
+
+    await prisma.usuario.update({
+      where: { id: usuario.id },
+      data: { senha: novaHash },
+    });
+
+    return res.json({ success: true });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Erro interno" });
   }
-
-  const token = jwt.sign(
-    { role: "ADMIN" },
-    process.env.JWT_SECRET as string,
-    { expiresIn: "12h" }
-  );
-
-  return res.json({ token });
 });
 
-/**
- * Exportação das rotas
- */
 export default router;
