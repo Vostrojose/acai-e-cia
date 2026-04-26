@@ -76,6 +76,9 @@ export default function Produtos() {
 
       localStorage.setItem("token", token);
 
+      // 🔥 FORÇA atualização imediata do axios
+      api.defaults.headers.Authorization = `Bearer ${token}`;
+
       setEmail("");
       setSenha("");
       setMostrarLogin(false);
