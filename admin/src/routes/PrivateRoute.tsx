@@ -1,12 +1,6 @@
-import { Navigate } from "react-router-dom"
+import { ReactNode } from "react"
 
-export default function PrivateRoute({ children }: any) {
-
-  const token = localStorage.getItem("token")
-
-  if (!token) {
-    return <Navigate to="/login" />
-  }
-
-  return children
+export default function PrivateRoute({ children }: { children: ReactNode }) {
+  // 🔥 NÃO BLOQUEIA MAIS — login controlado por modal
+  return <>{children}</>
 }
