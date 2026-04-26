@@ -9,8 +9,8 @@ api.interceptors.request.use((config) => {
 
   const token = sessionStorage.getItem("token")
 
-  if (token) {
-    // 🔥 forma correta (compatível com Axios + TS)
+  // 🔥 NÃO envia token para login
+  if (token && !config.url?.includes("/auth/login")) {
     config.headers = config.headers ?? {}
     ;(config.headers as any).Authorization = `Bearer ${token}`
   }
@@ -26,10 +26,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401 || error.response?.status === 403) {
       console.warn("⚠️ Token inválido, expirado ou sem permissão")
 
-      localStorage.removeItem("token")
-
-     // 🔥 NÃO redireciona mais
-     // deixa o modal controlar o login
+      // 🔥 CORRIGIDO → sessionStorage
+      sessionStorage.removeItem("token")
     }
 
     return Promise.reject(error)
