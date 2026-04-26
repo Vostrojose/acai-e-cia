@@ -28,6 +28,9 @@ export default function Produtos() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
+  // 🔥 NOVO: ação pendente
+  const [acaoPendente, setAcaoPendente] = useState<null | (() => void)>(null);
+
   function temToken() {
     return !!localStorage.getItem("token");
   }
@@ -56,6 +59,12 @@ export default function Produtos() {
       setSenha("");
       setMostrarLogin(false);
 
+      // 🔥 EXECUTA AÇÃO PENDENTE
+      if (acaoPendente) {
+        acaoPendente();
+        setAcaoPendente(null);
+      }
+
     } catch {
       alert("Credenciais inválidas");
     }
@@ -66,6 +75,7 @@ export default function Produtos() {
   /* ============================= */
   function exigirLogin(callback: () => void) {
     if (!temToken()) {
+      setAcaoPendente(() => callback); // 🔥 guarda ação
       setMostrarLogin(true);
       return;
     }
