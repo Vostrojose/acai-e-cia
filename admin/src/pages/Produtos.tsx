@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import ProdutoForm from "../components/ProdutoForm";
-import { theme } from "../assets/styles/adminTheme";
 
 type Produto = {
   id: string;
@@ -28,8 +27,11 @@ export default function Produtos() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
-  // 🔥 ação pendente
   const [acaoPendente, setAcaoPendente] = useState<null | (() => void)>(null);
+
+  // 🔥 CONTROLE DE REAUTENTICAÇÃO
+  const [ultimoLoginSensivel, setUltimoLoginSensivel] = useState<number | null>(null);
+  const TEMPO_REAUTENTICACAO = 5 * 60 * 1000;
 
   function temToken() {
     return !!localStorage.getItem("token");
@@ -37,56 +39,39 @@ export default function Produtos() {
 
   function logout() {
     localStorage.removeItem("token");
+    setUltimoLoginSensivel(null);
     alert("Sessão encerrada");
   }
 
-  /* ============================= */
-  /* 🔐 REAUTENTICAÇÃO             */
-  /* ============================= */
   function exigirReautenticacao(callback: () => void) {
+    const agora = Date.now();
+    if (ultimoLoginSensivel && agora - ultimoLoginSensivel < TEMPO_REAUTENTICACAO) {
+      callback();
+      return;
+    }
     setAcaoPendente(() => callback);
     setMostrarLogin(true);
   }
 
-  /* ============================= */
-  /* 🔐 LOGIN                      */
-  /* ============================= */
   async function login() {
     try {
-      const res = await api.post("/auth/login", {
-        email,
-        senha,
-      });
-
+      const res = await api.post("/auth/login", { email, senha });
       const token = res.data.data.token;
-
       localStorage.setItem("token", token);
-
-      // limpa campos
       setEmail("");
       setSenha("");
-
-      // fecha modal
       setMostrarLogin(false);
-
-      // executa ação depois
+      setUltimoLoginSensivel(Date.now());
       if (acaoPendente) {
         const acao = acaoPendente;
         setAcaoPendente(null);
-
-        setTimeout(() => {
-          acao();
-        }, 0);
+        setTimeout(() => acao(), 0);
       }
-
     } catch {
       alert("Credenciais inválidas");
     }
   }
 
-  /* ============================= */
-  /* 🔐 LOGIN INICIAL              */
-  /* ============================= */
   function exigirLogin(callback: () => void) {
     if (!temToken()) {
       setAcaoPendente(() => callback);
@@ -96,13 +81,9 @@ export default function Produtos() {
     callback();
   }
 
-  /* ============================= */
-  /* 📦 PRODUTOS                   */
-  /* ============================= */
   async function carregarProdutos() {
     setCarregando(true);
     setErro(null);
-
     try {
       const res = await api.get("/produtos");
       setProdutos(res.data.data || []);
@@ -116,10 +97,6 @@ export default function Produtos() {
   useEffect(() => {
     carregarProdutos();
   }, []);
-
-  /* ============================= */
-  /* 🔥 AÇÕES PROTEGIDAS           */
-  /* ============================= */
 
   async function remover(id: string) {
     exigirReautenticacao(async () => {
@@ -146,9 +123,7 @@ export default function Produtos() {
 
   async function toggleAtivo(p: Produto) {
     exigirReautenticacao(async () => {
-      await api.patch(`/produtos/${p.id}/status`, {
-        ativo: !p.ativo,
-      });
+      await api.patch(`/produtos/${p.id}/status`, { ativo: !p.ativo });
       carregarProdutos();
     });
   }
@@ -158,38 +133,35 @@ export default function Produtos() {
   );
 
   return (
-    <div style={theme.page}>
-
+    <div style={{
+      padding: 20,
+      background: '#6d10f9a2',
+      minHeight: '100vh',
+      width: '100%',
+      boxSizing: 'border-box',
+    }}>
       <CardMenu navigate={navigate} exigirLogin={exigirLogin} />
 
-      <h1 style={{ ...theme.title, textAlign: "center" }}>
+      <h1 style={{ textAlign: "center", color: "#fff" }}>
         🛒 Painel do Cardápio
       </h1>
 
       {temToken() && (
         <button
           onClick={logout}
-          style={{ ...theme.button, ...theme.buttonDanger, marginBottom: 10 }}
+          style={{ ...btnDanger, marginBottom: 10 }}
         >
           🚪 Sair
         </button>
       )}
 
-      <div style={theme.card}>
-        <h2 style={theme.title}>Adicionar novo produto</h2>
-
-        <button
-          style={{ ...theme.button, ...theme.buttonPrimary }}
-          onClick={() => setMostrarLogin(true)}
-        >
+      <div style={card}>
+        <h2 style={{ color: "#fff" }}>Adicionar novo produto</h2>
+        <button style={btn} onClick={() => setMostrarLogin(true)}>
           🔐 Fazer login para cadastrar
         </button>
-
         {temToken() && (
-          <ProdutoForm 
-            onCreated={carregarProdutos} 
-            exigirLogin={exigirReautenticacao}
-          />
+          <ProdutoForm onCreated={carregarProdutos} exigirLogin={exigirReautenticacao} />
         )}
       </div>
 
@@ -200,15 +172,13 @@ export default function Produtos() {
         style={input}
       />
 
-      {carregando && <p>Carregando...</p>}
+      {carregando && <p style={{ color: "#fff" }}>Carregando...</p>}
       {erro && <p style={{ color: "#ff5252" }}>{erro}</p>}
 
       <div style={grid}>
         {produtosFiltrados.map((p) => (
-          <div key={p.id} style={theme.card}>
-
-            <strong>{p.nome}</strong>
-
+          <div key={p.id} style={card}>
+            <strong style={{ color: "#fff" }}>{p.nome}</strong>
             {editando === p.id ? (
               <>
                 <input
@@ -217,31 +187,18 @@ export default function Produtos() {
                   onChange={(e) => setNovoPreco(Number(e.target.value))}
                   style={input}
                 />
-                <button
-                  onClick={() => salvarPreco(p.id)}
-                  style={{ ...theme.button, ...theme.buttonSuccess }}
-                >
+                <button onClick={() => salvarPreco(p.id)} style={btnSuccess}>
                   Salvar
                 </button>
               </>
             ) : (
-              <p>💰 R$ {p.preco.toFixed(2)}</p>
+              <p style={{ color: "#fff" }}>💰 R$ {p.preco.toFixed(2)}</p>
             )}
-
             <div style={acoes}>
-              <button onClick={() => iniciarEdicao(p)} style={btn}>
-                ✏️ Editar
-              </button>
-
-              <button onClick={() => toggleAtivo(p)} style={btn}>
-                🔄 Status
-              </button>
-
-              <button onClick={() => remover(p.id)} style={btnDanger}>
-                🗑 Remover
-              </button>
+              <button onClick={() => iniciarEdicao(p)} style={btn}>✏️ Editar</button>
+              <button onClick={() => toggleAtivo(p)} style={btn}>🔄 Status</button>
+              <button onClick={() => remover(p.id)} style={btnDanger}>🗑 Remover</button>
             </div>
-
           </div>
         ))}
       </div>
@@ -250,44 +207,18 @@ export default function Produtos() {
         <div style={overlay}>
           <div style={modal}>
             <h2>🔐 Login Admin</h2>
-
-            <input
-              type="email"
-              placeholder="Digite seu email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={input}
-            />
-
-            <input
-              type="password"
-              placeholder="Digite sua senha"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              style={input}
-            />
-
-            <button onClick={login} style={btn}>
-              Entrar
-            </button>
-
-            <button
-              onClick={() => setMostrarLogin(false)}
-              style={btnDanger}
-            >
-              Cancelar
-            </button>
+            <input type="email" placeholder="Digite seu email" value={email} onChange={(e) => setEmail(e.target.value)} style={input} />
+            <input type="password" placeholder="Digite sua senha" value={senha} onChange={(e) => setSenha(e.target.value)} style={input} />
+            <button onClick={login} style={btn}>Entrar</button>
+            <button onClick={() => setMostrarLogin(false)} style={btnDanger}>Cancelar</button>
           </div>
         </div>
       )}
-
     </div>
   );
 }
 
-/* ========================= */
-/* 🎨 ESTILOS                */
-/* ========================= */
+/* 🎨 ESTILOS */
 
 const grid = {
   display: "grid",
@@ -315,6 +246,16 @@ const btn = {
   padding: 10,
   border: "none",
   borderRadius: 6,
+  cursor: "pointer",
+};
+
+const btnSuccess = {
+  background: "#4caf50",
+  color: "#fff",
+  padding: 10,
+  border: "none",
+  borderRadius: 6,
+  cursor: "pointer",
 };
 
 const btnDanger = {
@@ -323,6 +264,13 @@ const btnDanger = {
   padding: 10,
   border: "none",
   borderRadius: 6,
+  cursor: "pointer",
+};
+
+const card = {
+  background: "#4e06f798",
+  borderRadius: 10,
+  padding: 20,
 };
 
 const overlay = {
@@ -336,7 +284,6 @@ const overlay = {
   justifyContent: "center",
   alignItems: "center",
 };
-
 const modal = {
   background: "#111",
   padding: 20,
@@ -344,27 +291,6 @@ const modal = {
   width: 300,
   color: "#fff",
 };
-
-function CardMenu({ navigate, exigirLogin }: any) {
-  return (
-    <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
-      <div style={{
-        background: "#000",
-        padding: 10,
-        borderRadius: 10,
-        display: "flex",
-        gap: 10,
-        flexWrap: "wrap"
-      }}>
-        <button onClick={() => navigate("/cozinha")} style={btnMenu}>🍳</button>
-        <button onClick={() => navigate("/pedidos")} style={btnMenu}>📦</button>
-        <button onClick={() => navigate("/dashboard")} style={btnMenu}>📈</button>
-        <button onClick={() => navigate("/auditoria")} style={btnMenu}>📊</button>
-        <button onClick={() => exigirLogin(() => navigate("/change-password"))}>🔑</button>
-      </div>
-    </div>
-  );
-}
 
 const btnMenu = {
   background: "#333",
@@ -374,4 +300,28 @@ const btnMenu = {
   borderRadius: 6,
   fontSize: 16,
   cursor: "pointer",
+  fontWeight: "bold",
 };
+
+function CardMenu({ navigate, exigirLogin }: any) {
+  return (
+    <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+      <div
+        style={{
+          background: "#111",
+          padding: 10,
+          borderRadius: 10,
+          display: "flex",
+          gap: 10,
+          flexWrap: "wrap",
+        }}
+      >
+        <button onClick={() => navigate("/cozinha")} style={btnMenu}>🍳 Cozinha</button>
+        <button onClick={() => navigate("/pedidos")} style={btnMenu}>📦 Pedidos</button>
+        <button onClick={() => navigate("/dashboard")} style={btnMenu}>📈 Dashboard</button>
+        <button onClick={() => navigate("/auditoria")} style={btnMenu}>📊 Auditoria</button>
+        <button onClick={() => exigirLogin(() => navigate("/change-password"))} style={btnMenu}>🔑 Alterar senha</button>
+      </div>
+    </div>
+  );
+}
