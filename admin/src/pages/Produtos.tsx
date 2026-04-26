@@ -35,11 +35,11 @@ export default function Produtos() {
   const TEMPO_REAUTENTICACAO = 5 * 60 * 1000;
 
   function temToken() {
-    return !!localStorage.getItem("token");
+    return !!sessionStorage.getItem("token");
   }
 
   function logout() {
-    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
     setUltimoLoginSensivel(null); // 🔥 limpa sessão sensível
     alert("Sessão encerrada");
   }
@@ -74,7 +74,7 @@ export default function Produtos() {
 
       const token = res.data.data.token;
 
-      localStorage.setItem("token", token);
+      sessionStorage.setItem("token", token);
 
       // 🔥 FORÇA atualização imediata do axios
       api.defaults.headers.Authorization = `Bearer ${token}`;

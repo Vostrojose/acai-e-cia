@@ -7,7 +7,7 @@ const api = axios.create({
 // 🔐 INTERCEPTOR DE REQUEST
 api.interceptors.request.use((config) => {
 
-  const token = localStorage.getItem("token")
+  const token = sessionStorage.getItem("token")
 
   if (token) {
     // 🔥 forma correta (compatível com Axios + TS)
