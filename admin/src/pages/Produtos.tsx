@@ -330,7 +330,7 @@ function CardMenu({ navigate }: any) {
         <button onClick={() => navigate("/cozinha")} style={btnMenu}>🍳</button>
         <button onClick={() => navigate("/pedidos")} style={btnMenu}>📦</button>
         <button onClick={() => navigate("/dashboard")} style={btnMenu}>📈</button>
-        <button style={btnMenu} onClick={() => navigate("/auditoria")}>📊</button>
+        <button onClick={() => navigate("/auditoria")} style={btnMenu}>📊</button>
       </div>
     </div>
   );
