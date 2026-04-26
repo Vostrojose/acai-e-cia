@@ -178,6 +178,9 @@ function CardMenu({ navigate }: any) {
     <div style={{ marginBottom: 20 }}>
       <button onClick={() => navigate('/pedidos')}>Pedidos</button>
       <button onClick={() => navigate('/produtos')}>Produtos</button>
+      <button onClick={() => navigate('/auditoria')}>Auditoria</button>
+      <button onClick={() => navigate('/dashboard')}>Dashboard</button>
+      
     </div>
   )
 }
