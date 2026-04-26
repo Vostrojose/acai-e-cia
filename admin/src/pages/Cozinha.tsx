@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { io } from 'socket.io-client'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
@@ -8,7 +8,6 @@ export default function Cozinha() {
   const [pedidos, setPedidos] = useState<any[]>([])
   const [mostrarEntregues, setMostrarEntregues] = useState(false)
 
-  const intervaloSom = useRef<ReturnType<typeof setInterval> | null>(null)
   const navigate = useNavigate()
 
   function tocarSom() {
@@ -17,8 +16,7 @@ export default function Cozinha() {
       audio.play().catch(() => {})
     } catch {}
   }
-
- useEffect(() => {
+useEffect(() => {
   const socket = io('https://api.acaiecompanhia.com.br')
 
   async function carregarPedidos(): Promise<void> {
@@ -52,8 +50,10 @@ export default function Cozinha() {
 }, [])
 
   function ordenar(lista: any[]) {
-    return [...lista].sort((a, b) =>
-      new Date(a.criadoEm).getTime() - new Date(b.criadoEm).getTime()
+    return [...lista].sort(
+      (a, b) =>
+        new Date(a.criadoEm).getTime() -
+        new Date(b.criadoEm).getTime()
     )
   }
 
@@ -168,8 +168,21 @@ function Coluna({ titulo, pedidos }: any) {
 }
 
 function PedidoCard({ pedido }: any) {
+
   async function atualizarStatus(status: string) {
     await api.patch(`/pedidos/${pedido.id}/status`, { status })
+  }
+
+  function enviarWhatsApp() {
+    if (!pedido.telefone) return
+
+    const numero = pedido.telefone.replace(/\D/g, '')
+
+    const mensagem = encodeURIComponent(
+      `🍧 Pedido #${pedido.codigo}\nSeu pedido está PRONTO para retirada!`
+    )
+
+    window.open(`https://wa.me/55${numero}?text=${mensagem}`, '_blank')
   }
 
   return (
@@ -195,9 +208,17 @@ function PedidoCard({ pedido }: any) {
       )}
 
       {pedido.status === 'PRONTO' && (
-        <button onClick={() => atualizarStatus('ENTREGUE')}>
-          ENTREGUE
-        </button>
+        <>
+          <button onClick={() => atualizarStatus('ENTREGUE')}>
+            ENTREGUE
+          </button>
+
+          {pedido.telefone && (
+            <button onClick={enviarWhatsApp} style={{ marginTop: 8 }}>
+              📲 WhatsApp
+            </button>
+          )}
+        </>
       )}
     </div>
   )
@@ -208,7 +229,8 @@ function PedidoCard({ pedido }: any) {
 const headerGrid = {
   display: 'flex',
   gap: 10,
-  marginBottom: 20
+  marginBottom: 20,
+  flexWrap: 'wrap' as const
 }
 
 const colunas = {
