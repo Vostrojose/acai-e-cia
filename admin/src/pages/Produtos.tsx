@@ -84,13 +84,13 @@ export default function Produtos() {
       setUltimoLoginSensivel(Date.now());
 
       if (acaoPendente) {
-        const acao = acaoPendente;
-        setAcaoPendente(null);
+      const acao = acaoPendente;
+      setAcaoPendente(null);
 
-        setTimeout(() => {
-          acao();
-        }, 0);
-      }
+       Promise.resolve().then(() => {
+       acao();
+      });
+     }
 
     } catch {
       alert("Credenciais inválidas");
