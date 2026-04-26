@@ -194,12 +194,10 @@ export default function Produtos() {
           🔐 Fazer login para cadastrar
         </button>
 
-        {temToken() && (
-          <ProdutoForm 
-            onCreated={carregarProdutos} 
-            exigirLogin={exigirReautenticacao}
-          />
-        )}
+        <ProdutoForm 
+        onCreated={carregarProdutos} 
+        exigirLogin={exigirReautenticacao}
+      />
       </div>
 
       <input
