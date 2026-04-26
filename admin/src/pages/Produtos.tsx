@@ -318,9 +318,30 @@ const modal = {
 
 function CardMenu({ navigate }: any) {
   return (
-    <div style={{ marginBottom: 20 }}>
-      <button onClick={() => navigate("/cozinha")}>Cozinha</button>
-      <button onClick={() => navigate("/pedidos")}>Pedidos</button>
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+      <div style={{
+        background: "#000",
+        padding: 10,
+        borderRadius: 10,
+        display: "flex",
+        gap: 10,
+        flexWrap: "wrap"
+      }}>
+        <button onClick={() => navigate("/cozinha")} style={btnMenu}>🍳</button>
+        <button onClick={() => navigate("/pedidos")} style={btnMenu}>📦</button>
+        <button onClick={() => navigate("/dashboard")} style={btnMenu}>📈</button>
+        <button style={btnMenu} onClick={() => navigate("/auditoria")}>📊</button>
+      </div>
     </div>
   );
 }
+
+const btnMenu = {
+  background: "#333",
+  color: "#fff",
+  border: "none",
+  padding: "10px 12px",
+  borderRadius: 6,
+  fontSize: 16,
+  cursor: "pointer",
+};
