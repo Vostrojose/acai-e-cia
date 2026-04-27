@@ -299,10 +299,11 @@ export default function Checkout() {
             <option value="PIX">PIX</option>
           </select>
         </div>
-
+         <div className="checkout-acoes">
         <Button onClick={finalizarPedido}>
           {loading ? 'Processando...' : 'Confirmar Pedido'}
         </Button>
+        </div>
 
         {qrCode && <img src={`data:image/png;base64,${qrCode}`} />}
       </div>
