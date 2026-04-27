@@ -361,7 +361,10 @@
 }
 
 .btn-semana {
-  margin-top: 10px;
+  position: fixed;
+  top: 10px;        /* distância do topo */
+  right: 10px;      /* distância da borda direita */
+  margin-top: 0;    /* não precisa mais do margin-top */
   padding: 10px;
   border: none;
   border-radius: 8px;
@@ -369,4 +372,5 @@
   color: #fff;
   font-weight: bold;
   cursor: pointer;
+  z-index: 1000;    /* garante que fique acima de outros elementos */
 }
