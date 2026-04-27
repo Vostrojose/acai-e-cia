@@ -1,15 +1,15 @@
 import { Router } from "express";
-import { ensureAuthenticated } from "../middlewares/auth.middleware";
-import { ensureAdmin } from "../middlewares/ensureAdmin";
-import balcãoController from "../controllers/balcao.controller";
+import balcaoController from "../controllers/balcao.controller";
 
 const router = Router();
 
+/* ============================= */
+/* VENDAS BALCÃO (SEM LOGIN)     */
+/* ============================= */
+
 router.post(
   "/",
-  ensureAuthenticated,
-  ensureAdmin,
-  balcãoController.criar
+  balcaoController.criar
 );
 
 export default router;
