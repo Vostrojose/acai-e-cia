@@ -361,15 +361,22 @@
 }
 
 .btn-semana {
- position: absolute;
-  left: 0;          /* canto esquerdo */
-  background: #9a471b;
-  color: white;
+  position: absolute;
+  top: 10px;        /* distância do topo */
+  left: 10px;       /* distância da borda esquerda */
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
   border: none;
-  border-radius: 10px;
-  padding: 10px 14px;
+  background: #9a471b;
+  color: #fff;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+   transition: all 0.2s ease;
 }
+
 
