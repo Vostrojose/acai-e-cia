@@ -363,14 +363,19 @@
 .btn-semana {
   position: fixed;
   top: 10px;        /* distância do topo */
-  right: 10px;      /* distância da borda direita */
-  margin-top: 0;    /* não precisa mais do margin-top */
-  padding: 10px;
+  left: 10px;       /* muda de right para left */
+  margin-top: 0;
+  width: 50px;      /* largura fixa */
+  height: 50px;     /* altura igual à largura */
+  border-radius: 50%; /* deixa o botão redondo */
+  padding: 0;       /* remove padding extra */
   border: none;
-  border-radius: 8px;
   background: #6a1b9a;
   color: #fff;
   font-weight: bold;
   cursor: pointer;
-  z-index: 1000;    /* garante que fique acima de outros elementos */
+  z-index: 1000;
+  display: flex;    /* centraliza o conteúdo dentro do círculo */
+  align-items: center;
+  justify-content: center;
 }
