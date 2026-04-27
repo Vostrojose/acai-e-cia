@@ -80,7 +80,7 @@ export default function CardapioSemana() {
         className="btn-voltar"
         onClick={() => navigate('/')}
       >
-       ← Acesse o cardápio do dia
+       ← 📅
       </button>
 
       <h1 className="titulo-semana">
