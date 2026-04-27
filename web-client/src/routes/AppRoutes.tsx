@@ -19,7 +19,7 @@ export default function AppRoutes() {
       <Route path="/pagamento/:id" element={<Pagamento />} />
       <Route path="/acompanhamento/:id" element={<Acompanhamento />} />
       <Route path="*" element={<Home />} />
-      <Route path="/cardapio" element={<CardapioSemana />} />
+      <Route path="/cardapio-semana/:origem" element={<CardapioSemana />} />
       <Route path="/sucesso/:id" element={<Sucesso />} />
       
     </Routes>
