@@ -15,7 +15,9 @@ import { httpLogger } from "./middlewares/logger.middleware";
 import { initSocket } from "./websocket/socket";
 
 import adicionalRoutes from "./routes/adicional.routes";
-import auditoriaRoutes from "./routes/auditoria.routes"
+import auditoriaRoutes from "./routes/auditoria.routes";
+
+import balcaoRoutes from "./routes/balcao.routes";
 
 const app = express();
 
@@ -49,6 +51,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/pedidos", pedidoRoutes);
 app.use("/api/produtos", produtoRoutes);
 app.use("/api/pagamento", pagamentoRoutes);
+
+app.use("/api/balcao", balcaoRoutes);
 
 app.use("/api/adicionais", adicionalRoutes);
 app.use(express.json({ limit: '1mb' }))

@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { theme } from '../assets/styles/adminTheme'
 
+import BalcaoModal from "../components/BalcaoModal";
+
 export default function Cozinha() {
   const [pedidos, setPedidos] = useState<any[]>([])
   const [mostrarEntregues, setMostrarEntregues] = useState(false)
@@ -17,6 +19,7 @@ export default function Cozinha() {
     } catch {}
   }
 
+  const [abrirBalcao, setAbrirBalcao] = useState(false)
   /* ============================= */
   /* 🔥 WAKE LOCK (ANTI SLEEP)     */
   /* ============================= */
@@ -84,9 +87,7 @@ export default function Cozinha() {
 
     socket.on('pedido_atualizado', (pedidoAtualizado: any) => {
       setPedidos((prev) =>
-        prev.map((p) =>
-          p.id === pedidoAtualizado.id ? pedidoAtualizado : p
-        )
+        prev.map((p) => (p.id === pedidoAtualizado.id ? pedidoAtualizado : p)),
       )
     })
 
@@ -101,9 +102,7 @@ export default function Cozinha() {
 
   function ordenar(lista: any[]) {
     return [...lista].sort(
-      (a, b) =>
-        new Date(a.criadoEm).getTime() -
-        new Date(b.criadoEm).getTime()
+      (a, b) => new Date(a.criadoEm).getTime() - new Date(b.criadoEm).getTime(),
     )
   }
 
@@ -119,20 +118,18 @@ export default function Cozinha() {
     )
   }
 
-  const novos = ordenar(pedidos.filter(p => p.status === 'RECEBIDO'))
-  const preparo = ordenar(pedidos.filter(p => p.status === 'EM_PREPARO'))
-  const prontos = ordenar(pedidos.filter(p => p.status === 'PRONTO'))
+  const novos = ordenar(pedidos.filter((p) => p.status === 'RECEBIDO'))
+  const preparo = ordenar(pedidos.filter((p) => p.status === 'EM_PREPARO'))
+  const prontos = ordenar(pedidos.filter((p) => p.status === 'PRONTO'))
 
   const entregues = ordenar(
-    pedidos.filter(
-      p => p.status === 'ENTREGUE' && isHoje(p.criadoEm)
-    )
+    pedidos.filter((p) => p.status === 'ENTREGUE' && isHoje(p.criadoEm)),
   )
 
   return (
     <div style={theme.page}>
-
-      <CardMenu navigate={navigate} />
+      {/* <CardMenu navigate={navigate} /> */}
+      <CardMenu navigate={navigate} onBalcao={() => setAbrirBalcao(true)} />
 
       <div style={headerGrid}>
         <CardRelogio />
@@ -141,7 +138,11 @@ export default function Cozinha() {
         <CardStatus titulo="✅ Prontos" valor={prontos.length} cor="#43a047" />
 
         <div onClick={() => setMostrarEntregues(!mostrarEntregues)}>
-          <CardStatus titulo="📦 Entregues Hoje" valor={entregues.length} cor="#757575" />
+          <CardStatus
+            titulo="📦 Entregues Hoje"
+            valor={entregues.length}
+            cor="#757575"
+          />
         </div>
       </div>
 
@@ -166,29 +167,49 @@ export default function Cozinha() {
           </div>
         </div>
       )}
-
+      {abrirBalcao && (
+        <BalcaoModal
+          onClose={() => setAbrirBalcao(false)}
+          onSuccess={() => console.log('Venda registrada')}
+        />
+      )}
     </div>
   )
 }
 
 /* COMPONENTES */
 
-function CardMenu({ navigate }: any) {
+function CardMenu({ navigate, onBalcao }: any) {
   return (
-     <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
-      <div style={{
-        background: "#000",
-        padding: 10,
-        borderRadius: 10,
-        display: "flex",
-        gap: 10,
-        flexWrap: "wrap"
-      }}>
-         <button onClick={() => navigate("/pedidos")} style={btnMenu}>📦</button>
-         <button onClick={() => navigate("/produtos")} style={btnMenu}>🛒</button>
-         <button onClick={() => navigate("/dashboard")} style={btnMenu}>📈</button>
-         <button onClick={() => navigate("/auditoria")} style={btnMenu}>📊</button>
-         
+    <div
+      style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}
+    >
+      <div
+        style={{
+          background: '#000',
+          padding: 10,
+          borderRadius: 10,
+          display: 'flex',
+          gap: 10,
+          flexWrap: 'wrap',
+        }}
+      >
+        <button onClick={() => navigate('/pedidos')} style={btnMenu}>
+          📦
+        </button>
+        <button onClick={() => navigate('/produtos')} style={btnMenu}>
+          🛒
+        </button>
+        <button onClick={() => navigate('/dashboard')} style={btnMenu}>
+          📈
+        </button>
+        <button onClick={() => navigate('/auditoria')} style={btnMenu}>
+          📊
+        </button>
+
+        <button onClick={onBalcao} style={btnMenu}>
+          🧾 Vendas Balcão
+        </button>
       </div>
     </div>
   )
@@ -230,7 +251,6 @@ function Coluna({ titulo, pedidos }: any) {
 }
 
 function PedidoCard({ pedido }: any) {
-
   async function atualizarStatus(status: string) {
     await api.patch(`/pedidos/${pedido.id}/status`, { status })
   }
@@ -241,7 +261,7 @@ function PedidoCard({ pedido }: any) {
     const numero = pedido.telefone.replace(/\D/g, '')
 
     const mensagem = encodeURIComponent(
-      ` Pedido #${pedido.codigo}\nSeu pedido está PRONTO para retirada!`
+      ` Pedido #${pedido.codigo}\nSeu pedido está PRONTO para retirada!`,
     )
 
     window.open(`https://wa.me/55${numero}?text=${mensagem}`, '_blank')
@@ -260,9 +280,7 @@ function PedidoCard({ pedido }: any) {
           {item.adicionais?.length > 0 && (
             <div style={{ marginLeft: 10, color: '#ffcc80' }}>
               {item.adicionais.map((add: any) => (
-                <div key={add.id}>
-                  + {add.nome}
-                </div>
+                <div key={add.id}>+ {add.nome}</div>
               ))}
             </div>
           )}
@@ -270,22 +288,16 @@ function PedidoCard({ pedido }: any) {
       ))}
 
       {pedido.status === 'RECEBIDO' && (
-        <button onClick={() => atualizarStatus('EM_PREPARO')}>
-          INICIAR
-        </button>
+        <button onClick={() => atualizarStatus('EM_PREPARO')}>INICIAR</button>
       )}
 
       {pedido.status === 'EM_PREPARO' && (
-        <button onClick={() => atualizarStatus('PRONTO')}>
-          PRONTO
-        </button>
+        <button onClick={() => atualizarStatus('PRONTO')}>PRONTO</button>
       )}
 
       {pedido.status === 'PRONTO' && (
         <>
-          <button onClick={() => atualizarStatus('ENTREGUE')}>
-            ENTREGUE
-          </button>
+          <button onClick={() => atualizarStatus('ENTREGUE')}>ENTREGUE</button>
 
           {pedido.telefone && (
             <button onClick={enviarWhatsApp} style={{ marginTop: 8 }}>
@@ -304,25 +316,25 @@ const headerGrid = {
   display: 'flex',
   gap: 10,
   marginBottom: 20,
-  flexWrap: 'wrap' as const
+  flexWrap: 'wrap' as const,
 }
 
 const colunas = {
   display: 'grid',
   gridTemplateColumns: '1fr 1fr 1fr',
-  gap: 20
+  gap: 20,
 }
 const linha = {
   marginBottom: 6,
   fontSize: 15,
-};
+}
 
 const btnMenu = {
-  background: "#333",
-  color: "#fff",
-  border: "none",
-  padding: "10px 12px",
+  background: '#333',
+  color: '#fff',
+  border: 'none',
+  padding: '10px 12px',
   borderRadius: 6,
   fontSize: 16,
-  cursor: "pointer",
-};
+  cursor: 'pointer',
+}
