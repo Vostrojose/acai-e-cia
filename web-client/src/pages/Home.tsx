@@ -178,8 +178,9 @@ export default function Home() {
         <button
           className="btn-semana"
           onClick={() => navigate(`/cardapio-semana/${origem || '1'}`)}
+          title="Ver cardápio da semana" // aparece como tooltip
         >
-          📅 Ver cardápio da semana
+          📅
         </button>
       </div>
 
@@ -264,8 +265,4 @@ export default function Home() {
       )}
     </div>
   )
-  
 }
-
-
-

@@ -362,20 +362,18 @@
 
 .btn-semana {
   position: fixed;
-  top: 10px;        /* distância do topo */
-  left: 10px;       /* muda de right para left */
-  margin-top: 0;
-  width: 50px;      /* largura fixa */
-  height: 50px;     /* altura igual à largura */
-  border-radius: 50%; /* deixa o botão redondo */
-  padding: 0;       /* remove padding extra */
+  bottom: 20px;      /* canto inferior */
+  left: 20px;        /* lado esquerdo */
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
   border: none;
   background: #6a1b9a;
   color: #fff;
-  font-weight: bold;
+  font-size: 28px;   /* deixa o ícone grande */
   cursor: pointer;
-  z-index: 1000;
-  display: flex;    /* centraliza o conteúdo dentro do círculo */
+  display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1000;
 }
