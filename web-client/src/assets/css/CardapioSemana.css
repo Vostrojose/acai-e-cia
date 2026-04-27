@@ -17,12 +17,16 @@
 /* ========================= */
 
 .titulo-semana {
-    display: flex;
+  display: flex;
   align-items: center;
   justify-content: center; /* centraliza o título */
   position: relative;      /* permite posicionar o botão */
   width: 100%;
   margin-bottom: 25px;
+
+  font-size: 10px;   /* 🔽 diminui o tamanho da letra */
+  font-weight: 700;  /* mantém em negrito */
+  color: #fff;
 }
 
 /* ========================= */
