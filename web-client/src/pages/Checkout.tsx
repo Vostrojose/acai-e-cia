@@ -8,21 +8,64 @@ import '../assets/css/Checkout.css'
 export default function Checkout() {
   const { itens } = useCart()
 
+  const [coordenadas, setCoordenadas] = useState<{
+    lat: number
+    lng: number
+  } | null>(null)
+
+  const [erroLocalizacao, setErroLocalizacao] = useState<string | null>(null)
+
   const [telefone, setTelefone] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const [tipoPedido, setTipoPedido] = useState<'retirada' | 'entrega'>('retirada')
-  const [metodoPagamento, setMetodoPagamento] = useState<'PIX' | 'CHECKOUT'>('CHECKOUT')
+  const [tipoPedido, setTipoPedido] = useState<'retirada' | 'entrega'>(
+    'retirada',
+  )
+  const [metodoPagamento, setMetodoPagamento] = useState<'PIX' | 'CHECKOUT'>(
+    'CHECKOUT',
+  )
 
   const [qrCode, setQrCode] = useState<string | null>(null)
+
+  // 🔥 NOVO
+  const [foraDaArea, setForaDaArea] = useState(false)
 
   const [endereco, setEndereco] = useState({
     rua: '',
     numero: '',
     bairro: '',
     cidade: '',
-    cep: ''
+    cep: '',
   })
+
+  function capturarLocalizacao() {
+    if (!navigator.geolocation) {
+      setErroLocalizacao('Seu navegador não suporta localização')
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCoordenadas({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        })
+
+        setErroLocalizacao(null)
+
+        console.log('📍 LOCALIZAÇÃO:', pos.coords)
+      },
+      (error) => {
+        console.error('Erro localização:', error)
+        setErroLocalizacao('Não foi possível obter sua localização')
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      },
+    )
+  }
 
   async function finalizarPedido() {
     try {
@@ -39,14 +82,14 @@ export default function Checkout() {
       setLoading(true)
 
       const origemSalva = localStorage.getItem('origemPedido')
-      const origensValidas = ["QR_CODE", "APP", "ADMIN", "BALCAO"]
+      const origensValidas = ['QR_CODE', 'APP', 'ADMIN', 'BALCAO']
 
-      let origem: string = origensValidas.includes(origemSalva ?? "")
+      let origem: string = origensValidas.includes(origemSalva ?? '')
         ? (origemSalva as string)
-        : "APP"
+        : 'APP'
 
       if (window.location.pathname.includes('/m/')) {
-        origem = "QR_CODE"
+        origem = 'QR_CODE'
       }
 
       const telefoneLimpo = telefone.replace(/\D/g, '')
@@ -56,45 +99,53 @@ export default function Checkout() {
         return
       }
 
-      const enderecoString = tipoPedido === "entrega"
-        ? `${endereco.rua}, ${endereco.numero} - ${endereco.bairro}, ${endereco.cidade} - ${endereco.cep}`
-        : null
+      const enderecoString =
+        tipoPedido === 'entrega'
+          ? `${endereco.rua}, ${endereco.numero} - ${endereco.bairro}, ${endereco.cidade} - ${endereco.cep}`
+          : null
 
-      /* ============================= */
-      /* ENVIO CORRETO (NÃO MEXER)    */
-      /* ============================= */
-      /* ============================= */
-/* ENVIO CORRETO (BLINDADO)     */
-/* ============================= */
+      if (tipoPedido === 'entrega' && !coordenadas) {
+        alert('Por favor, use sua localização para entrega')
+        return
+      }
 
-const itensFormatados = itens.map((item) => {
-  const adicionaisSeguro = Array.isArray(item.adicionais)
-    ? item.adicionais
-    : []
+      const itensFormatados = itens.map((item) => {
+        const adicionaisSeguro = Array.isArray(item.adicionais)
+          ? item.adicionais
+          : []
 
-  return {
-    produtoId: item.produtoId,
-    quantidade: item.quantidade,
+        return {
+          produtoId: item.produtoId,
+          quantidade: item.quantidade,
+          adicionais: adicionaisSeguro.map((a: any) => ({
+            nome: a?.nome ?? '',
+            preco: Number(a?.preco ?? 0),
+          })),
+        }
+      })
 
-    adicionais: adicionaisSeguro.map((a: any) => ({
-      nome: a?.nome ?? '',
-      preco: Number(a?.preco ?? 0)
-    }))
-  }
-})
-
-const payload = {
-  telefone: telefoneLimpo,
-  origem,
-  endereco: enderecoString,
-  itens: itensFormatados
-}
-
-console.log('🔥 ITENS ORIGINAIS:', JSON.stringify(itens, null, 2))
-console.log('🔥 ITENS FORMATADOS:', JSON.stringify(itensFormatados, null, 2))
-console.log('📦 PAYLOAD ENVIADO:', JSON.stringify(payload, null, 2))
+      const payload = {
+        telefone: telefoneLimpo,
+        origem,
+        endereco: enderecoString,
+        itens: itensFormatados,
+        coordenadas,
+      }
 
       const pedidoResponse = await api.post('/pedidos', payload)
+
+      // 🔥 NOVO (integra backend)
+      if (pedidoResponse.data.foraDaArea) {
+        setForaDaArea(true)
+        setTipoPedido('retirada')
+
+        alert(
+          'Você está fora da área de entrega. O pedido será feito para retirada no balcão.',
+        )
+      } else {
+        setForaDaArea(false)
+      }
+
       const pedidoId = pedidoResponse?.data?.data?.id
 
       if (!pedidoId) {
@@ -102,15 +153,18 @@ console.log('📦 PAYLOAD ENVIADO:', JSON.stringify(payload, null, 2))
         return
       }
 
-      localStorage.setItem("pedidoId", pedidoId)
+      localStorage.setItem('pedidoId', pedidoId)
 
-      if (metodoPagamento === "PIX") {
+      if (metodoPagamento === 'PIX') {
         const res = await api.post('/pagamento/pix', { pedidoId })
         setQrCode(res.data.data.qr_code_base64)
         return
       }
 
-      const pagamentoResponse = await api.post('/pagamento/checkout', { pedidoId })
+      const pagamentoResponse = await api.post('/pagamento/checkout', {
+        pedidoId,
+      })
+
       const initPoint = pagamentoResponse?.data?.data?.init_point
 
       if (initPoint) {
@@ -118,54 +172,43 @@ console.log('📦 PAYLOAD ENVIADO:', JSON.stringify(payload, null, 2))
       } else {
         alert('Erro ao iniciar pagamento')
       }
-
     } catch (error: any) {
       console.error('❌ ERRO COMPLETO:', error)
-      console.error('❌ RESPONSE:', error?.response)
-      console.error('❌ DATA:', error?.response?.data)
-
       alert(error?.response?.data?.message || 'Erro ao processar pedido')
     } finally {
       setLoading(false)
     }
   }
 
-  /* ============================= */
-  /* 🔥 TOTAL CORRETO (VISUAL)     */
-  /* ============================= */
   const totalReal = itens.reduce((acc, item) => {
     const adicionaisTotal = (item.adicionais || []).reduce(
       (soma: number, add: any) => soma + Number(add.preco),
-      0
+      0,
     )
 
     const precoExibicao = Number(item.preco) + adicionaisTotal
 
-    return acc + (precoExibicao * item.quantidade)
+    return acc + precoExibicao * item.quantidade
   }, 0)
 
   return (
     <Container>
-
       <div className="checkout-container">
-
         <h1 className="checkout-title">💳 Checkout</h1>
 
         <div className="checkout-card">
           <h3>Resumo do pedido</h3>
 
-          {itens.map(item => {
-
+          {itens.map((item) => {
             const adicionaisTotal = (item.adicionais || []).reduce(
               (soma: number, add: any) => soma + Number(add.preco),
-              0
+              0,
             )
 
             const precoExibicao = Number(item.preco) + adicionaisTotal
 
             return (
               <div key={item.id} className="checkout-item">
-
                 <strong>
                   {item.quantidade}x {item.nome}
                 </strong>
@@ -176,16 +219,12 @@ console.log('📦 PAYLOAD ENVIADO:', JSON.stringify(payload, null, 2))
                   </div>
                 ))}
 
-                <div>
-                  R$ {(precoExibicao * item.quantidade).toFixed(2)}
-                </div>
-
+                <div>R$ {(precoExibicao * item.quantidade).toFixed(2)}</div>
               </div>
             )
           })}
 
           <hr />
-
           <h2>R$ {(Number(totalReal) || 0).toFixed(2)}</h2>
         </div>
 
@@ -204,11 +243,15 @@ console.log('📦 PAYLOAD ENVIADO:', JSON.stringify(payload, null, 2))
           <label>Tipo de pedido</label>
           <select
             value={tipoPedido}
-            onChange={(e) => setTipoPedido(e.target.value as 'retirada' | 'entrega')}
+            onChange={(e) =>
+              setTipoPedido(e.target.value as 'retirada' | 'entrega')
+            }
             className="checkout-select"
           >
             <option value="retirada">Retirada no local</option>
-            <option value="entrega">Entrega</option>
+            <option value="entrega" disabled={foraDaArea}>
+              Entrega
+            </option>
           </select>
         </div>
 
@@ -216,11 +259,29 @@ console.log('📦 PAYLOAD ENVIADO:', JSON.stringify(payload, null, 2))
           <div className="checkout-card">
             <label>Endereço de entrega</label>
 
-            <input className="checkout-input" placeholder="Rua" value={endereco.rua} onChange={(e) => setEndereco({ ...endereco, rua: e.target.value })} />
-            <input className="checkout-input" placeholder="Número" value={endereco.numero} onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })} />
-            <input className="checkout-input" placeholder="Bairro" value={endereco.bairro} onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })} />
-            <input className="checkout-input" placeholder="Cidade" value={endereco.cidade} onChange={(e) => setEndereco({ ...endereco, cidade: e.target.value })} />
-            <input className="checkout-input" placeholder="CEP" value={endereco.cep} onChange={(e) => setEndereco({ ...endereco, cep: e.target.value })} />
+            {foraDaArea && (
+              <p style={{ color: 'orange', fontWeight: 'bold' }}>
+                ⚠️ Fora da área de entrega. Apenas retirada disponível.
+              </p>
+            )}
+
+            {erroLocalizacao && <p style={{ color: 'red' }}>{erroLocalizacao}</p>}
+
+            <button type="button" onClick={capturarLocalizacao}>
+              📍 Usar minha localização
+            </button>
+
+            {coordenadas && (
+              <p style={{ color: 'green' }}>
+                ✔ Localização capturada com sucesso
+              </p>
+            )}
+
+            <input className="checkout-input" placeholder="Rua" />
+            <input className="checkout-input" placeholder="Número" />
+            <input className="checkout-input" placeholder="Bairro" />
+            <input className="checkout-input" placeholder="Cidade" />
+            <input className="checkout-input" placeholder="CEP" />
           </div>
         )}
 
@@ -229,7 +290,9 @@ console.log('📦 PAYLOAD ENVIADO:', JSON.stringify(payload, null, 2))
 
           <select
             value={metodoPagamento}
-            onChange={(e) => setMetodoPagamento(e.target.value as 'PIX' | 'CHECKOUT')}
+            onChange={(e) =>
+              setMetodoPagamento(e.target.value as 'PIX' | 'CHECKOUT')
+            }
             className="checkout-select"
           >
             <option value="CHECKOUT">Cartão / Mercado Pago</option>
@@ -237,21 +300,12 @@ console.log('📦 PAYLOAD ENVIADO:', JSON.stringify(payload, null, 2))
           </select>
         </div>
 
-        <div style={{ marginTop: 20 }}>
-          <Button onClick={finalizarPedido}>
-            {loading ? 'Processando...' : 'Confirmar Pedido'}
-          </Button>
-        </div>
+        <Button onClick={finalizarPedido}>
+          {loading ? 'Processando...' : 'Confirmar Pedido'}
+        </Button>
 
-        {qrCode && (
-          <div className="checkout-card checkout-qr">
-            <p>Escaneie o QR Code:</p>
-            <img src={`data:image/png;base64,${qrCode}`} alt="QR Code" />
-          </div>
-        )}
-
+        {qrCode && <img src={`data:image/png;base64,${qrCode}`} />}
       </div>
-
     </Container>
   )
 }
