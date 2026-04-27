@@ -21,7 +21,7 @@
   align-items: center;
   justify-content: center; /* centraliza o título */
   position: relative;      /* permite posicionar o botão */
-  width: 100%;
+  width: 50%;
   margin-bottom: 25px;
 }
 
