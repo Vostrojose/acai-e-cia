@@ -362,18 +362,19 @@
 
 .btn-semana {
   position: fixed;
-  bottom: 20px;      /* canto inferior */
-  left: 20px;        /* lado esquerdo */
+  top: 10px;        /* distância do topo */
+  left: 10px;       /* distância da borda esquerda */
   width: 60px;
   height: 60px;
   border-radius: 50%;
   border: none;
   background: #6a1b9a;
   color: #fff;
-  font-size: 28px;   /* deixa o ícone grande */
+  font-size: 28px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 }
+
