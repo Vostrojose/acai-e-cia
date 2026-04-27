@@ -29,6 +29,7 @@
   border-radius: 14px;
   padding: 16px;
   margin-bottom: 14px;
+  color: #fff; /* 🔽 texto branco */
 
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
@@ -48,6 +49,7 @@
 
   margin-top: 8px;
   margin-bottom: 12px;
+  color: #fff; /* 🔽 texto branco */
 
   outline: none;
   transition: border 0.2s ease;
@@ -72,6 +74,7 @@
 
   margin-top: 8px;
   margin-bottom: 12px;
+  color: #fff; /* 🔽 texto branco */
 }
 
 /* ========================= */
@@ -111,6 +114,7 @@
 
 .checkout-total {
   text-align: center;
+  color: #fff; /* 🔽 texto branco */
 }
 
 .checkout-total h2 {
