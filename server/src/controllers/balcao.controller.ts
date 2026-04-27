@@ -23,7 +23,7 @@ class BalcaoController {
           create: itens.map((item: any) => ({
             produtoId: item.id,
             quantidade: item.quantidade,
-            preco: item.preco,
+            precoUnit: item.preco,
           })),
         },
       },
