@@ -14,9 +14,6 @@ export default function Acompanhamento() {
 
   const { limparCarrinho } = useCart()
 
-  /* ============================= */
-  /* LIMPAR CARRINHO               */
-  /* ============================= */
   useEffect(() => {
     if (id) {
       try {
@@ -28,9 +25,6 @@ export default function Acompanhamento() {
     }
   }, [id, limparCarrinho])
 
-  /* ============================= */
-  /* CARREGAR PEDIDO + SOCKET      */
-  /* ============================= */
   useEffect(() => {
     if (!id) return
 
@@ -65,9 +59,6 @@ export default function Acompanhamento() {
     }
   }, [id])
 
-  /* ============================= */
-  /* AUTO SAÍDA (UX MELHORADO)     */
-  /* ============================= */
   useEffect(() => {
     if (status === 'ENTREGUE') {
       const timer = setTimeout(() => {
@@ -119,6 +110,11 @@ export default function Acompanhamento() {
 
   return (
     <div className="acompanhamento-page">
+
+      {/* 🔥 TEXTO AGORA ACIMA DO CARD */}
+      <p className="banner-texto-topo">
+        🍓 Enquanto seu pedido é preparado...
+      </p>
 
       <div className="acompanhamento-card">
 
@@ -172,15 +168,8 @@ export default function Acompanhamento() {
 
       </div>
 
-      {/* ========================= */}
-      {/* 🔥 NOVO: BANNER PROMO     */}
-      {/* ========================= */}
-
+      {/* 🔥 BANNER CONTINUA ABAIXO (INALTERADO) */}
       <div className="acompanhamento-banner">
-
-        <p className="banner-texto">
-          🍓 Enquanto seu pedido é preparado...
-        </p>
 
         <div className="banner-card">
           <strong>Aproveite!</strong>

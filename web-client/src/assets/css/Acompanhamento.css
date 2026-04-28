@@ -8,10 +8,12 @@
   background: linear-gradient(180deg, #4A148C 0%, #6A1B9A 100%);
 
   display: flex;
-  justify-content: center;
-  align-items: center;
-}
+  flex-direction: column; /* 🔥 ESSENCIAL */
+  align-items: center;     /* centraliza horizontal */
+  justify-content: flex-start; /* 🔥 começa de cima */
 
+  gap: 12px; /* 🔥 espaçamento automático entre texto/card/banner */
+}
 /* ========================= */
 /* CARD PRINCIPAL            */
 /* ========================= */
@@ -196,20 +198,26 @@
 .acompanhamento-btn-sair:active {
   transform: scale(0.97);
 }
+/* TEXTO ACIMA DO CARD */
+.banner-texto-topo {
+  text-align: center;
+  font-size: 13px;
+  opacity: 0.8; /* 🔥 melhor leitura */
+  color: #fff;
+}
 
+/* BANNER ABAIXO */
 .acompanhamento-banner {
   margin-top: 16px;
-  padding: 12px;
-  text-align: center;
+  display: flex;
+  justify-content: center;
 }
 
-.banner-texto {
-  font-size: 14px;
-  opacity: 0.8;
-  margin-bottom: 8px;
-}
-
+/* CARD DO BANNER */
 .banner-card {
+  width: 100%;
+  max-width: 420px;
+
   background: linear-gradient(135deg, #ff9800, #ffb74d);
   padding: 14px;
   border-radius: 12px;
