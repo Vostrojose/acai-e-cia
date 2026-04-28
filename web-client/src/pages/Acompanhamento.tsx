@@ -58,14 +58,21 @@ export default function Acompanhamento() {
       socket.disconnect()
     }
   }, [id])
+  const [jaVibrou, setJaVibrou] = useState(false)
 
   useEffect(() => {
-    if (status === 'ENTREGUE') {
-      const timer = setTimeout(() => {
-        window.location.href = '/m/1'
-      }, 5000)
+    if (!status || !navigator.vibrate) return
+    if (status !== 'PRONTO') return
+    if (document.visibilityState === 'visible') return
+    if (jaVibrou) return
 
-      return () => clearTimeout(timer)
+    navigator.vibrate([120, 60, 120])
+    setJaVibrou(true)
+  }, [status, jaVibrou])
+
+  useEffect(() => {
+    if (status !== 'PRONTO') {
+      setJaVibrou(false)
     }
   }, [status])
 
@@ -101,51 +108,40 @@ export default function Acompanhamento() {
   if (!pedido) {
     return (
       <div className="acompanhamento-page">
-        <p className="acompanhamento-loading">
-          Carregando pedido...
-        </p>
+        <p className="acompanhamento-loading">Carregando pedido...</p>
       </div>
     )
   }
 
   return (
     <div className="acompanhamento-page">
-
       {/* 🔥 TEXTO AGORA ACIMA DO CARD */}
-      <p className="banner-texto-topo">
-        🍓 Enquanto seu pedido é preparado...
-      </p>
+      <p className="banner-texto-topo">🍓 Enquanto seu pedido é preparado...</p>
 
       <div className="acompanhamento-card">
-
-        <h1 className="acompanhamento-title">
-          📡 Acompanhamento
-        </h1>
+        <h1 className="acompanhamento-title">📡 Acompanhamento</h1>
 
         <div className="acompanhamento-bloco">
-          <div className="acompanhamento-label">
-            Número do pedido
-          </div>
+          <div className="acompanhamento-label">Número do pedido</div>
           <div className="acompanhamento-valor">
             #{pedido.codigo?.toString().padStart(4, '0') || '----'}
           </div>
         </div>
 
         <div className="acompanhamento-bloco">
-          <div className="acompanhamento-label">
-            Total
-          </div>
+          <div className="acompanhamento-label">Total</div>
           <div className="acompanhamento-valor">
             R$ {Number(pedido.total).toFixed(2)}
           </div>
         </div>
 
         <div className="acompanhamento-bloco">
-          <div className="acompanhamento-label">
-            Status do pedido
-          </div>
+          <div className="acompanhamento-label">Status do pedido</div>
 
-          <div className={`acompanhamento-status status-${status}`}>
+          <div
+            key={status} // 🔥 ESSENCIAL para animar troca
+            className={`acompanhamento-status status-${status} fade-status`}
+          >
             {statusInfo.texto}
           </div>
         </div>
@@ -158,29 +154,20 @@ export default function Acompanhamento() {
         </div>
 
         {status === 'ENTREGUE' && (
-          <button
-            className="acompanhamento-btn-sair"
-            onClick={sairDoApp}
-          >
+          <button className="acompanhamento-btn-sair" onClick={sairDoApp}>
             🚪 Finalizar / Sair
           </button>
         )}
-
       </div>
 
       {/* 🔥 BANNER CONTINUA ABAIXO (INALTERADO) */}
       <div className="acompanhamento-banner">
-
         <div className="banner-card">
           <strong>Aproveite!</strong>
 
-          <p>
-            Adicione uma bebida gelada por apenas R$ 5,00 no balcão 😋
-          </p>
+          <p>Adicione uma bebida gelada por apenas R$ 5,00 no balcão 😋</p>
         </div>
-
       </div>
-
     </div>
   )
 }
