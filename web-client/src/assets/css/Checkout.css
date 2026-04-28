@@ -1,172 +1,41 @@
-/* ========================= */
-/* CONTAINER GERAL           */
-/* ========================= */
-
-.checkout-container {
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 16px;
-}
-
-/* ========================= */
-/* TÍTULO                    */
-/* ========================= */
-
-.checkout-title {
-  text-align: center;
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  color: rgb(83, 88, 75);
-}
-
-/* ========================= */
-/* CARDS                     */
-/* ========================= */
-
 .checkout-card {
-  background: #6A1B9A;
-  border-radius: 14px;
+  background: linear-gradient(135deg, #6A1B9A, #8e24aa);
+  border-radius: 16px;
   padding: 16px;
-  margin-bottom: 14px;
-  color: #fff; /* 🔽 texto branco */
+  margin-bottom: 16px;
+  color: #fff;
 
-  box-shadow: 0 4px 12px rgb(220, 7, 7);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
 }
-
-/* ========================= */
-/* INPUTS                    */
-/* ========================= */
 
 .checkout-input {
-  width: 100%;
-  padding: 12px;
-
-  border-radius: 10px;
-  border: 1px solid #ddd;
-
-  font-size: 16px;
-
-  margin-top: 8px;
-  margin-bottom: 12px;
-  color: #fff; /* 🔽 texto branco */
-
-  outline: none;
-  transition: border 0.2s ease;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: #fff;
 }
 
-.checkout-input:focus {
-  border-color: #6A1B9A;
+.checkout-input::placeholder {
+  color: rgba(255,255,255,0.6);
 }
-
-/* ========================= */
-/* SELECT                    */
-/* ========================= */
 
 .checkout-select {
-  width: 100%;
-  padding: 12px;
-
-  border-radius: 10px;
-  border: 1px solid #ddd;
-
-  font-size: 16px;
-
-  margin-top: 8px;
-  margin-bottom: 12px;
-  color: #fff; /* 🔽 texto branco */
-}
-
-/* ========================= */
-/* BOTÃO PRINCIPAL           */
-/* ========================= */
-.checkout-button {
-  width: 100%;
-  max-width: 400px;   /* 🔥 limita largura */
-  margin: 0 auto;     /* 🔥 centraliza */
-
-  padding: 16px;
-
-  border: none;
-  border-radius: 12px;
-
-  background: #00c853;
-  color: white;
-
-  font-size: 16px;
-  font-weight: bold;
-
-  cursor: pointer;
-
-  transition: all 0.2s ease;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.checkout-button:active {
-  transform: scale(0.98);
-}
-
-/* ========================= */
-/* TOTAL                     */
-/* ========================= */
-
-.checkout-total {
-  text-align: center;
-  color: #fff; /* 🔽 texto branco */
-}
-
-.checkout-total h2 {
-  font-size: 22px;
-  margin-top: 6px;
-}
-
-/* ========================= */
-/* QR CODE                   */
-/* ========================= */
-
-.checkout-qr {
-  text-align: center;
-}
-
-.checkout-qr img {
-  width: 100%;
-  max-width: 220px;
-  margin-top: 10px;
-}
-
-/* ========================= */
-/* MOBILE EXTRA              */
-/* ========================= */
-
-@media (max-width: 480px) {
-  .checkout-container {
-    padding: 12px;
-  }
-
-  .checkout-title {
-    font-size: 22px;
-  }
-
-  .checkout-card {
-    padding: 14px;
-  }
+  background: rgba(255,255,255,0.1);
+  color: #fff;
 }
 
 .checkout-item {
-  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
 .checkout-adicional {
   font-size: 12px;
-  color: #6A1B9A;
-  margin-left: 8px;
+  opacity: 0.8;
 }
 
 .checkout-acoes {
   margin-top: 20px;
   display: flex;
-  justify-content: center; /* 🔽 centraliza horizontalmente */
-  
+  justify-content: center;
 }

@@ -30,13 +30,12 @@ export default function Carrinho() {
             <div key={item.id} className="carrinho-card">
 
               <div className="carrinho-info">
-                <strong>{item.nome}</strong>
+                <strong className="carrinho-nome">{item.nome}</strong>
 
-                <p>
+                <p className="carrinho-preco">
                   {item.quantidade}x R$ {item.preco.toFixed(2)}
                 </p>
 
-                {/* 🔥 ADICIONAIS */}
                 {item.adicionais && item.adicionais.length > 0 && (
                   <div className="carrinho-adicionais">
                     {item.adicionais.map((add: any, index: number) => (
@@ -52,7 +51,7 @@ export default function Carrinho() {
                 className="carrinho-btn-remover"
                 onClick={() => removerItem(item.id)}
               >
-                Remover
+                ✖
               </button>
 
             </div>
@@ -89,7 +88,6 @@ export default function Carrinho() {
           </div>
         </>
       )}
-
     </div>
   )
 }
