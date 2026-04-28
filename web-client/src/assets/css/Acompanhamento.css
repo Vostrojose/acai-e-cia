@@ -13,9 +13,10 @@
 
   justify-content: flex-start;
 
-  padding-top: 12vh; /* 🔥 empurra tudo pra baixo (ajuste fino) */
+  padding-top: 18vh;
   gap: 14px;
 }
+
 /* ========================= */
 /* CARD PRINCIPAL            */
 /* ========================= */
@@ -26,12 +27,28 @@
 
   background: #fff;
   border-radius: 18px;
-
   padding: 24px;
 
   box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-
   text-align: center;
+
+  /* 🔥 ANIMAÇÃO CORRETA */
+  animation: slideUp 0.4s ease;
+}
+
+/* ========================= */
+/* ANIMAÇÃO GLOBAL           */
+/* ========================= */
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* ========================= */
@@ -81,37 +98,16 @@
   min-width: 200px;
 }
 
-/* 🎯 CORES POR STATUS */
+/* ========================= */
+/* CORES STATUS              */
+/* ========================= */
 
-.status-AGUARDANDO_PAGAMENTO {
-  background: #fff3cd;
-  color: #856404;
-}
-
-.status-RECEBIDO {
-  background: #cce5ff;
-  color: #004085;
-}
-
-.status-EM_PREPARO {
-  background: #ffeeba;
-  color: #856404;
-}
-
-.status-PRONTO {
-  background: #d4edda;
-  color: #155724;
-}
-
-.status-ENTREGUE {
-  background: #d1ecf1;
-  color: #0c5460;
-}
-
-.status-CANCELADO {
-  background: #f8d7da;
-  color: #721c24;
-}
+.status-AGUARDANDO_PAGAMENTO { background: #fff3cd; color: #856404; }
+.status-RECEBIDO { background: #cce5ff; color: #004085; }
+.status-EM_PREPARO { background: #ffeeba; color: #856404; }
+.status-PRONTO { background: #d4edda; color: #155724; }
+.status-ENTREGUE { background: #d1ecf1; color: #0c5460; }
+.status-CANCELADO { background: #f8d7da; color: #721c24; }
 
 /* ========================= */
 /* LOADING                   */
@@ -139,24 +135,6 @@
 }
 
 /* ========================= */
-/* MOBILE EXTRA              */
-/* ========================= */
-
-@media (max-width: 480px) {
-  .acompanhamento-card {
-    padding: 20px;
-  }
-
-  .acompanhamento-title {
-    font-size: 22px;
-  }
-
-  .acompanhamento-valor {
-    font-size: 16px;
-  }
-}
-
-/* ========================= */
 /* PROGRESSO                 */
 /* ========================= */
 
@@ -174,6 +152,10 @@
   background: linear-gradient(135deg, #00c853, #00e676);
   transition: width 0.4s ease;
 }
+
+/* ========================= */
+/* BOTÃO SAIR                */
+/* ========================= */
 
 .acompanhamento-btn-sair {
   margin-top: 20px;
@@ -200,22 +182,29 @@
 .acompanhamento-btn-sair:active {
   transform: scale(0.97);
 }
-/* TEXTO ACIMA DO CARD */
+
+/* ========================= */
+/* TEXTO TOPO                */
+/* ========================= */
+
 .banner-texto-topo {
   text-align: center;
-  font-size: 13px;
-  opacity: 0.8; /* 🔥 melhor leitura */
+  font-size: 16px;
+  font-weight: 600;
   color: #fff;
+  opacity: 0.9;
 }
 
-/* BANNER ABAIXO */
+/* ========================= */
+/* BANNER                    */
+/* ========================= */
+
 .acompanhamento-banner {
   margin-top: 16px;
   display: flex;
   justify-content: center;
 }
 
-/* CARD DO BANNER */
 .banner-card {
   width: 100%;
   max-width: 420px;
@@ -226,4 +215,18 @@
   color: #fff;
 
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* ========================= */
+/* MOBILE                    */
+/* ========================= */
+
+@media (max-width: 480px) {
+  .acompanhamento-title {
+    font-size: 22px;
+  }
+
+  .acompanhamento-valor {
+    font-size: 16px;
+  }
 }
