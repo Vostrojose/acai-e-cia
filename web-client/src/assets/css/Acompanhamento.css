@@ -207,7 +207,7 @@
 
 .banner-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 100%;
 
   background: linear-gradient(135deg, #ff9800, #ffb74d);
   padding: 14px;
