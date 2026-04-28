@@ -196,3 +196,24 @@
 .acompanhamento-btn-sair:active {
   transform: scale(0.97);
 }
+
+.acompanhamento-banner {
+  margin-top: 16px;
+  padding: 12px;
+  text-align: center;
+}
+
+.banner-texto {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 8px;
+}
+
+.banner-card {
+  background: linear-gradient(135deg, #ff9800, #ffb74d);
+  padding: 14px;
+  border-radius: 12px;
+  color: #fff;
+
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}

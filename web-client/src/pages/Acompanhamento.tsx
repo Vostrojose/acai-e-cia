@@ -72,15 +72,12 @@ export default function Acompanhamento() {
     if (status === 'ENTREGUE') {
       const timer = setTimeout(() => {
         window.location.href = '/m/1'
-      }, 5000) // 5 segundos
+      }, 5000)
 
       return () => clearTimeout(timer)
     }
   }, [status])
 
-  /* ============================= */
-  /* FUNÇÃO SAIR                   */
-  /* ============================= */
   function sairDoApp() {
     try {
       window.close()
@@ -89,9 +86,6 @@ export default function Acompanhamento() {
     window.location.href = '/m/1'
   }
 
-  /* ============================= */
-  /* STATUS FORMATADO              */
-  /* ============================= */
   function getStatusInfo(status: string | null) {
     switch (status) {
       case 'AGUARDANDO_PAGAMENTO':
@@ -113,9 +107,6 @@ export default function Acompanhamento() {
 
   const statusInfo = getStatusInfo(status)
 
-  /* ============================= */
-  /* LOADING                       */
-  /* ============================= */
   if (!pedido) {
     return (
       <div className="acompanhamento-page">
@@ -126,9 +117,6 @@ export default function Acompanhamento() {
     )
   }
 
-  /* ============================= */
-  /* UI                            */
-  /* ============================= */
   return (
     <div className="acompanhamento-page">
 
@@ -166,20 +154,12 @@ export default function Acompanhamento() {
           </div>
         </div>
 
-        {/* ========================= */}
-        {/* BARRA DE PROGRESSO        */}
-        {/* ========================= */}
-
         <div className="progress-container">
           <div
             className="progress-bar"
             style={{ width: `${statusInfo.progresso}%` }}
           />
         </div>
-
-        {/* ========================= */}
-        {/* BOTÃO SAIR                */}
-        {/* ========================= */}
 
         {status === 'ENTREGUE' && (
           <button
@@ -189,6 +169,26 @@ export default function Acompanhamento() {
             🚪 Finalizar / Sair
           </button>
         )}
+
+      </div>
+
+      {/* ========================= */}
+      {/* 🔥 NOVO: BANNER PROMO     */}
+      {/* ========================= */}
+
+      <div className="acompanhamento-banner">
+
+        <p className="banner-texto">
+          🍓 Enquanto seu pedido é preparado...
+        </p>
+
+        <div className="banner-card">
+          <strong>Aproveite!</strong>
+
+          <p>
+            Adicione uma bebida gelada por apenas R$ 5,00 no balcão 😋
+          </p>
+        </div>
 
       </div>
 

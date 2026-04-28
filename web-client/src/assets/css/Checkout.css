@@ -1,13 +1,13 @@
 .checkout-card {
-  background: linear-gradient(135deg, #6A1B9A, #8e24aa);
+  background: #121212; /* 🔥 preto moderno */
   border-radius: 16px;
   padding: 16px;
   margin-bottom: 16px;
   color: #fff;
 
-  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.05); /* 🔥 detalhe premium */
 }
-
 .checkout-input {
   background: rgba(255,255,255,0.1);
   border: none;
