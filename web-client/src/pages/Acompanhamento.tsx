@@ -46,10 +46,11 @@ export default function Acompanhamento() {
 
     const socket = io(socketUrl, {
       transports: ['websocket'],
+      reconnection: true,
     })
 
     socket.on('pedido_atualizado', (pedidoAtualizado: any) => {
-      if (pedidoAtualizado.id === id) {
+      if (String(pedidoAtualizado.id) === String(id)) {
         setStatus(pedidoAtualizado.status)
       }
     })
@@ -61,7 +62,8 @@ export default function Acompanhamento() {
   const [jaVibrou, setJaVibrou] = useState(false)
 
   useEffect(() => {
-    if (!status || !navigator.vibrate) return
+    if (!status) return
+    if (!('vibrate' in navigator)) return
     if (status !== 'PRONTO') return
     if (document.visibilityState === 'visible') return
     if (jaVibrou) return
