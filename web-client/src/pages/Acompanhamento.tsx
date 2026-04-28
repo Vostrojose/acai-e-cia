@@ -82,7 +82,9 @@ export default function Acompanhamento() {
     try {
       window.close()
     } catch {}
-
+    {
+      /* em produção a linha abaixo, trocar para -> navigate('/m/1') */
+    }
     window.location.href = '/m/1'
   }
 
