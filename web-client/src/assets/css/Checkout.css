@@ -1,3 +1,29 @@
+/* ========================= */
+/* CONTAINER GERAL           */
+/* ========================= */
+
+.checkout-container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* ========================= */
+/* TÍTULO                    */
+/* ========================= */
+
+.checkout-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #e0e0e0;
+}
+
+/* ========================= */
+/* CARDS (🔥 NOVO PADRÃO)    */
+/* ========================= */
+
 .checkout-card {
   background: #121212; /* 🔥 preto moderno */
   border-radius: 16px;
@@ -6,22 +32,127 @@
   color: #fff;
 
   box-shadow: 0 6px 18px rgba(0,0,0,0.5);
-  border: 1px solid rgba(255,255,255,0.05); /* 🔥 detalhe premium */
-}
-.checkout-input {
-  background: rgba(255,255,255,0.1);
-  border: none;
-  color: #fff;
+  border: 1px solid rgba(255,255,255,0.05);
+
+  backdrop-filter: blur(4px); /* 🔥 efeito premium */
 }
 
-.checkout-input::placeholder {
-  color: rgba(255,255,255,0.6);
+/* ========================= */
+/* INPUTS                    */
+/* ========================= */
+
+.checkout-input {
+  width: 100%;
+  padding: 12px;
+
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+
+  font-size: 16px;
+
+  margin-top: 8px;
+  margin-bottom: 12px;
+
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+
+  outline: none;
+  transition: all 0.2s ease;
 }
+
+.checkout-input:focus {
+  border-color: #00e676;
+}
+
+/* placeholder */
+.checkout-input::placeholder {
+  color: rgba(255,255,255,0.5);
+}
+
+/* ========================= */
+/* SELECT                    */
+/* ========================= */
 
 .checkout-select {
-  background: rgba(255,255,255,0.1);
+  width: 100%;
+  padding: 12px;
+
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+
+  font-size: 16px;
+
+  margin-top: 8px;
+  margin-bottom: 12px;
+
+  background: rgba(255,255,255,0.05);
   color: #fff;
 }
+
+/* ========================= */
+/* BOTÃO PRINCIPAL           */
+/* ========================= */
+
+.checkout-button {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+
+  padding: 16px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: linear-gradient(135deg, #00c853, #00e676);
+  color: white;
+
+  font-size: 16px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkout-button:active {
+  transform: scale(0.98);
+}
+
+/* ========================= */
+/* TOTAL                     */
+/* ========================= */
+
+.checkout-total {
+  text-align: center;
+  color: #fff;
+}
+
+.checkout-total h2 {
+  font-size: 22px;
+  margin-top: 6px;
+}
+
+/* ========================= */
+/* QR CODE                   */
+/* ========================= */
+
+.checkout-qr {
+  text-align: center;
+}
+
+.checkout-qr img {
+  width: 100%;
+  max-width: 220px;
+  margin-top: 10px;
+}
+
+/* ========================= */
+/* ITENS                     */
+/* ========================= */
 
 .checkout-item {
   display: flex;
@@ -34,8 +165,30 @@
   opacity: 0.8;
 }
 
+/* ========================= */
+/* AÇÕES                     */
+/* ========================= */
+
 .checkout-acoes {
   margin-top: 20px;
   display: flex;
   justify-content: center;
+}
+
+/* ========================= */
+/* MOBILE                    */
+/* ========================= */
+
+@media (max-width: 480px) {
+  .checkout-container {
+    padding: 12px;
+  }
+
+  .checkout-title {
+    font-size: 22px;
+  }
+
+  .checkout-card {
+    padding: 14px;
+  }
 }
