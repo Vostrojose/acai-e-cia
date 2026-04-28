@@ -31,7 +31,7 @@
   margin-bottom: 14px;
   color: #fff; /* 🔽 texto branco */
 
-  box-shadow: 0 4px 12px rgba(220, 7, 7, 0.08);
+  box-shadow: 0 4px 12px rgb(220, 7, 7);
 }
 
 /* ========================= */
