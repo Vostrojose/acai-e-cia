@@ -18,7 +18,6 @@ export default function Acompanhamento() {
     if (id) {
       try {
         limparCarrinho()
-        localStorage.removeItem('pedidoId')
       } catch (err) {
         console.warn('Erro ao limpar carrinho:', err)
       }
@@ -59,6 +58,22 @@ export default function Acompanhamento() {
       socket.disconnect()
     }
   }, [id])
+
+  // 🔥 salva status para controle do Splash
+  useEffect(() => {
+    if (status) {
+      localStorage.setItem('pedidoStatus', status)
+    }
+  }, [status])
+
+  // 🔥 remove dados quando pedido finalizar
+  useEffect(() => {
+    if (status === 'ENTREGUE' || status === 'CANCELADO') {
+      localStorage.removeItem('pedidoId')
+      localStorage.removeItem('pedidoStatus')
+    }
+  }, [status])
+
   const [jaVibrou, setJaVibrou] = useState(false)
 
   useEffect(() => {
@@ -143,7 +158,7 @@ export default function Acompanhamento() {
           <div className="acompanhamento-label">Status do pedido</div>
 
           <div
-            key={status} // 🔥 ESSENCIAL para animar troca
+            key={status}
             className={`acompanhamento-status status-${status} fade-status`}
           >
             {statusInfo.texto}
@@ -164,7 +179,6 @@ export default function Acompanhamento() {
         )}
       </div>
 
-      {/* 🔥 BANNER CONTINUA ABAIXO (INALTERADO) */}
       <div className="acompanhamento-banner">
         <div className="banner-card">
           <strong>Aproveite!</strong>
