@@ -15,8 +15,13 @@ export default function Sucesso() {
   /* ============================= */
   useEffect(() => {
     limparCarrinho()
-    localStorage.removeItem('pedidoId')
-  }, [limparCarrinho])
+
+    // 🔥 MANTER pedidoId para fluxo inteligente
+    if (id) {
+      localStorage.setItem('pedidoId', id)
+      localStorage.setItem('pedidoStatus', 'RECEBIDO')
+    }
+  }, [limparCarrinho, id])
 
   /* ============================= */
   /* 🔎 BUSCAR PEDIDO */
@@ -89,7 +94,7 @@ export default function Sucesso() {
           </button>
 
           <button
-            onClick={() => navigate('/cardapio')}
+            onClick={() => navigate('/cardapio-semana/1')}
             style={btn('#FF9800')}
           >
             📅 Cardápio da semana
