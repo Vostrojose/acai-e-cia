@@ -12,7 +12,7 @@
 }
 .splash-overlay {
   position: absolute;
-  bottom: 420px; /*  sobe os botões */
+  bottom: 320px; /*  sobe os botões */
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -28,7 +28,7 @@
   border-radius: 12px;
 
   border: 1px solid rgba(255,255,255,0.2); /*  borda leve */
-  background: rgba(0,0,0,0.5);             /*  transparência */
+  background: rgba(0,0,0,0.2);             /*  transparência */
 
   color: #fff;
   font-size: 14px;
