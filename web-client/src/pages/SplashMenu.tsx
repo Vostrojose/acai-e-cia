@@ -9,7 +9,7 @@ export default function SplashMenu() {
     const pedidoId = localStorage.getItem('pedidoId')
     const status = localStorage.getItem('pedidoStatus')
 
-    // 🔥 só redireciona se NÃO estiver finalizado
+    //  só redireciona se NÃO estiver finalizado
     if (pedidoId && status !== 'ENTREGUE') {
       navigate(`/acompanhamento/${pedidoId}`, { replace: true })
     }
@@ -31,15 +31,15 @@ export default function SplashMenu() {
 
       <div className="splash-overlay">
         <button onClick={() => navigate('/m/1')}>
-          🍓 Fazer pedido
+           Fazer pedido
         </button>
 
         <button onClick={() => navigate('/cardapio-semana/1')}>
-          📅 Cardápio da semana
+          Cardápio da semana
         </button>
 
         <button onClick={irParaAcompanhamento}>
-          📦 Acompanhar pedido
+           Acompanhar pedido
         </button>
       </div>
     </div>
