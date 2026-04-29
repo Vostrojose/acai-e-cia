@@ -10,24 +10,26 @@
   height: 100%;
   object-fit: cover;
 }
-
 .splash-overlay {
   position: absolute;
-  bottom: 40px;
+  bottom: 120px; /*  sobe os botões */
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   padding: 0 20px;
+  align-items: center;
 }
 
 .splash-overlay button {
-  padding: 16px;
-  border-radius: 12px;
+  width: 90%;              /*  não ocupa tudo */
+  max-width: 320px;        /*  limita largura */
+  padding: 12px;           /*  menor altura */
+  border-radius: 10px;
   border: none;
-  font-size: 16px;
-  font-weight: bold;
-  background: rgba(0,0,0,0.75);
+  font-size: 14px;         /*  mais elegante */
+  font-weight: 600;
+  background: rgba(0,0,0,0.65);
   color: #fff;
   backdrop-filter: blur(6px);
 }
