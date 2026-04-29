@@ -1,12 +1,12 @@
 {
   "routes": [
-    { "handle": "filesystem" },
     {
-      "src": "/index.html",
-      "headers": {
-        "Cache-Control": "no-store"
-      }
+      "src": "/(.*\\.(png|jpg|jpeg|svg|ico|webp|json))",
+      "dest": "/$1"
     },
-    { "src": "/.*", "dest": "/index.html" }
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
   ]
 }
