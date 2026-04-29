@@ -12,7 +12,7 @@
 }
 .splash-overlay {
   position: absolute;
-  bottom: 160px; /*  sobe os botões */
+  bottom: 185px; /*  sobe os botões */
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -27,14 +27,14 @@
   padding: 12px;
   border-radius: 12px;
 
-  border: 1px solid rgba(255,255,255,0.2); /* 🔥 borda leve */
-  background: rgba(0,0,0,0.5);             /* 🔥 transparência */
+  border: 1px solid rgba(255,255,255,0.2); /*  borda leve */
+  background: rgba(0,0,0,0.2);             /*  transparência */
 
   color: #fff;
   font-size: 14px;
   font-weight: 600;
 
-  backdrop-filter: blur(8px);              /* 🔥 efeito vidro */
+  backdrop-filter: blur(8px);              /*  efeito vidro */
   -webkit-backdrop-filter: blur(8px);
 
   transition: all 0.25s ease;
