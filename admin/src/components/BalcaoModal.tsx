@@ -38,13 +38,14 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           nome: produto.nome,
           preco: produto.preco,
           quantidade: 1,
+          adicionais: [], // 🔥 NOVO
         },
       ]);
     }
   }
 
   /* ============================= */
-  /* 🔢 ALTERAR QUANTIDADE         */
+  /* 🔢 ALTERAR QUANTIDADE ITEM    */
   /* ============================= */
   function alterarQuantidade(id: string, delta: number) {
     setItens((prev) =>
@@ -53,6 +54,69 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           ? { ...i, quantidade: Math.max(1, i.quantidade + delta) }
           : i
       )
+    );
+  }
+
+  /* ============================= */
+  /* ➕ TOGGLE ADICIONAL           */
+  /* ============================= */
+  function toggleAdicional(itemId: string, adicional: any) {
+    setItens((prev) =>
+      prev.map((item) => {
+        if (item.id !== itemId) return item;
+
+        const existente = item.adicionais?.find(
+          (a: any) => a.id === adicional.id
+        );
+
+        if (existente) {
+          return {
+            ...item,
+            adicionais: item.adicionais.filter(
+              (a: any) => a.id !== adicional.id
+            ),
+          };
+        }
+
+        return {
+          ...item,
+          adicionais: [
+            ...(item.adicionais || []),
+            {
+              id: adicional.id,
+              nome: adicional.nome,
+              quantidade: 1,
+            },
+          ],
+        };
+      })
+    );
+  }
+
+  /* ============================= */
+  /* 🔢 ALTERAR QTD ADICIONAL      */
+  /* ============================= */
+  function alterarQtdAdicional(
+    itemId: string,
+    adicionalId: string,
+    delta: number
+  ) {
+    setItens((prev) =>
+      prev.map((item) => {
+        if (item.id !== itemId) return item;
+
+        return {
+          ...item,
+          adicionais: item.adicionais.map((a: any) =>
+            a.id === adicionalId
+              ? {
+                  ...a,
+                  quantidade: Math.max(1, a.quantidade + delta),
+                }
+              : a
+          ),
+        };
+      })
     );
   }
 
@@ -71,7 +135,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
       });
 
       onSuccess();
-      onClose(); // 🔥 fecha automaticamente
+      onClose();
     } catch (err) {
       console.error(err);
       alert("Erro ao salvar venda");
@@ -104,6 +168,29 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                 />
 
                 {p.nome} - R$ {p.preco}
+
+                {/* 🔥 ADICIONAIS (SE EXISTIREM) */}
+                {selecionado && p.adicionais?.length > 0 && (
+                  <div style={{ marginLeft: 20 }}>
+                    {p.adicionais.map((add: any) => {
+                      const item = itens.find((i) => i.id === p.id);
+                      const ativo = item?.adicionais?.find(
+                        (a: any) => a.id === add.id
+                      );
+
+                      return (
+                        <div key={add.id}>
+                          <input
+                            type="checkbox"
+                            checked={!!ativo}
+                            onChange={() => toggleAdicional(p.id, add)}
+                          />
+                          + {add.nome}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
           })}
@@ -114,11 +201,38 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
         {itens.map((i) => (
           <div key={i.id} style={linha}>
-            {i.nome}
+            <strong>{i.nome}</strong>
 
             <button onClick={() => alterarQuantidade(i.id, -1)}>-</button>
             {i.quantidade}
             <button onClick={() => alterarQuantidade(i.id, 1)}>+</button>
+
+            {/* 🔥 ADICIONAIS SELECIONADOS */}
+            {i.adicionais?.length > 0 && (
+              <div style={{ marginLeft: 10 }}>
+                {i.adicionais.map((a: any) => (
+                  <div key={a.id}>
+                    + {a.nome}
+
+                    <button
+                      onClick={() =>
+                        alterarQtdAdicional(i.id, a.id, -1)
+                      }
+                    >
+                      -
+                    </button>
+                    {a.quantidade}
+                    <button
+                      onClick={() =>
+                        alterarQtdAdicional(i.id, a.id, 1)
+                      }
+                    >
+                      +
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ))}
 
@@ -136,7 +250,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 }
 
 /* ============================= */
-/* ESTILOS (SEPARADOS)           */
+/* ESTILOS                       */
 /* ============================= */
 
 const overlay = {
