@@ -79,7 +79,12 @@ export default function Pedidos() {
           {pedidos.map((pedido) => (
             <div key={pedido.id} style={theme.card}>
               <div style={linha}>
-               <strong>Pedido:</strong> #{pedido.codigo}
+                <strong>Pedido:</strong>{' '}
+                {pedido.origem === 'BALCAO'
+                  ? 'Balcão'
+                  : pedido.codigo
+                    ? `#${pedido.codigo}`
+                    : '—'}
               </div>
 
               <div style={linha}>
