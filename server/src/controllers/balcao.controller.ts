@@ -69,6 +69,9 @@ class BalcaoController {
       /* 🔥 VALIDAÇÃO DE CRÉDITO       */
       /* ============================= */
 
+      let creditoUsado = 0
+      let valorRestante = total
+
       if (formaFinal === 'CREDITO') {
         if (!cliente) {
           return res.status(400).json({
@@ -76,10 +79,11 @@ class BalcaoController {
           })
         }
 
-        if (Number(cliente.credito) < total) {
-          return res.status(400).json({
-            message: 'Saldo insuficiente',
-          })
+        const saldo = Number(cliente.credito)
+
+        if (saldo > 0) {
+          creditoUsado = Math.min(saldo, total)
+          valorRestante = total - creditoUsado
         }
       }
 
@@ -124,12 +128,12 @@ class BalcaoController {
       /* 🔥 DESCONTAR CRÉDITO          */
       /* ============================= */
 
-      if (formaFinal === 'CREDITO' && cliente) {
+      if (formaFinal === 'CREDITO' && cliente && creditoUsado > 0) {
         await prisma.cliente.update({
           where: { id: cliente.id },
           data: {
             credito: {
-              decrement: total,
+              decrement: creditoUsado,
             },
           },
         })
@@ -138,9 +142,11 @@ class BalcaoController {
       return res.json({
         success: true,
         data: pedido,
+        creditoUsado,
+        valorRestante,
         creditoRestante:
           formaFinal === 'CREDITO' && cliente
-            ? Number(cliente.credito) - total
+            ? Number(cliente.credito) - creditoUsado
             : null,
       })
     } catch (err) {

@@ -151,12 +151,22 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
     }
 
     try {
-      await api.post('/balcao', {
+      const res = await api.post('/balcao', {
         itens,
         forma: formaPagamento,
         clienteNome: formaPagamento !== 'PAGO' ? nomeNormalizado : null,
         pularPreparo,
       })
+
+      const { creditoUsado, valorRestante } = res.data
+
+      if (creditoUsado > 0) {
+        alert(`💳 Crédito usado: R$ ${creditoUsado.toFixed(2)}`)
+      }
+
+      if (valorRestante > 0) {
+        alert(`💵 Pagar no caixa: R$ ${valorRestante.toFixed(2)}`)
+      }
 
       onSuccess()
       onClose()
