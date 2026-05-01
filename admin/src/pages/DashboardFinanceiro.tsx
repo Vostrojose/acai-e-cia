@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { theme } from "../assets/styles/adminTheme";
 
 export default function DashboardFinanceiro() {
   const navigate = useNavigate();
@@ -24,12 +25,14 @@ export default function DashboardFinanceiro() {
   if (!data) return <p style={{ padding: 20 }}>Carregando...</p>;
 
   return (
-    <div style={{ padding: 20 }}>
+    <div style={theme.page}>
 
       {/* 🔥 MENU DE NAVEGAÇÃO */}
       <CardMenu navigate={navigate} />
 
-      <h1 style={{ marginBottom: 20 }}>📊 Financeiro</h1>
+      <h1 style={{ ...theme.title, textAlign: "center", marginBottom: 20 }}>
+        📊 Financeiro
+      </h1>
 
       {/* 🔥 CARDS */}
       <div style={grid}>
@@ -126,6 +129,7 @@ const grid: React.CSSProperties = {
   display: "flex",
   gap: 16,
   width: "100%",
+  flexWrap: "wrap",
 };
 
 /* ============================= */
