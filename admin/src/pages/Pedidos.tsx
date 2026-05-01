@@ -13,6 +13,7 @@ type ItemPedido = {
 
 type Pedido = {
   id: string
+  codigo: number
   status: string
   tipo: string
   total: number
@@ -78,7 +79,7 @@ export default function Pedidos() {
           {pedidos.map((pedido) => (
             <div key={pedido.id} style={theme.card}>
               <div style={linha}>
-                <strong>ID:</strong> {pedido.id}
+               <strong>Pedido:</strong> #{pedido.codigo}
               </div>
 
               <div style={linha}>
