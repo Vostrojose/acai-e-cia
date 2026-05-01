@@ -130,7 +130,10 @@ export default function Cozinha() {
         <CardStatus titulo="👨‍🍳 Preparo" valor={preparo.length} cor="#fb8c00" />
         <CardStatus titulo="✅ Prontos" valor={prontos.length} cor="#43a047" />
 
-        <div onClick={() => setMostrarEntregues(!mostrarEntregues)}>
+        <div
+          onClick={() => setMostrarEntregues(!mostrarEntregues)}
+          style={{ flex: 1 }}
+        >
           <CardStatus
             titulo="📦 Entregues Hoje"
             valor={entregues.length}
@@ -274,7 +277,15 @@ function CardStatus({ titulo, valor, cor }: any) {
 
       <div style={{ opacity: 0.8, fontSize: 14 }}>{titulo}</div>
 
-      <div style={{ fontSize: 26, fontWeight: 'bold', marginTop: 10 }}>
+      <div
+        style={{
+          fontSize: 26,
+          fontWeight: 'bold',
+          marginTop: 10,
+          textAlign: 'left', // 👈 move número
+          paddingLeft: 10, // 👈 ajuste fino
+        }}
+      >
         {valor}
       </div>
     </div>
