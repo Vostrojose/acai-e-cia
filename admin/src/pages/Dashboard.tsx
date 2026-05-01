@@ -15,6 +15,8 @@ export default function Dashboard() {
     tendencia: 0
   })
 
+  const [fiados, setFiados] = useState<any[]>([])
+
   useEffect(() => {
     async function carregar() {
       try {
@@ -23,6 +25,9 @@ export default function Dashboard() {
 
         const resProdutos = await api.get("/produtos")
         const listaProdutos = resProdutos.data?.data || []
+
+        const resFiados = await api.get("/pedidos/fiados")
+        setFiados(resFiados.data.data || [])
 
         const mapaProdutos: any = {}
         listaProdutos.forEach((p: any) => {
@@ -106,7 +111,18 @@ export default function Dashboard() {
     }
 
     carregar()
+
+    // 🔥 atualiza automático
+    const interval = setInterval(carregar, 10000)
+
+    return () => clearInterval(interval)
+
   }, [])
+
+  async function quitar(id: string) {
+    await api.patch(`/pedidos/${id}/pagar`)
+    setFiados((prev) => prev.filter((f) => f.id !== id))
+  }
 
   return (
     <div style={theme.page}>
@@ -118,18 +134,32 @@ export default function Dashboard() {
       </h1>
 
       <div style={grid}>
-
         <Card titulo="💰 Vendas hoje" valor={`R$ ${dados.totalHoje.toFixed(2)}`} cor="#4caf50" />
-
         <Card titulo="🔥 Produto mais vendido" valor={dados.produtoTop} cor="#ff9800" />
-
         <Card titulo="📦 Pedidos em aberto" valor={dados.pedidosAbertos} cor="#2196f3" />
-
         <Card titulo="⏱ Tempo médio" valor={`${dados.tempoMedio} min`} cor="#9c27b0" />
-
         <Card titulo="📈 Tendência" valor={`R$ ${dados.tendencia}`} cor="#f44336" />
-
       </div>
+
+      {/* 🔥 FIADOS */}
+      {fiados.length > 0 && (
+        <div style={fiadoBox}>
+          <h2>💰 Fiados em aberto</h2>
+
+          {fiados.map((f) => (
+            <div key={f.id} style={linhaFiado}>
+              <div>
+                <strong>{f.clienteNome}</strong>
+                <div>R$ {Number(f.total).toFixed(2)}</div>
+              </div>
+
+              <button style={btnQuitar} onClick={() => quitar(f.id)}>
+                ✔ Quitar
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
     </div>
   )
@@ -189,5 +219,29 @@ const btnMenu = {
   padding: "10px 12px",
   borderRadius: 6,
   fontSize: 16,
+  cursor: "pointer"
+}
+
+const fiadoBox: React.CSSProperties = {
+  marginTop: 30,
+  background: "#111",
+  padding: 20,
+  borderRadius: 12,
+  color: "#fff"
+}
+
+const linhaFiado: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginTop: 10
+}
+
+const btnQuitar: React.CSSProperties = {
+  background: "#4caf50",
+  color: "#fff",
+  border: "none",
+  padding: "8px 12px",
+  borderRadius: 6,
   cursor: "pointer"
 }
