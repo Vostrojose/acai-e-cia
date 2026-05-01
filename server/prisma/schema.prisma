@@ -2,10 +2,12 @@ generator client {
   provider = "prisma-client-js"
 }
 
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 
 model Produto {
   id            String       @id @default(uuid())
@@ -29,8 +31,9 @@ model Produto {
   atualizadoEm  DateTime     @updatedAt
 
   itensPedido   ItemPedido[]
-  adicionais    Adicional[]  // 🔥 RELAÇÃO OK
+  adicionais    Adicional[]
 }
+
 
 model Pedido {
   id                String           @id @default(uuid())
@@ -49,6 +52,15 @@ model Pedido {
   statusPagamento   StatusPagamento?
 
   origem            OrigemPedido?
+
+  // 🔥 FIADO / CRÉDITO
+  clienteNome       String?
+  formaPagamentoBalcao FormaPagamentoBalcao?
+  pago              Boolean          @default(true)
+
+  // 🔥 RELAÇÃO COM CLIENTE (CORRETO)
+  clienteId         String?
+  cliente           Cliente? @relation(fields: [clienteId], references: [id])
 
   criadoEm          DateTime         @default(now())
   atualizadoEm      DateTime         @updatedAt
@@ -73,9 +85,10 @@ model ItemPedido {
   pedido     Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
   produto    Produto @relation(fields: [produtoId], references: [id])
 
-  // 🔥 ESSENCIAL (faltava isso)
   adicionais ItemPedidoAdicional[]
 }
+
+
 
 model Adicional {
   id        String  @id @default(uuid())
@@ -89,14 +102,20 @@ model Adicional {
   criadoEm  DateTime @default(now())
 }
 
+
+
 model ItemPedidoAdicional {
   id            String  @id @default(uuid())
   nome          String
   preco         Decimal @db.Decimal(10, 2)
 
+  quantidade    Int      @default(1) // 🔥 NOVO
+
   itemPedidoId  String
   itemPedido    ItemPedido @relation(fields: [itemPedidoId], references: [id], onDelete: Cascade)
 }
+
+
 
 model Usuario {
   id       String   @id @default(uuid())
@@ -106,6 +125,8 @@ model Usuario {
   role     Role     @default(ADMIN)
   criadoEm DateTime @default(now())
 }
+
+
 
 model AuditoriaMensal {
   id          String   @id @default(uuid())
@@ -120,6 +141,8 @@ model AuditoriaMensal {
   @@unique([mes, ano])
 }
 
+
+
 enum StatusPedido {
   RECEBIDO
   EM_PREPARO
@@ -129,6 +152,8 @@ enum StatusPedido {
   AGUARDANDO_PAGAMENTO
 }
 
+
+
 enum StatusPagamento {
   PENDENTE
   APROVADO
@@ -136,9 +161,13 @@ enum StatusPagamento {
   CANCELADO
 }
 
+
+
 enum Role {
   ADMIN
 }
+
+
 
 enum TipoPedido {
   MESA
@@ -147,9 +176,31 @@ enum TipoPedido {
   ONLINE
 }
 
+
+
 enum OrigemPedido {
   QR_CODE
   APP
   ADMIN
   BALCAO
 }
+
+
+
+enum FormaPagamentoBalcao {
+  PAGO
+  FIADO
+  CREDITO
+}
+
+model Cliente {
+  id        String   @id @default(uuid())
+  nome      String   @unique
+  credito   Decimal  @db.Decimal(10, 2) @default(0)
+
+  criadoEm  DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  pedidos   Pedido[]
+}
+

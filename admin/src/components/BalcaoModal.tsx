@@ -6,6 +6,10 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   const [produtos, setProdutos] = useState<any[]>([]);
   const [itens, setItens] = useState<any[]>([]);
 
+  //  NOVOS STATES
+  const [formaPagamento, setFormaPagamento] = useState("PAGO");
+  const [clienteNome, setClienteNome] = useState("");
+
   /* ============================= */
   /* 🔍 BUSCAR PRODUTOS            */
   /* ============================= */
@@ -38,7 +42,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           nome: produto.nome,
           preco: produto.preco,
           quantidade: 1,
-          adicionais: [], // 🔥 NOVO
+          adicionais: [],
         },
       ]);
     }
@@ -85,6 +89,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
             {
               id: adicional.id,
               nome: adicional.nome,
+              preco: adicional.preco,
               quantidade: 1,
             },
           ],
@@ -129,9 +134,17 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
       return;
     }
 
+    //  VALIDAÇÃO FIADO / CRÉDITO
+    if (formaPagamento !== "PAGO" && !clienteNome) {
+      alert("Informe o nome do cliente");
+      return;
+    }
+
     try {
       await api.post("/balcao", {
         itens,
+        forma: formaPagamento,
+        clienteNome: formaPagamento !== "PAGO" ? clienteNome : null,
       });
 
       onSuccess();
@@ -154,7 +167,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           style={input}
         />
 
-        {/* 🔥 LISTA DE PRODUTOS */}
+        {/*  LISTA DE PRODUTOS */}
         <div style={{ maxHeight: 200, overflow: "auto" }}>
           {produtosFiltrados.map((p) => {
             const selecionado = itens.find((i) => i.id === p.id);
@@ -169,7 +182,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
                 {p.nome} - R$ {p.preco}
 
-                {/* 🔥 ADICIONAIS (SE EXISTIREM) */}
+                {/*  ADICIONAIS */}
                 {selecionado && p.adicionais?.length > 0 && (
                   <div style={{ marginLeft: 20 }}>
                     {p.adicionais.map((add: any) => {
@@ -196,7 +209,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           })}
         </div>
 
-        {/* 🔥 ITENS SELECIONADOS */}
+        {/*  ITENS SELECIONADOS */}
         <h3>Itens selecionados</h3>
 
         {itens.map((i) => (
@@ -207,7 +220,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
             {i.quantidade}
             <button onClick={() => alterarQuantidade(i.id, 1)}>+</button>
 
-            {/* 🔥 ADICIONAIS SELECIONADOS */}
+            {/*  ADICIONAIS SELECIONADOS */}
             {i.adicionais?.length > 0 && (
               <div style={{ marginLeft: 10 }}>
                 {i.adicionais.map((a: any) => (
@@ -236,7 +249,30 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           </div>
         ))}
 
-        {/* 🔥 AÇÕES */}
+        {/*  FORMA DE PAGAMENTO */}
+        <select
+          value={formaPagamento}
+          onChange={(e) => setFormaPagamento(e.target.value)}
+          style={{ width: "100%", padding: 10, marginTop: 10 }}
+        >
+          <option value="PAGO">💵 Pago</option>
+          <option value="FIADO">🧾 Fiado</option>
+          <option value="CREDITO">💳 Usar Crédito</option>
+        </select>
+
+        {/*  NOME DO CLIENTE */}
+        {formaPagamento !== "PAGO" && (
+          <input
+            placeholder="Nome do cliente"
+            value={clienteNome}
+            onChange={(e) =>
+              setClienteNome(e.target.value.toUpperCase().trim())
+            }
+            style={input}
+          />
+        )}
+
+        {/*  AÇÕES */}
         <button onClick={salvar} style={btn}>
           💾 Salvar venda
         </button>

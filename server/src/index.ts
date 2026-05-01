@@ -16,52 +16,55 @@ import { initSocket } from "./websocket/socket";
 
 import adicionalRoutes from "./routes/adicional.routes";
 import auditoriaRoutes from "./routes/auditoria.routes";
-
 import balcaoRoutes from "./routes/balcao.routes";
+import clienteRoutes from "./routes/cliente.routes";
+import dashboardRoutes from "./routes/dashboard.routes";
 
 const app = express();
 
 /* =================================
    MIDDLEWARES GLOBAIS
 ================================= */
-app.use(
-  cors({
-    origin: [
-      "https://pedido.acaiecompanhia.com.br",
-      "https://admin.acaiecompanhia.com.br",
-      "http://localhost:5173",
-      "http://127.0.0.1:5173",
-    ],
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
 
-// ✅ CORRETO: fora do app.use
-app.options('*', cors());
+const corsOptions = {
+  origin: [
+    "https://pedido.acaiecompanhia.com.br",
+    "https://admin.acaiecompanhia.com.br",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+  ],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
 
-app.use(express.json());
+app.use(cors(corsOptions));
+
+// 🔥 preflight usando MESMA config
+app.options("*", cors(corsOptions));
+
+app.use(express.json({ limit: "1mb" }));
 app.use(httpLogger);
 
 /* =================================
    ROTAS PRINCIPAIS
 ================================= */
+
 app.use("/api/auth", authRoutes);
 app.use("/api/pedidos", pedidoRoutes);
 app.use("/api/produtos", produtoRoutes);
 app.use("/api/pagamento", pagamentoRoutes);
 
 app.use("/api/balcao", balcaoRoutes);
-
+app.use("/api/dashboard-financeiro", dashboardRoutes);
+app.use("/api/clientes", clienteRoutes);
 app.use("/api/adicionais", adicionalRoutes);
-app.use(express.json({ limit: '1mb' }))
-
-
+app.use("/api/auditoria", auditoriaRoutes);
 
 /* =================================
    HEALTH CHECK
 ================================= */
+
 app.get("/", (req, res) => {
   return res.json({
     message: "API Açaí & Cia funcionando corretamente! 🚀",
@@ -69,27 +72,28 @@ app.get("/", (req, res) => {
 });
 
 /* =================================
-   MIDDLEWARE DE ERRO
+   MIDDLEWARE DE ERRO (SEMPRE ÚLTIMO)
 ================================= */
-app.use(errorMiddleware);
 
-app.use("/api/auditoria", auditoriaRoutes)
+app.use(errorMiddleware);
 
 /* =================================
    SERVIDOR HTTP
 ================================= */
+
 const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 
 /* =================================
    WEBSOCKET
 ================================= */
+
 initSocket(server);
 
 /* =================================
    INICIAR SERVIDOR
 ================================= */
+
 server.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
-

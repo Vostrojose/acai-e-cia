@@ -1,39 +1,151 @@
-import { Request, Response } from "express";
-import prisma from "../lib/prisma";
+import { Request, Response } from 'express'
+import prisma from '../lib/prisma'
 
 class BalcaoController {
   async criar(req: Request, res: Response) {
-    const { itens } = req.body;
+    try {
+      const { itens, forma, clienteNome } = req.body
 
-    if (!itens || itens.length === 0) {
-      return res.status(400).json({ message: "Itens obrigatórios" });
-    }
+      const clienteNomeNormalizado = clienteNome
+        ? clienteNome.toUpperCase().trim()
+        : null
 
-    const total = itens.reduce(
-      (acc: number, item: any) => acc + item.preco * item.quantidade,
-      0
-    );
+      const formaFinal = forma || 'PAGO'
+      const pago = formaFinal !== 'FIADO'
 
-    const pedido = await prisma.pedido.create({
-      data: {
-        origem: "BALCAO",
-        status: "ENTREGUE",
-        total,
-        itens: {
-          create: itens.map((item: any) => ({
-            produtoId: item.id,
-            quantidade: item.quantidade,
-            precoUnit: item.preco,
-          })),
+      if (!itens || itens.length === 0) {
+        return res.status(400).json({ message: 'Itens obrigatórios' })
+      }
+
+      if (
+        (formaFinal === 'FIADO' || formaFinal === 'CREDITO') &&
+        !clienteNome
+      ) {
+        return res.status(400).json({
+          message: 'Nome do cliente obrigatório',
+        })
+      }
+
+      /* ============================= */
+      /* 🔥 BUSCAR OU CRIAR CLIENTE    */
+      /* ============================= */
+
+      let cliente: any = null
+
+      if (clienteNomeNormalizado) {
+        cliente = await prisma.cliente.upsert({
+          where: { nome: clienteNomeNormalizado },
+          update: {},
+          create: {
+            nome: clienteNomeNormalizado,
+          },
+        })
+      }
+
+      /* ============================= */
+      /* 🔥 CÁLCULO TOTAL              */
+      /* ============================= */
+
+      const total = itens.reduce((acc: number, item: any) => {
+        const quantidadeItem = item.quantidade || 1
+
+        const totalItem = item.preco * quantidadeItem
+
+        const totalAdicionais = (item.adicionais || []).reduce(
+          (aAcc: number, a: any) => {
+            const qtdAdicional = a.quantidade || 1
+
+            return aAcc + (a.preco || 0) * qtdAdicional * quantidadeItem
+          },
+          0,
+        )
+
+        return acc + totalItem + totalAdicionais
+      }, 0)
+
+      /* ============================= */
+      /* 🔥 VALIDAÇÃO DE CRÉDITO       */
+      /* ============================= */
+
+      if (formaFinal === 'CREDITO') {
+        if (!cliente) {
+          return res.status(400).json({
+            message: 'Cliente não encontrado',
+          })
+        }
+
+        if (Number(cliente.credito) < total) {
+          return res.status(400).json({
+            message: 'Saldo insuficiente',
+          })
+        }
+      }
+
+      /* ============================= */
+      /* 🔥 CRIA PEDIDO                */
+      /* ============================= */
+
+      const pedido = await prisma.pedido.create({
+        data: {
+          origem: 'BALCAO',
+          status: 'RECEBIDO',
+
+          clienteNome: clienteNomeNormalizado,
+          clienteId: cliente?.id,
+
+          formaPagamentoBalcao: formaFinal,
+          pago: formaFinal !== 'FIADO',
+
+          total: total,
+
+          itens: {
+            create: itens.map((item: any) => ({
+              produtoId: item.id,
+              quantidade: item.quantidade || 1,
+              precoUnit: item.preco,
+
+              adicionais: {
+                create: (item.adicionais || []).map((a: any) => ({
+                  nome: a.nome,
+                  preco: a.preco,
+                  quantidade: a.quantidade || 1,
+                })),
+              },
+            })),
+          },
         },
-      },
-    });
+      })
 
-    return res.json({
-      success: true,
-      data: pedido,
-    });
+      /* ============================= */
+      /* 🔥 DESCONTAR CRÉDITO          */
+      /* ============================= */
+
+      if (formaFinal === 'CREDITO' && cliente) {
+        await prisma.cliente.update({
+          where: { id: cliente.id },
+          data: {
+            credito: {
+              decrement: total,
+            },
+          },
+        })
+      }
+
+      return res.json({
+        success: true,
+        data: pedido,
+        creditoRestante:
+          formaFinal === 'CREDITO' && cliente
+            ? Number(cliente.credito) - total
+            : null,
+      })
+    } catch (err) {
+      console.error('Erro no balcão:', err)
+      return res.status(500).json({
+        message: 'Erro ao criar pedido',
+      })
+    }
   }
 }
 
-export default new BalcaoController();
+export default new BalcaoController()

@@ -6,17 +6,20 @@ import Pedidos from '../pages/Pedidos'
 import Cozinha from '../pages/Cozinha'
 import Auditoria from '../pages/Auditoria'
 import Login from '../pages/Login'
-import ChangePassword from "../pages/ChangePassword";
+import ChangePassword from '../pages/ChangePassword'
+import Clientes from '../pages/Clientes'
+import DashboardFinanceiro from '../pages/DashboardFinanceiro'
 
-// 🔥 NOVA TELA DE ADICIONAIS
+//  NOVA TELA DE ADICIONAIS
 import Adicionais from '../pages/Adicionais'
 
 import PrivateRoute from './PrivateRoute'
 
+import Fiados from '../pages/Fiados'
+
 export default function AppRoutes() {
   return (
     <Routes>
-
       {/* ========================= */}
       {/* LOGIN (PÚBLICO)          */}
       {/* ========================= */}
@@ -58,7 +61,7 @@ export default function AppRoutes() {
         }
       />
 
-      {/* 🔥 NOVA ROTA ADICIONAIS */}
+      {/*  NOVA ROTA ADICIONAIS */}
       <Route
         path="/produtos/:id/adicionais"
         element={
@@ -76,6 +79,15 @@ export default function AppRoutes() {
         element={
           <PrivateRoute>
             <Pedidos />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/fiados"
+        element={
+          <PrivateRoute>
+            <Fiados />
           </PrivateRoute>
         }
       />
@@ -104,8 +116,25 @@ export default function AppRoutes() {
         }
       />
 
-      <Route path="/change-password" element={<ChangePassword />} />
+      <Route
+        path="/clientes"
+        element={
+          <PrivateRoute>
+            <Clientes />
+          </PrivateRoute>
+        }
+      />
 
+      <Route
+        path="/financeiro"
+        element={
+          <PrivateRoute>
+            <DashboardFinanceiro />
+          </PrivateRoute>
+        }
+      />
+
+      <Route path="/change-password" element={<ChangePassword />} />
     </Routes>
   )
 }
