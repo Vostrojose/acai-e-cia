@@ -1,41 +1,41 @@
-import { useEffect, useState } from "react";
-import api from "../services/api";
+import { useEffect, useState } from 'react'
+import api from '../services/api'
 
 export default function BalcaoModal({ onClose, onSuccess }: any) {
-  const [busca, setBusca] = useState("");
-  const [produtos, setProdutos] = useState<any[]>([]);
-  const [itens, setItens] = useState<any[]>([]);
+  const [busca, setBusca] = useState('')
+  const [produtos, setProdutos] = useState<any[]>([])
+  const [itens, setItens] = useState<any[]>([])
 
-  const [formaPagamento, setFormaPagamento] = useState("PAGO");
-  const [clienteNome, setClienteNome] = useState("");
+  const [formaPagamento, setFormaPagamento] = useState('PAGO')
+  const [clienteNome, setClienteNome] = useState('')
 
   // 🔥 NOVO (opcional - não quebra nada)
-  const [pularPreparo, setPularPreparo] = useState(false);
+  const [pularPreparo, setPularPreparo] = useState(false)
 
   /* ============================= */
   /* 🔍 BUSCAR PRODUTOS            */
   /* ============================= */
   useEffect(() => {
     async function carregar() {
-      const res = await api.get("/produtos");
-      setProdutos(res.data.data || []);
+      const res = await api.get('/produtos')
+      setProdutos(res.data.data || [])
     }
 
-    carregar();
-  }, []);
+    carregar()
+  }, [])
 
   const produtosFiltrados = produtos.filter((p) =>
-    p.nome.toLowerCase().includes(busca.toLowerCase())
-  );
+    p.nome.toLowerCase().includes(busca.toLowerCase()),
+  )
 
   /* ============================= */
   /* ➕ SELECIONAR ITEM            */
   /* ============================= */
   function toggleItem(produto: any) {
-    const existente = itens.find((i) => i.id === produto.id);
+    const existente = itens.find((i) => i.id === produto.id)
 
     if (existente) {
-      setItens(itens.filter((i) => i.id !== produto.id));
+      setItens(itens.filter((i) => i.id !== produto.id))
     } else {
       setItens([
         ...itens,
@@ -46,7 +46,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           quantidade: 1,
           adicionais: [],
         },
-      ]);
+      ])
     }
   }
 
@@ -58,9 +58,9 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
       prev.map((i) =>
         i.id === id
           ? { ...i, quantidade: Math.max(1, (i.quantidade || 1) + delta) }
-          : i
-      )
-    );
+          : i,
+      ),
+    )
   }
 
   /* ============================= */
@@ -69,19 +69,19 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   function toggleAdicional(itemId: string, adicional: any) {
     setItens((prev) =>
       prev.map((item) => {
-        if (item.id !== itemId) return item;
+        if (item.id !== itemId) return item
 
         const existente = item.adicionais?.find(
-          (a: any) => a.id === adicional.id
-        );
+          (a: any) => a.id === adicional.id,
+        )
 
         if (existente) {
           return {
             ...item,
             adicionais: item.adicionais.filter(
-              (a: any) => a.id !== adicional.id
+              (a: any) => a.id !== adicional.id,
             ),
-          };
+          }
         }
 
         return {
@@ -95,9 +95,9 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
               quantidade: 1,
             },
           ],
-        };
-      })
-    );
+        }
+      }),
+    )
   }
 
   /* ============================= */
@@ -106,11 +106,11 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   function alterarQtdAdicional(
     itemId: string,
     adicionalId: string,
-    delta: number
+    delta: number,
   ) {
     setItens((prev) =>
       prev.map((item) => {
-        if (item.id !== itemId) return item;
+        if (item.id !== itemId) return item
 
         return {
           ...item,
@@ -120,11 +120,11 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                   ...a,
                   quantidade: Math.max(1, (a.quantidade || 1) + delta),
                 }
-              : a
+              : a,
           ),
-        };
-      })
-    );
+        }
+      }),
+    )
   }
 
   /* ============================= */
@@ -132,32 +132,32 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   /* ============================= */
   async function salvar() {
     if (itens.length === 0) {
-      alert("Selecione pelo menos um item");
-      return;
+      alert('Selecione pelo menos um item')
+      return
     }
 
     const nomeNormalizado = clienteNome
       ? clienteNome.toUpperCase().trim()
-      : null;
+      : null
 
-    if (formaPagamento !== "PAGO" && !nomeNormalizado) {
-      alert("Informe o nome do cliente");
-      return;
+    if (formaPagamento !== 'PAGO' && !nomeNormalizado) {
+      alert('Informe o nome do cliente')
+      return
     }
 
     try {
-      await api.post("/balcao", {
+      await api.post('/balcao', {
         itens,
         forma: formaPagamento,
-        clienteNome: formaPagamento !== "PAGO" ? nomeNormalizado : null,
+        clienteNome: formaPagamento !== 'PAGO' ? nomeNormalizado : null,
         pularPreparo, // 🔥 opcional (backend já suporta)
-      });
+      })
 
-      onSuccess();
-      onClose();
+      onSuccess()
+      onClose()
     } catch (err) {
-      console.error(err);
-      alert("Erro ao salvar venda");
+      console.error(err)
+      alert('Erro ao salvar venda')
     }
   }
 
@@ -174,9 +174,9 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
         />
 
         {/* PRODUTOS */}
-        <div style={{ maxHeight: 200, overflow: "auto" }}>
+        <div style={{ maxHeight: 200, overflow: 'auto' }}>
           {produtosFiltrados.map((p) => {
-            const selecionado = itens.find((i) => i.id === p.id);
+            const selecionado = itens.find((i) => i.id === p.id)
 
             return (
               <div key={p.id} style={linha}>
@@ -185,17 +185,15 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                   checked={!!selecionado}
                   onChange={() => toggleItem(p)}
                 />
-
                 {p.nome} - R$ {p.preco}
-
                 {/* ADICIONAIS */}
                 {selecionado && p.adicionais?.length > 0 && (
                   <div style={{ marginLeft: 20 }}>
                     {p.adicionais.map((add: any) => {
-                      const item = itens.find((i) => i.id === p.id);
+                      const item = itens.find((i) => i.id === p.id)
                       const ativo = item?.adicionais?.find(
-                        (a: any) => a.id === add.id
-                      );
+                        (a: any) => a.id === add.id,
+                      )
 
                       return (
                         <div key={add.id}>
@@ -206,12 +204,12 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                           />
                           + {add.nome}
                         </div>
-                      );
+                      )
                     })}
                   </div>
                 )}
               </div>
-            );
+            )
           })}
         </div>
 
@@ -222,31 +220,64 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           <div key={i.id} style={linha}>
             <strong>{i.nome}</strong>
 
-            <button onClick={() => alterarQuantidade(i.id, -1)}>-</button>
-            {i.quantidade}
-            <button onClick={() => alterarQuantidade(i.id, 1)}>+</button>
+            <div
+              style={{ display: 'flex', alignItems: 'center', marginTop: 5 }}
+            >
+              <button
+                style={btnTouch}
+                onClick={() => alterarQuantidade(i.id, -1)}
+              >
+                −
+              </button>
+
+              <span style={{ fontSize: 18, minWidth: 30, textAlign: 'center' }}>
+                {i.quantidade}
+              </span>
+
+              <button
+                style={btnTouch}
+                onClick={() => alterarQuantidade(i.id, 1)}
+              >
+                +
+              </button>
+            </div>
 
             {i.adicionais?.length > 0 && (
               <div style={{ marginLeft: 10 }}>
                 {i.adicionais.map((a: any) => (
                   <div key={a.id}>
                     + {a.nome}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        marginTop: 5,
+                      }}
+                    >
+                      <button
+                        style={btnTouch}
+                        onClick={() => alterarQtdAdicional(i.id, a.id, -1)}
+                      >
+                        −
+                      </button>
 
-                    <button
-                      onClick={() =>
-                        alterarQtdAdicional(i.id, a.id, -1)
-                      }
-                    >
-                      -
-                    </button>
-                    {a.quantidade}
-                    <button
-                      onClick={() =>
-                        alterarQtdAdicional(i.id, a.id, 1)
-                      }
-                    >
-                      +
-                    </button>
+                      <span
+                        style={{
+                          fontSize: 16,
+                          minWidth: 30,
+                          textAlign: 'center',
+                        }}
+                      >
+                        {a.quantidade}
+                      </span>
+
+                      <button
+                        style={btnTouch}
+                        onClick={() => alterarQtdAdicional(i.id, a.id, 1)}
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -258,7 +289,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
         <select
           value={formaPagamento}
           onChange={(e) => setFormaPagamento(e.target.value)}
-          style={{ width: "100%", padding: 10, marginTop: 10 }}
+          style={{ width: '100%', padding: 10, marginTop: 10 }}
         >
           <option value="PAGO">💵 Pago</option>
           <option value="FIADO">🧾 Fiado</option>
@@ -266,7 +297,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
         </select>
 
         {/* NOME */}
-        {formaPagamento !== "PAGO" && (
+        {formaPagamento !== 'PAGO' && (
           <input
             placeholder="Nome do cliente"
             value={clienteNome}
@@ -278,7 +309,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
         )}
 
         {/* 🔥 NOVO (OPCIONAL) */}
-        <label style={{ marginTop: 10, display: "block" }}>
+        <label style={{ marginTop: 10, display: 'block' }}>
           <input
             type="checkbox"
             checked={pularPreparo}
@@ -296,7 +327,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
         </button>
       </div>
     </div>
-  );
+  )
 }
 
 /* ============================= */
@@ -304,44 +335,56 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 /* ============================= */
 
 const overlay = {
-  position: "fixed" as const,
+  position: 'fixed' as const,
   inset: 0,
-  background: "rgba(0,0,0,0.8)",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-};
+  background: 'rgba(0,0,0,0.8)',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+}
 
 const modal = {
-  background: "#111",
+  background: '#111',
   padding: 20,
   borderRadius: 10,
   width: 400,
-  color: "#fff",
-};
+  color: '#fff',
+}
 
 const input = {
-  width: "100%",
+  width: '100%',
   padding: 10,
   marginBottom: 10,
-};
+}
 
 const linha = {
   marginBottom: 8,
-};
+}
 
 const btn = {
-  background: "#4caf50",
-  color: "#fff",
+  background: '#4caf50',
+  color: '#fff',
   padding: 10,
   marginTop: 10,
-  border: "none",
-};
+  border: 'none',
+}
 
 const btnDanger = {
-  background: "#e53935",
-  color: "#fff",
+  background: '#e53935',
+  color: '#fff',
   padding: 10,
   marginTop: 10,
+  border: 'none',
+}
+
+const btnTouch = {
+  width: 50,
+  height: 50,
+  fontSize: 22,
+  borderRadius: 10,
   border: "none",
+  margin: "0 8px",
+  cursor: "pointer",
+  background: "#222",
+  color: "#fff",
 };
