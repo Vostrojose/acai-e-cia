@@ -103,10 +103,31 @@ export default function Acompanhamento() {
     window.location.href = '/m/1'
   }
 
+  async function cancelarPedido() {
+    const confirmar = window.confirm(
+      'Deseja cancelar o pedido?\n\nSe o pagamento falhou, você pode tentar novamente.',
+    )
+
+    if (!confirmar) return
+
+    try {
+      await api.patch(`/pedidos/${id}/status`, {
+        status: 'CANCELADO',
+      })
+
+      localStorage.removeItem('pedidoId')
+      localStorage.removeItem('pedidoStatus')
+
+      window.location.href = '/m/1'
+    } catch (err) {
+      alert('Erro ao cancelar pedido')
+    }
+  }
+
   function getStatusInfo(status: string | null) {
     switch (status) {
       case 'AGUARDANDO_PAGAMENTO':
-        return { texto: 'Aguardando pagamento 💳', progresso: 10 }
+        return { texto: 'Pagamento não confirmado 💳', progresso: 10 }
       case 'RECEBIDO':
         return { texto: 'Pedido recebido 📥', progresso: 30 }
       case 'EM_PREPARO':
@@ -171,7 +192,19 @@ export default function Acompanhamento() {
             style={{ width: `${statusInfo.progresso}%` }}
           />
         </div>
-
+        {status === 'AGUARDANDO_PAGAMENTO' && (
+          <button
+            className="acompanhamento-btn-cancelar"
+            onClick={cancelarPedido}
+          >
+            ❌ Cancelar e refazer
+          </button>
+        )}
+        {status === 'AGUARDANDO_PAGAMENTO' && (
+          <p style={{ fontSize: 12, opacity: 0.7, marginTop: 8 }}>
+            Se o pagamento falhou, cancele e tente novamente.
+          </p>
+        )}
         {status === 'ENTREGUE' && (
           <button className="acompanhamento-btn-sair" onClick={sairDoApp}>
             🚪 Finalizar / Sair
