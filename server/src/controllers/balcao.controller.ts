@@ -4,7 +4,9 @@ import prisma from '../lib/prisma'
 class BalcaoController {
   async criar(req: Request, res: Response) {
     try {
-      const { itens, forma, clienteNome } = req.body
+      /*const { itens, forma, clienteNome } = req.body*/ /*se a cozinha crescer usar este para fluxo completo de pedidos*/
+
+      const { itens, forma, clienteNome, pularPreparo } = req.body
 
       const clienteNomeNormalizado = clienteNome
         ? clienteNome.toUpperCase().trim()
@@ -88,7 +90,9 @@ class BalcaoController {
       const pedido = await prisma.pedido.create({
         data: {
           origem: 'BALCAO',
-          status: 'RECEBIDO',
+          status: pularPreparo
+            ? 'PRONTO'
+            : 'RECEBIDO' /*  aqui tambem para cozinha grandestatus: 'RECEBIDO', */,
 
           clienteNome: clienteNomeNormalizado,
           clienteId: cliente?.id,
