@@ -197,60 +197,61 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                   </pre>
                 )}
                 {/* 🔥 ADICIONAIS */}
-                {selecionado && p.adicionais?.length > 0 && (
-                  <div style={{ marginLeft: 20, marginTop: 5 }}>
-                    {p.adicionais.map((add: any) => {
-                      const item = itens.find((i) => i.id === p.id)
-                      const ativo = item?.adicionais?.find(
-                        (a: any) => a.id === add.id,
-                      )
+                {itens.some((i) => i.id === p.id) &&
+                  p.adicionais?.length > 0 && (
+                    <div style={{ marginLeft: 20, marginTop: 5 }}>
+                      {p.adicionais.map((add: any) => {
+                        const item = itens.find((i) => i.id === p.id)
+                        const ativo = item?.adicionais?.find(
+                          (a: any) => a.id === add.id,
+                        )
 
-                      return (
-                        <div key={add.id} style={{ marginTop: 4 }}>
-                          <input
-                            type="checkbox"
-                            checked={!!ativo}
-                            onChange={() => toggleAdicional(p.id, add)}
-                          />
-                          + {add.nome} (R$ {add.preco})
-                          {ativo && (
-                            <div
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                marginTop: 4,
-                              }}
-                            >
-                              <button
-                                style={btnTouch}
-                                onClick={() =>
-                                  alterarQtdAdicional(p.id, add.id, -1)
-                                }
+                        return (
+                          <div key={add.id} style={{ marginTop: 4 }}>
+                            <input
+                              type="checkbox"
+                              checked={!!ativo}
+                              onChange={() => toggleAdicional(p.id, add)}
+                            />
+                            + {add.nome} (R$ {add.preco})
+                            {ativo && (
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  marginTop: 4,
+                                }}
                               >
-                                −
-                              </button>
+                                <button
+                                  style={btnTouch}
+                                  onClick={() =>
+                                    alterarQtdAdicional(p.id, add.id, -1)
+                                  }
+                                >
+                                  −
+                                </button>
 
-                              <span
-                                style={{ minWidth: 30, textAlign: 'center' }}
-                              >
-                                {ativo.quantidade}
-                              </span>
+                                <span
+                                  style={{ minWidth: 30, textAlign: 'center' }}
+                                >
+                                  {ativo.quantidade}
+                                </span>
 
-                              <button
-                                style={btnTouch}
-                                onClick={() =>
-                                  alterarQtdAdicional(p.id, add.id, 1)
-                                }
-                              >
-                                +
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
+                                <button
+                                  style={btnTouch}
+                                  onClick={() =>
+                                    alterarQtdAdicional(p.id, add.id, 1)
+                                  }
+                                >
+                                  +
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
               </div>
             )
           })}
