@@ -20,9 +20,7 @@ export default function Cozinha() {
   }
 
   const [abrirBalcao, setAbrirBalcao] = useState(false)
-  /* ============================= */
-  /* 🔥 WAKE LOCK (ANTI SLEEP)     */
-  /* ============================= */
+
   useEffect(() => {
     let wakeLock: any = null
 
@@ -30,7 +28,6 @@ export default function Cozinha() {
       try {
         if ('wakeLock' in navigator) {
           wakeLock = await (navigator as any).wakeLock.request('screen')
-          console.log('🔒 Wake Lock ativo')
         }
       } catch {}
     }
@@ -48,9 +45,6 @@ export default function Cozinha() {
     }
   }, [])
 
-  /* ============================= */
-  /* 🔥 SOCKET + FALLBACK          */
-  /* ============================= */
   useEffect((): (() => void) => {
     const socket = io('https://api.acaiecompanhia.com.br', {
       transports: ['websocket'],
@@ -91,7 +85,6 @@ export default function Cozinha() {
       )
     })
 
-    /* 🔥 FALLBACK (GARANTE ATUALIZAÇÃO) */
     const intervalo = setInterval(carregarPedidos, 10000)
 
     return () => {
@@ -128,7 +121,6 @@ export default function Cozinha() {
 
   return (
     <div style={theme.page}>
-      {/* <CardMenu navigate={navigate} /> */}
       <CardMenu navigate={navigate} onBalcao={() => setAbrirBalcao(true)} />
 
       <div style={headerGrid}>
@@ -167,6 +159,7 @@ export default function Cozinha() {
           </div>
         </div>
       )}
+
       {abrirBalcao && (
         <BalcaoModal
           onClose={() => setAbrirBalcao(false)}
@@ -177,78 +170,51 @@ export default function Cozinha() {
   )
 }
 
-/* COMPONENTES */
+/* ============================= */
+/* 🔥 CARD STATUS NOVO ESTILO    */
+/* ============================= */
 
-function CardMenu({ navigate, onBalcao }: any) {
+function CardStatus({ titulo, valor, cor }: any) {
   return (
     <div
-      style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}
+      style={{
+        flex: 1,
+        background: "linear-gradient(135deg, #1e1e1e, #2a2a2a)",
+        padding: 20,
+        borderRadius: 16,
+        color: "#fff",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+        border: `1px solid ${cor}`,
+        position: "relative",
+        textAlign: "center",
+        minWidth: 120,
+      }}
     >
       <div
         style={{
-          background: '#000',
-          padding: 10,
-          borderRadius: 10,
-          display: 'flex',
-          gap: 10,
-          flexWrap: 'wrap',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 4,
+          background: cor,
+          borderTopLeftRadius: 16,
+          borderTopRightRadius: 16,
         }}
-      >
-        <button onClick={() => navigate('/pedidos')} style={btnMenu}>
-          📦
-        </button>
-        <button onClick={() => navigate('/produtos')} style={btnMenu}>
-          🛒
-        </button>
-        <button onClick={() => navigate('/dashboard')} style={btnMenu}>
-          📈
-        </button>
-        <button onClick={() => navigate('/auditoria')} style={btnMenu}>
-          📊
-        </button>
+      />
 
-        <button onClick={onBalcao} style={btnMenu}>
-          🧾 Vendas Balcão
-        </button>
+      <div style={{ opacity: 0.8, fontSize: 14 }}>{titulo}</div>
+
+      <div style={{ fontSize: 26, fontWeight: "bold", marginTop: 10 }}>
+        {valor}
       </div>
     </div>
   )
 }
 
-function CardRelogio() {
-  const [hora, setHora] = useState(new Date())
-
-  useEffect(() => {
-    const timer = setInterval(() => setHora(new Date()), 1000)
-    return () => clearInterval(timer)
-  }, [])
-
-  return (
-    <div style={theme.card}>
-      <div>{hora.toLocaleTimeString()}</div>
-    </div>
-  )
-}
-
-function CardStatus({ titulo, valor, cor }: any) {
-  return (
-    <div style={{ background: cor, padding: 10, borderRadius: 10 }}>
-      <div>{titulo}</div>
-      <strong>{valor}</strong>
-    </div>
-  )
-}
-
-function Coluna({ titulo, pedidos }: any) {
-  return (
-    <div style={theme.column}>
-      <h2>{titulo}</h2>
-      {pedidos.map((p: any) => (
-        <PedidoCard key={p.id} pedido={p} />
-      ))}
-    </div>
-  )
-}
+/* ============================= */
+/* 🔥 PEDIDO CARD NOVO ESTILO    */
+/* ============================= */
 
 function PedidoCard({ pedido }: any) {
   async function atualizarStatus(status: string) {
@@ -268,7 +234,15 @@ function PedidoCard({ pedido }: any) {
   }
 
   return (
-    <div style={theme.card}>
+    <div
+      style={{
+        ...theme.card,
+        background: "linear-gradient(135deg, #1e1e1e, #2a2a2a)",
+        borderRadius: 16,
+        border: "1px solid #333",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+      }}
+    >
       <strong>Pedido #{pedido.codigo}</strong>
 
       {pedido.itens?.map((item: any) => (
@@ -310,7 +284,52 @@ function PedidoCard({ pedido }: any) {
   )
 }
 
-/* ESTILOS */
+/* ============================= */
+/* RESTANTE INALTERADO           */
+/* ============================= */
+
+function CardMenu({ navigate, onBalcao }: any) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+      <div style={{
+        background: '#000',
+        padding: 10,
+        borderRadius: 10,
+        display: 'flex',
+        gap: 10,
+        flexWrap: 'wrap',
+      }}>
+        <button onClick={() => navigate('/pedidos')} style={btnMenu}>📦</button>
+        <button onClick={() => navigate('/produtos')} style={btnMenu}>🛒</button>
+        <button onClick={() => navigate('/dashboard')} style={btnMenu}>📈</button>
+        <button onClick={() => navigate('/auditoria')} style={btnMenu}>📊</button>
+        <button onClick={onBalcao} style={btnMenu}>🧾 Vendas Balcão</button>
+      </div>
+    </div>
+  )
+}
+
+function CardRelogio() {
+  const [hora, setHora] = useState(new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => setHora(new Date()), 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  return <div style={theme.card}>{hora.toLocaleTimeString()}</div>
+}
+
+function Coluna({ titulo, pedidos }: any) {
+  return (
+    <div style={theme.column}>
+      <h2>{titulo}</h2>
+      {pedidos.map((p: any) => (
+        <PedidoCard key={p.id} pedido={p} />
+      ))}
+    </div>
+  )
+}
 
 const headerGrid = {
   display: 'flex',
@@ -323,10 +342,6 @@ const colunas = {
   display: 'grid',
   gridTemplateColumns: '1fr 1fr 1fr',
   gap: 20,
-}
-const linha = {
-  marginBottom: 6,
-  fontSize: 15,
 }
 
 const btnMenu = {

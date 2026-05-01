@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
 export default function Fiados() {
+  const navigate = useNavigate();
+
   const [fiados, setFiados] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -35,6 +38,10 @@ export default function Fiados() {
 
   return (
     <div style={{ padding: 20 }}>
+
+      {/* 🔥 MENU DE NAVEGAÇÃO */}
+      <CardMenu navigate={navigate} />
+
       <h1>💰 Fiados</h1>
 
       {loading && <p>Carregando...</p>}
@@ -58,7 +65,7 @@ export default function Fiados() {
             <strong>{p.clienteNome || "Sem nome"}</strong>
           </div>
 
-          <div>Valor: R$ {p.total}</div>
+          <div>Valor: R$ {Number(p.total).toFixed(2)}</div>
 
           <div style={{ marginTop: 10 }}>
             <button
@@ -80,3 +87,45 @@ export default function Fiados() {
     </div>
   );
 }
+
+/* ============================= */
+/* MENU PADRÃO                   */
+/* ============================= */
+
+function CardMenu({ navigate }: any) {
+  return (
+    <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+      <div
+        style={{
+          background: "#000",
+          padding: 10,
+          borderRadius: 10,
+          display: "flex",
+          gap: 10,
+          flexWrap: "wrap",
+        }}
+      >
+        <button style={btnMenu} onClick={() => navigate("/cozinha")}>🍳</button>
+        <button style={btnMenu} onClick={() => navigate("/pedidos")}>📦</button>
+        <button style={btnMenu} onClick={() => navigate("/produtos")}>🛒</button>
+        <button style={btnMenu} onClick={() => navigate("/auditoria")}>📊</button>
+        <button style={btnMenu} onClick={() => navigate("/clientes")}>💳</button>
+        <button style={btnMenu} onClick={() => navigate("/financeiro")}>💰</button>
+      </div>
+    </div>
+  );
+}
+
+/* ============================= */
+/* ESTILO BOTÃO                  */
+/* ============================= */
+
+const btnMenu: React.CSSProperties = {
+  background: "#333",
+  color: "#fff",
+  border: "none",
+  padding: "10px 12px",
+  borderRadius: 6,
+  fontSize: 16,
+  cursor: "pointer",
+};

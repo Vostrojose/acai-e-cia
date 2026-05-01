@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
 export default function DashboardFinanceiro() {
+  const navigate = useNavigate();
+
   const [data, setData] = useState<any>(null);
 
   async function carregar() {
@@ -22,6 +25,10 @@ export default function DashboardFinanceiro() {
 
   return (
     <div style={{ padding: 20 }}>
+
+      {/* 🔥 MENU DE NAVEGAÇÃO */}
+      <CardMenu navigate={navigate} />
+
       <h1 style={{ marginBottom: 20 }}>📊 Financeiro</h1>
 
       {/* 🔥 CARDS */}
@@ -30,6 +37,34 @@ export default function DashboardFinanceiro() {
         <Card titulo="💵 Pago" valor={data.totalPago} cor="#2196f3" />
         <Card titulo="🧾 Fiado" valor={data.totalFiado} cor="#ff9800" />
         <Card titulo="💳 Crédito" valor={data.totalCredito} cor="#9c27b0" />
+      </div>
+    </div>
+  );
+}
+
+/* ============================= */
+/* MENU PADRÃO                   */
+/* ============================= */
+
+function CardMenu({ navigate }: any) {
+  return (
+    <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+      <div
+        style={{
+          background: "#000",
+          padding: 10,
+          borderRadius: 10,
+          display: "flex",
+          gap: 10,
+          flexWrap: "wrap",
+        }}
+      >
+        <button style={btnMenu} onClick={() => navigate("/cozinha")}>🍳</button>
+        <button style={btnMenu} onClick={() => navigate("/pedidos")}>📦</button>
+        <button style={btnMenu} onClick={() => navigate("/produtos")}>🛒</button>
+        <button style={btnMenu} onClick={() => navigate("/auditoria")}>📊</button>
+        <button style={btnMenu} onClick={() => navigate("/clientes")}>💳</button>
+        <button style={btnMenu} onClick={() => navigate("/financeiro")}>💰</button>
       </div>
     </div>
   );
@@ -91,4 +126,18 @@ const grid: React.CSSProperties = {
   display: "flex",
   gap: 16,
   width: "100%",
+};
+
+/* ============================= */
+/* ESTILO BOTÃO                  */
+/* ============================= */
+
+const btnMenu: React.CSSProperties = {
+  background: "#333",
+  color: "#fff",
+  border: "none",
+  padding: "10px 12px",
+  borderRadius: 6,
+  fontSize: 16,
+  cursor: "pointer",
 };
