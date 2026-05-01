@@ -39,7 +39,7 @@ export default function Pedidos() {
     setErro(null)
 
     try {
-      const res = await api.get(`/pedidos?horas=36&page=${page}&limit=20`)
+      const res = await api.get(`/pedidos?horas=36&page=${page}&limit=10`)
 
       if (res.data?.success && Array.isArray(res.data.data)) {
         setPedidos(res.data.data)
