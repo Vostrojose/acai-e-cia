@@ -132,7 +132,10 @@ export default function Cozinha() {
 
         <div
           onClick={() => setMostrarEntregues(!mostrarEntregues)}
-          style={{ flex: 1 }}
+          style={{
+            flex: 1,
+            display: 'flex', // 🔥 IMPORTANTE
+          }}
         >
           <CardStatus
             titulo="📦 Entregues Hoje"
@@ -413,11 +416,14 @@ function CardRelogio() {
   const [hora, setHora] = useState(new Date())
 
   useEffect(() => {
-    const timer = setInterval(() => setHora(new Date()), 1000)
+    const timer = setInterval(() => setHora(new Date()), 60000)
     return () => clearInterval(timer)
   }, [])
 
-  const horaFormatada = hora.toLocaleTimeString('pt-BR')
+  const horaFormatada = hora.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 
   return (
     <div
