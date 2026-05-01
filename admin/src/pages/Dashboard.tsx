@@ -205,6 +205,12 @@ function CardMenu({ navigate }: any) {
         <button style={btnMenu} onClick={() => navigate('/auditoria')}>
           📊
         </button>
+        <button style={btnMenu} onClick={() => navigate('/clientes')}>
+          💳
+        </button>
+       <button style={btnMenu} onClick={() => navigate("/financeiro")}>
+        💰
+        </button>
       </div>
     </div>
   )
