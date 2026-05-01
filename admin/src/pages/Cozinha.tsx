@@ -406,30 +406,49 @@ function CardRelogio() {
     return () => clearInterval(timer)
   }, [])
 
-  return <div style={theme.card}>{hora.toLocaleTimeString()}</div>
-}
+  const horaFormatada = hora.toLocaleTimeString('pt-BR')
 
-function Coluna({ titulo, pedidos }: any) {
   return (
-    <div style={theme.column}>
-      <h2>{titulo}</h2>
-      {pedidos.map((p: any) => (
-        <PedidoCard key={p.id} pedido={p} />
-      ))}
+    <div
+      style={{
+        flex: 1,
+        background: 'linear-gradient(135deg, #1e1e1e, #2a2a2a)',
+        padding: 20,
+        borderRadius: 16,
+        color: '#fff',
+        border: '1px solid #2196f3',
+        textAlign: 'center',
+        minWidth: 160,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ fontSize: 14, opacity: 0.7 }}>Hora Atual</div>
+
+      <div
+        style={{
+          fontSize: 42, // 🔥 GRANDE
+          fontWeight: 'bold',
+          marginTop: 5,
+          letterSpacing: 2, // 🔥 melhora leitura
+        }}
+      >
+        {horaFormatada}
+      </div>
     </div>
   )
 }
-
-const headerGrid = {
+const headerGrid: React.CSSProperties = {
   display: 'flex',
   gap: 10,
   marginBottom: 20,
-  flexWrap: 'wrap' as const,
+  flexWrap: 'wrap',
 }
 
-const colunas = {
+const colunas: React.CSSProperties = {
   display: 'grid',
-  gridTemplateColumns: '1fr 1fr 1fr',
+  gridTemplateColumns: 'repeat(3, 1fr)',
   gap: 20,
 }
 
@@ -441,4 +460,18 @@ const btnMenu = {
   borderRadius: 6,
   fontSize: 16,
   cursor: 'pointer',
+}
+
+function Coluna({ titulo, pedidos }: any) {
+  return (
+    <div style={theme.column}>
+      <h2 style={theme.title}>{titulo}</h2>
+
+      {pedidos.length === 0 && <p style={theme.textMuted}>Nenhum pedido</p>}
+
+      {pedidos.map((pedido: any) => (
+        <PedidoCard key={pedido.id} pedido={pedido} />
+      ))}
+    </div>
+  )
 }
