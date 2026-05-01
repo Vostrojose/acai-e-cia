@@ -3,26 +3,37 @@ import prisma from "../lib/prisma";
 
 const router = Router();
 
-/**
- * 🔥 ADICIONAR CRÉDITO
- */
-router.post("/:id/credito", async (req, res) => {
-  const { id } = req.params;
-  const { valor } = req.body;
+/* ============================= */
+/* 🔥 LISTAR CLIENTES            */
+/* ============================= */
+router.get("/", async (req, res) => {
+  const clientes = await prisma.cliente.findMany({
+    orderBy: { criadoEm: "desc" },
+  });
+
+  return res.json({
+    success: true,
+    data: clientes,
+  });
+});
+
+/* ============================= */
+/* 🔥 CRIAR CLIENTE              */
+/* ============================= */
+router.post("/", async (req, res) => {
+  const { nome, credito } = req.body;
+
+  if (!nome) {
+    return res.status(400).json({
+      message: "Nome é obrigatório",
+    });
+  }
 
   try {
-    if (!valor || valor <= 0) {
-      return res.status(400).json({
-        message: "Valor inválido",
-      });
-    }
-
-    const cliente = await prisma.cliente.update({
-      where: { id },
+    const cliente = await prisma.cliente.create({
       data: {
-        credito: {
-          increment: valor,
-        },
+        nome: nome.toUpperCase().trim(),
+        credito: credito || 0,
       },
     });
 
@@ -30,32 +41,39 @@ router.post("/:id/credito", async (req, res) => {
       success: true,
       data: cliente,
     });
-  } catch (err) {
-    console.error("Erro ao adicionar crédito:", err);
+  } catch (err: any) {
+    // 🔥 evita erro de nome duplicado
+    if (err.code === "P2002") {
+      return res.status(400).json({
+        message: "Cliente já existe",
+      });
+    }
+
+    console.error(err);
+
     return res.status(500).json({
-      message: "Erro ao adicionar crédito",
+      message: "Erro ao criar cliente",
     });
   }
 });
 
-/**
- * 🔥 LISTAR CLIENTES
- */
-router.get("/", async (req, res) => {
-  try {
-    const clientes = await prisma.cliente.findMany({
-      orderBy: { nome: "asc" },
-    });
+/* ============================= */
+/* 🔥 ADICIONAR CRÉDITO          */
+/* ============================= */
+router.post("/:id/credito", async (req, res) => {
+  const { id } = req.params;
+  const { valor } = req.body;
 
-    return res.json({
-      success: true,
-      data: clientes,
-    });
-  } catch (err) {
-    return res.status(500).json({
-      message: "Erro ao buscar clientes",
-    });
-  }
+  await prisma.cliente.update({
+    where: { id },
+    data: {
+      credito: {
+        increment: valor,
+      },
+    },
+  });
+
+  return res.json({ success: true });
 });
 
 export default router;
