@@ -218,6 +218,7 @@ function Card({ titulo, valor, cor }: any) {
         padding: 20,
         borderRadius: 16,
         color: '#fff',
+        minWidth: 220,
         boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
         border: `1px solid ${cor}`,
         position: 'relative',
@@ -255,10 +256,9 @@ function Card({ titulo, valor, cor }: any) {
 /* ESTILOS */
 
 const grid: React.CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+  display: "flex",
   gap: 16,
-  width: '100%',
+  width: "100%",
 }
 
 const btnMenu: React.CSSProperties = {
