@@ -214,11 +214,11 @@ function Card({ titulo, valor, cor }: any) {
   return (
     <div
       style={{
+        flex: 1, // 🔥 ESSENCIAL
         background: 'linear-gradient(135deg, #1e1e1e, #2a2a2a)',
         padding: 20,
         borderRadius: 16,
         color: '#fff',
-        minWidth: 220,
         boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
         border: `1px solid ${cor}`,
         position: 'relative',
@@ -256,9 +256,9 @@ function Card({ titulo, valor, cor }: any) {
 /* ESTILOS */
 
 const grid: React.CSSProperties = {
-  display: "flex",
+  display: 'flex',
   gap: 16,
-  width: "100%",
+  width: '100%',
 }
 
 const btnMenu: React.CSSProperties = {
