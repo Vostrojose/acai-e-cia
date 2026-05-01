@@ -79,10 +79,8 @@ export default function Cozinha() {
       })
     })
 
-    socket.on('pedido_atualizado', (pedidoAtualizado: any) => {
-      setPedidos((prev) =>
-        prev.map((p) => (p.id === pedidoAtualizado.id ? pedidoAtualizado : p)),
-      )
+    socket.on('pedido_atualizado', async () => {
+      await carregarPedidos()
     })
 
     const intervalo = setInterval(carregarPedidos, 10000)
