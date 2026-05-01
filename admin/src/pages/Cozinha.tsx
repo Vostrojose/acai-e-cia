@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { theme } from '../assets/styles/adminTheme'
 
-import BalcaoModal from "../components/BalcaoModal";
+import BalcaoModal from '../components/BalcaoModal'
 
 export default function Cozinha() {
   const [pedidos, setPedidos] = useState<any[]>([])
@@ -179,20 +179,20 @@ function CardStatus({ titulo, valor, cor }: any) {
     <div
       style={{
         flex: 1,
-        background: "linear-gradient(135deg, #1e1e1e, #2a2a2a)",
+        background: 'linear-gradient(135deg, #1e1e1e, #2a2a2a)',
         padding: 20,
         borderRadius: 16,
-        color: "#fff",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+        color: '#fff',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
         border: `1px solid ${cor}`,
-        position: "relative",
-        textAlign: "center",
+        position: 'relative',
+        textAlign: 'center',
         minWidth: 120,
       }}
     >
       <div
         style={{
-          position: "absolute",
+          position: 'absolute',
           top: 0,
           left: 0,
           right: 0,
@@ -205,7 +205,7 @@ function CardStatus({ titulo, valor, cor }: any) {
 
       <div style={{ opacity: 0.8, fontSize: 14 }}>{titulo}</div>
 
-      <div style={{ fontSize: 26, fontWeight: "bold", marginTop: 10 }}>
+      <div style={{ fontSize: 26, fontWeight: 'bold', marginTop: 10 }}>
         {valor}
       </div>
     </div>
@@ -237,13 +237,19 @@ function PedidoCard({ pedido }: any) {
     <div
       style={{
         ...theme.card,
-        background: "linear-gradient(135deg, #1e1e1e, #2a2a2a)",
+        background: 'linear-gradient(135deg, #1e1e1e, #2a2a2a)',
         borderRadius: 16,
-        border: "1px solid #333",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+        border: '1px solid #333',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
       }}
     >
       <strong>Pedido #{pedido.codigo}</strong>
+
+      {pedido.status === 'PRONTO' && (
+        <div style={{ marginTop: 6, color: '#4caf50', fontWeight: 'bold' }}>
+          💰 Total: R$ {Number(pedido.total).toFixed(2)}
+        </div>
+      )}
 
       {pedido.itens?.map((item: any) => (
         <div key={item.id} style={{ marginBottom: 8 }}>
@@ -290,20 +296,34 @@ function PedidoCard({ pedido }: any) {
 
 function CardMenu({ navigate, onBalcao }: any) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-      <div style={{
-        background: '#000',
-        padding: 10,
-        borderRadius: 10,
-        display: 'flex',
-        gap: 10,
-        flexWrap: 'wrap',
-      }}>
-        <button onClick={() => navigate('/pedidos')} style={btnMenu}>📦</button>
-        <button onClick={() => navigate('/produtos')} style={btnMenu}>🛒</button>
-        <button onClick={() => navigate('/dashboard')} style={btnMenu}>📈</button>
-        <button onClick={() => navigate('/auditoria')} style={btnMenu}>📊</button>
-        <button onClick={onBalcao} style={btnMenu}>🧾 Vendas Balcão</button>
+    <div
+      style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}
+    >
+      <div
+        style={{
+          background: '#000',
+          padding: 10,
+          borderRadius: 10,
+          display: 'flex',
+          gap: 10,
+          flexWrap: 'wrap',
+        }}
+      >
+        <button onClick={() => navigate('/pedidos')} style={btnMenu}>
+          📦
+        </button>
+        <button onClick={() => navigate('/produtos')} style={btnMenu}>
+          🛒
+        </button>
+        <button onClick={() => navigate('/dashboard')} style={btnMenu}>
+          📈
+        </button>
+        <button onClick={() => navigate('/auditoria')} style={btnMenu}>
+          📊
+        </button>
+        <button onClick={onBalcao} style={btnMenu}>
+          🧾 Vendas Balcão
+        </button>
       </div>
     </div>
   )
