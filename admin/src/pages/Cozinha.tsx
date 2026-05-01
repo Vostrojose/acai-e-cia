@@ -57,42 +57,33 @@ export default function Cozinha() {
   }, [])
 
   useEffect((): (() => void) => {
-  const socket = io('https://api.acaiecompanhia.com.br', {
-    transports: ['websocket'],
-    reconnection: true,
-    reconnectionAttempts: Infinity,
-    reconnectionDelay: 1000,
-    reconnectionDelayMax: 5000,
-  })
+    const socket = io('https://api.acaiecompanhia.com.br', {
+      transports: ['websocket'],
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+    })
 
-  const carregarPedidos = async () => {
-    try {
-      const res = await api.get('/pedidos')
-      setPedidos(res.data?.data || [])
-    } catch {}
-  }
+    const carregarPedidos = async () => {
+      try {
+       const res = await api.get('/pedidos?limit=50')
+        setPedidos(res.data?.data || [])
+      } catch {}
+    }
 
-  async function inicializar() {
-    await carregarPedidos()
-    await carregarResumo()
-  }
+    async function inicializar() {
+      await carregarPedidos()
+      await carregarResumo()
+    }
 
-  inicializar()
+    inicializar()
 
-    socket.on('novo_pedido', (pedido: any) => {
+    socket.on('novo_pedido', async () => {
       tocarSom()
 
-      setPedidos((prev) => {
-        const index = prev.findIndex((p) => p.id === pedido.id)
-
-        if (index !== -1) {
-          const copia = [...prev]
-          copia[index] = pedido
-          return copia
-        }
-
-        return [pedido, ...prev]
-      })
+      await carregarPedidos()
+      await carregarResumo()
     })
 
     socket.on('pedido_atualizado', async () => {
@@ -134,7 +125,7 @@ export default function Cozinha() {
   const prontos = ordenar(pedidos.filter((p) => p.status === 'PRONTO'))
 
   const entregues = ordenar(
-    pedidos.filter((p) => p.status === 'ENTREGUE' && isHoje(p.criadoEm)),
+    pedidos.filter((p) => p.status === 'ENTREGUE' && isHoje(p.entregueEm)),
   )
 
   return (
@@ -355,7 +346,7 @@ function PedidoCard({ pedido }: any) {
       {pedido.itens?.map((item: any) => (
         <div key={item.id} style={{ marginBottom: 8 }}>
           <strong>
-            {item.quantidade}x {item.produto?.nome}
+            {item.quantidade}x {item.produto?.nome || 'Produto'}
           </strong>
 
           {item.adicionais?.length > 0 && (
@@ -463,10 +454,10 @@ function CardRelogio() {
 
       <div
         style={{
-          fontSize: 42, // 🔥 GRANDE
+          fontSize: 42, //  GRANDE
           fontWeight: 'bold',
           marginTop: 5,
-          letterSpacing: 2, // 🔥 melhora leitura
+          letterSpacing: 2, //  melhora leitura
         }}
       >
         {horaFormatada}

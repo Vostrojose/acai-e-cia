@@ -52,9 +52,14 @@ router.get('/', async (req, res) => {
         },
         skip: skip,
         take: limit,
-        include: {
-          itens: true,
-        },
+      include: {
+  itens: {
+    include: {
+      produto: true,
+      adicionais: true
+    }
+  }
+}
       }),
 
       prisma.pedido.count({
