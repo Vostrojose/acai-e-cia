@@ -22,7 +22,6 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
     carregar()
 
-    // 🔥 trava scroll do fundo
     document.body.style.overflow = 'hidden'
 
     return () => {
@@ -182,7 +181,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           style={input}
         />
 
-        {/* PRODUTOS */}
+        {/* PRODUTOS + ADICIONAIS */}
         <div style={{ maxHeight: 200, overflow: 'auto' }}>
           {produtosFiltrados.map((p) => {
             const selecionado = itens.find((i) => i.id === p.id)
@@ -195,6 +194,52 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                   onChange={() => toggleItem(p)}
                 />
                 {p.nome} - R$ {p.preco}
+
+                {/* 🔥 ADICIONAIS */}
+                {selecionado && p.adicionais?.length > 0 && (
+                  <div style={{ marginLeft: 20, marginTop: 5 }}>
+                    {p.adicionais.map((add: any) => {
+                      const item = itens.find((i) => i.id === p.id)
+                      const ativo = item?.adicionais?.find(
+                        (a: any) => a.id === add.id
+                      )
+
+                      return (
+                        <div key={add.id} style={{ marginTop: 4 }}>
+                          <input
+                            type="checkbox"
+                            checked={!!ativo}
+                            onChange={() => toggleAdicional(p.id, add)}
+                          />
+
+                          + {add.nome} (R$ {add.preco})
+
+                          {ativo && (
+                            <div style={{ display: 'flex', alignItems: 'center', marginTop: 4 }}>
+                              <button
+                                style={btnTouch}
+                                onClick={() => alterarQtdAdicional(p.id, add.id, -1)}
+                              >
+                                −
+                              </button>
+
+                              <span style={{ minWidth: 30, textAlign: 'center' }}>
+                                {ativo.quantidade}
+                              </span>
+
+                              <button
+                                style={btnTouch}
+                                onClick={() => alterarQtdAdicional(p.id, add.id, 1)}
+                              >
+                                +
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             )
           })}
@@ -255,7 +300,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 /* ============================= */
 
 const overlay: React.CSSProperties = {
-  position: 'fixed' as const,
+  position: 'fixed',
   inset: 0,
   background: 'rgba(0,0,0,0.8)',
   display: 'flex',
