@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
     /* 🔥 PARÂMETROS DA REQUISIÇÃO   */
     /* ============================= */
 
-    const horas = Number(req.query.horas) || 24 // padrão 24h
+    const horas = Number(req.query.horas) || 36 // padrão 36h
     const page = Number(req.query.page) || 1
     const limit = Number(req.query.limit) || 20
 
@@ -72,11 +72,11 @@ router.get('/', async (req, res) => {
 
     return res.json({
       success: true,
-      data: pedidos,
+      data: serializeDecimal(pedidos),
       pagination: {
         page: page,
         limit: limit,
-        total: total,
+        total: Number(total),
         totalPages: Math.ceil(total / limit),
       },
     })
