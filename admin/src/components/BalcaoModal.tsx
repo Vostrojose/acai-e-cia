@@ -191,11 +191,6 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                   onChange={() => toggleItem(p)}
                 />
                 {p.nome} - R$ {p.preco}
-                {selecionado && (
-                  <pre style={{ color: 'lime', fontSize: 10 }}>
-                    {JSON.stringify(p, null, 2)}
-                  </pre>
-                )}
                 {/* 🔥 ADICIONAIS */}
                 {itens.some((i) => i.id === p.id) &&
                   p.adicionais?.length > 0 && (
