@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { theme } from "../assets/styles/adminTheme";
 
 export default function Clientes() {
   const navigate = useNavigate();
@@ -76,30 +77,32 @@ export default function Clientes() {
   }
 
   return (
-    <div style={{ padding: 20 }}>
+    <div style={theme.page}>
 
       {/* 🔥 MENU DE NAVEGAÇÃO */}
       <CardMenu navigate={navigate} />
 
-      <h1>💳 Clientes</h1>
+      <h1 style={{ ...theme.title, textAlign: "center" }}>
+        💳 Clientes
+      </h1>
 
       {/* 🔥 NOVO CLIENTE */}
-      <div style={{ marginBottom: 20 }}>
+      <div style={boxTopo}>
         <input
           placeholder="Nome do cliente"
           value={novoNome}
           onChange={(e) => setNovoNome(e.target.value)}
-          style={{ marginRight: 10 }}
+          style={input}
         />
 
         <input
           placeholder="Crédito inicial"
           value={novoCredito}
           onChange={(e) => setNovoCredito(e.target.value)}
-          style={{ marginRight: 10 }}
+          style={input}
         />
 
-        <button onClick={criarCliente}>
+        <button onClick={criarCliente} style={btnPrimary}>
           ➕ Criar cliente
         </button>
       </div>
@@ -111,31 +114,30 @@ export default function Clientes() {
       )}
 
       {clientes.map((c) => (
-        <div
-          key={c.id}
-          style={{
-            marginBottom: 10,
-            padding: 10,
-            background: "#f5f5f5",
-            borderRadius: 8,
-          }}
-        >
+        <div key={c.id} style={cardCliente}>
           <strong>{c.nome}</strong>
 
-          <div>Saldo: R$ {Number(c.credito).toFixed(2)}</div>
+          <div style={{ marginTop: 6 }}>
+            Saldo: <strong>R$ {Number(c.credito).toFixed(2)}</strong>
+          </div>
 
-          <input
-            placeholder="Valor"
-            value={valores[c.id] || ""}
-            onChange={(e) =>
-              setValores({ ...valores, [c.id]: e.target.value })
-            }
-            style={{ marginRight: 10 }}
-          />
+          <div style={{ marginTop: 10 }}>
+            <input
+              placeholder="Valor"
+              value={valores[c.id] || ""}
+              onChange={(e) =>
+                setValores({ ...valores, [c.id]: e.target.value })
+              }
+              style={input}
+            />
 
-          <button onClick={() => adicionarCredito(c.id)}>
-            ➕ Adicionar crédito
-          </button>
+            <button
+              onClick={() => adicionarCredito(c.id)}
+              style={btnSuccess}
+            >
+              ➕ Adicionar crédito
+            </button>
+          </div>
         </div>
       ))}
     </div>
@@ -171,8 +173,50 @@ function CardMenu({ navigate }: any) {
 }
 
 /* ============================= */
-/* ESTILO BOTÃO                  */
+/* ESTILOS                       */
 /* ============================= */
+
+const cardCliente: React.CSSProperties = {
+  marginBottom: 12,
+  padding: 16,
+  background: "linear-gradient(135deg, #1e1e1e, #2a2a2a)",
+  borderRadius: 12,
+  color: "#fff",
+  boxShadow: "0 4px 10px rgba(0,0,0,0.4)",
+};
+
+const boxTopo: React.CSSProperties = {
+  marginBottom: 20,
+  display: "flex",
+  gap: 10,
+  flexWrap: "wrap",
+};
+
+const input: React.CSSProperties = {
+  background: "#222",
+  color: "#fff",
+  border: "1px solid #444",
+  padding: "10px",
+  borderRadius: 6,
+};
+
+const btnPrimary: React.CSSProperties = {
+  background: "#2196f3",
+  color: "#fff",
+  border: "none",
+  padding: "10px 14px",
+  borderRadius: 6,
+  cursor: "pointer",
+};
+
+const btnSuccess: React.CSSProperties = {
+  background: "#4caf50",
+  color: "#fff",
+  border: "none",
+  padding: "10px 14px",
+  borderRadius: 6,
+  cursor: "pointer",
+};
 
 const btnMenu: React.CSSProperties = {
   background: "#333",
