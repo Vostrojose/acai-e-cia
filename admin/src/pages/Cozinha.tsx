@@ -125,6 +125,7 @@ export default function Cozinha() {
 
       <div style={headerGrid}>
         <CardRelogio />
+        <CardClima />
         <CardStatus titulo="🆕 Novos" valor={novos.length} cor="#e53935" />
         <CardStatus titulo="👨‍🍳 Preparo" valor={preparo.length} cor="#fb8c00" />
         <CardStatus titulo="✅ Prontos" valor={prontos.length} cor="#43a047" />
@@ -166,6 +167,74 @@ export default function Cozinha() {
           onSuccess={() => console.log('Venda registrada')}
         />
       )}
+    </div>
+  )
+}
+
+/* ============================= */
+/* 🔥 CARD CLIMA                 */
+/* ============================= */
+
+function CardClima() {
+  const [status, setStatus] = useState<'ok' | 'alerta' | 'critico'>('ok')
+  const [texto, setTexto] = useState('Carregando clima...')
+
+  useEffect(() => {
+    async function carregarClima() {
+      try {
+        const res = await fetch(
+          'https://api.open-meteo.com/v1/forecast?latitude=-23.52&longitude=-46.83&current=precipitation',
+        )
+
+        const data = await res.json()
+        const chuva = data?.current?.precipitation || 0
+
+        if (chuva > 5) {
+          setStatus('critico')
+          setTexto('🚨 CHUVA FORTE')
+        } else if (chuva > 0) {
+          setStatus('alerta')
+          setTexto('🌧️ Possível chuva')
+        } else {
+          setStatus('ok')
+          setTexto('☀️ Tempo estável')
+        }
+      } catch {
+        setTexto('Clima indisponível')
+      }
+    }
+
+    carregarClima()
+    const interval = setInterval(carregarClima, 60000)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  const cor =
+    status === 'critico'
+      ? '#e53935'
+      : status === 'alerta'
+        ? '#fb8c00'
+        : '#43a047'
+
+  return (
+    <div
+      style={{
+        flex: 1,
+        background: 'linear-gradient(135deg, #1e1e1e, #2a2a2a)',
+        padding: 20,
+        borderRadius: 16,
+        color: '#fff',
+        border: `1px solid ${cor}`,
+        textAlign: 'center',
+        minWidth: 120,
+      }}
+    >
+      <div style={{ fontSize: 14, opacity: 0.8 }}>Clima</div>
+
+      <div style={{ fontSize: 18, fontWeight: 'bold', marginTop: 8 }}>
+        {texto}
+      </div>
     </div>
   )
 }
