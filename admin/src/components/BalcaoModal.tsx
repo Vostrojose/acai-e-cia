@@ -301,9 +301,14 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           <input
             placeholder="Nome do cliente"
             value={clienteNome}
-            onChange={(e) =>
-              setClienteNome(e.target.value.toUpperCase().trim())
-            }
+            onChange={(e) => {
+              const valor = e.target.value
+                .toUpperCase()
+                .replace(/\s+/g, ' ') // 🔥 remove espaços duplicados
+                .trim()
+
+              setClienteNome(valor)
+            }}
             style={input}
           />
         )}
@@ -382,9 +387,9 @@ const btnTouch = {
   height: 50,
   fontSize: 22,
   borderRadius: 10,
-  border: "none",
-  margin: "0 8px",
-  cursor: "pointer",
-  background: "#222",
-  color: "#fff",
-};
+  border: 'none',
+  margin: '0 8px',
+  cursor: 'pointer',
+  background: '#222',
+  color: '#fff',
+}
