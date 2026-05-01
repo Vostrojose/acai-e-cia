@@ -254,7 +254,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 /* ESTILOS                       */
 /* ============================= */
 
-const overlay = {
+const overlay: React.CSSProperties = {
   position: 'fixed' as const,
   inset: 0,
   background: 'rgba(0,0,0,0.8)',
@@ -274,17 +274,17 @@ const modal: React.CSSProperties = {
   overflowY: 'auto',
 }
 
-const input = {
+const input: React.CSSProperties = {
   width: '100%',
   padding: 10,
   marginBottom: 10,
 }
 
-const linha = {
+const linha: React.CSSProperties = {
   marginBottom: 8,
 }
 
-const btn = {
+const btn: React.CSSProperties = {
   background: '#4caf50',
   color: '#fff',
   padding: 10,
@@ -292,7 +292,7 @@ const btn = {
   border: 'none',
 }
 
-const btnDanger = {
+const btnDanger: React.CSSProperties = {
   background: '#e53935',
   color: '#fff',
   padding: 10,
@@ -300,7 +300,7 @@ const btnDanger = {
   border: 'none',
 }
 
-const btnTouch = {
+const btnTouch: React.CSSProperties = {
   width: 50,
   height: 50,
   fontSize: 22,
