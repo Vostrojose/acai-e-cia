@@ -142,10 +142,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
     }
 
     const nomeNormalizado = clienteNome
-      ? clienteNome
-          .toUpperCase()
-          .replace(/\s+/g, ' ')
-          .trim()
+      ? clienteNome.toUpperCase().replace(/\s+/g, ' ').trim()
       : null
 
     if (formaPagamento !== 'PAGO' && !nomeNormalizado) {
@@ -194,14 +191,18 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                   onChange={() => toggleItem(p)}
                 />
                 {p.nome} - R$ {p.preco}
-
+                {selecionado && (
+                  <pre style={{ color: 'lime', fontSize: 10 }}>
+                    {JSON.stringify(p, null, 2)}
+                  </pre>
+                )}
                 {/* 🔥 ADICIONAIS */}
                 {selecionado && p.adicionais?.length > 0 && (
                   <div style={{ marginLeft: 20, marginTop: 5 }}>
                     {p.adicionais.map((add: any) => {
                       const item = itens.find((i) => i.id === p.id)
                       const ativo = item?.adicionais?.find(
-                        (a: any) => a.id === add.id
+                        (a: any) => a.id === add.id,
                       )
 
                       return (
@@ -211,25 +212,35 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                             checked={!!ativo}
                             onChange={() => toggleAdicional(p.id, add)}
                           />
-
                           + {add.nome} (R$ {add.preco})
-
                           {ativo && (
-                            <div style={{ display: 'flex', alignItems: 'center', marginTop: 4 }}>
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                marginTop: 4,
+                              }}
+                            >
                               <button
                                 style={btnTouch}
-                                onClick={() => alterarQtdAdicional(p.id, add.id, -1)}
+                                onClick={() =>
+                                  alterarQtdAdicional(p.id, add.id, -1)
+                                }
                               >
                                 −
                               </button>
 
-                              <span style={{ minWidth: 30, textAlign: 'center' }}>
+                              <span
+                                style={{ minWidth: 30, textAlign: 'center' }}
+                              >
                                 {ativo.quantidade}
                               </span>
 
                               <button
                                 style={btnTouch}
-                                onClick={() => alterarQtdAdicional(p.id, add.id, 1)}
+                                onClick={() =>
+                                  alterarQtdAdicional(p.id, add.id, 1)
+                                }
                               >
                                 +
                               </button>
@@ -252,10 +263,24 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           <div key={i.id} style={linha}>
             <strong>{i.nome}</strong>
 
-            <div style={{ display: 'flex', alignItems: 'center', marginTop: 5 }}>
-              <button style={btnTouch} onClick={() => alterarQuantidade(i.id, -1)}>−</button>
-              <span style={{ fontSize: 18, minWidth: 30, textAlign: 'center' }}>{i.quantidade}</span>
-              <button style={btnTouch} onClick={() => alterarQuantidade(i.id, 1)}>+</button>
+            <div
+              style={{ display: 'flex', alignItems: 'center', marginTop: 5 }}
+            >
+              <button
+                style={btnTouch}
+                onClick={() => alterarQuantidade(i.id, -1)}
+              >
+                −
+              </button>
+              <span style={{ fontSize: 18, minWidth: 30, textAlign: 'center' }}>
+                {i.quantidade}
+              </span>
+              <button
+                style={btnTouch}
+                onClick={() => alterarQuantidade(i.id, 1)}
+              >
+                +
+              </button>
             </div>
           </div>
         ))}
@@ -288,8 +313,12 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           Pedido já pronto
         </label>
 
-        <button onClick={salvar} style={btn}>💾 Salvar venda</button>
-        <button onClick={onClose} style={btnDanger}>Cancelar</button>
+        <button onClick={salvar} style={btn}>
+          💾 Salvar venda
+        </button>
+        <button onClick={onClose} style={btnDanger}>
+          Cancelar
+        </button>
       </div>
     </div>
   )
