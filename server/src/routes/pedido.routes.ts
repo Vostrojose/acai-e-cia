@@ -126,6 +126,33 @@ router.get(
 router.get('/dashboard', pedidoController.dashboard)
 
 /**
+ * Dashboard (livre)
+ * nova rota
+ */
+
+router.get(
+  '/entregues/hoje/count',
+  asyncHandler(async (req, res) => {
+    const inicioHoje = new Date()
+    inicioHoje.setHours(0, 0, 0, 0)
+
+    const total = await prisma.pedido.count({
+      where: {
+        status: 'ENTREGUE',
+        criadoEm: {
+          gte: inicioHoje,
+        },
+      },
+    })
+
+    return res.json({
+      success: true,
+      total,
+    })
+  }),
+)
+
+/**
  * Buscar pedido por ID (livre)
  */
 router.get('/:id', pedidoController.buscarPorId)

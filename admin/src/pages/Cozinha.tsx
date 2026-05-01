@@ -10,6 +10,17 @@ export default function Cozinha() {
   const [pedidos, setPedidos] = useState<any[]>([])
   const [mostrarEntregues, setMostrarEntregues] = useState(false)
 
+  const [totalEntreguesHoje, setTotalEntreguesHoje] = useState(0)
+
+  async function carregarResumo() {
+    try {
+      const res = await api.get('/pedidos/entregues/hoje/count')
+      setTotalEntreguesHoje(res.data.total || 0)
+    } catch {
+      console.error('Erro ao carregar resumo')
+    }
+  }
+
   const navigate = useNavigate()
 
   function tocarSom() {
@@ -46,22 +57,27 @@ export default function Cozinha() {
   }, [])
 
   useEffect((): (() => void) => {
-    const socket = io('https://api.acaiecompanhia.com.br', {
-      transports: ['websocket'],
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-    })
+  const socket = io('https://api.acaiecompanhia.com.br', {
+    transports: ['websocket'],
+    reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+  })
 
-    const carregarPedidos = async () => {
-      try {
-        const res = await api.get('/pedidos')
-        setPedidos(res.data?.data || [])
-      } catch {}
-    }
+  const carregarPedidos = async () => {
+    try {
+      const res = await api.get('/pedidos')
+      setPedidos(res.data?.data || [])
+    } catch {}
+  }
 
-    carregarPedidos()
+  async function inicializar() {
+    await carregarPedidos()
+    await carregarResumo()
+  }
+
+  inicializar()
 
     socket.on('novo_pedido', (pedido: any) => {
       tocarSom()
@@ -81,9 +97,13 @@ export default function Cozinha() {
 
     socket.on('pedido_atualizado', async () => {
       await carregarPedidos()
+      await carregarResumo()
     })
 
-    const intervalo = setInterval(carregarPedidos, 10000)
+    const intervalo = setInterval(() => {
+      carregarPedidos()
+      carregarResumo()
+    }, 10000)
 
     return () => {
       socket.disconnect()
@@ -137,7 +157,7 @@ export default function Cozinha() {
         >
           <CardStatus
             titulo="📦 Entregues Hoje"
-            valor={entregues.length}
+            valor={totalEntreguesHoje}
             cor="#757575"
           />
         </div>
