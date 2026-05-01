@@ -139,7 +139,7 @@ router.get(
     const total = await prisma.pedido.count({
       where: {
         status: 'ENTREGUE',
-        criadoEm: {
+        atualizadoEm: {
           gte: inicioHoje,
         },
       },

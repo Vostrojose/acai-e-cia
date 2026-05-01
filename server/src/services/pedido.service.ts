@@ -2,7 +2,6 @@ import prisma from '../services/prisma'
 import { StatusPedido, StatusPagamento } from '@prisma/client'
 
 class PedidoService {
-
   /* ============================= */
   /* CRIAR PEDIDO (PROFISSIONAL)   */
   /* ============================= */
@@ -14,12 +13,11 @@ class PedidoService {
     }
 
     return await prisma.$transaction(async (tx) => {
-
       let total = 0
 
       const ultimoPedido = await tx.pedido.findFirst({
         where: { codigo: { not: null } },
-        orderBy: { codigo: 'desc' }
+        orderBy: { codigo: 'desc' },
       })
 
       const proximoCodigo = (ultimoPedido?.codigo ?? 1000) + 1
@@ -30,25 +28,24 @@ class PedidoService {
           endereco,
           origem,
           total: 0,
-          codigo: proximoCodigo
-        }
+          codigo: proximoCodigo,
+        },
       })
 
       for (const item of itens) {
-
         const produto = await tx.produto.findUnique({
-          where: { id: item.produtoId }
+          where: { id: item.produtoId },
         })
 
         if (!produto) {
-          throw new Error("Produto não encontrado")
+          throw new Error('Produto não encontrado')
         }
 
         const adicionais = Array.isArray(item.adicionais) ? item.adicionais : []
 
         const totalAdicionais = adicionais.reduce(
           (soma: number, add: any) => soma + Number(add.preco || 0),
-          0
+          0,
         )
 
         const precoUnit = Number(produto.preco) + totalAdicionais
@@ -60,8 +57,8 @@ class PedidoService {
             pedidoId: pedido.id,
             produtoId: produto.id,
             quantidade: item.quantidade,
-            precoUnit
-          }
+            precoUnit,
+          },
         })
 
         if (adicionais.length > 0) {
@@ -69,8 +66,8 @@ class PedidoService {
             data: adicionais.map((add: any) => ({
               nome: add.nome,
               preco: Number(add.preco),
-              itemPedidoId: itemCriado.id
-            }))
+              itemPedidoId: itemCriado.id,
+            })),
           })
         }
       }
@@ -78,7 +75,7 @@ class PedidoService {
       /* 🔥 ATUALIZA TOTAL */
       await tx.pedido.update({
         where: { id: pedido.id },
-        data: { total }
+        data: { total },
       })
 
       /* 🔥 RETORNA COMPLETO */
@@ -88,10 +85,10 @@ class PedidoService {
           itens: {
             include: {
               produto: true,
-              adicionais: true
-            }
-          }
-        }
+              adicionais: true,
+            },
+          },
+        },
       })
     })
   }
@@ -106,11 +103,11 @@ class PedidoService {
         itens: {
           include: {
             produto: true,
-            adicionais: true
-          }
-        }
+            adicionais: true,
+          },
+        },
       },
-      orderBy: { criadoEm: 'desc' }
+      orderBy: { criadoEm: 'desc' },
     })
   }
 
@@ -124,10 +121,10 @@ class PedidoService {
         itens: {
           include: {
             produto: true,
-            adicionais: true
-          }
-        }
-      }
+            adicionais: true,
+          },
+        },
+      },
     })
   }
 
@@ -141,10 +138,10 @@ class PedidoService {
         itens: {
           include: {
             produto: true,
-            adicionais: true
-          }
-        }
-      }
+            adicionais: true,
+          },
+        },
+      },
     })
   }
 
@@ -152,17 +149,27 @@ class PedidoService {
   /* ATUALIZAR STATUS              */
   /* ============================= */
   async atualizarStatus(id: string, status: StatusPedido) {
+    const data: any = { status }
+
+    // 🔥 SALVA DATA REAL DE ENTREGA
+    if (status === StatusPedido.ENTREGUE) {
+      data.entregueEm = new Date()
+    }
+
     return prisma.pedido.update({
       where: { id },
-      data: { status }
+      data,
     })
   }
 
   /* ============================= */
   /* ATUALIZAR PAGAMENTO           */
   /* ============================= */
-  async atualizarPagamento(id: string, statusPagamento: string, pagamentoId?: string) {
-
+  async atualizarPagamento(
+    id: string,
+    statusPagamento: string,
+    pagamentoId?: string,
+  ) {
     let pagamentoEnum: StatusPagamento
     let statusPedido: StatusPedido
 
@@ -186,8 +193,8 @@ class PedidoService {
       data: {
         statusPagamento: pagamentoEnum,
         pagamentoId,
-        status: statusPedido
-      }
+        status: statusPedido,
+      },
     })
   }
 

@@ -65,6 +65,8 @@ model Pedido {
   criadoEm          DateTime         @default(now())
   atualizadoEm      DateTime         @updatedAt
 
+  entregueEm DateTime?
+
   itens             ItemPedido[]
 
   auditoriaId       String?
