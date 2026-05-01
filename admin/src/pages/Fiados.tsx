@@ -57,7 +57,7 @@ export default function Fiados() {
             marginBottom: 10,
             padding: 10,
             borderBottom: "1px solid #ccc",
-            background: "#f9f9f9",
+            background: "#080808",
             borderRadius: 8,
           }}
         >
