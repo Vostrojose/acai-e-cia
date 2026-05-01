@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
 export default function Fiados() {
-  const navigate = useNavigate();
-
   const [fiados, setFiados] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -12,7 +9,9 @@ export default function Fiados() {
     try {
       setLoading(true);
 
-      const res = await api.get("/pedidos?fiado=true");
+      // ✅ ROTA CORRETA
+      const res = await api.get("/pedidos/fiados");
+
       setFiados(res.data.data || []);
     } catch (err) {
       console.error("Erro ao carregar fiados:", err);
@@ -29,7 +28,7 @@ export default function Fiados() {
   async function marcarComoPago(id: string) {
     try {
       await api.patch(`/pedidos/${id}/pagar`);
-      carregar();
+      carregar(); // 🔄 atualiza lista
     } catch (err) {
       console.error("Erro ao marcar como pago:", err);
       alert("Erro ao atualizar pedido");
@@ -38,10 +37,6 @@ export default function Fiados() {
 
   return (
     <div style={{ padding: 20 }}>
-
-      {/* 🔥 MENU DE NAVEGAÇÃO */}
-      <CardMenu navigate={navigate} />
-
       <h1>💰 Fiados</h1>
 
       {loading && <p>Carregando...</p>}
@@ -54,18 +49,28 @@ export default function Fiados() {
         <div
           key={p.id}
           style={{
-            marginBottom: 10,
-            padding: 10,
-            borderBottom: "1px solid #ccc",
-            background: "#080808",
-            borderRadius: 8,
+            marginBottom: 12,
+            padding: 12,
+            background: "#f5f5f5",
+            borderRadius: 10,
+            boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
           }}
         >
           <div>
             <strong>{p.clienteNome || "Sem nome"}</strong>
           </div>
 
-          <div>Valor: R$ {Number(p.total).toFixed(2)}</div>
+          {/* ✅ VALOR CORRIGIDO */}
+          <div>
+            Valor: <strong>R$ {Number(p.total).toFixed(2)}</strong>
+          </div>
+
+          {/* 🔥 OPCIONAL (se quiser mostrar data) */}
+          {p.criadoEm && (
+            <div style={{ fontSize: 12, color: "#666" }}>
+              {new Date(p.criadoEm).toLocaleString()}
+            </div>
+          )}
 
           <div style={{ marginTop: 10 }}>
             <button
@@ -74,9 +79,10 @@ export default function Fiados() {
                 background: "#4caf50",
                 color: "#fff",
                 border: "none",
-                padding: "6px 12px",
+                padding: "8px 14px",
                 borderRadius: 6,
                 cursor: "pointer",
+                fontWeight: "bold",
               }}
             >
               ✔ Marcar como pago
@@ -87,45 +93,3 @@ export default function Fiados() {
     </div>
   );
 }
-
-/* ============================= */
-/* MENU PADRÃO                   */
-/* ============================= */
-
-function CardMenu({ navigate }: any) {
-  return (
-    <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
-      <div
-        style={{
-          background: "#000",
-          padding: 10,
-          borderRadius: 10,
-          display: "flex",
-          gap: 10,
-          flexWrap: "wrap",
-        }}
-      >
-        <button style={btnMenu} onClick={() => navigate("/cozinha")}>🍳</button>
-        <button style={btnMenu} onClick={() => navigate("/pedidos")}>📦</button>
-        <button style={btnMenu} onClick={() => navigate("/produtos")}>🛒</button>
-        <button style={btnMenu} onClick={() => navigate("/auditoria")}>📊</button>
-        <button style={btnMenu} onClick={() => navigate("/clientes")}>💳</button>
-        <button style={btnMenu} onClick={() => navigate("/financeiro")}>💰</button>
-      </div>
-    </div>
-  );
-}
-
-/* ============================= */
-/* ESTILO BOTÃO                  */
-/* ============================= */
-
-const btnMenu: React.CSSProperties = {
-  background: "#333",
-  color: "#fff",
-  border: "none",
-  padding: "10px 12px",
-  borderRadius: 6,
-  fontSize: 16,
-  cursor: "pointer",
-};
