@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import api from "../services/api"
-import Botao from "../components/Botao"
 import { theme } from "../assets/styles/adminTheme"
 import { Bar, Pie } from "react-chartjs-2"
 
@@ -153,13 +152,14 @@ export default function Auditoria() {
 
         <div style={acoes}>
           {produtos.map((p: any) => (
-            <Botao
+            <button
               key={p.nome}
               onClick={() => registrarVenda(p.nome)}
               disabled={loadingVenda}
+              style={btnPadrao}
             >
               {p.nome}
-            </Botao>
+            </button>
           ))}
         </div>
       </div>
@@ -197,17 +197,30 @@ function CardMenu({ navigate }: any) {
 function CardResumo({ titulo, valor, cor }: any) {
   return (
     <div style={{
-      background: cor,
+      flex: 1,
+      background: "linear-gradient(135deg, #1e1e1e, #2a2a2a)",
       padding: 20,
-      borderRadius: 12,
-      minWidth: 150,
-      textAlign: "center",
+      borderRadius: 16,
       color: "#fff",
-      fontWeight: "bold",
-      fontSize: 18
+      boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+      border: `1px solid ${cor}`,
+      position: "relative",
+      textAlign: "center",
+      minWidth: 120
     }}>
-      <div>{titulo}</div>
-      <div style={{ fontSize: 26 }}>{valor}</div>
+      <div style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 4,
+        background: cor,
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16,
+      }} />
+
+      <div style={{ opacity: 0.8, fontSize: 14 }}>{titulo}</div>
+      <div style={{ fontSize: 26, fontWeight: "bold", marginTop: 10 }}>{valor}</div>
     </div>
   )
 }
@@ -237,6 +250,18 @@ const acoes = {
 const aviso = {
   marginTop: 30,
   color: "#ccc"
+}
+
+/* 🔥 NOVO PADRÃO BOTÃO */
+const btnPadrao = {
+  background: "#222",
+  color: "#fff",
+  border: "1px solid #444",
+  padding: "12px 14px",
+  borderRadius: 10,
+  fontSize: 14,
+  cursor: "pointer",
+  transition: "0.2s"
 }
 
 const btnMenu = {
