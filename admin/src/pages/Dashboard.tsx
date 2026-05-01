@@ -196,7 +196,8 @@ function Card({ titulo, valor, cor }: any) {
       color: "#fff",
       fontWeight: "bold",
       textAlign: "center",
-      fontSize: 18
+      fontSize: 18,
+      minWidth: 220,
     }}>
       <div style={{ marginBottom: 10 }}>{titulo}</div>
       <div style={{ fontSize: 24 }}>{valor}</div>
@@ -206,13 +207,14 @@ function Card({ titulo, valor, cor }: any) {
 
 /* ESTILOS */
 
-const grid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+const grid: React.CSSProperties = {
+  display: "flex",
   gap: 20,
+  overflowX: "auto",
+  paddingBottom: 10,
 }
 
-const btnMenu = {
+const btnMenu: React.CSSProperties = {
   background: "#333",
   color: "#fff",
   border: "none",
