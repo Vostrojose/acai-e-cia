@@ -1,18 +1,17 @@
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import api from "../services/api"
-import { theme } from "../assets/styles/adminTheme"
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import api from '../services/api'
+import { theme } from '../assets/styles/adminTheme'
 
 export default function Dashboard() {
-
   const navigate = useNavigate()
 
   const [dados, setDados] = useState({
     totalHoje: 0,
-    produtoTop: "-",
+    produtoTop: '-',
     pedidosAbertos: 0,
     tempoMedio: 0,
-    tendencia: 0
+    tendencia: 0,
   })
 
   const [fiados, setFiados] = useState<any[]>([])
@@ -20,13 +19,13 @@ export default function Dashboard() {
   useEffect(() => {
     async function carregar() {
       try {
-        const resPedidos = await api.get("/pedidos")
+        const resPedidos = await api.get('/pedidos')
         const pedidos = resPedidos.data?.data || []
 
-        const resProdutos = await api.get("/produtos")
+        const resProdutos = await api.get('/produtos')
         const listaProdutos = resProdutos.data?.data || []
 
-        const resFiados = await api.get("/pedidos/fiados")
+        const resFiados = await api.get('/pedidos/fiados')
         setFiados(resFiados.data.data || [])
 
         const mapaProdutos: any = {}
@@ -43,11 +42,11 @@ export default function Dashboard() {
 
         const totalHoje = pedidosHoje.reduce(
           (acc: number, p: any) => acc + p.total,
-          0
+          0,
         )
 
         const pedidosAbertos = pedidos.filter(
-          (p: any) => p.status !== "ENTREGUE"
+          (p: any) => p.status !== 'ENTREGUE',
         ).length
 
         const contador: any = {}
@@ -59,19 +58,17 @@ export default function Dashboard() {
           })
         })
 
-        let produtoTop = "-"
+        let produtoTop = '-'
         let max = 0
 
         Object.entries(contador).forEach(([id, qtd]: any) => {
           if (qtd > max) {
             max = qtd
-            produtoTop = `${mapaProdutos[id] || "Produto"} (${qtd}x)`
+            produtoTop = `${mapaProdutos[id] || 'Produto'} (${qtd}x)`
           }
         })
 
-        const entregues = pedidos.filter(
-          (p: any) => p.status === "ENTREGUE"
-        )
+        const entregues = pedidos.filter((p: any) => p.status === 'ENTREGUE')
 
         const tempoMedio =
           entregues.reduce((acc: number, p: any) => {
@@ -92,7 +89,7 @@ export default function Dashboard() {
 
         const totalOntem = pedidosOntem.reduce(
           (acc: number, p: any) => acc + p.total,
-          0
+          0,
         )
 
         const tendencia = totalHoje - totalOntem
@@ -102,11 +99,10 @@ export default function Dashboard() {
           produtoTop,
           pedidosAbertos,
           tempoMedio: tempoMin,
-          tendencia
+          tendencia,
         })
-
       } catch (err) {
-        console.error("Erro ao carregar dashboard", err)
+        console.error('Erro ao carregar dashboard', err)
       }
     }
 
@@ -116,7 +112,6 @@ export default function Dashboard() {
     const interval = setInterval(carregar, 10000)
 
     return () => clearInterval(interval)
-
   }, [])
 
   async function quitar(id: string) {
@@ -126,19 +121,36 @@ export default function Dashboard() {
 
   return (
     <div style={theme.page}>
-
       <CardMenu navigate={navigate} />
 
-      <h1 style={{ ...theme.title, textAlign: "center" }}>
-        📊 Dashboard
-      </h1>
+      <h1 style={{ ...theme.title, textAlign: 'center' }}>📊 Dashboard</h1>
 
       <div style={grid}>
-        <Card titulo="💰 Vendas hoje" valor={`R$ ${dados.totalHoje.toFixed(2)}`} cor="#4caf50" />
-        <Card titulo="🔥 Produto mais vendido" valor={dados.produtoTop} cor="#ff9800" />
-        <Card titulo="📦 Pedidos em aberto" valor={dados.pedidosAbertos} cor="#2196f3" />
-        <Card titulo="⏱ Tempo médio" valor={`${dados.tempoMedio} min`} cor="#9c27b0" />
-        <Card titulo="📈 Tendência" valor={`R$ ${dados.tendencia}`} cor="#f44336" />
+        <Card
+          titulo="💰 Vendas hoje"
+          valor={`R$ ${dados.totalHoje.toFixed(2)}`}
+          cor="#4caf50"
+        />
+        <Card
+          titulo="🔥 Produto mais vendido"
+          valor={dados.produtoTop}
+          cor="#ff9800"
+        />
+        <Card
+          titulo="📦 Pedidos em aberto"
+          valor={dados.pedidosAbertos}
+          cor="#2196f3"
+        />
+        <Card
+          titulo="⏱ Tempo médio"
+          valor={`${dados.tempoMedio} min`}
+          cor="#9c27b0"
+        />
+        <Card
+          titulo="📈 Tendência"
+          valor={`R$ ${dados.tendencia}`}
+          cor="#f44336"
+        />
       </div>
 
       {/* 🔥 FIADOS */}
@@ -160,7 +172,6 @@ export default function Dashboard() {
           ))}
         </div>
       )}
-
     </div>
   )
 }
@@ -169,19 +180,31 @@ export default function Dashboard() {
 
 function CardMenu({ navigate }: any) {
   return (
-    <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
-      <div style={{
-        background: "#000",
-        padding: 10,
-        borderRadius: 10,
-        display: "flex",
-        gap: 10,
-        flexWrap: "wrap"
-      }}>
-        <button style={btnMenu} onClick={() => navigate("/cozinha")}>🍳</button>
-        <button style={btnMenu} onClick={() => navigate("/pedidos")}>📦</button>
-        <button style={btnMenu} onClick={() => navigate("/produtos")}>🛒</button>
-        <button style={btnMenu} onClick={() => navigate("/auditoria")}>📊</button>
+    <div
+      style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}
+    >
+      <div
+        style={{
+          background: '#000',
+          padding: 10,
+          borderRadius: 10,
+          display: 'flex',
+          gap: 10,
+          flexWrap: 'wrap',
+        }}
+      >
+        <button style={btnMenu} onClick={() => navigate('/cozinha')}>
+          🍳
+        </button>
+        <button style={btnMenu} onClick={() => navigate('/pedidos')}>
+          📦
+        </button>
+        <button style={btnMenu} onClick={() => navigate('/produtos')}>
+          🛒
+        </button>
+        <button style={btnMenu} onClick={() => navigate('/auditoria')}>
+          📊
+        </button>
       </div>
     </div>
   )
@@ -189,41 +212,42 @@ function CardMenu({ navigate }: any) {
 
 function Card({ titulo, valor, cor }: any) {
   return (
-    <div style={{
-      background: "linear-gradient(135deg, #1e1e1e, #2a2a2a)",
-      padding: 20,
-      borderRadius: 16,
-      color: "#fff",
-      minWidth: 220,
-      boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
-      border: `1px solid ${cor}`,
-      position: "relative"
-    }}>
-      
+    <div
+      style={{
+        background: 'linear-gradient(135deg, #1e1e1e, #2a2a2a)',
+        padding: 20,
+        borderRadius: 16,
+        color: '#fff',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+        border: `1px solid ${cor}`,
+        position: 'relative',
+      }}
+    >
       {/* LINHA DE COR */}
-      <div style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        height: 4,
-        background: cor,
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16
-      }} />
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 4,
+          background: cor,
+          borderTopLeftRadius: 16,
+          borderTopRightRadius: 16,
+        }}
+      />
 
-      <div style={{ opacity: 0.8, fontSize: 14 }}>
-        {titulo}
-      </div>
+      <div style={{ opacity: 0.8, fontSize: 14 }}>{titulo}</div>
 
-      <div style={{
-        fontSize: 26,
-        fontWeight: "bold",
-        marginTop: 10
-      }}>
+      <div
+        style={{
+          fontSize: 26,
+          fontWeight: 'bold',
+          marginTop: 10,
+        }}
+      >
         {valor}
       </div>
-
     </div>
   )
 }
@@ -231,44 +255,42 @@ function Card({ titulo, valor, cor }: any) {
 /* ESTILOS */
 
 const grid: React.CSSProperties = {
-  display: "flex",
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
   gap: 16,
-  overflowX: "auto",
-  padding: "10px 5px 20px 5px",
-
-  scrollbarWidth: "none", // Firefox
+  width: '100%',
 }
 
 const btnMenu: React.CSSProperties = {
-  background: "#333",
-  color: "#fff",
-  border: "none",
-  padding: "10px 12px",
+  background: '#333',
+  color: '#fff',
+  border: 'none',
+  padding: '10px 12px',
   borderRadius: 6,
   fontSize: 16,
-  cursor: "pointer"
+  cursor: 'pointer',
 }
 
 const fiadoBox: React.CSSProperties = {
   marginTop: 30,
-  background: "#111",
+  background: '#111',
   padding: 20,
   borderRadius: 12,
-  color: "#fff"
+  color: '#fff',
 }
 
 const linhaFiado: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  marginTop: 10
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginTop: 10,
 }
 
 const btnQuitar: React.CSSProperties = {
-  background: "#4caf50",
-  color: "#fff",
-  border: "none",
-  padding: "8px 12px",
+  background: '#4caf50',
+  color: '#fff',
+  border: 'none',
+  padding: '8px 12px',
   borderRadius: 6,
-  cursor: "pointer"
+  cursor: 'pointer',
 }
