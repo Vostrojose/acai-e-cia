@@ -9,7 +9,8 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   const [formaPagamento, setFormaPagamento] = useState('PAGO')
   const [clienteNome, setClienteNome] = useState('')
 
-  const [pularPreparo, setPularPreparo] = useState(false)
+  /*const [pularPreparo, setPularPreparo] = useState(false)*/
+  const [pularPreparo, setPularPreparo] = useState(true)
 
   /* ============================= */
   /* 🔍 BUSCAR PRODUTOS + SCROLL FIX */
