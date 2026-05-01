@@ -190,17 +190,40 @@ function CardMenu({ navigate }: any) {
 function Card({ titulo, valor, cor }: any) {
   return (
     <div style={{
-      background: cor,
+      background: "linear-gradient(135deg, #1e1e1e, #2a2a2a)",
       padding: 20,
-      borderRadius: 12,
+      borderRadius: 16,
       color: "#fff",
-      fontWeight: "bold",
-      textAlign: "center",
-      fontSize: 18,
       minWidth: 220,
+      boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+      border: `1px solid ${cor}`,
+      position: "relative"
     }}>
-      <div style={{ marginBottom: 10 }}>{titulo}</div>
-      <div style={{ fontSize: 24 }}>{valor}</div>
+      
+      {/* LINHA DE COR */}
+      <div style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 4,
+        background: cor,
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16
+      }} />
+
+      <div style={{ opacity: 0.8, fontSize: 14 }}>
+        {titulo}
+      </div>
+
+      <div style={{
+        fontSize: 26,
+        fontWeight: "bold",
+        marginTop: 10
+      }}>
+        {valor}
+      </div>
+
     </div>
   )
 }
@@ -209,9 +232,11 @@ function Card({ titulo, valor, cor }: any) {
 
 const grid: React.CSSProperties = {
   display: "flex",
-  gap: 20,
+  gap: 16,
   overflowX: "auto",
-  paddingBottom: 10,
+  padding: "10px 5px 20px 5px",
+
+  scrollbarWidth: "none", // Firefox
 }
 
 const btnMenu: React.CSSProperties = {
