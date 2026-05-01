@@ -9,11 +9,10 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   const [formaPagamento, setFormaPagamento] = useState('PAGO')
   const [clienteNome, setClienteNome] = useState('')
 
-  // 🔥 NOVO (opcional - não quebra nada)
   const [pularPreparo, setPularPreparo] = useState(false)
 
   /* ============================= */
-  /* 🔍 BUSCAR PRODUTOS            */
+  /* 🔍 BUSCAR PRODUTOS + SCROLL FIX */
   /* ============================= */
   useEffect(() => {
     async function carregar() {
@@ -22,6 +21,13 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
     }
 
     carregar()
+
+    // 🔥 trava scroll do fundo
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = 'auto'
+    }
   }, [])
 
   const produtosFiltrados = produtos.filter((p) =>
@@ -137,7 +143,10 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
     }
 
     const nomeNormalizado = clienteNome
-      ? clienteNome.toUpperCase().trim()
+      ? clienteNome
+          .toUpperCase()
+          .replace(/\s+/g, ' ')
+          .trim()
       : null
 
     if (formaPagamento !== 'PAGO' && !nomeNormalizado) {
@@ -150,7 +159,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
         itens,
         forma: formaPagamento,
         clienteNome: formaPagamento !== 'PAGO' ? nomeNormalizado : null,
-        pularPreparo, // 🔥 opcional (backend já suporta)
+        pularPreparo,
       })
 
       onSuccess()
@@ -186,28 +195,6 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                   onChange={() => toggleItem(p)}
                 />
                 {p.nome} - R$ {p.preco}
-                {/* ADICIONAIS */}
-                {selecionado && p.adicionais?.length > 0 && (
-                  <div style={{ marginLeft: 20 }}>
-                    {p.adicionais.map((add: any) => {
-                      const item = itens.find((i) => i.id === p.id)
-                      const ativo = item?.adicionais?.find(
-                        (a: any) => a.id === add.id,
-                      )
-
-                      return (
-                        <div key={add.id}>
-                          <input
-                            type="checkbox"
-                            checked={!!ativo}
-                            onChange={() => toggleAdicional(p.id, add)}
-                          />
-                          + {add.nome}
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
               </div>
             )
           })}
@@ -220,72 +207,14 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           <div key={i.id} style={linha}>
             <strong>{i.nome}</strong>
 
-            <div
-              style={{ display: 'flex', alignItems: 'center', marginTop: 5 }}
-            >
-              <button
-                style={btnTouch}
-                onClick={() => alterarQuantidade(i.id, -1)}
-              >
-                −
-              </button>
-
-              <span style={{ fontSize: 18, minWidth: 30, textAlign: 'center' }}>
-                {i.quantidade}
-              </span>
-
-              <button
-                style={btnTouch}
-                onClick={() => alterarQuantidade(i.id, 1)}
-              >
-                +
-              </button>
+            <div style={{ display: 'flex', alignItems: 'center', marginTop: 5 }}>
+              <button style={btnTouch} onClick={() => alterarQuantidade(i.id, -1)}>−</button>
+              <span style={{ fontSize: 18, minWidth: 30, textAlign: 'center' }}>{i.quantidade}</span>
+              <button style={btnTouch} onClick={() => alterarQuantidade(i.id, 1)}>+</button>
             </div>
-
-            {i.adicionais?.length > 0 && (
-              <div style={{ marginLeft: 10 }}>
-                {i.adicionais.map((a: any) => (
-                  <div key={a.id}>
-                    + {a.nome}
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        marginTop: 5,
-                      }}
-                    >
-                      <button
-                        style={btnTouch}
-                        onClick={() => alterarQtdAdicional(i.id, a.id, -1)}
-                      >
-                        −
-                      </button>
-
-                      <span
-                        style={{
-                          fontSize: 16,
-                          minWidth: 30,
-                          textAlign: 'center',
-                        }}
-                      >
-                        {a.quantidade}
-                      </span>
-
-                      <button
-                        style={btnTouch}
-                        onClick={() => alterarQtdAdicional(i.id, a.id, 1)}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         ))}
 
-        {/* FORMA DE PAGAMENTO */}
         <select
           value={formaPagamento}
           onChange={(e) => setFormaPagamento(e.target.value)}
@@ -296,24 +225,15 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           <option value="CREDITO">💳 Usar Crédito</option>
         </select>
 
-        {/* NOME */}
         {formaPagamento !== 'PAGO' && (
           <input
-            placeholder="Nome do cliente"
+            placeholder="Nome do cliente (ex: JOÃO SILVA)"
             value={clienteNome}
-            onChange={(e) => {
-              const valor = e.target.value
-                .toUpperCase()
-                .replace(/\s+/g, ' ') // 🔥 remove espaços duplicados
-                .trim()
-
-              setClienteNome(valor)
-            }}
+            onChange={(e) => setClienteNome(e.target.value.toUpperCase())}
             style={input}
           />
         )}
 
-        {/* 🔥 NOVO (OPCIONAL) */}
         <label style={{ marginTop: 10, display: 'block' }}>
           <input
             type="checkbox"
@@ -323,13 +243,8 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           Pedido já pronto
         </label>
 
-        <button onClick={salvar} style={btn}>
-          💾 Salvar venda
-        </button>
-
-        <button onClick={onClose} style={btnDanger}>
-          Cancelar
-        </button>
+        <button onClick={salvar} style={btn}>💾 Salvar venda</button>
+        <button onClick={onClose} style={btnDanger}>Cancelar</button>
       </div>
     </div>
   )
@@ -345,15 +260,18 @@ const overlay = {
   background: 'rgba(0,0,0,0.8)',
   display: 'flex',
   justifyContent: 'center',
-  alignItems: 'center',
+  alignItems: 'flex-start',
+  paddingTop: 20,
 }
 
-const modal = {
+const modal: React.CSSProperties = {
   background: '#111',
   padding: 20,
   borderRadius: 10,
   width: 400,
   color: '#fff',
+  maxHeight: '90vh',
+  overflowY: 'auto',
 }
 
 const input = {
