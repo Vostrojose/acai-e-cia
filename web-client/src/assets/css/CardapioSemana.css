@@ -2,7 +2,7 @@
   min-height: 100vh;
   width: 100%;
 
-  background: linear-gradient(180deg, #4A148C 0%, #6A1B9A 100%);
+  background: radial-gradient(circle at top, #2a0040, #0f0018 70%);
 
   display: flex;
   flex-direction: column;
@@ -19,14 +19,17 @@
 .titulo-semana {
   display: flex;
   align-items: center;
-  justify-content: center; /* centraliza o título */
-  position: relative;      /* permite posicionar o botão */
+  justify-content: center;
+  position: relative;
+
   width: 100%;
   margin-bottom: 25px;
 
-  font-size: 30px;   /* 🔽 diminui o tamanho da letra */
-  font-weight: 700;  /* mantém em negrito */
+  font-size: 28px;
+  font-weight: bold;
   color: #fff;
+
+  text-shadow: 0 0 10px rgba(170, 0, 255, 0.6);
 }
 
 /* ========================= */
@@ -37,13 +40,15 @@
   width: 100%;
   max-width: 700px;
 
-  background: linear-gradient(135deg, #ffffff, #f3e5f5);
+  background: linear-gradient(135deg, #1a0026, #2a0040);
   border-radius: 16px;
 
   padding: 20px;
   margin-bottom: 25px;
 
-  box-shadow: 0 8px 22px rgba(0,0,0,0.2);
+  border: 1px solid rgba(170, 0, 255, 0.2);
+
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
 
   text-align: center;
 }
@@ -51,19 +56,19 @@
 .destaque-label {
   font-size: 12px;
   font-weight: bold;
-  color: #6A1B9A;
+  color: #ff2e8b;
   margin-bottom: 8px;
 }
 
 .destaque-nome {
   font-size: 20px;
   font-weight: bold;
-  color: #333;
+  color: #fff;
 }
 
 .destaque-desc {
   font-size: 14px;
-  color: #666;
+  color: #bbb;
   margin-top: 6px;
 }
 
@@ -71,7 +76,7 @@
   margin-top: 10px;
   font-size: 18px;
   font-weight: bold;
-  color: #00c853;
+  color: #aaff00;
 }
 
 /* ========================= */
@@ -82,40 +87,46 @@
   width: 100%;
   max-width: 700px;
 
-  background: white;
+  background: linear-gradient(135deg, #1a0026, #2a0040);
   border-radius: 16px;
 
   padding: 18px;
   margin-bottom: 18px;
 
-  box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+  border: 1px solid rgba(170, 0, 255, 0.2);
+
+  box-shadow: 0 6px 16px rgba(0,0,0,0.4);
 }
 
 /* destaque do dia atual */
 .dia-hoje {
-  border: 2px solid #00c853;
-  box-shadow: 0 8px 22px rgba(0,0,0,0.25);
+  border: 2px solid #aaff00;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.6);
 }
 
 /* título do dia */
 .dia-titulo {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
   margin-bottom: 15px;
 
   display: flex;
   align-items: center;
   gap: 10px;
+
+  color: #fff;
 }
 
 /* badge HOJE */
 .badge-hoje {
-  background: #00c853;
-  color: white;
+  background: linear-gradient(135deg, #aaff00, #7edc00);
+  color: #000;
 
   font-size: 12px;
   padding: 4px 8px;
   border-radius: 8px;
+
+  font-weight: bold;
 }
 
 /* ========================= */
@@ -133,7 +144,7 @@
 /* ========================= */
 
 .produto-card {
-  background: #fff;
+  background: linear-gradient(135deg, #1a0026, #2a0040);
   border-radius: 14px;
 
   padding: 14px;
@@ -144,13 +155,18 @@
 
   gap: 12px;
 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border: 1px solid rgba(170, 0, 255, 0.2);
+
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+
+  transition: all 0.2s ease;
 }
 
 .produto-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+  box-shadow:
+    0 8px 18px rgba(0,0,0,0.4),
+    0 0 10px rgba(170, 0, 255, 0.3);
 }
 
 .produto-info {
@@ -163,24 +179,25 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
 }
 
 .produto-nome {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: #fff;
 }
 
 .produto-descricao {
   font-size: 13px;
-  color: #777;
+  color: #bbb;
   margin-top: 4px;
 }
 
 .produto-preco {
   font-size: 15px;
   font-weight: bold;
-  color: #6A1B9A;
+  color: #aaff00;
 }
 
 /* ========================= */
@@ -188,8 +205,8 @@
 /* ========================= */
 
 .add-btn {
-  background: #6A1B9A;
-  color: white;
+  background: linear-gradient(135deg, #aaff00, #7edc00);
+  color: #000;
 
   border: none;
   padding: 10px 12px;
@@ -198,13 +215,13 @@
   cursor: pointer;
 
   font-size: 13px;
-  font-weight: 600;
+  font-weight: bold;
 
   transition: all 0.2s ease;
 }
 
 .add-btn:hover {
-  background: #7B1FA2;
+  filter: brightness(1.1);
 }
 
 .add-btn:active {
@@ -216,7 +233,6 @@
 /* ========================= */
 
 @media (max-width: 500px) {
-
   .produto-card {
     flex-direction: column;
     align-items: flex-start;
@@ -226,24 +242,31 @@
     width: 100%;
     text-align: center;
   }
-
 }
 
+/* ========================= */
+/* BOTÃO VOLTAR              */
+/* ========================= */
+
 .btn-voltar {
-position: absolute;
-  left: 0;          /* canto esquerdo */
-  background: #9a471b;
-  color: white;
+  position: absolute;
+  left: 0;
+
+  background: linear-gradient(135deg, #ff2e8b, #ff6ec7);
+  color: #fff;
+
   border: none;
   border-radius: 10px;
   padding: 10px 14px;
+
   font-weight: 600;
   cursor: pointer;
+
   transition: all 0.2s ease;
 }
 
 .btn-voltar:hover {
-  background: #7B1FA2;
+  filter: brightness(1.1);
 }
 
 .btn-voltar:active {
