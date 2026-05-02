@@ -205,7 +205,7 @@
 /* ========================= */
 
 .add-btn {
-   background: radial-gradient(circle at top, #2a0040, #0f0018 70%);
+  background: linear-gradient(135deg, #ff2e8b, #ff6ec7);
   color: #000;
 
   border: none;
