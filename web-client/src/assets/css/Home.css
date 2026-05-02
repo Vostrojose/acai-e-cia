@@ -60,11 +60,12 @@
   flex: 1;
 }
 
-/* 🔥 NOVO */
+/*  NOVO */
 .produto-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%; /*  ESSENCIAL */
 }
 
 .produto-nome {
@@ -80,6 +81,7 @@
 .produto-preco {
   color: #aaff00;
   font-weight: bold;
+  margin-left: 10px; /* pequeno respiro */
 }
 
 /* ========================= */
