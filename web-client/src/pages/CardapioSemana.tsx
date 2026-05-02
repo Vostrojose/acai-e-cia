@@ -71,62 +71,62 @@ export default function CardapioSemana() {
 
     console.log('📌 Interesse registrado:', novo)
   }
+return (
+  <div className="cardapio-semana-page">
 
-  return (
-    <div className="cardapio-semana-page">
+    {/* 🔥 BOTÃO VOLTAR */}
+    <button
+      className="btn-voltar"
+      onClick={() => navigate('/')}
+    >
+      📅
+    </button>
 
-      {/* 🔥 BOTÃO VOLTAR */}
-      <button
-        className="btn-voltar"
-        onClick={() => navigate('/')}
-      >
-       📅
-      </button>
+    <h1 className="titulo-semana">
+      🍽️ Cardápio da Semana
+    </h1>
 
-      <h1 className="titulo-semana">
-        🍽️ Cardápio da Semana
-      </h1>
+    {destaque && (
+      <div className="destaque-card">
 
-      {destaque && (
-        <div className="destaque-card">
-
-          <div className="destaque-label">
-            ⭐ Especial da Semana
-          </div>
-
-          <div className="destaque-nome">
-            {destaque.nome}
-          </div>
-
-          {destaque.descricao && (
-            <div className="destaque-desc">
-              {destaque.descricao}
-            </div>
-          )}
-
-          <div className="destaque-preco">
-            R$ {Number(destaque.preco || 0).toFixed(2)}
-          </div>
-
+        <div className="destaque-label">
+          ⭐ Especial da Semana
         </div>
-      )}
 
-      {diasOrdenados.map((dia) => {
+        <div className="destaque-nome">
+          {destaque.nome}
+        </div>
 
-        const produtosDoDia = produtos.filter(
-          (produto) => produto.ativo && produto[dia.key as keyof Produto]
-        )
+        {destaque.descricao && (
+          <div className="destaque-desc">
+            {destaque.descricao}
+          </div>
+        )}
 
-        if (produtosDoDia.length === 0) return null
+        <div className="destaque-preco">
+          R$ {Number(destaque.preco || 0).toFixed(2)}
+        </div>
 
-        return (
+      </div>
+    )}
+
+    {diasOrdenados.map((dia, index) => {
+
+      const produtosDoDia = produtos.filter(
+        (produto) => produto.ativo && produto[dia.key as keyof Produto]
+      )
+
+      if (produtosDoDia.length === 0) return null
+
+      return (
+        <div key={dia.nome} style={{ width: '100%', maxWidth: 700 }}>
+
           <div
-            key={dia.nome}
             className={`dia-card ${hoje === dia.numero ? 'dia-hoje' : ''}`}
           >
 
             <h2 className="dia-titulo">
-              {dia.nome}
+              📅 {dia.nome}
 
               {hoje === dia.numero && (
                 <span className="badge-hoje">
@@ -175,10 +175,17 @@ export default function CardapioSemana() {
             </div>
 
           </div>
-        )
 
-      })}
+          {/* 🔥 LINHA SEPARADORA */}
+          {index !== diasOrdenados.length - 1 && (
+            <div className="linha-divisoria" />
+          )}
 
-    </div>
-  )
+        </div>
+      )
+
+    })}
+
+  </div>
+)
 }

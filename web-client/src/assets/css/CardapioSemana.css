@@ -272,3 +272,18 @@
 .btn-voltar:active {
   transform: scale(0.95);
 }
+
+.linha-divisoria {
+  height: 1px;
+  width: 100%;
+  max-width: 700px;
+
+  margin: 20px auto;
+
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(170, 0, 255, 0.4),
+    transparent
+  );
+}
