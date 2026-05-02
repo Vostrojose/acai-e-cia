@@ -27,6 +27,19 @@ export default function CardapioSemana() {
   const hoje = new Date().getDay()
 
   /* ============================= */
+  /* 🔥 FUNÇÃO BLINDADA BOOLEAN    */
+  /* ============================= */
+
+  function toBoolean(value: any): boolean {
+    return (
+      value === true ||
+      value === 'true' ||
+      value === 1 ||
+      value === '1'
+    )
+  }
+
+  /* ============================= */
   /* 🔥 DIAS DA SEMANA             */
   /* ============================= */
 
@@ -57,13 +70,14 @@ export default function CardapioSemana() {
 
       const produtosTratados = res.data.data.map((p: any) => ({
         ...p,
-        disponivelSeg: p.disponivelSeg === true || p.disponivelSeg === 'true',
-        disponivelTer: p.disponivelTer === true || p.disponivelTer === 'true',
-        disponivelQua: p.disponivelQua === true || p.disponivelQua === 'true',
-        disponivelQui: p.disponivelQui === true || p.disponivelQui === 'true',
-        disponivelSex: p.disponivelSex === true || p.disponivelSex === 'true',
-        disponivelSab: p.disponivelSab === true || p.disponivelSab === 'true',
-        disponivelDom: p.disponivelDom === true || p.disponivelDom === 'true',
+        ativo: toBoolean(p.ativo),
+        disponivelSeg: toBoolean(p.disponivelSeg),
+        disponivelTer: toBoolean(p.disponivelTer),
+        disponivelQua: toBoolean(p.disponivelQua),
+        disponivelQui: toBoolean(p.disponivelQui),
+        disponivelSex: toBoolean(p.disponivelSex),
+        disponivelSab: toBoolean(p.disponivelSab),
+        disponivelDom: toBoolean(p.disponivelDom),
       }))
 
       setProdutos(produtosTratados)
@@ -130,11 +144,7 @@ export default function CardapioSemana() {
       {diasOrdenados.map((dia, index) => {
         const produtosDoDia = produtos.filter((produto) => {
           const disponivel = produto[dia.key as keyof Produto]
-
-          return (
-            produto.ativo === true &&
-            (disponivel === true || disponivel === 'true')
-          )
+          return produto.ativo === true && toBoolean(disponivel)
         })
 
         if (produtosDoDia.length === 0) return null
@@ -158,7 +168,9 @@ export default function CardapioSemana() {
                   <div key={produto.id} className="produto-card">
                     <div className="produto-info">
                       <div className="produto-header">
-                        <div className="produto-nome">{produto.nome}</div>
+                        <div className="produto-nome">
+                          {produto.nome}
+                        </div>
 
                         <div className="produto-preco">
                           R$ {Number(produto.preco || 0).toFixed(2)}
