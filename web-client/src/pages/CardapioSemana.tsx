@@ -26,61 +26,30 @@ export default function CardapioSemana() {
 
   const hoje = new Date().getDay()
 
-  /* ============================= */
-  /* 🔥 DIAS DA SEMANA             */
-  /* ============================= */
-
-  const dias = [
-    { nome: "Segunda", key: "disponivelSeg", numero: 1 },
-    { nome: "Terça", key: "disponivelTer", numero: 2 },
-    { nome: "Quarta", key: "disponivelQua", numero: 3 },
-    { nome: "Quinta", key: "disponivelQui", numero: 4 },
-    { nome: "Sexta", key: "disponivelSex", numero: 5 },
-    { nome: "Sábado", key: "disponivelSab", numero: 6 },
-    { nome: "Domingo", key: "disponivelDom", numero: 0 }
-  ]
-
-  const indexHoje = dias.findIndex((d) => d.numero === hoje)
-
-  const diasOrdenados = [
-    ...dias.slice(indexHoje),
-    ...dias.slice(0, indexHoje)
-  ]
-
-  /* ============================= */
-  /* 🔥 CARREGAR PRODUTOS          */
-  /* ============================= */
+  const destaque = produtos.find((p) => p.destaque && p.ativo)
 
   useEffect(() => {
     async function loadProdutos() {
       const res = await api.get('/produtos')
-
-      const produtosTratados = res.data.data.map((p: any) => ({
-        ...p,
-        disponivelSeg: p.disponivelSeg === true || p.disponivelSeg === 'true',
-        disponivelTer: p.disponivelTer === true || p.disponivelTer === 'true',
-        disponivelQua: p.disponivelQua === true || p.disponivelQua === 'true',
-        disponivelQui: p.disponivelQui === true || p.disponivelQui === 'true',
-        disponivelSex: p.disponivelSex === true || p.disponivelSex === 'true',
-        disponivelSab: p.disponivelSab === true || p.disponivelSab === 'true',
-        disponivelDom: p.disponivelDom === true || p.disponivelDom === 'true',
-      }))
-
-      setProdutos(produtosTratados)
+      setProdutos(res.data.data)
     }
 
     loadProdutos()
   }, [])
 
-  /* ============================= */
-  /* 🔥 DESTAQUE                  */
-  /* ============================= */
+  const dias = [
+    { nome: 'Segunda', key: 'disponivelSeg', numero: 1 },
+    { nome: 'Terça', key: 'disponivelTer', numero: 2 },
+    { nome: 'Quarta', key: 'disponivelQua', numero: 3 },
+    { nome: 'Quinta', key: 'disponivelQui', numero: 4 },
+    { nome: 'Sexta', key: 'disponivelSex', numero: 5 },
+    { nome: 'Sábado', key: 'disponivelSab', numero: 6 },
+    { nome: 'Domingo', key: 'disponivelDom', numero: 0 },
+  ]
 
-  const destaque = produtos.find((p) => p.destaque && p.ativo)
+  const indexHoje = dias.findIndex((d) => d.numero === hoje)
 
-  /* ============================= */
-  /* 🔥 INTERESSE                 */
-  /* ============================= */
+  const diasOrdenados = [...dias.slice(indexHoje), ...dias.slice(0, indexHoje)]
 
   function registrarInteresse(produto: Produto, dia: string) {
     const interesses = JSON.parse(localStorage.getItem('interesses') || '[]')
@@ -95,15 +64,12 @@ export default function CardapioSemana() {
     interesses.push(novo)
 
     localStorage.setItem('interesses', JSON.stringify(interesses))
+
+    console.log('📌 Interesse registrado:', novo)
   }
-
-  /* ============================= */
-  /* 🔥 RENDER                    */
-  /* ============================= */
-
   return (
     <div className="cardapio-semana-page">
-
+      {/* 🔥 BOTÃO VOLTAR */}
       <button className="btn-voltar" onClick={() => navigate('/')}>
         📅
       </button>
@@ -127,35 +93,33 @@ export default function CardapioSemana() {
       )}
 
       {diasOrdenados.map((dia, index) => {
-
         const produtosDoDia = produtos.filter((produto) => {
           const disponivel = produto[dia.key as keyof Produto]
 
-          return produto.ativo === true && disponivel === true
+          return (
+            produto.ativo === true &&
+            (disponivel === true || disponivel === 'true')
+          )
         })
 
         if (produtosDoDia.length === 0) return null
 
         return (
           <div key={dia.nome} style={{ width: '100%', maxWidth: 700 }}>
-
-            <div className={`dia-card ${hoje === dia.numero ? 'dia-hoje' : ''}`}>
-
+            <div
+              className={`dia-card ${hoje === dia.numero ? 'dia-hoje' : ''}`}
+            >
               <h2 className="dia-titulo">
                 📅 {dia.nome}
-
                 {hoje === dia.numero && (
                   <span className="badge-hoje">HOJE</span>
                 )}
               </h2>
 
               <div className="produtos-dia">
-
                 {produtosDoDia.map((produto) => (
                   <div key={produto.id} className="produto-card">
-
                     <div className="produto-info">
-
                       <div className="produto-header">
                         <div className="produto-nome">{produto.nome}</div>
 
@@ -169,7 +133,6 @@ export default function CardapioSemana() {
                           {produto.descricao}
                         </div>
                       )}
-
                     </div>
 
                     <button
@@ -178,21 +141,18 @@ export default function CardapioSemana() {
                     >
                       Tenho interesse
                     </button>
-
                   </div>
                 ))}
-
               </div>
             </div>
 
+            {/* 🔥 LINHA SEPARADORA */}
             {index !== diasOrdenados.length - 1 && (
               <div className="linha-divisoria" />
             )}
-
           </div>
         )
       })}
-
     </div>
   )
 }
