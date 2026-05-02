@@ -164,12 +164,14 @@ export default function Home() {
 
   return (
     <div className="page">
-      {totalItens > 0 && (
-        <div className="cart-floating" onClick={() => navigate('/carrinho')}>
-          🛒
-          <span className="cart-badge">{totalItens}</span>
-        </div>
-      )}
+      <div
+        className="cart-floating"
+        onClick={() => navigate('/carrinho')}
+        style={{ opacity: totalItens > 0 ? 1 : 0.6 }}
+      >
+        🛒
+        {totalItens > 0 && <span className="cart-badge">{totalItens}</span>}
+      </div>
 
       <div className="header">
         <h1 className="title">Açaí & Co</h1>
@@ -206,21 +208,18 @@ export default function Home() {
                   )}
                 </div>
 
-                {!produto.temAdicionais ? (
-                  <button
-                    className="add-btn"
-                    onClick={() => adicionarDireto(produto)}
-                  >
-                    + Adicionar
-                  </button>
-                ) : (
-                  <button
-                    className={quantidade ? 'add-btn-added' : 'add-btn'}
-                    onClick={() => abrirPopup(produto)}
-                  >
-                    {quantidade ? `✔ ${quantidade}` : 'Escolher'}
-                  </button>
-                )}
+                <button
+                  className={quantidade ? 'add-btn-added' : 'add-btn'}
+                  onClick={() => {
+                    if (produto.temAdicionais) {
+                      abrirPopup(produto)
+                    } else {
+                      adicionarDireto(produto)
+                    }
+                  }}
+                >
+                  {quantidade ? `✔ ${quantidade} no carrinho` : 'Adicionar'}
+                </button>
               </div>
             )
           })}

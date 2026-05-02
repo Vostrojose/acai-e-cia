@@ -143,11 +143,30 @@
 /* ========================= */
 
 .cart-floating {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+
+  width: 60px;
+  height: 60px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   background: linear-gradient(135deg, #aaff00, #7edc00);
   color: #000;
-  border-radius: 50%;
-}
 
+  border-radius: 50%;
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+
+  z-index: 9999;
+
+  transition: all 0.2s ease;
+
+  pointer-events: auto; /* 🔥 mantém aqui */
+}
 .cart-floating:hover {
   transform: scale(1.1);
 }
@@ -225,9 +244,12 @@
 }
 
 .popup-adicionais {
-  box-shadow: 0 -10px 30px rgba(0,0,0,0.6);
-}
-.popup-adicionais {
+  background: #1a0026;
+  color: #fff;
+  border-radius: 16px;
+  padding: 20px;
+
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6);
   animation: subir 0.3s ease;
 }
 
@@ -250,26 +272,41 @@
 }
 
 .btn-semana {
-  position: absolute;
-  top: 10px; /* distância do topo */
-  left: 10px; /* distância da borda esquerda */
-  width: 60px;
-  height: 60px;
+  position: fixed;
+
+  top: 20px;
+  right: 20px;
+
+  width: 50px;
+  height: 50px;
+
   border-radius: 50%;
   border: none;
+
   background: linear-gradient(135deg, #ff2e8b, #ff6ec7);
   color: #fff;
-  font-weight: 600;
-  cursor: pointer;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  transition: all 0.2s ease;
+
+  z-index: 9999;
 }
 
 .produto-card:hover {
   box-shadow:
-    0 10px 22px rgba(0,0,0,0.4),
+    0 10px 22px rgba(0, 0, 0, 0.4),
     0 0 10px rgba(170, 0, 255, 0.3);
+}
+
+.header {
+  position: relative;
+  padding: 20px;
+}
+
+.btn-semana:hover {
+  transform: scale(1.1);
+}
+.btn-semana {
+  pointer-events: auto;
 }
