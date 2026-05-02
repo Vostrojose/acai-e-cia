@@ -106,7 +106,7 @@
 }
 
 .add-btn-added {
-  background: linear-gradient(135deg, #ff2e8b, #ff6ec7);
+  background: linear-gradient(135deg, #aaff00, #7edc00);
   color: #fff;
 }
 
@@ -182,7 +182,7 @@
   top: -6px;
   right: -6px;
 
-  background:  #aaff00;
+  background: #ff2e8b;
   color: white;
 
   font-size: 12px;
