@@ -89,7 +89,7 @@
 /* ========================= */
 
 .add-btn {
-  background: linear-gradient(135deg, #aaff00, #7edc00);
+  background: radial-gradient(circle at top, #2a0040, #0f0018 70%);
   color: #000;
   border: none;
   padding: 8px 12px;
