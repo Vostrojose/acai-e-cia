@@ -68,6 +68,8 @@ export default function Adicionais({ exigirLogin }: any) {
         if (!id) return
 
         setSalvando(true)
+        console.log('API:', api)
+        console.log('POST:', api.post)
 
         await api.post(`/produtos/${id}/adicionais`, {
           nome,
@@ -219,9 +221,7 @@ export default function Adicionais({ exigirLogin }: any) {
                 </button>
               </>
             ) : (
-              <p style={theme.textMuted}>
-                💰 R$ {Number(a.preco).toFixed(2)}
-              </p>
+              <p style={theme.textMuted}>💰 R$ {Number(a.preco).toFixed(2)}</p>
             )}
 
             <div>
