@@ -251,7 +251,7 @@ export default function Produtos() {
               </button>
               <button
                 onClick={() =>
-                  exigirLogin(() => {
+                  exigirReautenticacao(() => {
                     navigate(`/produtos/${p.id}/adicionais`)
                   })
                 }
