@@ -21,28 +21,49 @@ export default function ProdutoForm({ onCreated, exigirLogin }: any) {
   }
 
   async function salvar(e: any) {
-  e.preventDefault();
+    e.preventDefault();
 
-  exigirLogin(async () => {
-    const payload = {
-      nome,
-      descricao,
-      preco,
-      ...dias,
-      ativo: true
-    };
+    exigirLogin(async () => {
 
-    console.log("📦 PAYLOAD ENVIADO:", payload);
+      /* 🔥 BLINDAGEM TOTAL DOS BOOLEANOS */
+      const payload = {
+        nome,
+        descricao,
+        preco: Number(preco),
 
-    await api.post("/produtos", payload);
+        disponivelSeg: !!dias.disponivelSeg,
+        disponivelTer: !!dias.disponivelTer,
+        disponivelQua: !!dias.disponivelQua,
+        disponivelQui: !!dias.disponivelQui,
+        disponivelSex: !!dias.disponivelSex,
+        disponivelSab: !!dias.disponivelSab,
+        disponivelDom: !!dias.disponivelDom,
 
-    setNome("");
-    setDescricao("");
-    setPreco(0);
+        ativo: true
+      };
 
-    onCreated();
-  });
-}
+      console.log("📦 PAYLOAD ENVIADO:", payload);
+
+      await api.post("/produtos", payload);
+
+      setNome("");
+      setDescricao("");
+      setPreco(0);
+
+      /* 🔥 RESET CORRETO DOS DIAS */
+      setDias({
+        disponivelSeg: true,
+        disponivelTer: true,
+        disponivelQua: true,
+        disponivelQui: true,
+        disponivelSex: true,
+        disponivelSab: true,
+        disponivelDom: true
+      });
+
+      onCreated();
+    });
+  }
 
   return (
     <form onSubmit={salvar} style={{ marginTop: 20 }}>
