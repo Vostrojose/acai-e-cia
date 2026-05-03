@@ -22,6 +22,7 @@ export default function Produtos() {
 
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
+  const [alterandoId, setAlterandoId] = useState<string | null>(null)
 
   /* AUTH */
   const [mostrarLogin, setMostrarLogin] = useState(false)
@@ -156,13 +157,30 @@ export default function Produtos() {
       carregarProdutos()
     })
   }
-
   async function toggleAtivo(p: Produto) {
     exigirReautenticacao(async () => {
-      await api.patch(`/produtos/${p.id}/status`, {
-        ativo: !p.ativo,
-      })
-      carregarProdutos()
+      const confirmar = confirm(
+        p.ativo
+          ? `Deseja DESATIVAR o produto "${p.nome}" no cardápio?`
+          : `Deseja ATIVAR o produto "${p.nome}" no cardápio?`,
+      )
+
+      if (!confirmar) return
+
+      try {
+        setAlterandoId(p.id) // 🔥 FALTAVA ISSO
+
+        await api.patch(`/produtos/${p.id}/status`, {
+          ativo: !p.ativo,
+        })
+
+        await carregarProdutos()
+      } catch (err) {
+        console.error(err)
+        setErro('Erro ao alterar status')
+      } finally {
+        setAlterandoId(null) //  LIBERA O BOTÃO
+      }
     })
   }
 
@@ -241,10 +259,25 @@ export default function Produtos() {
               <button onClick={() => iniciarEdicao(p)} style={btn}>
                 ✏️ Editar
               </button>
-
-              <button onClick={() => toggleAtivo(p)} style={btn}>
-                🔄 Status
+              <button
+                onClick={() => toggleAtivo(p)}
+                disabled={alterandoId === p.id}
+                style={{
+                  ...btn,
+                  background: p.ativo ? '#ff9800' : '#4caf50',
+                  opacity: alterandoId === p.id ? 0.6 : 1,
+                  cursor: alterandoId === p.id ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {alterandoId === p.id
+                  ? 'Processando...'
+                  : p.ativo
+                    ? '🚫 Desativar'
+                    : '✅ Ativar'}
               </button>
+              <p style={{ color: p.ativo ? '#4caf50' : '#f44336' }}>
+                {p.ativo ? '🟢 Ativo' : '🔴 Inativo'}
+              </p>
 
               <button onClick={() => remover(p.id)} style={btnDanger}>
                 🗑 Remover
