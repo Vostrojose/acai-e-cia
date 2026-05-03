@@ -20,11 +20,12 @@ export class WebhookController {
     try {
       console.log('📥 [WEBHOOK] Notificação recebida:', req.body)
 
-      const paymentId = req.body?.data?.id
+      const paymentId = req.body?.data?.id || req.body?.id
       if (!paymentId) {
         console.error('❌ [WEBHOOK] Nenhum paymentId encontrado')
         return res.status(400).send('paymentId ausente')
       }
+      console.log('📦 BODY COMPLETO:', JSON.stringify(req.body))
 
       // Buscar detalhes do pagamento no Mercado Pago
       const pagamento: Pagamento = await mpProvider.buscarPagamento(paymentId)
@@ -54,15 +55,19 @@ export class WebhookController {
       // Atualizar pedido no banco usando externalReference
       const pedidoAtualizado = await pedidoService.atualizarPagamento(
         pagamento.externalReference,
-        novoStatusPagamento
+        novoStatusPagamento,
       )
 
       // 🔔 Emitir atualização via websocket
       getIO().emit('pedido_atualizado', serializeDecimal(pedidoAtualizado))
 
-      console.log(`✅ Pedido ${pagamento.externalReference} atualizado para pagamento ${novoStatusPagamento}`)
+      console.log(
+        `✅ Pedido ${pagamento.externalReference} atualizado para pagamento ${novoStatusPagamento}`,
+      )
 
-      return res.status(200).json({ success: true, data: serializeDecimal(pedidoAtualizado) })
+      return res
+        .status(200)
+        .json({ success: true, data: serializeDecimal(pedidoAtualizado) })
     } catch (error: any) {
       console.error('❌ [WEBHOOK] Erro ao processar webhook:', error.message)
       return res.status(500).send('Erro interno')
@@ -71,10 +76,3 @@ export class WebhookController {
 }
 
 export default new WebhookController()
-
-
-
-
-
-
-
