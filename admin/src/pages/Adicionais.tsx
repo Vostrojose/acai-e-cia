@@ -3,6 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { theme } from '../assets/styles/adminTheme'
 
+const { id } = useParams()
+
+console.log('ID ADICIONAIS:', id)
+
 type Adicional = {
   id: string
   nome: string
