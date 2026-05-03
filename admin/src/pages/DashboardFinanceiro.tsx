@@ -33,14 +33,14 @@ export default function DashboardFinanceiro() {
 
   return (
     <div style={theme.page}>
-      {/* 🔥 MENU DE NAVEGAÇÃO */}
+      {/*  MENU DE NAVEGAÇÃO */}
       <CardMenu navigate={navigate} />
 
       <h1 style={{ ...theme.title, textAlign: 'center', marginBottom: 20 }}>
         📊 Financeiro
       </h1>
 
-      {/* 🔥 CARDS */}
+      {/*  CARDS */}
       <div style={grid}>
         <Card titulo="💰 Vendas" valor={data.totalVendas} cor="#4caf50" />
         <Card titulo="💵 Pago" valor={data.totalPago} cor="#2196f3" />

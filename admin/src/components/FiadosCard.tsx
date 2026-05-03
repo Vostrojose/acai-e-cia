@@ -16,7 +16,7 @@ export default function FiadosCard() {
   useEffect(() => {
     carregar();
 
-    // 🔥 atualiza automático a cada 10s
+    // atualiza automático a cada 10s
     const interval = setInterval(carregar, 10000);
 
     return () => clearInterval(interval);

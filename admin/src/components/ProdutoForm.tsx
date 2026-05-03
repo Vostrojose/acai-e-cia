@@ -25,7 +25,7 @@ export default function ProdutoForm({ onCreated, exigirLogin }: any) {
 
     exigirLogin(async () => {
 
-      /* 🔥 BLINDAGEM TOTAL DOS BOOLEANOS */
+      /*  BLINDAGEM TOTAL DOS BOOLEANOS */
       const payload = {
         nome,
         descricao,
@@ -50,7 +50,7 @@ export default function ProdutoForm({ onCreated, exigirLogin }: any) {
       setDescricao("");
       setPreco(0);
 
-      /* 🔥 RESET CORRETO DOS DIAS */
+      /*  RESET CORRETO DOS DIAS */
       setDias({
         disponivelSeg: true,
         disponivelTer: true,

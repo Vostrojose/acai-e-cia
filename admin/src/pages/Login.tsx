@@ -14,7 +14,7 @@ export default function Login() {
 
     try {
 
-      const res = await api.post("/auth/login", { // ✅ CORREÇÃO
+      const res = await api.post("/auth/login", { //  CORREÇÃO
         email,
         senha
       })

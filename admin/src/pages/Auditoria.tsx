@@ -252,7 +252,7 @@ const aviso = {
   color: "#ccc"
 }
 
-/* 🔥 NOVO PADRÃO BOTÃO */
+/*  NOVO PADRÃO BOTÃO */
 const btnPadrao = {
   background: "#222",
   color: "#fff",

@@ -23,14 +23,14 @@ export default function Produtos() {
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
 
-  /* 🔐 AUTH */
+  /* AUTH */
   const [mostrarLogin, setMostrarLogin] = useState(false)
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
 
   const [acaoPendente, setAcaoPendente] = useState<null | (() => void)>(null)
 
-  // 🔥 CONTROLE DE REAUTENTICAÇÃO
+  //  CONTROLE DE REAUTENTICAÇÃO
   const [ultimoLoginSensivel, setUltimoLoginSensivel] = useState<number | null>(
     null,
   )
@@ -42,12 +42,12 @@ export default function Produtos() {
 
   function logout() {
     sessionStorage.removeItem('token')
-    setUltimoLoginSensivel(null) // 🔥 limpa sessão sensível
+    setUltimoLoginSensivel(null) // limpa sessão sensível
     alert('Sessão encerrada')
   }
 
   /* ============================= */
-  /* 🔐 REAUTENTICAÇÃO             */
+  /*  REAUTENTICAÇÃO             */
   /* ============================= */
   function exigirReautenticacao(callback: () => void) {
     const agora = Date.now()
@@ -65,7 +65,7 @@ export default function Produtos() {
   }
 
   /* ============================= */
-  /* 🔐 LOGIN                      */
+  /*  LOGIN                      */
   /* ============================= */
   async function login() {
     try {
@@ -78,14 +78,14 @@ export default function Produtos() {
 
       sessionStorage.setItem('token', token)
 
-      // 🔥 FORÇA atualização imediata do axios
+      //  FORÇA atualização imediata do axios
       api.defaults.headers.Authorization = `Bearer ${token}`
 
       setEmail('')
       setSenha('')
       setMostrarLogin(false)
 
-      // 🔥 MARCA MOMENTO DA REAUTENTICAÇÃO
+      //  MARCA MOMENTO DA REAUTENTICAÇÃO
       setUltimoLoginSensivel(Date.now())
 
       if (acaoPendente) {
@@ -102,7 +102,7 @@ export default function Produtos() {
   }
 
   /* ============================= */
-  /* 🔐 LOGIN INICIAL              */
+  /*  LOGIN INICIAL              */
   /* ============================= */
   function exigirLogin(callback: () => void) {
     if (!temToken()) {
@@ -114,7 +114,7 @@ export default function Produtos() {
   }
 
   /* ============================= */
-  /* 📦 PRODUTOS                   */
+  /*  PRODUTOS                   */
   /* ============================= */
   async function carregarProdutos() {
     setCarregando(true)
