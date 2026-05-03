@@ -264,10 +264,10 @@ function CardClima() {
           setTexto('🚨 CHUVA FORTE RÍSCO DE ALAGAMENTO')
         } else if (chuva > 0) {
           setStatus('alerta')
-          setTexto('🌧️ Possível chuva')
+          setTexto('🌧️ Possível Chuva')
         } else {
           setStatus('ok')
-          setTexto('☀️ Sem risco de tempestade')
+          setTexto('☀️ Não Há Ríscos de Tempestades')
         }
       } catch {
         setTexto('Clima indisponível')
