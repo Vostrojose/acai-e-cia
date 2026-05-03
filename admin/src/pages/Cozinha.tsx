@@ -267,7 +267,7 @@ function CardClima() {
           setTexto('🌧️ Possível chuva')
         } else {
           setStatus('ok')
-          setTexto('☀️ Tempo estável')
+          setTexto('☀️ Sem risco de tempestade')
         }
       } catch {
         setTexto('Clima indisponível')
