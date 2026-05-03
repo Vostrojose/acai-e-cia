@@ -3,6 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { theme } from '../assets/styles/adminTheme'
 
+/* ========================= */
+/* TIPOS                     */
+/* ========================= */
+
 type Adicional = {
   id: string
   nome: string
@@ -10,96 +14,107 @@ type Adicional = {
   ativo: boolean
 }
 
-export default function Adicionais({ exigirLogin }: any) {
+type Props = {
+  exigirLogin?: (callback: () => Promise<void>) => Promise<void> | void
+}
+
+/* ========================= */
+/* COMPONENTE                */
+/* ========================= */
+
+export default function Adicionais({ exigirLogin }: Props) {
   const { id } = useParams()
   const navigate = useNavigate()
 
   const [adicionais, setAdicionais] = useState<Adicional[]>([])
   const [nome, setNome] = useState('')
-  const [preco, setPreco] = useState(0)
+  const [preco, setPreco] = useState<number | ''>('')
 
   const [editando, setEditando] = useState<string | null>(null)
-  const [novoPreco, setNovoPreco] = useState(0)
+  const [novoPreco, setNovoPreco] = useState<number | ''>('')
 
   const [loading, setLoading] = useState(false)
   const [salvando, setSalvando] = useState(false)
 
   /* ============================= */
-  /* SAFE EXECUTOR (🔥 CORREÇÃO)   */
+  /* EXECUTOR SEGURO               */
   /* ============================= */
   async function executarComOuSemLogin(callback: () => Promise<void>) {
     try {
       if (typeof exigirLogin === 'function') {
-        return exigirLogin(callback)
+        await exigirLogin(callback)
       } else {
-        console.warn('⚠️ exigirLogin não é função — executando direto')
-        return await callback()
+        await callback()
       }
     } catch (err) {
-      console.error('🔥 ERRO NO EXECUTOR:', err)
+      console.error('Erro no executor:', err)
     }
   }
 
   /* ============================= */
-  /* VALIDAÇÃO ID                 */
+  /* VALIDAÇÃO ID                  */
   /* ============================= */
-  if (!id) {
-    console.error('ID NÃO VEIO NA ROTA')
-    return <div>Erro: produto não identificado</div>
-  }
+  useEffect(() => {
+    if (!id) {
+      navigate('/produtos')
+    }
+  }, [id, navigate])
+
+  if (!id) return null
 
   /* ============================= */
-  /* CARREGAR                     */
+  /* CARREGAR                      */
   /* ============================= */
   async function carregar() {
     try {
-      if (!id) return
-
       setLoading(true)
 
       const res = await api.get(`/produtos/${id}`)
 
       setAdicionais(res.data.data.adicionais || [])
     } catch (err) {
-      console.error('🔥 ERRO AO CARREGAR:', err)
+      console.error('Erro ao carregar adicionais:', err)
       alert('Erro ao carregar adicionais')
     } finally {
       setLoading(false)
     }
   }
 
+  /* ============================= */
+  /* ATUALIZAR LISTA (🔥 NOVO)     */
+  /* ============================= */
+  async function atualizarLista() {
+    await carregar()
+  }
+
   useEffect(() => {
-    if (id) carregar()
+    carregar()
   }, [id])
 
   /* ============================= */
-  /* CRIAR                        */
+  /* CRIAR                         */
   /* ============================= */
   async function criar() {
     await executarComOuSemLogin(async () => {
       try {
-        if (!nome.trim() || preco <= 0) {
+        if (!nome.trim() || Number(preco) <= 0) {
           alert('Preencha corretamente')
           return
         }
 
-        if (!id) return
-
         setSalvando(true)
-
-        console.log('🔥 CRIANDO ADICIONAL', { nome, preco, id })
 
         await api.post(`/produtos/${id}/adicionais`, {
           nome,
-          preco,
+          preco: Number(preco),
         })
 
         setNome('')
-        setPreco(0)
+        setPreco('')
 
-        await carregar()
+        await atualizarLista()
       } catch (err) {
-        console.error('🔥 ERRO AO CRIAR:', err)
+        console.error('Erro ao criar adicional:', err)
         alert('Erro ao criar adicional')
       } finally {
         setSalvando(false)
@@ -108,7 +123,7 @@ export default function Adicionais({ exigirLogin }: any) {
   }
 
   /* ============================= */
-  /* REMOVER                      */
+  /* REMOVER                       */
   /* ============================= */
   async function remover(adicionalId: string) {
     await executarComOuSemLogin(async () => {
@@ -116,16 +131,16 @@ export default function Adicionais({ exigirLogin }: any) {
 
       try {
         await api.delete(`/adicionais/${adicionalId}`)
-        await carregar()
+        await atualizarLista()
       } catch (err) {
-        console.error('🔥 ERRO AO REMOVER:', err)
+        console.error('Erro ao remover adicional:', err)
         alert('Erro ao remover adicional')
       }
     })
   }
 
   /* ============================= */
-  /* EDITAR PREÇO                 */
+  /* EDITAR PREÇO                  */
   /* ============================= */
   function iniciarEdicao(a: Adicional) {
     setEditando(a.id)
@@ -135,21 +150,26 @@ export default function Adicionais({ exigirLogin }: any) {
   async function salvarPreco(adicionalId: string) {
     await executarComOuSemLogin(async () => {
       try {
+        if (Number(novoPreco) <= 0) {
+          alert('Preço inválido')
+          return
+        }
+
         await api.put(`/adicionais/${adicionalId}`, {
-          preco: novoPreco,
+          preco: Number(novoPreco),
         })
 
         setEditando(null)
-        await carregar()
+        await atualizarLista()
       } catch (err) {
-        console.error('🔥 ERRO AO EDITAR:', err)
+        console.error('Erro ao atualizar preço:', err)
         alert('Erro ao atualizar preço')
       }
     })
   }
 
   /* ============================= */
-  /* STATUS                       */
+  /* STATUS                        */
   /* ============================= */
   async function toggleAtivo(a: Adicional) {
     await executarComOuSemLogin(async () => {
@@ -158,16 +178,16 @@ export default function Adicionais({ exigirLogin }: any) {
           ativo: !a.ativo,
         })
 
-        await carregar()
+        await atualizarLista()
       } catch (err) {
-        console.error('🔥 ERRO AO ALTERAR STATUS:', err)
+        console.error('Erro ao alterar status:', err)
         alert('Erro ao alterar status')
       }
     })
   }
 
   /* ============================= */
-  /* UI                           */
+  /* UI                            */
   /* ============================= */
 
   return (
@@ -198,7 +218,9 @@ export default function Adicionais({ exigirLogin }: any) {
           type="number"
           placeholder="Preço"
           value={preco}
-          onChange={(e) => setPreco(Number(e.target.value))}
+          onChange={(e) =>
+            setPreco(e.target.value === '' ? '' : Number(e.target.value))
+          }
           style={input}
         />
 
@@ -224,7 +246,11 @@ export default function Adicionais({ exigirLogin }: any) {
                 <input
                   type="number"
                   value={novoPreco}
-                  onChange={(e) => setNovoPreco(Number(e.target.value))}
+                  onChange={(e) =>
+                    setNovoPreco(
+                      e.target.value === '' ? '' : Number(e.target.value)
+                    )
+                  }
                   style={input}
                 />
 
@@ -283,7 +309,7 @@ export default function Adicionais({ exigirLogin }: any) {
 }
 
 /* ========================= */
-/* ESTILO LOCAL LIMPO        */
+/* ESTILO                    */
 /* ========================= */
 
 const grid = {
