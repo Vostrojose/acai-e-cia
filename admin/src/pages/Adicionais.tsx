@@ -10,7 +10,7 @@ type Adicional = {
   ativo: boolean
 }
 
-export default function Adicionais() {
+export default function Adicionais({ exigirLogin }: any) {
   const { id } = useParams()
   const navigate = useNavigate()
 
@@ -24,57 +24,90 @@ export default function Adicionais() {
   const [loading, setLoading] = useState(false)
   const [salvando, setSalvando] = useState(false)
 
-  async function carregar() {
-    try {
-      if (!id) return
-      setLoading(true)
+  /* ============================= */
+  /* CARREGAR                      */
+  /* ============================= */
 
-      const res = await api.get(`/produtos/${id}`)
-      setAdicionais(res.data.data.adicionais || [])
-    } catch (err: any) {
-      console.error(err)
-      alert('Erro ao carregar adicionais')
-    } finally {
-      setLoading(false)
-    }
+  async function carregar() {
+    exigirLogin(async () => {
+      try {
+        if (!id) return
+
+        setLoading(true)
+
+        const res = await api.get(`/produtos/${id}`)
+
+        console.log('📦 RESPOSTA API:', res.data)
+
+        setAdicionais(res.data.data.adicionais || [])
+      } catch (err) {
+        console.error('🔥 ERRO AO CARREGAR:', err)
+        alert('Erro ao carregar adicionais')
+      } finally {
+        setLoading(false)
+      }
+    })
   }
 
   useEffect(() => {
     if (id) carregar()
   }, [id])
 
+  /* ============================= */
+  /* CRIAR                         */
+  /* ============================= */
+
   async function criar() {
-    try {
-      if (!nome.trim() || preco <= 0) {
-        alert('Preencha corretamente')
-        return
+    exigirLogin(async () => {
+      try {
+        if (!nome.trim() || preco <= 0) {
+          alert('Preencha corretamente')
+          return
+        }
+
+        if (!id) return
+
+        setSalvando(true)
+
+        await api.post(`/produtos/${id}/adicionais`, {
+          nome,
+          preco,
+        })
+
+        setNome('')
+        setPreco(0)
+
+        await carregar()
+      } catch (err) {
+        console.error('🔥 ERRO AO CRIAR:', err)
+        alert('Erro ao criar adicional')
+      } finally {
+        setSalvando(false)
       }
-
-      if (!id) return
-
-      setSalvando(true)
-
-      /* 🔥 ROTA CORRIGIDA */
-      await api.post(`/produtos/${id}/adicionais`, {
-        nome,
-        preco
-      })
-
-      setNome('')
-      setPreco(0)
-
-      await carregar()
-    } finally {
-      setSalvando(false)
-    }
+    })
   }
+
+  /* ============================= */
+  /* REMOVER                       */
+  /* ============================= */
 
   async function remover(adicionalId: string) {
-    if (!confirm('Remover adicional?')) return
+    exigirLogin(async () => {
+      if (!confirm('Remover adicional?')) return
 
-    await api.delete(`/adicionais/${adicionalId}`)
-    await carregar()
+      try {
+        await api.delete(`/adicionais/${adicionalId}`)
+        await carregar()
+      } catch (err) {
+        console.error('🔥 ERRO AO REMOVER:', err)
+        alert('Erro ao remover adicional')
+      }
+    })
   }
+
+  /* ============================= */
+  /* EDITAR PREÇO                  */
+  /* ============================= */
 
   function iniciarEdicao(a: Adicional) {
     setEditando(a.id)
@@ -82,28 +115,47 @@ export default function Adicionais() {
   }
 
   async function salvarPreco(adicionalId: string) {
-    await api.put(`/adicionais/${adicionalId}`, {
-      preco: novoPreco
-    })
+    exigirLogin(async () => {
+      try {
+        await api.put(`/adicionais/${adicionalId}`, {
+          preco: novoPreco,
+        })
 
-    setEditando(null)
-    await carregar()
+        setEditando(null)
+        await carregar()
+      } catch (err) {
+        console.error('🔥 ERRO AO EDITAR:', err)
+        alert('Erro ao atualizar preço')
+      }
+    })
   }
+
+  /* ============================= */
+  /* STATUS                        */
+  /* ============================= */
 
   async function toggleAtivo(a: Adicional) {
-    /* 🔥 ROTA PADRONIZADA */
-    await api.patch(`/adicionais/${a.id}`, {
-      ativo: !a.ativo
-    })
+    exigirLogin(async () => {
+      try {
+        await api.patch(`/adicionais/${a.id}`, {
+          ativo: !a.ativo,
+        })
 
-    await carregar()
+        await carregar()
+      } catch (err) {
+        console.error('🔥 ERRO AO ALTERAR STATUS:', err)
+        alert('Erro ao alterar status')
+      }
+    })
   }
+
+  /* ============================= */
+  /* UI                            */
+  /* ============================= */
 
   return (
     <div style={theme.page}>
-
       <button
-        /* 🔥 MELHOR UX */
         onClick={() => navigate(-1)}
         style={{ ...theme.button, ...theme.buttonPrimary, marginBottom: 20 }}
       >
@@ -148,7 +200,6 @@ export default function Adicionais() {
       <div style={grid}>
         {adicionais.map((a) => (
           <div key={a.id} style={theme.card}>
-
             <strong style={{ fontSize: 18 }}>{a.nome}</strong>
 
             {editando === a.id ? (
@@ -198,12 +249,15 @@ export default function Adicionais() {
 
               <button
                 onClick={() => remover(a.id)}
-                style={{ ...theme.button, background: '#e53935', color: '#fff' }}
+                style={{
+                  ...theme.button,
+                  background: '#e53935',
+                  color: '#fff',
+                }}
               >
                 🗑 Remover
               </button>
             </div>
-
           </div>
         ))}
       </div>
@@ -218,7 +272,7 @@ export default function Adicionais() {
 const grid = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-  gap: 20
+  gap: 20,
 }
 
 const input = {
@@ -227,24 +281,24 @@ const input = {
   marginBottom: 10,
   borderRadius: 8,
   border: 'none',
-  fontSize: 16
+  fontSize: 16,
 }
 
 const acoes = {
   display: 'flex',
   flexDirection: 'column' as const,
   gap: 8,
-  marginTop: 10
+  marginTop: 10,
 }
 
 const badgeVerde = {
   background: '#43a047',
   padding: '4px 10px',
-  borderRadius: 6
+  borderRadius: 6,
 }
 
 const badgeCinza = {
   background: '#777',
   padding: '4px 10px',
-  borderRadius: 6
+  borderRadius: 6,
 }
