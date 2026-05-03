@@ -26,9 +26,14 @@ export default function Adicionais({ exigirLogin }: any) {
   const [loading, setLoading] = useState(false)
   const [salvando, setSalvando] = useState(false)
 
+
   /* ============================= */
   /* CARREGAR                      */
   /* ============================= */
+  if (!id) {
+  console.error('ID NÃO VEIO NA ROTA')
+  return <div>Erro: produto não identificado</div>
+}
 
   async function carregar() {
     exigirLogin(async () => {
