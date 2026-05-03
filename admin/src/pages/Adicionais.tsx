@@ -70,6 +70,7 @@ export default function Adicionais({ exigirLogin }: any) {
         setSalvando(true)
         console.log('API:', api)
         console.log('POST:', api.post)
+        console.log('ID:', id)
 
         await api.post(`/produtos/${id}/adicionais`, {
           nome,
