@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { io } from 'socket.io-client'
+import { useEffect, useState, useRef, useMemo } from 'react'
+import { io, Socket } from 'socket.io-client'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { theme } from '../assets/styles/adminTheme'
@@ -9,28 +9,33 @@ import BalcaoModal from '../components/BalcaoModal'
 export default function Cozinha() {
   const [pedidos, setPedidos] = useState<any[]>([])
   const [mostrarEntregues, setMostrarEntregues] = useState(false)
-
   const [totalEntreguesHoje, setTotalEntreguesHoje] = useState(0)
-
-  async function carregarResumo() {
-    try {
-      const res = await api.get('/pedidos/entregues/hoje/count')
-      setTotalEntreguesHoje(res.data.total || 0)
-    } catch {
-      console.error('Erro ao carregar resumo')
-    }
-  }
+  const [abrirBalcao, setAbrirBalcao] = useState(false)
 
   const navigate = useNavigate()
 
+  const carregandoRef = useRef(false)
+  const socketRef = useRef<Socket | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+
+  /* ============================= */
+  /* AUDIO                      */
+  /* ============================= */
+
+  useEffect(() => {
+    audioRef.current = new Audio('/novo-pedido.mp3')
+  }, [])
+
   function tocarSom() {
-    try {
-      const audio = new Audio('/novo-pedido.mp3')
-      audio.play().catch(() => {})
-    } catch {}
+    if (!audioRef.current) return
+
+    audioRef.current.currentTime = 0
+    audioRef.current.play().catch(() => {})
   }
 
-  const [abrirBalcao, setAbrirBalcao] = useState(false)
+  /* ============================= */
+  /* WAKE LOCK                  */
+  /* ============================= */
 
   useEffect(() => {
     let wakeLock: any = null
@@ -45,62 +50,99 @@ export default function Cozinha() {
 
     ativarWakeLock()
 
-    document.addEventListener('visibilitychange', () => {
+    const onVisibility = () => {
       if (document.visibilityState === 'visible') {
         ativarWakeLock()
       }
-    })
+    }
+
+    document.addEventListener('visibilitychange', onVisibility)
 
     return () => {
+      document.removeEventListener('visibilitychange', onVisibility)
       wakeLock?.release()
     }
   }, [])
 
-  useEffect((): (() => void) => {
-    const socket = io('https://api.acaiecompanhia.com.br', {
+  /* ============================= */
+  /*  API                        */
+  /* ============================= */
+
+  async function carregarPedidos() {
+    try {
+      const res = await api.get('/pedidos')
+      setPedidos(res.data?.data || [])
+    } catch (err) {
+      console.error('Erro ao carregar pedidos', err)
+    }
+  }
+
+  async function carregarResumo() {
+    try {
+      const res = await api.get('/pedidos/entregues/hoje/count')
+      setTotalEntreguesHoje(res.data.total || 0)
+    } catch (err) {
+      console.error('Erro ao carregar resumo', err)
+    }
+  }
+
+  async function atualizarTudo() {
+    if (carregandoRef.current) return
+
+    try {
+      carregandoRef.current = true
+      await Promise.all([carregarPedidos(), carregarResumo()])
+    } catch (err) {
+      console.error('Erro geral atualização', err)
+    } finally {
+      carregandoRef.current = false
+    }
+  }
+
+  /* ============================= */
+  /* 🔌 SOCKET + POLLING SAFE      */
+  /* ============================= */
+
+  useEffect(() => {
+    atualizarTudo()
+
+    socketRef.current = io('https://api.acaiecompanhia.com.br', {
       transports: ['websocket'],
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
     })
 
-    const carregarPedidos = async () => {
-      try {
-       const res = await api.get('/pedidos?limit=50')
-        setPedidos(res.data?.data || [])
-      } catch {}
-    }
-
-    async function inicializar() {
-      await carregarPedidos()
-      await carregarResumo()
-    }
-
-    inicializar()
+    const socket = socketRef.current
+    if (!socket) return
 
     socket.on('novo_pedido', async () => {
       tocarSom()
-
-      await carregarPedidos()
-      await carregarResumo()
+      await atualizarTudo()
     })
 
     socket.on('pedido_atualizado', async () => {
-      await carregarPedidos()
-      await carregarResumo()
+      await atualizarTudo()
     })
 
-    const intervalo = setInterval(() => {
-      carregarPedidos()
-      carregarResumo()
-    }, 10000)
+    const intervalo = setInterval(async () => {
+      try {
+        if (!carregandoRef.current) {
+          await atualizarTudo()
+        }
+      } catch (err) {
+        console.warn('Erro no refresh automático', err)
+      }
+    }, 15000)
 
     return () => {
+      socket.off('novo_pedido')
+      socket.off('pedido_atualizado')
       socket.disconnect()
       clearInterval(intervalo)
     }
   }, [])
+
+  /* ============================= */
+  /*  HELPERS                    */
+  /* ============================= */
 
   function ordenar(lista: any[]) {
     return [...lista].sort(
@@ -110,23 +152,39 @@ export default function Cozinha() {
 
   function isHoje(data: any) {
     if (!data) return false
-    const d = new Date(data)
-    const hoje = new Date()
-
-    return (
-      d.getDate() === hoje.getDate() &&
-      d.getMonth() === hoje.getMonth() &&
-      d.getFullYear() === hoje.getFullYear()
-    )
+    return new Date(data).toDateString() === new Date().toDateString()
   }
 
-  const novos = ordenar(pedidos.filter((p) => p.status === 'RECEBIDO'))
-  const preparo = ordenar(pedidos.filter((p) => p.status === 'EM_PREPARO'))
-  const prontos = ordenar(pedidos.filter((p) => p.status === 'PRONTO'))
+  /* ============================= */
+  /*  PERFORMANCE                */
+  /* ============================= */
 
-  const entregues = ordenar(
-    pedidos.filter((p) => p.status === 'ENTREGUE' && isHoje(p.entregueEm)),
+  const novos = useMemo(
+    () => ordenar(pedidos.filter((p) => p.status === 'RECEBIDO')),
+    [pedidos],
   )
+
+  const preparo = useMemo(
+    () => ordenar(pedidos.filter((p) => p.status === 'EM_PREPARO')),
+    [pedidos],
+  )
+
+  const prontos = useMemo(
+    () => ordenar(pedidos.filter((p) => p.status === 'PRONTO')),
+    [pedidos],
+  )
+
+  const entregues = useMemo(
+    () =>
+      ordenar(
+        pedidos.filter((p) => p.status === 'ENTREGUE' && isHoje(p.entregueEm)),
+      ),
+    [pedidos],
+  )
+
+  /* ============================= */
+  /*  RENDER                     */
+  /* ============================= */
 
   return (
     <div style={theme.page}>
@@ -141,10 +199,7 @@ export default function Cozinha() {
 
         <div
           onClick={() => setMostrarEntregues(!mostrarEntregues)}
-          style={{
-            flex: 1,
-            display: 'flex', // 🔥 IMPORTANTE
-          }}
+          style={{ flex: 1, display: 'flex', cursor: 'pointer' }}
         >
           <CardStatus
             titulo="📦 Entregues Hoje"
@@ -179,7 +234,7 @@ export default function Cozinha() {
       {abrirBalcao && (
         <BalcaoModal
           onClose={() => setAbrirBalcao(false)}
-          onSuccess={() => console.log('Venda registrada')}
+          onSuccess={() => atualizarTudo()}
         />
       )}
     </div>
@@ -187,7 +242,7 @@ export default function Cozinha() {
 }
 
 /* ============================= */
-/* 🔥 CARD CLIMA                 */
+/*  CARD CLIMA                 */
 /* ============================= */
 
 function CardClima() {
@@ -206,7 +261,7 @@ function CardClima() {
 
         if (chuva > 5) {
           setStatus('critico')
-          setTexto('🚨 CHUVA FORTE')
+          setTexto('🚨 CHUVA FORTE RÍSCO DE ALAGAMENTO')
         } else if (chuva > 0) {
           setStatus('alerta')
           setTexto('🌧️ Possível chuva')
@@ -255,7 +310,7 @@ function CardClima() {
 }
 
 /* ============================= */
-/* 🔥 CARD STATUS NOVO ESTILO    */
+/*  CARD STATUS NOVO ESTILO    */
 /* ============================= */
 
 function CardStatus({ titulo, valor, cor }: any) {
@@ -294,8 +349,8 @@ function CardStatus({ titulo, valor, cor }: any) {
           fontSize: 26,
           fontWeight: 'bold',
           marginTop: 10,
-          textAlign: 'left', // 👈 move número
-          paddingLeft: 10, // 👈 ajuste fino
+          textAlign: 'left', //  move número
+          paddingLeft: 10, // ajuste fino
         }}
       >
         {valor}
@@ -305,12 +360,23 @@ function CardStatus({ titulo, valor, cor }: any) {
 }
 
 /* ============================= */
-/* 🔥 PEDIDO CARD NOVO ESTILO    */
+/*  PEDIDO CARD NOVO ESTILO    */
 /* ============================= */
 
 function PedidoCard({ pedido }: any) {
+  const [loading, setLoading] = useState(false)
+
   async function atualizarStatus(status: string) {
-    await api.patch(`/pedidos/${pedido.id}/status`, { status })
+    if (loading) return
+
+    try {
+      setLoading(true)
+      await api.patch(`/pedidos/${pedido.id}/status`, { status })
+    } catch (err) {
+      console.error('Erro ao atualizar status', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   function enviarWhatsApp() {
@@ -360,16 +426,43 @@ function PedidoCard({ pedido }: any) {
       ))}
 
       {pedido.status === 'RECEBIDO' && (
-        <button onClick={() => atualizarStatus('EM_PREPARO')}>INICIAR</button>
+        <button
+          onClick={() => atualizarStatus('EM_PREPARO')}
+          disabled={loading}
+          style={{
+            opacity: loading ? 0.6 : 1,
+            cursor: loading ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {loading ? 'Processando...' : 'INICIAR'}
+        </button>
       )}
 
       {pedido.status === 'EM_PREPARO' && (
-        <button onClick={() => atualizarStatus('PRONTO')}>PRONTO</button>
+        <button
+          onClick={() => atualizarStatus('PRONTO')}
+          disabled={loading}
+          style={{
+            opacity: loading ? 0.6 : 1,
+            cursor: loading ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {loading ? 'Processando...' : 'PRONTO'}
+        </button>
       )}
 
       {pedido.status === 'PRONTO' && (
         <>
-          <button onClick={() => atualizarStatus('ENTREGUE')}>ENTREGUE</button>
+          <button
+            onClick={() => atualizarStatus('ENTREGUE')}
+            disabled={loading}
+            style={{
+              opacity: loading ? 0.6 : 1,
+              cursor: loading ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {loading ? 'Processando...' : 'ENTREGUE'}
+          </button>
 
           {pedido.telefone && (
             <button onClick={enviarWhatsApp} style={{ marginTop: 8 }}>
