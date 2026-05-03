@@ -156,11 +156,19 @@ export default function Home() {
         const produtosData = response.data?.data || []
 
         const produtosAtivos = produtosData
-          .map((produto: Produto) => ({
-            ...produto,
-            preco: Number(produto.preco),
-            temAdicionais: (produto.adicionais?.length ?? 0) > 0,
-          }))
+          .map((produto: Produto) => {
+            const adicionaisAtivos =
+              produto.adicionais?.filter((a) => a.ativo) ?? []
+
+            return {
+              ...produto,
+              preco: Number(produto.preco),
+
+              /* 🔥 CORREÇÃO AQUI */
+              adicionais: adicionaisAtivos,
+              temAdicionais: adicionaisAtivos.length > 0,
+            }
+          })
           .filter((produto: Produto) => produto.ativo)
 
         setProdutos(produtosAtivos)
@@ -201,11 +209,12 @@ export default function Home() {
     }
   })
 
-  const totalAdicionais = Object.values(adicionaisSelecionados)
-    .reduce((acc, a) => acc + a.preco * a.quantidade, 0)
+  const totalAdicionais = Object.values(adicionaisSelecionados).reduce(
+    (acc, a) => acc + a.preco * a.quantidade,
+    0,
+  )
 
-  const totalFinal =
-    (produtoSelecionado?.preco || 0) + totalAdicionais
+  const totalFinal = (produtoSelecionado?.preco || 0) + totalAdicionais
 
   return (
     <div className="page">
@@ -279,52 +288,49 @@ export default function Home() {
           >
             <h3>{produtoSelecionado.nome}</h3>
 
-            {produtoSelecionado.adicionais
-              ?.filter((a) => a.ativo)
-              .map((add) => {
-                const quantidade =
-                  adicionaisSelecionados[add.id]?.quantidade || 0
+            {produtoSelecionado.adicionais?.map((add) => {
+              const quantidade = adicionaisSelecionados[add.id]?.quantidade || 0
 
-                return (
-                  <div key={add.id} style={{ marginBottom: 10 }}>
+              return (
+                <div key={add.id} style={{ marginBottom: 10 }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <span>
+                      {add.nome} (+R$ {Number(add.preco).toFixed(2)})
+                    </span>
+
                     <div
                       style={{
                         display: 'flex',
-                        justifyContent: 'space-between',
+                        gap: 8,
+                        alignItems: 'center',
                       }}
                     >
-                      <span>
-                        {add.nome} (+R$ {Number(add.preco).toFixed(2)})
-                      </span>
-
-                      <div
-                        style={{
-                          display: 'flex',
-                          gap: 8,
-                          alignItems: 'center',
-                        }}
+                      <button
+                        disabled={quantidade === 0}
+                        onClick={() => decrementarAdicional(add)}
+                        style={{ width: 30, height: 30 }}
                       >
-                        <button
-                          disabled={quantidade === 0}
-                          onClick={() => decrementarAdicional(add)}
-                          style={{ width: 30, height: 30 }}
-                        >
-                          -
-                        </button>
+                        -
+                      </button>
 
-                        <span>{quantidade}</span>
+                      <span>{quantidade}</span>
 
-                        <button
-                          onClick={() => incrementarAdicional(add)}
-                          style={{ width: 30, height: 30 }}
-                        >
-                          +
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => incrementarAdicional(add)}
+                        style={{ width: 30, height: 30 }}
+                      >
+                        +
+                      </button>
                     </div>
                   </div>
-                )
-              })}
+                </div>
+              )
+            })}
 
             <div style={{ marginTop: 15, fontWeight: 'bold' }}>
               Adicionais: R$ {totalAdicionais.toFixed(2)}
