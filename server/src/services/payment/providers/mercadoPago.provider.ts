@@ -83,7 +83,7 @@ export class MercadoPagoProvider {
 
         const totalAdicionais = adicionais.reduce(
           (soma: number, add: any) => soma + Number(add.preco),
-          0
+          0,
         )
 
         const precoFinal = Number((precoProduto + totalAdicionais).toFixed(2))
@@ -108,7 +108,7 @@ export class MercadoPagoProvider {
           title: String(
             item.produto?.nome ||
               item.nome ||
-              `Produto ${item.produtoId || 'sem-id'}`
+              `Produto ${item.produtoId || 'sem-id'}`,
           ),
           quantity: quantidade,
           unit_price: precoFinal,
@@ -221,7 +221,7 @@ export class MercadoPagoProvider {
         id: response.id?.toString(),
         status: response.status,
         transaction_amount: response.transaction_amount,
-        external_reference: externalRef,
+        externalReference: externalRef,
       }
     } catch (error: any) {
       console.error('❌ [MP BUSCAR PAGAMENTO] ERRO COMPLETO:')
