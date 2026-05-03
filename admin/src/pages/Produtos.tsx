@@ -250,7 +250,11 @@ export default function Produtos() {
                 🗑 Remover
               </button>
               <button
-                onClick={() => navigate(`/produtos/${p.id}/adicionais`)}
+                onClick={() =>
+                  exigirLogin(() => {
+                    navigate(`/produtos/${p.id}/adicionais`)
+                  })
+                }
                 style={btn}
               >
                 ➕ Adicionais
