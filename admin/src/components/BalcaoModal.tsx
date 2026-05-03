@@ -282,7 +282,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <strong>{i.nome}</strong>
 
-              {/* 🔥 SUBTOTAL DO ITEM */}
+              {/*  SUBTOTAL DO ITEM */}
               <span style={{ color: '#4caf50', fontWeight: 'bold' }}>
                 R$ {(i.preco * i.quantidade).toFixed(2)}
               </span>
@@ -297,7 +297,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                 -
               </button>
 
-              {/* 🔥 QUANTIDADE VISÍVEL */}
+              {/*  QUANTIDADE VISÍVEL */}
               <span
                 style={{
                   minWidth: 40,
