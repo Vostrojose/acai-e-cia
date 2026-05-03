@@ -31,7 +31,6 @@ export default function Adicionais() {
 
       const res = await api.get(`/produtos/${id}`)
       setAdicionais(res.data.data.adicionais || [])
-
     } catch (err: any) {
       console.error(err)
       alert('Erro ao carregar adicionais')
@@ -46,7 +45,7 @@ export default function Adicionais() {
 
   async function criar() {
     try {
-      if (!nome || preco <= 0) {
+      if (!nome.trim() || preco <= 0) {
         alert('Preencha corretamente')
         return
       }
@@ -55,17 +54,16 @@ export default function Adicionais() {
 
       setSalvando(true)
 
-      await api.post('/adicionais', {
+      /* 🔥 ROTA CORRIGIDA */
+      await api.post(`/produtos/${id}/adicionais`, {
         nome,
-        preco,
-        produtoId: id
+        preco
       })
 
       setNome('')
       setPreco(0)
 
       await carregar()
-
     } finally {
       setSalvando(false)
     }
@@ -93,7 +91,8 @@ export default function Adicionais() {
   }
 
   async function toggleAtivo(a: Adicional) {
-    await api.patch(`/adicionais/${a.id}/status`, {
+    /* 🔥 ROTA PADRONIZADA */
+    await api.patch(`/adicionais/${a.id}`, {
       ativo: !a.ativo
     })
 
@@ -104,7 +103,8 @@ export default function Adicionais() {
     <div style={theme.page}>
 
       <button
-        onClick={() => navigate('/produtos')}
+        /* 🔥 MELHOR UX */
+        onClick={() => navigate(-1)}
         style={{ ...theme.button, ...theme.buttonPrimary, marginBottom: 20 }}
       >
         ← Voltar
