@@ -9,16 +9,22 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   const [formaPagamento, setFormaPagamento] = useState('PAGO')
   const [clienteNome, setClienteNome] = useState('')
 
-  /*const [pularPreparo, setPularPreparo] = useState(false)*/
   const [pularPreparo, setPularPreparo] = useState(true)
 
+  //  NOVO (PROTEÇÃO DUPLICAÇÃO)
+  const [salvando, setSalvando] = useState(false)
+
   /* ============================= */
-  /* 🔍 BUSCAR PRODUTOS + SCROLL FIX */
+  /*  BUSCAR PRODUTOS            */
   /* ============================= */
   useEffect(() => {
     async function carregar() {
-      const res = await api.get('/produtos')
-      setProdutos(res.data.data || [])
+      try {
+        const res = await api.get('/produtos')
+        setProdutos(res.data.data || [])
+      } catch (err) {
+        console.error('Erro ao carregar produtos', err)
+      }
     }
 
     carregar()
@@ -35,16 +41,18 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   )
 
   /* ============================= */
-  /* ➕ SELECIONAR ITEM            */
+  /*  SELECIONAR ITEM (SAFE)     */
   /* ============================= */
   function toggleItem(produto: any) {
-    const existente = itens.find((i) => i.id === produto.id)
+    setItens((prev) => {
+      const existente = prev.find((i) => i.id === produto.id)
 
-    if (existente) {
-      setItens(itens.filter((i) => i.id !== produto.id))
-    } else {
-      setItens([
-        ...itens,
+      if (existente) {
+        return prev.filter((i) => i.id !== produto.id)
+      }
+
+      return [
+        ...prev,
         {
           id: produto.id,
           nome: produto.nome,
@@ -52,14 +60,15 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           quantidade: 1,
           adicionais: [],
         },
-      ])
-    }
+      ]
+    })
   }
 
   /* ============================= */
-  /* 🔢 ALTERAR QUANTIDADE ITEM    */
+  /*  ALTERAR QTD ITEM           */
   /* ============================= */
   function alterarQuantidade(id: string, delta: number) {
+    if (salvando) return
     setItens((prev) =>
       prev.map((i) =>
         i.id === id
@@ -70,9 +79,10 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   }
 
   /* ============================= */
-  /* ➕ TOGGLE ADICIONAL           */
+  /*  ADICIONAL                  */
   /* ============================= */
   function toggleAdicional(itemId: string, adicional: any) {
+    if (salvando) return
     setItens((prev) =>
       prev.map((item) => {
         if (item.id !== itemId) return item
@@ -107,13 +117,14 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   }
 
   /* ============================= */
-  /* 🔢 ALTERAR QTD ADICIONAL      */
+  /*  QTD ADICIONAL              */
   /* ============================= */
   function alterarQtdAdicional(
     itemId: string,
     adicionalId: string,
     delta: number,
   ) {
+    if (salvando) return
     setItens((prev) =>
       prev.map((item) => {
         if (item.id !== itemId) return item
@@ -134,9 +145,11 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   }
 
   /* ============================= */
-  /* 💾 SALVAR VENDA               */
+  /* SALVAR (PRODUÇÃO REAL)     */
   /* ============================= */
   async function salvar() {
+    if (salvando) return
+
     if (itens.length === 0) {
       alert('Selecione pelo menos um item')
       return
@@ -152,6 +165,8 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
     }
 
     try {
+      setSalvando(true)
+
       const res = await api.post('/balcao', {
         itens,
         forma: formaPagamento,
@@ -169,11 +184,13 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
         alert(`💵 Pagar no caixa: R$ ${valorRestante.toFixed(2)}`)
       }
 
-      onSuccess()
-      onClose()
+      onSuccess?.()
+      onClose?.()
     } catch (err) {
       console.error(err)
       alert('Erro ao salvar venda')
+    } finally {
+      setSalvando(false)
     }
   }
 
@@ -189,7 +206,6 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           style={input}
         />
 
-        {/* PRODUTOS + ADICIONAIS */}
         <div style={{ maxHeight: 200, overflow: 'auto' }}>
           {produtosFiltrados.map((p) => {
             const selecionado = itens.find((i) => i.id === p.id)
@@ -202,89 +218,81 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                   onChange={() => toggleItem(p)}
                 />
                 {p.nome} - R$ {p.preco}
-                {/* 🔥 ADICIONAIS */}
-                {itens.some((i) => i.id === p.id) &&
-                  p.adicionais?.length > 0 && (
-                    <div style={{ marginLeft: 20, marginTop: 5 }}>
-                      {p.adicionais.map((add: any) => {
-                        const item = itens.find((i) => i.id === p.id)
-                        const ativo = item?.adicionais?.find(
-                          (a: any) => a.id === add.id,
-                        )
+                {selecionado && p.adicionais?.length > 0 && (
+                  <div style={{ marginLeft: 20, marginTop: 5 }}>
+                    {p.adicionais.map((add: any) => {
+                      const item = itens.find((i) => i.id === p.id)
+                      const ativo = item?.adicionais?.find(
+                        (a: any) => a.id === add.id,
+                      )
 
-                        return (
-                          <div key={add.id} style={{ marginTop: 4 }}>
-                            <input
-                              type="checkbox"
-                              checked={!!ativo}
-                              onChange={() => toggleAdicional(p.id, add)}
-                            />
-                            + {add.nome} (R$ {add.preco})
-                            {ativo && (
-                              <div
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  marginTop: 4,
-                                }}
+                      return (
+                        <div key={add.id}>
+                          <input
+                            type="checkbox"
+                            checked={!!ativo}
+                            onChange={() => toggleAdicional(p.id, add)}
+                          />
+                          + {add.nome} (R$ {add.preco})
+                          {ativo && (
+                            <div
+                              style={{ display: 'flex', alignItems: 'center' }}
+                            >
+                              <button
+                                style={btnTouch}
+                                onClick={() =>
+                                  alterarQtdAdicional(p.id, add.id, -1)
+                                }
+                                disabled={salvando}
                               >
-                                <button
-                                  style={btnTouch}
-                                  onClick={() =>
-                                    alterarQtdAdicional(p.id, add.id, -1)
-                                  }
-                                >
-                                  −
-                                </button>
+                                -
+                              </button>
 
-                                <span
-                                  style={{ minWidth: 30, textAlign: 'center' }}
-                                >
-                                  {ativo.quantidade}
-                                </span>
+                              <span
+                                style={{ minWidth: 30, textAlign: 'center' }}
+                              >
+                                {ativo.quantidade}
+                              </span>
 
-                                <button
-                                  style={btnTouch}
-                                  onClick={() =>
-                                    alterarQtdAdicional(p.id, add.id, 1)
-                                  }
-                                >
-                                  +
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )}
+                              <button
+                                style={btnTouch}
+                                onClick={() =>
+                                  alterarQtdAdicional(p.id, add.id, 1)
+                                }
+                                disabled={salvando}
+                              >
+                                +
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             )
           })}
         </div>
 
-        {/* ITENS */}
         <h3>Itens selecionados</h3>
 
         {itens.map((i) => (
           <div key={i.id} style={linha}>
             <strong>{i.nome}</strong>
 
-            <div
-              style={{ display: 'flex', alignItems: 'center', marginTop: 5 }}
-            >
+            <div style={{ display: 'flex', alignItems: 'center' }}>
               <button
                 style={btnTouch}
                 onClick={() => alterarQuantidade(i.id, -1)}
+                disabled={salvando}
               >
-                −
+                -
               </button>
-              <span style={{ fontSize: 18, minWidth: 30, textAlign: 'center' }}>
-                {i.quantidade}
-              </span>
               <button
                 style={btnTouch}
-                onClick={() => alterarQuantidade(i.id, 1)}
+                onClick={() => alterarQuantidade(i.id, +1)}
+                disabled={salvando}
               >
                 +
               </button>
@@ -304,14 +312,14 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
         {formaPagamento !== 'PAGO' && (
           <input
-            placeholder="Nome do cliente (ex: JOÃO SILVA)"
+            placeholder="Nome do cliente"
             value={clienteNome}
             onChange={(e) => setClienteNome(e.target.value.toUpperCase())}
             style={input}
           />
         )}
 
-        <label style={{ marginTop: 10, display: 'block' }}>
+        <label>
           <input
             type="checkbox"
             checked={pularPreparo}
@@ -320,9 +328,18 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           Pedido já pronto
         </label>
 
-        <button onClick={salvar} style={btn}>
-          💾 Salvar venda
+        <button
+          onClick={salvar}
+          disabled={salvando}
+          style={{
+            ...btn,
+            opacity: salvando ? 0.6 : 1,
+            cursor: salvando ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {salvando ? 'Salvando...' : '💾 Salvar venda'}
         </button>
+
         <button onClick={onClose} style={btnDanger}>
           Cancelar
         </button>
