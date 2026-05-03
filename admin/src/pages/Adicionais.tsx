@@ -3,10 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { theme } from '../assets/styles/adminTheme'
 
-/* ========================= */
-/* TIPOS                     */
-/* ========================= */
-
 type Adicional = {
   id: string
   nome: string
@@ -17,10 +13,6 @@ type Adicional = {
 type Props = {
   exigirLogin?: (callback: () => Promise<void>) => Promise<void> | void
 }
-
-/* ========================= */
-/* COMPONENTE                */
-/* ========================= */
 
 export default function Adicionais({ exigirLogin }: Props) {
   const { id } = useParams()
@@ -36,9 +28,6 @@ export default function Adicionais({ exigirLogin }: Props) {
   const [loading, setLoading] = useState(false)
   const [salvando, setSalvando] = useState(false)
 
-  /* ============================= */
-  /* EXECUTOR SEGURO               */
-  /* ============================= */
   async function executarComOuSemLogin(callback: () => Promise<void>) {
     try {
       if (typeof exigirLogin === 'function') {
@@ -51,38 +40,25 @@ export default function Adicionais({ exigirLogin }: Props) {
     }
   }
 
-  /* ============================= */
-  /* VALIDAÇÃO ID                  */
-  /* ============================= */
   useEffect(() => {
-    if (!id) {
-      navigate('/produtos')
-    }
+    if (!id) navigate('/produtos')
   }, [id, navigate])
 
   if (!id) return null
 
-  /* ============================= */
-  /* CARREGAR                      */
-  /* ============================= */
   async function carregar() {
     try {
       setLoading(true)
-
       const res = await api.get(`/produtos/${id}`)
-
       setAdicionais(res.data.data.adicionais || [])
     } catch (err) {
-      console.error('Erro ao carregar adicionais:', err)
+      console.error(err)
       alert('Erro ao carregar adicionais')
     } finally {
       setLoading(false)
     }
   }
 
-  /* ============================= */
-  /* ATUALIZAR LISTA (🔥 NOVO)     */
-  /* ============================= */
   async function atualizarLista() {
     await carregar()
   }
@@ -91,17 +67,14 @@ export default function Adicionais({ exigirLogin }: Props) {
     carregar()
   }, [id])
 
-  /* ============================= */
-  /* CRIAR                         */
-  /* ============================= */
   async function criar() {
     await executarComOuSemLogin(async () => {
-      try {
-        if (!nome.trim() || Number(preco) <= 0) {
-          alert('Preencha corretamente')
-          return
-        }
+      if (!nome.trim() || Number(preco) <= 0) {
+        alert('Preencha corretamente')
+        return
+      }
 
+      try {
         setSalvando(true)
 
         await api.post(`/produtos/${id}/adicionais`, {
@@ -111,10 +84,8 @@ export default function Adicionais({ exigirLogin }: Props) {
 
         setNome('')
         setPreco('')
-
         await atualizarLista()
-      } catch (err) {
-        console.error('Erro ao criar adicional:', err)
+      } catch {
         alert('Erro ao criar adicional')
       } finally {
         setSalvando(false)
@@ -122,9 +93,6 @@ export default function Adicionais({ exigirLogin }: Props) {
     })
   }
 
-  /* ============================= */
-  /* REMOVER                       */
-  /* ============================= */
   async function remover(adicionalId: string) {
     await executarComOuSemLogin(async () => {
       if (!confirm('Remover adicional?')) return
@@ -132,16 +100,12 @@ export default function Adicionais({ exigirLogin }: Props) {
       try {
         await api.delete(`/adicionais/${adicionalId}`)
         await atualizarLista()
-      } catch (err) {
-        console.error('Erro ao remover adicional:', err)
+      } catch {
         alert('Erro ao remover adicional')
       }
     })
   }
 
-  /* ============================= */
-  /* EDITAR PREÇO                  */
-  /* ============================= */
   function iniciarEdicao(a: Adicional) {
     setEditando(a.id)
     setNovoPreco(a.preco)
@@ -149,52 +113,42 @@ export default function Adicionais({ exigirLogin }: Props) {
 
   async function salvarPreco(adicionalId: string) {
     await executarComOuSemLogin(async () => {
-      try {
-        if (Number(novoPreco) <= 0) {
-          alert('Preço inválido')
-          return
-        }
+      if (Number(novoPreco) <= 0) {
+        alert('Preço inválido')
+        return
+      }
 
+      try {
         await api.put(`/adicionais/${adicionalId}`, {
           preco: Number(novoPreco),
         })
 
         setEditando(null)
         await atualizarLista()
-      } catch (err) {
-        console.error('Erro ao atualizar preço:', err)
+      } catch {
         alert('Erro ao atualizar preço')
       }
     })
   }
 
-  /* ============================= */
-  /* STATUS                        */
-  /* ============================= */
   async function toggleAtivo(a: Adicional) {
     await executarComOuSemLogin(async () => {
       try {
         await api.patch(`/adicionais/${a.id}`, {
           ativo: !a.ativo,
         })
-
         await atualizarLista()
-      } catch (err) {
-        console.error('Erro ao alterar status:', err)
+      } catch {
         alert('Erro ao alterar status')
       }
     })
   }
 
-  /* ============================= */
-  /* UI                            */
-  /* ============================= */
-
   return (
     <div style={theme.page}>
       <button
         onClick={() => navigate(-1)}
-        style={{ ...theme.button, ...theme.buttonPrimary, marginBottom: 20 }}
+        style={{ ...buttonBase, ...theme.buttonPrimary, marginBottom: 20 }}
       >
         ← Voltar
       </button>
@@ -203,8 +157,7 @@ export default function Adicionais({ exigirLogin }: Props) {
         Adicionais do Produto
       </h1>
 
-      {/* FORM */}
-      <div style={theme.card}>
+      <div style={card}>
         <h3>Novo adicional</h3>
 
         <input
@@ -227,7 +180,26 @@ export default function Adicionais({ exigirLogin }: Props) {
         <button
           onClick={criar}
           disabled={salvando}
-          style={{ ...theme.button, ...theme.buttonSuccess }}
+          style={{
+            ...buttonBase,
+            ...theme.buttonSuccess,
+            opacity: salvando ? 0.6 : 1,
+          }}
+          onMouseEnter={(e) =>
+            Object.assign(e.currentTarget.style, buttonHover)
+          }
+          onMouseLeave={(e) =>
+            Object.assign(e.currentTarget.style, {
+              transform: 'scale(1)',
+              opacity: '1',
+            })
+          }
+          onMouseDown={(e) =>
+            Object.assign(e.currentTarget.style, buttonActive)
+          }
+          onMouseUp={(e) =>
+            Object.assign(e.currentTarget.style, buttonHover)
+          }
         >
           {salvando ? 'Salvando...' : '➕ Adicionar'}
         </button>
@@ -235,11 +207,10 @@ export default function Adicionais({ exigirLogin }: Props) {
 
       {loading && <p>Carregando...</p>}
 
-      {/* LISTA */}
       <div style={grid}>
         {adicionais.map((a) => (
-          <div key={a.id} style={theme.card}>
-            <strong style={{ fontSize: 18 }}>{a.nome}</strong>
+          <div key={a.id} style={card}>
+            <strong>{a.nome}</strong>
 
             {editando === a.id ? (
               <>
@@ -256,49 +227,39 @@ export default function Adicionais({ exigirLogin }: Props) {
 
                 <button
                   onClick={() => salvarPreco(a.id)}
-                  style={{ ...theme.button, ...theme.buttonSuccess }}
+                  style={{ ...buttonBase, ...theme.buttonSuccess }}
                 >
                   Salvar
                 </button>
               </>
             ) : (
-              <p style={theme.textMuted}>
-                💰 R$ {Number(a.preco).toFixed(2)}
-              </p>
+              <p>💰 R$ {Number(a.preco).toFixed(2)}</p>
             )}
 
-            <div>
-              {a.ativo ? (
-                <span style={badgeVerde}>Ativo</span>
-              ) : (
-                <span style={badgeCinza}>Inativo</span>
-              )}
-            </div>
+            <span style={a.ativo ? badgeVerde : badgeCinza}>
+              {a.ativo ? 'Ativo' : 'Inativo'}
+            </span>
 
             <div style={acoes}>
               <button
                 onClick={() => iniciarEdicao(a)}
-                style={{ ...theme.button, ...theme.buttonPrimary }}
+                style={{ ...buttonBase, ...theme.buttonPrimary }}
               >
-                ✏️ Editar
+                ✏️
               </button>
 
               <button
                 onClick={() => toggleAtivo(a)}
-                style={{ ...theme.button, ...theme.buttonWarning }}
+                style={{ ...buttonBase, ...theme.buttonWarning }}
               >
-                🔄 Status
+                🔄
               </button>
 
               <button
                 onClick={() => remover(a.id)}
-                style={{
-                  ...theme.button,
-                  background: '#e53935',
-                  color: '#fff',
-                }}
+                style={{ ...buttonBase, background: '#e53935', color: '#fff' }}
               >
-                🗑 Remover
+                🗑
               </button>
             </div>
           </div>
@@ -312,36 +273,63 @@ export default function Adicionais({ exigirLogin }: Props) {
 /* ESTILO                    */
 /* ========================= */
 
+const card = {
+  ...theme.card,
+  borderRadius: 16,
+  boxShadow: '0 8px 25px rgba(0,0,0,0.25)',
+}
+
 const grid = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-  gap: 20,
+  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+  gap: 24,
 }
 
 const input = {
   width: '100%',
   padding: 12,
   marginBottom: 10,
-  borderRadius: 8,
-  border: 'none',
-  fontSize: 16,
+  borderRadius: 10,
+  border: '1px solid rgba(255,255,255,0.15)',
+  background: '#1e1e2f',
+  color: '#fff',
 }
 
 const acoes = {
   display: 'flex',
-  flexDirection: 'column' as const,
   gap: 8,
-  marginTop: 10,
+  marginTop: 12,
+  flexWrap: 'wrap' as const,
 }
 
 const badgeVerde = {
-  background: '#43a047',
+  background: 'rgba(67,160,71,0.2)',
+  color: '#4caf50',
   padding: '4px 10px',
-  borderRadius: 6,
+  borderRadius: 20,
 }
 
 const badgeCinza = {
-  background: '#777',
+  background: 'rgba(255,255,255,0.1)',
+  color: '#aaa',
   padding: '4px 10px',
-  borderRadius: 6,
+  borderRadius: 20,
+}
+
+const buttonBase = {
+  borderRadius: 10,
+  padding: '10px 14px',
+  fontWeight: 600,
+  cursor: 'pointer',
+  transition: 'all 0.2s ease',
+  border: 'none',
+}
+
+const buttonHover = {
+  transform: 'scale(1.03)',
+  opacity: 0.9,
+}
+
+const buttonActive = {
+  transform: 'scale(0.98)',
 }
