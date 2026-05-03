@@ -279,7 +279,14 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
         {itens.map((i) => (
           <div key={i.id} style={linha}>
-            <strong>{i.nome}</strong>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <strong>{i.nome}</strong>
+
+              {/* 🔥 SUBTOTAL DO ITEM */}
+              <span style={{ color: '#4caf50', fontWeight: 'bold' }}>
+                R$ {(i.preco * i.quantidade).toFixed(2)}
+              </span>
+            </div>
 
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <button
@@ -289,6 +296,22 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
               >
                 -
               </button>
+
+              {/* 🔥 QUANTIDADE VISÍVEL */}
+              <span
+                style={{
+                  minWidth: 40,
+                  textAlign: 'center',
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  background: '#000',
+                  borderRadius: 6,
+                  padding: '5px 10px',
+                }}
+              >
+                {i.quantidade}
+              </span>
+
               <button
                 style={btnTouch}
                 onClick={() => alterarQuantidade(i.id, +1)}
@@ -327,6 +350,22 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           />
           Pedido já pronto
         </label>
+        <div style={{ marginTop: 15, fontSize: 18, fontWeight: 'bold' }}>
+          Total:{' '}
+          <span style={{ color: '#4caf50' }}>
+            R${' '}
+            {itens
+              .reduce((total, i) => {
+                const adicionais = (i.adicionais || []).reduce(
+                  (s: number, a: any) => s + a.preco * a.quantidade,
+                  0,
+                )
+
+                return total + (i.preco + adicionais) * i.quantidade
+              }, 0)
+              .toFixed(2)}
+          </span>
+        </div>
 
         <button
           onClick={salvar}
