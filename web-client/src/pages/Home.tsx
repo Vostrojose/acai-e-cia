@@ -44,13 +44,55 @@ export default function Home() {
   const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(
     null,
   )
-  const [adicionaisSelecionados, setAdicionaisSelecionados] = useState<any[]>(
-    [],
-  )
+  const [adicionaisSelecionados, setAdicionaisSelecionados] = useState<{
+    [key: string]: {
+      id: string
+      nome: string
+      preco: number
+      quantidade: number
+    }
+  }>({})
+
+  function incrementarAdicional(add: any) {
+    setAdicionaisSelecionados((prev) => {
+      const atual = prev[add.id]
+
+      return {
+        ...prev,
+        [add.id]: {
+          id: add.id,
+          nome: add.nome,
+          preco: Number(add.preco),
+          quantidade: atual ? atual.quantidade + 1 : 1,
+        },
+      }
+    })
+  }
+
+  function decrementarAdicional(add: any) {
+    setAdicionaisSelecionados((prev) => {
+      const atual = prev[add.id]
+      if (!atual) return prev
+
+      if (atual.quantidade === 1) {
+        const copy = { ...prev }
+        delete copy[add.id]
+        return copy
+      }
+
+      return {
+        ...prev,
+        [add.id]: {
+          ...atual,
+          quantidade: atual.quantidade - 1,
+        },
+      }
+    })
+  }
 
   function abrirPopup(produto: Produto) {
     setProdutoSelecionado(produto)
-    setAdicionaisSelecionados([])
+    setAdicionaisSelecionados({})
   }
 
   function fecharPopup() {
@@ -79,18 +121,17 @@ export default function Home() {
     })
   }
 
-  /* ============================= */
-  /* 🔥 CORREÇÃO DEFINITIVA REAL   */
-  /* ============================= */
   function confirmarProduto() {
     if (!produtoSelecionado) return
 
-    // 🔥 CLONE REAL DOS ADICIONAIS (ESSENCIAL)
-    const adicionaisClonados = (adicionaisSelecionados || []).map((a: any) => ({
-      id: a.id,
-      nome: a.nome,
-      preco: Number(a.preco),
-    }))
+    const adicionaisClonados = Object.values(adicionaisSelecionados).flatMap(
+      (a) =>
+        Array.from({ length: a.quantidade }).map(() => ({
+          id: a.id,
+          nome: a.nome,
+          preco: Number(a.preco),
+        })),
+    )
 
     console.log('🔥 ENVIANDO ADICIONAIS:', adicionaisClonados)
 
@@ -104,9 +145,7 @@ export default function Home() {
       adicionais: adicionaisClonados,
     })
 
-    // 🔥 LIMPA SOMENTE DEPOIS
-    setAdicionaisSelecionados([])
-
+    setAdicionaisSelecionados({})
     fecharPopup()
   }
 
@@ -162,6 +201,12 @@ export default function Home() {
     }
   })
 
+  const totalAdicionais = Object.values(adicionaisSelecionados)
+    .reduce((acc, a) => acc + a.preco * a.quantidade, 0)
+
+  const totalFinal =
+    (produtoSelecionado?.preco || 0) + totalAdicionais
+
   return (
     <div className="page">
       <div
@@ -180,7 +225,7 @@ export default function Home() {
         <button
           className="btn-semana"
           onClick={() => navigate(`/cardapio-semana/${origem || '1'}`)}
-          title="Ver cardápio da semana" // aparece como tooltip
+          title="Ver cardápio da semana"
         >
           📅
         </button>
@@ -236,26 +281,58 @@ export default function Home() {
 
             {produtoSelecionado.adicionais
               ?.filter((a) => a.ativo)
-              .map((add) => (
-                <label key={add.id}>
-                  <input
-                    type="checkbox"
-                    checked={adicionaisSelecionados.some(
-                      (a) => a.id === add.id,
-                    )}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setAdicionaisSelecionados((prev) => [...prev, add])
-                      } else {
-                        setAdicionaisSelecionados((prev) =>
-                          prev.filter((a) => a.id !== add.id),
-                        )
-                      }
-                    }}
-                  />
-                  {add.nome} (+R$ {Number(add.preco).toFixed(2)})
-                </label>
-              ))}
+              .map((add) => {
+                const quantidade =
+                  adicionaisSelecionados[add.id]?.quantidade || 0
+
+                return (
+                  <div key={add.id} style={{ marginBottom: 10 }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <span>
+                        {add.nome} (+R$ {Number(add.preco).toFixed(2)})
+                      </span>
+
+                      <div
+                        style={{
+                          display: 'flex',
+                          gap: 8,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <button
+                          disabled={quantidade === 0}
+                          onClick={() => decrementarAdicional(add)}
+                          style={{ width: 30, height: 30 }}
+                        >
+                          -
+                        </button>
+
+                        <span>{quantidade}</span>
+
+                        <button
+                          onClick={() => incrementarAdicional(add)}
+                          style={{ width: 30, height: 30 }}
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+
+            <div style={{ marginTop: 15, fontWeight: 'bold' }}>
+              Adicionais: R$ {totalAdicionais.toFixed(2)}
+            </div>
+
+            <div style={{ marginTop: 5, fontWeight: 'bold', fontSize: 16 }}>
+              Total: R$ {totalFinal.toFixed(2)}
+            </div>
 
             <button onClick={confirmarProduto}>Confirmar</button>
             <button onClick={fecharPopup}>Cancelar</button>
