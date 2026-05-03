@@ -3,8 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { theme } from '../assets/styles/adminTheme'
 
-
-
 type Adicional = {
   id: string
   nome: string
@@ -26,42 +24,59 @@ export default function Adicionais({ exigirLogin }: any) {
   const [loading, setLoading] = useState(false)
   const [salvando, setSalvando] = useState(false)
 
+  /* ============================= */
+  /* SAFE EXECUTOR (🔥 CORREÇÃO)   */
+  /* ============================= */
+  async function executarComOuSemLogin(callback: () => Promise<void>) {
+    try {
+      if (typeof exigirLogin === 'function') {
+        return exigirLogin(callback)
+      } else {
+        console.warn('⚠️ exigirLogin não é função — executando direto')
+        return await callback()
+      }
+    } catch (err) {
+      console.error('🔥 ERRO NO EXECUTOR:', err)
+    }
+  }
 
   /* ============================= */
-  /* CARREGAR                      */
+  /* VALIDAÇÃO ID                 */
   /* ============================= */
   if (!id) {
-  console.error('ID NÃO VEIO NA ROTA')
-  return <div>Erro: produto não identificado</div>
-}
-
-  async function carregar() {
-  try {
-    if (!id) return
-
-    setLoading(true)
-
-    const res = await api.get(`/produtos/${id}`)
-
-    setAdicionais(res.data.data.adicionais || [])
-  } catch (err) {
-    console.error('🔥 ERRO AO CARREGAR:', err)
-    alert('Erro ao carregar adicionais')
-  } finally {
-    setLoading(false)
+    console.error('ID NÃO VEIO NA ROTA')
+    return <div>Erro: produto não identificado</div>
   }
-}
+
+  /* ============================= */
+  /* CARREGAR                     */
+  /* ============================= */
+  async function carregar() {
+    try {
+      if (!id) return
+
+      setLoading(true)
+
+      const res = await api.get(`/produtos/${id}`)
+
+      setAdicionais(res.data.data.adicionais || [])
+    } catch (err) {
+      console.error('🔥 ERRO AO CARREGAR:', err)
+      alert('Erro ao carregar adicionais')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (id) carregar()
   }, [id])
 
   /* ============================= */
-  /* CRIAR                         */
+  /* CRIAR                        */
   /* ============================= */
-
   async function criar() {
-    exigirLogin(async () => {
+    await executarComOuSemLogin(async () => {
       try {
         if (!nome.trim() || preco <= 0) {
           alert('Preencha corretamente')
@@ -71,9 +86,8 @@ export default function Adicionais({ exigirLogin }: any) {
         if (!id) return
 
         setSalvando(true)
-        console.log('API:', api)
-        console.log('POST:', api.post)
-        console.log('ID:', id)
+
+        console.log('🔥 CRIANDO ADICIONAL', { nome, preco, id })
 
         await api.post(`/produtos/${id}/adicionais`, {
           nome,
@@ -94,11 +108,10 @@ export default function Adicionais({ exigirLogin }: any) {
   }
 
   /* ============================= */
-  /* REMOVER                       */
+  /* REMOVER                      */
   /* ============================= */
-
   async function remover(adicionalId: string) {
-    exigirLogin(async () => {
+    await executarComOuSemLogin(async () => {
       if (!confirm('Remover adicional?')) return
 
       try {
@@ -112,16 +125,15 @@ export default function Adicionais({ exigirLogin }: any) {
   }
 
   /* ============================= */
-  /* EDITAR PREÇO                  */
+  /* EDITAR PREÇO                 */
   /* ============================= */
-
   function iniciarEdicao(a: Adicional) {
     setEditando(a.id)
     setNovoPreco(a.preco)
   }
 
   async function salvarPreco(adicionalId: string) {
-    exigirLogin(async () => {
+    await executarComOuSemLogin(async () => {
       try {
         await api.put(`/adicionais/${adicionalId}`, {
           preco: novoPreco,
@@ -137,11 +149,10 @@ export default function Adicionais({ exigirLogin }: any) {
   }
 
   /* ============================= */
-  /* STATUS                        */
+  /* STATUS                       */
   /* ============================= */
-
   async function toggleAtivo(a: Adicional) {
-    exigirLogin(async () => {
+    await executarComOuSemLogin(async () => {
       try {
         await api.patch(`/adicionais/${a.id}`, {
           ativo: !a.ativo,
@@ -156,7 +167,7 @@ export default function Adicionais({ exigirLogin }: any) {
   }
 
   /* ============================= */
-  /* UI                            */
+  /* UI                           */
   /* ============================= */
 
   return (
@@ -225,7 +236,9 @@ export default function Adicionais({ exigirLogin }: any) {
                 </button>
               </>
             ) : (
-              <p style={theme.textMuted}>💰 R$ {Number(a.preco).toFixed(2)}</p>
+              <p style={theme.textMuted}>
+                💰 R$ {Number(a.preco).toFixed(2)}
+              </p>
             )}
 
             <div>
