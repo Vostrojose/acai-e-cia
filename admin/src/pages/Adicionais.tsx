@@ -36,25 +36,21 @@ export default function Adicionais({ exigirLogin }: any) {
 }
 
   async function carregar() {
-    exigirLogin(async () => {
-      try {
-        if (!id) return
+  try {
+    if (!id) return
 
-        setLoading(true)
+    setLoading(true)
 
-        const res = await api.get(`/produtos/${id}`)
+    const res = await api.get(`/produtos/${id}`)
 
-        console.log('📦 RESPOSTA API:', res.data)
-
-        setAdicionais(res.data.data.adicionais || [])
-      } catch (err) {
-        console.error('🔥 ERRO AO CARREGAR:', err)
-        alert('Erro ao carregar adicionais')
-      } finally {
-        setLoading(false)
-      }
-    })
+    setAdicionais(res.data.data.adicionais || [])
+  } catch (err) {
+    console.error('🔥 ERRO AO CARREGAR:', err)
+    alert('Erro ao carregar adicionais')
+  } finally {
+    setLoading(false)
   }
+}
 
   useEffect(() => {
     if (id) carregar()
