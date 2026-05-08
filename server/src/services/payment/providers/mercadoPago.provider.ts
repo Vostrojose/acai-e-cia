@@ -211,16 +211,15 @@ export class MercadoPagoProvider {
     try {
       const response: any = await this.payment.get({ id: paymentId })
 
+      const body = response.body || response
+
       const externalRef =
-        response.external_reference ||
-        response.body?.external_reference ||
-        response.metadata?.pedido_id ||
-        undefined
+        body.external_reference || body.metadata?.pedido_id || undefined
 
       return {
-        id: response.id?.toString(),
-        status: response.status,
-        transaction_amount: response.transaction_amount,
+        id: body.id?.toString(),
+        status: body.status,
+        transaction_amount: body.transaction_amount,
         externalReference: externalRef,
       }
     } catch (error: any) {
