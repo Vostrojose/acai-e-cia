@@ -105,7 +105,7 @@ export default function Acompanhamento() {
 
   async function cancelarPedido() {
     const confirmar = window.confirm(
-      'Deseja cancelar o pedido?\n\nSe o pagamento falhou, você pode tentar novamente.',
+      'Tem certeza que deseja cancelar o pedido?\n\nSe você já realizou o pagamento, aguarde alguns instantes antes de cancelar.',
     )
 
     if (!confirmar) return
@@ -127,7 +127,7 @@ export default function Acompanhamento() {
   function getStatusInfo(status: string | null) {
     switch (status) {
       case 'AGUARDANDO_PAGAMENTO':
-        return { texto: 'Pagamento não confirmado 💳', progresso: 10 }
+        return { texto: 'Confirmando pagamento 💳', progresso: 10 }
       case 'RECEBIDO':
         return { texto: 'Pedido recebido ', progresso: 30 }
       case 'EM_PREPARO':
@@ -202,7 +202,8 @@ export default function Acompanhamento() {
         )}
         {status === 'AGUARDANDO_PAGAMENTO' && (
           <p style={{ fontSize: 12, opacity: 0.7, marginTop: 8 }}>
-            Se o pagamento falhou, cancele e tente novamente.
+            Estamos aguardando a confirmação do pagamento. Isso pode levar
+            alguns segundos. Não realize um novo pagamento neste momento.
           </p>
         )}
         {status === 'ENTREGUE' && (
