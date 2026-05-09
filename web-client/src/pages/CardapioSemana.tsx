@@ -27,7 +27,7 @@ export default function CardapioSemana() {
   const hoje = new Date().getDay()
 
   /* ============================= */
-  /* 🔥 FUNÇÃO BLINDADA BOOLEAN    */
+  /*  FUNÇÃO BLINDADA BOOLEAN    */
   /* ============================= */
 
   function toBoolean(value: any): boolean {
@@ -40,7 +40,7 @@ export default function CardapioSemana() {
   }
 
   /* ============================= */
-  /* 🔥 DIAS DA SEMANA             */
+  /*  DIAS DA SEMANA             */
   /* ============================= */
 
   const dias = [
@@ -61,7 +61,7 @@ export default function CardapioSemana() {
   ]
 
   /* ============================= */
-  /* 🔥 CARREGAR PRODUTOS          */
+  /*  CARREGAR PRODUTOS          */
   /* ============================= */
 
   useEffect(() => {
@@ -87,13 +87,13 @@ export default function CardapioSemana() {
   }, [])
 
   /* ============================= */
-  /* 🔥 DESTAQUE                  */
+  /*  DESTAQUE                  */
   /* ============================= */
 
   const destaque = produtos.find((p) => p.destaque && p.ativo)
 
   /* ============================= */
-  /* 🔥 INTERESSE                 */
+  /*  INTERESSE                 */
   /* ============================= */
 
   function registrarInteresse(produto: Produto, dia: string) {
@@ -114,7 +114,7 @@ export default function CardapioSemana() {
   }
 
   /* ============================= */
-  /* 🔥 RENDER                    */
+  /*  RENDER                    */
   /* ============================= */
 
   return (

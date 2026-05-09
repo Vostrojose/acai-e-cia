@@ -11,12 +11,12 @@ export default function Sucesso() {
   const [codigo, setCodigo] = useState<number | null>(null)
 
   /* ============================= */
-  /* 🧹 LIMPAR CARRINHO */
+  /*  LIMPAR CARRINHO */
   /* ============================= */
   useEffect(() => {
     limparCarrinho()
 
-    // 🔥 MANTER pedidoId para fluxo inteligente
+    //  MANTER pedidoId para fluxo inteligente
     if (id) {
       localStorage.setItem('pedidoId', id)
       localStorage.setItem('pedidoStatus', 'RECEBIDO')
@@ -107,7 +107,7 @@ export default function Sucesso() {
   )
 }
 
-/* 🎨 botão padrão */
+/*  botão padrão */
 function btn(color: string) {
   return {
     width: '100%',

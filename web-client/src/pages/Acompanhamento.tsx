@@ -59,14 +59,14 @@ export default function Acompanhamento() {
     }
   }, [id])
 
-  // 🔥 salva status para controle do Splash
+  //  salva status para controle do Splash
   useEffect(() => {
     if (status) {
       localStorage.setItem('pedidoStatus', status)
     }
   }, [status])
 
-  // 🔥 remove dados quando pedido finalizar
+  //  remove dados quando pedido finalizar
   useEffect(() => {
     if (status === 'ENTREGUE' || status === 'CANCELADO') {
       localStorage.removeItem('pedidoId')
@@ -129,9 +129,9 @@ export default function Acompanhamento() {
       case 'AGUARDANDO_PAGAMENTO':
         return { texto: 'Pagamento não confirmado 💳', progresso: 10 }
       case 'RECEBIDO':
-        return { texto: 'Pedido recebido 📥', progresso: 30 }
+        return { texto: 'Pedido recebido ', progresso: 30 }
       case 'EM_PREPARO':
-        return { texto: 'Estamos preparando 🍳', progresso: 60 }
+        return { texto: 'Estamos preparando ', progresso: 60 }
       case 'PRONTO':
         return { texto: 'Seu pedido está pronto! ✅', progresso: 90 }
       case 'ENTREGUE':
@@ -155,7 +155,7 @@ export default function Acompanhamento() {
 
   return (
     <div className="acompanhamento-page">
-      {/* 🔥 TEXTO AGORA ACIMA DO CARD */}
+      {/*  TEXTO AGORA ACIMA DO CARD */}
       <p className="banner-texto-topo">🍓 Enquanto seu pedido é preparado...</p>
 
       <div className="acompanhamento-card">

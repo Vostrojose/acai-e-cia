@@ -27,7 +27,7 @@ export default function Checkout() {
 
   const [qrCode, setQrCode] = useState<string | null>(null)
 
-  // 🔥 NOVO
+  //  NOVO
   const [foraDaArea, setForaDaArea] = useState(false)
 
   const [endereco, setEndereco] = useState({
@@ -134,7 +134,7 @@ export default function Checkout() {
 
       const pedidoResponse = await api.post('/pedidos', payload)
 
-      // 🔥 NOVO (integra backend)
+      //  NOVO (integra backend)
       if (pedidoResponse.data.foraDaArea) {
         setForaDaArea(true)
         setTipoPedido('retirada')

@@ -133,7 +133,7 @@ export default function Home() {
         })),
     )
 
-    console.log('🔥 ENVIANDO ADICIONAIS:', adicionaisClonados)
+    console.log(' ENVIANDO ADICIONAIS:', adicionaisClonados)
 
     const idUnico = gerarIdItem(produtoSelecionado, adicionaisClonados)
 
@@ -164,7 +164,7 @@ export default function Home() {
               ...produto,
               preco: Number(produto.preco),
 
-              /* 🔥 CORREÇÃO AQUI */
+              /*  CORREÇÃO AQUI */
               adicionais: adicionaisAtivos,
               temAdicionais: adicionaisAtivos.length > 0,
             }
