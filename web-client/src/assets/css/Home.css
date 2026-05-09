@@ -130,8 +130,25 @@
 }
 
 .produto-preco {
-  color: red !important;
-  font-size: 40px !important;
+  flex-shrink: 0;
+
+  background:
+    rgba(120, 120, 120, 0.12);
+
+  color: #d5d5d5;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.08);
+
+  padding: 8px 12px;
+
+  border-radius: 12px;
+
+  font-weight: 700;
+  font-size: 15px;
+
+  box-shadow:
+    inset 0 0 10px rgba(255,255,255,0.03);
 }
 
 /* ======================================== */
