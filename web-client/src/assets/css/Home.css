@@ -159,19 +159,13 @@
 /* BOTÕES                                   */
 /* ======================================== */
 
-.add-btn {
+/* BASE DOS BOTÕES */
+
+.add-btn,
+.add-btn-added {
   margin-top: 16px;
 
   width: 100%;
-
-  background:
-    linear-gradient(
-      135deg,
-      #4b5563,
-      #6b7280
-    );
-
-  color: #fff;
 
   border: none;
 
@@ -184,27 +178,30 @@
 
   cursor: pointer;
 
+  color: #fff;
+
   transition:
     transform 0.18s ease,
     filter 0.18s ease,
-    box-shadow 0.18s ease;
+    box-shadow 0.18s ease,
+    opacity 0.18s ease;
 
   box-shadow:
     0 10px 20px rgba(0,0,0,0.25);
 }
 
-.add-btn:hover {
-  filter: brightness(1.08);
+/* BOTÃO NORMAL */
 
-  box-shadow:
-    0 12px 26px rgba(0,0,0,0.35);
-
-  transform: translateY(-1px);
+.add-btn {
+  background:
+    linear-gradient(
+      135deg,
+      #4b5563,
+      #6b7280
+    );
 }
 
-.add-btn:active {
-  transform: scale(0.97);
-}
+/* BOTÃO JÁ ADICIONADO */
 
 .add-btn-added {
   background:
@@ -213,12 +210,25 @@
       #2f343c,
       #525861
     );
-
-  color: #fff;
 }
 
+/* HOVER */
+
+.add-btn:hover,
 .add-btn-added:hover {
   filter: brightness(1.08);
+
+  box-shadow:
+    0 12px 26px rgba(0,0,0,0.35);
+
+  transform: translateY(-1px);
+}
+
+/* ACTIVE */
+
+.add-btn:active,
+.add-btn-added:active {
+  transform: scale(0.97);
 }
 
 /* ======================================== */
