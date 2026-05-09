@@ -1,54 +1,37 @@
 .page {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top, #2a0040, #0f0018 70%);
+  background: radial-gradient(circle at top, #2a0040, #0f0018 70%);
   color: #fff;
-  overflow-x: hidden;
 }
 
-/* ======================================== */
-/* HEADER                                   */
-/* ======================================== */
-
-.header {
-  position: relative;
-  padding: 24px 20px 10px;
-}
+/* ========================= */
+/* HEADER                    */
+/* ========================= */
 
 .title {
-  font-size: 32px;
-  font-weight: 800;
+  font-size: 28px;
+  font-weight: bold;
   color: #ffffff;
-
-  text-shadow:
-    0 0 10px rgba(170, 0, 255, 0.35),
-    0 0 30px rgba(170, 0, 255, 0.18);
-
-  letter-spacing: -0.5px;
+  text-shadow: 0 0 10px rgba(170, 0, 255, 0.6);
 }
 
 .subtitle {
-  color: #c9c9c9;
+  color: #aaff00;
   font-size: 14px;
-  margin-top: 6px;
-  opacity: 0.82;
 }
-
-/* ======================================== */
-/* CARDÁPIO                                 */
-/* ======================================== */
+/* ========================= */
+/* LISTA                     */
+/* ========================= */
 
 .cardapio-container {
   width: 100%;
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 10px 16px 120px;
+  max-width: 700px;
 }
 
 .cardapio-list {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 18px;
+  gap: 16px;
 }
 
 @media (min-width: 768px) {
@@ -57,301 +40,168 @@
   }
 }
 
-/* ======================================== */
-/* PRODUTO CARD                             */
-/* ======================================== */
+/* ========================= */
+/* CARD PRODUTO              */
+/* ========================= */
 
 .produto-card {
-  position: relative;
+  background: linear-gradient(135deg, #1a0026, #2a0040);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(170, 0, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 
-  background:
-    linear-gradient(
-      135deg,
-      rgba(26, 0, 38, 0.92),
-      rgba(40, 0, 60, 0.92)
-    );
-
-  backdrop-filter: blur(10px);
-
-  border-radius: 22px;
-
-  padding: 18px;
-
-  border:
-    1px solid rgba(255, 255, 255, 0.06);
-
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.35);
-
-  transition:
-    transform 0.22s ease,
-    box-shadow 0.22s ease,
-    border 0.22s ease;
+  transition: all 0.2s ease;
 }
-
-.produto-card:hover {
-  transform: translateY(-4px);
-
-  border:
-    1px solid rgba(170, 170, 170, 0.16);
-
-  box-shadow:
-    0 16px 38px rgba(0, 0, 0, 0.45),
-    0 0 18px rgba(170, 170, 170, 0.08);
-}
-
 .produto-info {
   display: flex;
   flex-direction: column;
   flex: 1;
 }
 
+/*  NOVO */
 .produto-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 14px;
-  width: 100%;
+  align-items: center;
+  width: 100%; /*  ESSENCIAL */
 }
 
 .produto-nome {
-  font-weight: 700;
-  font-size: 18px;
+  font-weight: bold;
   color: #ffffff;
-  line-height: 1.25;
 }
 
 .produto-descricao {
-  color: #c3c3c3;
+  color: #bbb;
   font-size: 13px;
-  margin-top: 8px;
-  line-height: 1.45;
-  opacity: 0.82;
 }
 
 .produto-preco {
-  flex-shrink: 0;
-
-  background:
-    rgba(120, 120, 120, 0.12);
-
-  color: #d5d5d5;
-
-  border:
-    1px solid rgba(255, 255, 255, 0.08);
-
-  padding: 8px 12px;
-
-  border-radius: 12px;
-
-  font-weight: 700;
-  font-size: 15px;
-
-  box-shadow:
-    inset 0 0 10px rgba(255,255,255,0.03);
+  color: #aaff00;
+  font-weight: bold;
+  margin-left: 10px; /* pequeno respiro */
 }
 
-/* ======================================== */
-/* BOTÕES                                   */
-/* ======================================== */
-
-/* BASE DOS BOTÕES */
-
-.add-btn,
-.add-btn-added {
-  margin-top: 16px;
-
-  width: 100%;
-
-  border: none;
-
-  padding: 12px 14px;
-
-  border-radius: 14px;
-
-  font-weight: 700;
-  font-size: 14px;
-
-  cursor: pointer;
-
-  color: #fff;
-
-  transition:
-    transform 0.18s ease,
-    filter 0.18s ease,
-    box-shadow 0.18s ease,
-    opacity 0.18s ease;
-
-  box-shadow:
-    0 10px 20px rgba(0,0,0,0.25);
-}
-
-/* BOTÃO NORMAL */
+/* ========================= */
+/* BOTÕES                    */
+/* ========================= */
 
 .add-btn {
-  background:
-    linear-gradient(
-      135deg,
-      #4b5563,
-      #6b7280
-    );
+  background: linear-gradient(135deg, #ff2e8b, #ff6ec7);
+  color: #000;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
 }
 
-/* BOTÃO JÁ ADICIONADO */
+.add-btn:hover {
+  filter: brightness(1.1);
+}
+.add-btn:active {
+  transform: scale(0.95);
+}
 
 .add-btn-added {
-  background:
-    linear-gradient(
-      135deg,
-      #2f343c,
-      #525861
-    );
+  background: linear-gradient(135deg, #aaff00, #7edc00);
+  color: #0c0c0c;
 }
 
-/* HOVER */
-
-.add-btn:hover,
 .add-btn-added:hover {
-  filter: brightness(1.08);
-
-  box-shadow:
-    0 12px 26px rgba(0,0,0,0.35);
-
-  transform: translateY(-1px);
+  filter: brightness(1.1);
 }
 
-/* ACTIVE */
-
-.add-btn:active,
 .add-btn-added:active {
-  transform: scale(0.97);
+  transform: scale(0.95);
 }
 
-/* ======================================== */
-/* CHECKOUT BAR                             */
-/* ======================================== */
+/* ========================= */
+/* CHECKOUT BAR              */
+/* ========================= */
 
 .checkout-bar {
-  background:
-    rgba(17, 24, 39, 0.92);
-
-  backdrop-filter: blur(12px);
-
-  border-top:
-    1px solid rgba(255,255,255,0.08);
-
-  box-shadow:
-    0 -8px 30px rgba(0,0,0,0.35);
+  background: #1a0026;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .checkout-btn {
-  background:
-    linear-gradient(
-      135deg,
-      #4b5563,
-      #6b7280
-    );
-
-  color: #fff;
-
-  border: none;
-
-  transition:
-    transform 0.18s ease,
-    filter 0.18s ease;
+  background: linear-gradient(135deg, #aaff00, #7edc00);
+  color: #000;
 }
 
-.checkout-btn:hover {
-  filter: brightness(1.08);
+.checkout-btn {
+  transition: all 0.2s ease;
 }
 
 .checkout-btn:active {
   transform: scale(0.98);
 }
 
-/* ======================================== */
-/* CARRINHO FLUTUANTE                       */
-/* ======================================== */
+/* ========================= */
+/* CARRINHO FLUTUANTE        */
+/* ========================= */
 
 .cart-floating {
   position: fixed;
+  bottom: 20px;
+  right: 20px;
 
-  bottom: 22px;
-  right: 22px;
-
-  width: 64px;
-  height: 64px;
+  width: 60px;
+  height: 60px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  background:
-    linear-gradient(
-      135deg,
-      #4b5563,
-      #6b7280
-    );
-
-  color: #fff;
+  background: linear-gradient(135deg, #aaff00, #7edc00);
+  color: #000;
 
   border-radius: 50%;
 
-  box-shadow:
-    0 14px 30px rgba(0,0,0,0.42);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 
   z-index: 9999;
 
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: all 0.2s ease;
+
+  pointer-events: auto; /* 🔥 mantém aqui */
 }
-
 .cart-floating:hover {
-  transform: scale(1.08);
-
-  box-shadow:
-    0 18px 34px rgba(0,0,0,0.5);
+  transform: scale(1.1);
 }
 
 .cart-floating:active {
-  transform: scale(0.96);
+  transform: scale(0.95);
 }
 
 .cart-badge {
   position: absolute;
-
   top: -6px;
   right: -6px;
 
   background: #ff2e8b;
-  color: #fff;
+  color: white;
 
   font-size: 12px;
-  font-weight: 700;
+  font-weight: bold;
 
-  padding: 4px 8px;
-
-  border-radius: 999px;
-
-  box-shadow:
-    0 6px 16px rgba(255,46,139,0.35);
+  padding: 4px 7px;
+  border-radius: 20px;
 }
 
-/* ======================================== */
-/* ANIMAÇÕES                                */
-/* ======================================== */
+/* ========================= */
+/* ANIMAÇÃO ITEM             */
+/* ========================= */
 
 .fly-item {
   position: fixed;
-
   width: 18px;
   height: 18px;
-
-  background: #6b7280;
-
+  background: #6a1b9a;
   border-radius: 50%;
-
   z-index: 9999;
 
   transition:
@@ -367,19 +217,61 @@
   0% {
     transform: scale(1);
   }
-
   50% {
-    transform: scale(1.18);
+    transform: scale(1.25);
   }
-
   100% {
     transform: scale(1);
   }
 }
+.btn-semana-floating {
+  background: linear-gradient(135deg, #ff2e8b, #ff6ec7);
+  color: #fff;
+}
 
-/* ======================================== */
-/* BOTÃO CARDÁPIO SEMANA                    */
-/* ======================================== */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  background: rgba(0, 0, 0, 0.6); /* escurece fundo */
+
+  display: flex;
+  align-items: flex-end; /* 🔥 vem de baixo */
+  justify-content: center;
+
+  z-index: 9999;
+}
+
+.popup-adicionais {
+  background: #1a0026;
+  color: #fff;
+  border-radius: 16px;
+  padding: 20px;
+
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6);
+  animation: subir 0.3s ease;
+}
+
+@keyframes subir {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.popup-adicionais h3 {
+  margin-bottom: 10px;
+}
+
+.popup-adicionais button {
+  width: 100%;
+  margin-top: 10px;
+}
 
 .btn-semana {
   position: fixed;
@@ -387,19 +279,13 @@
   top: 20px;
   right: 20px;
 
-  width: 54px;
-  height: 54px;
+  width: 50px;
+  height: 50px;
 
   border-radius: 50%;
   border: none;
 
-  background:
-    linear-gradient(
-      135deg,
-      #ff2e8b,
-      #ff6ec7
-    );
-
+  background: linear-gradient(135deg, #ff2e8b, #ff6ec7);
   color: #fff;
 
   display: flex;
@@ -407,84 +293,22 @@
   justify-content: center;
 
   z-index: 9999;
+}
 
+.produto-card:hover {
   box-shadow:
-    0 10px 22px rgba(0,0,0,0.32);
+    0 10px 22px rgba(0, 0, 0, 0.4),
+    0 0 10px rgba(170, 0, 255, 0.3);
+}
 
-  transition:
-    transform 0.2s ease,
-    filter 0.2s ease;
+.header {
+  position: relative;
+  padding: 20px;
 }
 
 .btn-semana:hover {
-  transform: scale(1.08);
-  filter: brightness(1.08);
+  transform: scale(1.1);
 }
-
-.btn-semana:active {
-  transform: scale(0.96);
-}
-
-/* ======================================== */
-/* POPUP ADICIONAIS                         */
-/* ======================================== */
-
-.popup-overlay {
-  position: fixed;
-
-  inset: 0;
-
-  background:
-    rgba(0,0,0,0.72);
-
-  backdrop-filter: blur(4px);
-
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-
-  z-index: 9999;
-}
-
-.popup-adicionais {
-  width: 100%;
-  max-width: 560px;
-
-  background:
-    linear-gradient(
-      180deg,
-      #1a0026,
-      #120018
-    );
-
-  color: #fff;
-
-  border-radius: 26px 26px 0 0;
-
-  padding: 24px;
-
-  box-shadow:
-    0 -16px 40px rgba(0,0,0,0.45);
-
-  animation: subir 0.28s ease;
-}
-
-.popup-adicionais h3 {
-  margin-bottom: 14px;
-  font-size: 22px;
-}
-
-.popup-adicionais button {
-  width: 100%;
-  margin-top: 12px;
-}
-
-@keyframes subir {
-  from {
-    transform: translateY(100%);
-  }
-
-  to {
-    transform: translateY(0);
-  }
+.btn-semana {
+  pointer-events: auto;
 }
