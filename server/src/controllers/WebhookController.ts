@@ -11,7 +11,8 @@ const mpProvider = new MercadoPagoProvider()
 interface Pagamento {
   id?: string
   status?: string
-  transaction_amount?: number
+
+  external_reference?: string
   externalReference?: string
 }
 
@@ -31,6 +32,18 @@ export class WebhookController {
 
       console.log('📊 [WEBHOOK] Pagamento consultado:', pagamento)
 
+      /* ============================= */
+      /* 🔥 NORMALIZA EXTERNAL REF     */
+      /* ============================= */
+
+      const externalReference =
+        pagamento.external_reference || pagamento.externalReference
+
+      if (!externalReference) {
+        console.error('❌ [WEBHOOK] externalReference ausente no pagamento')
+        return res.status(400).send('externalReference ausente')
+      }
+
       // Mapear status do Mercado Pago para StatusPagamento
       let novoStatusPagamento: StatusPagamento = StatusPagamento.PENDENTE
 
@@ -46,23 +59,23 @@ export class WebhookController {
         novoStatusPagamento = StatusPagamento.PENDENTE
       }
 
-      if (!pagamento.externalReference) {
-        console.error('❌ [WEBHOOK] externalReference ausente no pagamento')
-        return res.status(400).send('externalReference ausente')
-      }
-
       // Atualizar pedido no banco usando externalReference
       const pedidoAtualizado = await pedidoService.atualizarPagamento(
-        pagamento.externalReference,
-        novoStatusPagamento
+        externalReference,
+        novoStatusPagamento,
+        pagamento.id,
       )
 
       // 🔔 Emitir atualização via websocket
       getIO().emit('pedido_atualizado', serializeDecimal(pedidoAtualizado))
 
-      console.log(`✅ Pedido ${pagamento.externalReference} atualizado para pagamento ${novoStatusPagamento}`)
+      console.log(
+        `✅ Pedido ${externalReference} atualizado para pagamento ${novoStatusPagamento}`,
+      )
 
-      return res.status(200).json({ success: true, data: serializeDecimal(pedidoAtualizado) })
+      return res
+        .status(200)
+        .json({ success: true, data: serializeDecimal(pedidoAtualizado) })
     } catch (error: any) {
       console.error('❌ [WEBHOOK] Erro ao processar webhook:', error.message)
       return res.status(500).send('Erro interno')
@@ -71,10 +84,3 @@ export class WebhookController {
 }
 
 export default new WebhookController()
-
-
-
-
-
-
-

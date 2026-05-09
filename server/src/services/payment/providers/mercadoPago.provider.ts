@@ -203,31 +203,66 @@ export class MercadoPagoProvider {
   /* BUSCAR PAGAMENTO              */
   /* ============================= */
 
-  async buscarPagamento(paymentId: string) {
-    if (!paymentId) {
-      throw new Error('paymentId não informado')
-    }
+/* ============================= */
+/* BUSCAR PAGAMENTO              */
+/* ============================= */
 
-    try {
-      const response: any = await this.payment.get({ id: paymentId })
-
-      const externalRef =
-        response.external_reference ||
-        response.body?.external_reference ||
-        response.metadata?.pedido_id ||
-        undefined
-
-      return {
-        id: response.id?.toString(),
-        status: response.status,
-        transaction_amount: response.transaction_amount,
-        external_reference: externalRef,
-      }
-    } catch (error: any) {
-      console.error('❌ [MP BUSCAR PAGAMENTO] ERRO COMPLETO:')
-      console.error(error)
-
-      throw error
-    }
+async buscarPagamento(paymentId: string) {
+  if (!paymentId) {
+    throw new Error('paymentId não informado')
   }
+
+  try {
+    const response: any = await this.payment.get({
+      id: paymentId,
+    })
+
+    console.log(
+      '📦 [MP] RESPOSTA BRUTA:',
+      JSON.stringify(response, null, 2),
+    )
+
+    /* ============================= */
+    /* 🔥 COMPATIBILIDADE SDK        */
+    /* ============================= */
+
+    const body = response?.body || response
+
+    const externalReference =
+      body?.external_reference ||
+      body?.externalReference ||
+      body?.metadata?.pedido_id ||
+      undefined
+
+    const pagamento = {
+      id: body?.id?.toString(),
+      status: body?.status,
+      transaction_amount: Number(body?.transaction_amount || 0),
+      external_reference: externalReference,
+
+      /* 🔥 RETROCOMPATIBILIDADE */
+      externalReference: externalReference,
+    }
+
+    console.log('✅ [MP] PAGAMENTO NORMALIZADO:', pagamento)
+
+    return pagamento
+  } catch (error: any) {
+    console.error('❌ [MP BUSCAR PAGAMENTO] ERRO COMPLETO:')
+    console.error(error)
+
+    if (error?.cause) {
+      console.error('CAUSE:', error.cause)
+    }
+
+    if (error?.response?.data) {
+      console.error(
+        'MP RESPONSE:',
+        JSON.stringify(error.response.data, null, 2),
+      )
+    }
+
+    throw error
+  }
+}
 }

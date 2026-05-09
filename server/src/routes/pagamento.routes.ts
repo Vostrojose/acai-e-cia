@@ -1,12 +1,12 @@
-import { Router } from "express";
-import { z } from "zod";
-import PaymentProvider from "../services/payment/PaymentProvider";
-import PedidoService from "../services/pedido.service";
-import { StatusPedido } from "@prisma/client";
-import { AppError } from "../utils/AppError";
-import { getIO } from "../websocket/socket";
+import { Router } from 'express'
+import { z } from 'zod'
+import PaymentProvider from '../services/payment/PaymentProvider'
+import PedidoService from '../services/pedido.service'
+import { StatusPedido } from '@prisma/client'
+import { AppError } from '../utils/AppError'
+import { getIO } from '../websocket/socket'
 
-const router = Router();
+const router = Router()
 
 /* ============================= */
 /* SCHEMAS                       */
@@ -14,171 +14,169 @@ const router = Router();
 
 const pagamentoSchema = z.object({
   pedidoId: z.string().uuid(),
-});
+})
 
 /* ============================= */
 /* PIX                           */
 /* ============================= */
 
-router.post("/pix", async (req, res) => {
+router.post('/pix', async (req, res) => {
   try {
-    const { pedidoId } = pagamentoSchema.parse(req.body);
+    const { pedidoId } = pagamentoSchema.parse(req.body)
 
-    const pedido = await PedidoService.buscarPorId(pedidoId);
+    const pedido = await PedidoService.buscarPorId(pedidoId)
 
     if (!pedido) {
-      throw new AppError("Pedido não encontrado.", 404);
+      throw new AppError('Pedido não encontrado.', 404)
     }
 
-    const resultado = await PaymentProvider.criarPagamentoPix(pedido);
+    const resultado = await PaymentProvider.criarPagamentoPix(pedido)
 
     return res.json({
       success: true,
       data: resultado,
-    });
-
+    })
   } catch (error: any) {
-    console.error("🔥 ERRO PIX COMPLETO:", error);
+    console.error('🔥 ERRO PIX COMPLETO:', error)
 
     return res.status(500).json({
       success: false,
-      message: error?.message || "Erro ao gerar pagamento PIX",
+      message: error?.message || 'Erro ao gerar pagamento PIX',
       detalhe: error?.response?.data || error,
-    });
+    })
   }
-});
+})
 
 /* ============================= */
 /* CHECKOUT                      */
 /* ============================= */
 
-router.post("/checkout", async (req, res) => {
+router.post('/checkout', async (req, res) => {
   try {
-    console.log("🔥 CHEGOU NO CHECKOUT");
+    console.log('🔥 CHEGOU NO CHECKOUT')
 
-    const { pedidoId } = pagamentoSchema.parse(req.body);
+    const { pedidoId } = pagamentoSchema.parse(req.body)
 
-    const pedido = await PedidoService.buscarPorId(pedidoId);
+    const pedido = await PedidoService.buscarPorId(pedidoId)
 
     if (!pedido) {
-      throw new AppError("Pedido não encontrado.", 404);
+      throw new AppError('Pedido não encontrado.', 404)
     }
 
     if (pedido.status !== StatusPedido.AGUARDANDO_PAGAMENTO) {
       throw new AppError(
-        "Pagamento só pode ser realizado para pedidos aguardando pagamento.",
-        400
-      );
+        'Pagamento só pode ser realizado para pedidos aguardando pagamento.',
+        400,
+      )
     }
 
-    const checkout = await PaymentProvider.criarCheckout(pedido);
+    const checkout = await PaymentProvider.criarCheckout(pedido)
 
     return res.status(200).json({
       success: true,
       data: {
         init_point: checkout.init_point,
       },
-    });
-
+    })
   } catch (error: any) {
-    console.error("🔥 ERRO REAL CHECKOUT:");
-    console.error(error);
+    console.error('🔥 ERRO REAL CHECKOUT:')
+    console.error(error)
 
     return res.status(500).json({
       success: false,
-      message: error?.message || "Erro ao gerar checkout.",
+      message: error?.message || 'Erro ao gerar checkout.',
       detalhe: error?.response?.data || error,
-    });
+    })
   }
-});
+})
 
 /* ============================= */
 /* WEBHOOK MERCADO PAGO          */
 /* ============================= */
 
-router.post("/webhook", async (req, res) => {
+router.post('/webhook', async (req, res) => {
   try {
-    const topic =
-      (req.query.topic as string) ||
-      (req.query.type as string);
+    const topic = (req.query.topic as string) || (req.query.type as string)
 
-    const id =
-      (req.query.id as string) ||
-      (req.query["data.id"] as string);
+    const id = (req.query.id as string) || (req.query['data.id'] as string)
 
-    console.log("🔥 WEBHOOK RECEBIDO:", { topic, id });
+    console.log('🔥 WEBHOOK RECEBIDO:', { topic, id })
 
-    if (topic === "payment") {
-      if (!id) return res.sendStatus(200);
+    if (topic === 'payment') {
+      if (!id) return res.sendStatus(200)
 
-      const pagamento = await PaymentProvider.buscarPagamento(id);
+      const pagamento = await PaymentProvider.buscarPagamento(id)
 
-      if (!pagamento) return res.sendStatus(200);
+      if (!pagamento) return res.sendStatus(200)
 
-      console.log("🔎 PAGAMENTO COMPLETO:", pagamento);
-      console.log("💳 STATUS PAGAMENTO:", pagamento.status);
+      console.log('🔎 PAGAMENTO COMPLETO:', pagamento)
+      console.log('💳 STATUS PAGAMENTO:', pagamento.status)
 
-      if (pagamento.status !== "approved") {
-        return res.sendStatus(200);
+      if (pagamento.status !== 'approved') {
+        return res.sendStatus(200)
       }
 
       if (!pagamento.external_reference) {
-        console.error("Pagamento sem external_reference");
-        return res.sendStatus(200);
+        console.error('Pagamento sem external_reference')
+        return res.sendStatus(200)
       }
 
       const pedido = await PedidoService.buscarPorId(
-        pagamento.external_reference
-      );
+        pagamento.external_reference,
+      )
 
-      if (!pedido) return res.sendStatus(200);
+      if (!pedido) return res.sendStatus(200)
 
       /* 🔥 BLOQUEIO DUPLICIDADE */
       if (pedido.status === StatusPedido.RECEBIDO) {
-        console.log("⚠️ Pedido já confirmado, ignorando webhook duplicado");
-        return res.sendStatus(200);
+        console.log('⚠️ Pedido já confirmado, ignorando webhook duplicado')
+        return res.sendStatus(200)
       }
 
       if (Number(pedido.total) !== Number(pagamento.transaction_amount)) {
-        console.error("Divergência de valor detectada");
-        return res.sendStatus(200);
+        console.error('Divergência de valor detectada')
+        return res.sendStatus(200)
       }
 
       if (pedido.status !== StatusPedido.AGUARDANDO_PAGAMENTO) {
-        return res.sendStatus(200);
+        return res.sendStatus(200)
       }
 
-      await PedidoService.atualizarStatus(
+      /* ============================= */
+      /* 🔥 ATUALIZA PAGAMENTO COMPLETO */
+      /* ============================= */
+
+      await PedidoService.atualizarPagamento(
         pedido.id,
-        StatusPedido.RECEBIDO
-      );
+        pagamento.status,
+        pagamento.id,
+      )
 
       /* 🔥 CORREÇÃO: BUSCAR COMPLETO COM PRODUTOS E ADICIONAIS */
       const pedidoCompleto = await PedidoService.buscarPorIdComProdutos(
-        pedido.id
-      );
+        pedido.id,
+      )
 
       try {
-        const io = getIO();
-        io.emit("novo_pedido", pedidoCompleto);
-        io.emit("pedido_atualizado", pedidoCompleto);
+        const io = getIO()
+        io.emit('novo_pedido', pedidoCompleto)
+        io.emit('pedido_atualizado', pedidoCompleto)
       } catch {
-        console.warn("WebSocket não inicializado.");
+        console.warn('WebSocket não inicializado.')
       }
 
-      console.log("✅ PEDIDO CONFIRMADO:", pedido.id);
+      console.log('✅ PEDIDO CONFIRMADO:', pedido.id)
     }
 
-    if (topic === "merchant_order") {
-      console.log("🟡 merchant_order recebido (ignorado)");
+    if (topic === 'merchant_order') {
+      console.log('🟡 merchant_order recebido (ignorado)')
     }
 
-    return res.sendStatus(200);
-
+    return res.sendStatus(200)
   } catch (error) {
-    console.error("ERRO WEBHOOK:", error);
-    return res.sendStatus(200);
+    console.error('ERRO WEBHOOK:', error)
+    return res.sendStatus(200)
   }
-});
+})
 
-export default router;
+export default router
