@@ -189,7 +189,7 @@ export default function Cozinha() {
   return (
     <div style={theme.page}>
       <div style={brandingHeader}>
-        <div style={brandingLogo}>A&CO</div>
+        <div style={brandingLogo}>A&CO TESTE 999</div>
 
         <div style={brandingInfo}>
           <div style={brandingTitle}>Painel Operacional</div>
