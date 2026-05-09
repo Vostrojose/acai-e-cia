@@ -188,6 +188,15 @@ export default function Cozinha() {
 
   return (
     <div style={theme.page}>
+      <div style={brandingHeader}>
+        <div style={brandingLogo}>A&CO</div>
+
+        <div style={brandingInfo}>
+          <div style={brandingTitle}>Painel Operacional</div>
+
+          <div style={brandingSub}>Tempo real • Produção • Cozinha</div>
+        </div>
+      </div>
       <CardMenu navigate={navigate} onBalcao={() => setAbrirBalcao(true)} />
 
       <div style={headerGrid}>
@@ -579,6 +588,63 @@ const btnMenu = {
   borderRadius: 6,
   fontSize: 16,
   cursor: 'pointer',
+}
+const brandingHeader: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 16,
+
+  marginBottom: 24,
+
+  padding: '18px 22px',
+
+  borderRadius: 18,
+
+  background: 'linear-gradient(135deg, rgba(25,25,25,.96), rgba(40,40,40,.96))',
+
+  border: '1px solid rgba(255,255,255,0.06)',
+
+  boxShadow: '0 10px 30px rgba(0,0,0,0.35)',
+}
+
+const brandingLogo: React.CSSProperties = {
+  width: 72,
+  height: 72,
+
+  borderRadius: 18,
+
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: 26,
+  fontWeight: 900,
+  letterSpacing: 1.2,
+
+  color: '#fff',
+
+  background: 'linear-gradient(135deg, #6b7280, #3f4752)',
+
+  boxShadow: '0 10px 20px rgba(0,0,0,0.35)',
+}
+
+const brandingInfo: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+}
+
+const brandingTitle: React.CSSProperties = {
+  fontSize: 28,
+  fontWeight: 800,
+  color: '#fff',
+  letterSpacing: -0.5,
+}
+
+const brandingSub: React.CSSProperties = {
+  marginTop: 4,
+
+  fontSize: 14,
+
+  color: 'rgba(255,255,255,.65)',
 }
 
 function Coluna({ titulo, pedidos }: any) {
