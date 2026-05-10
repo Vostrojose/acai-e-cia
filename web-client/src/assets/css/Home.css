@@ -9,16 +9,28 @@
 /* ========================= */
 
 .title {
-  font-size: 28px;
-  font-weight: bold;
+  font-size: 30px;
+
+  font-weight: 800;
+
   color: #ffffff;
-  text-shadow: 0 0 10px rgba(170, 0, 255, 0.6);
+
+  line-height: 1.1;
+
+  margin: 0;
+
+  text-align: center;
+
+  text-shadow:
+    0 0 10px rgba(170,0,255,.35);
 }
 
 .subtitle {
   color: #9ca3af;
 
   font-size: 14px;
+
+  margin-top: 6px;
 
   letter-spacing: 0.3px;
 }
@@ -366,7 +378,16 @@
 
 .header {
   position: relative;
+
   padding: 20px;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  margin-bottom: 20px;
 }
 
 .btn-semana:hover {
@@ -398,10 +419,11 @@
 
 .header-branding {
   display: flex;
-  align-items: center;
-  gap: 14px;
-}
 
+  align-items: center;
+
+  gap: 16px;
+}
 .header-logo {
   width: 58px;
   height: 58px;
@@ -425,12 +447,17 @@
 
 .header-texts {
   display: flex;
+
   flex-direction: column;
+
+  justify-content: center;
 }
 
 .online-status {
   display: flex;
+
   align-items: center;
+
   gap: 6px;
 
   margin-top: 4px;
