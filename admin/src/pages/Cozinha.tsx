@@ -369,7 +369,7 @@ function PedidoCard({ pedido }: any) {
 
       {pedido.status === 'PRONTO' && (
         <>
-          <button onClick={() => atualizarStatus('ENTREGUE')}>ENTREGUE</button>
+          <button onClick={() => atualizarStatus('ENTREGUE')}>FINALIZAR</button>
 
           {pedido.telefone && (
             <button onClick={enviarWhatsApp} style={{ marginTop: 8 }}>
