@@ -93,15 +93,14 @@
   gap: 12px;
 }
 .produto-nome {
-  flex: 1;
+  max-width: 100%;
 
-  font-weight: 700;
+  overflow: hidden;
 
-  color: #fff;
+  text-overflow: ellipsis;
 
-  line-height: 1.35;
+  white-space: nowrap;
 }
-
 .produto-descricao {
   color: #bbb;
   font-size: 13px;
