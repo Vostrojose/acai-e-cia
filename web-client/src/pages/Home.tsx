@@ -215,6 +215,13 @@ export default function Home() {
         >
           📅
         </button>
+        <button
+          className="btn-home"
+          onClick={() => navigate('/')}
+          title="Voltar para home"
+        >
+          🏠
+        </button>
       </div>
       {antesDaAbertura && (
         <div
