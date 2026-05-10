@@ -87,19 +87,21 @@
 }
 
 .produto-preco {
-  color: #d1d5db;
+  color: #d1d5db !important;
 
   font-weight: 700;
 
-  margin-left: 24px;
+  font-size: 15px;
 
-  min-width: 90px;
+  min-width: 95px;
 
   text-align: right;
 
-  font-size: 15px;
+  display: flex;
 
-  letter-spacing: 0.3px;
+  justify-content: flex-end;
+
+  flex-shrink: 0;
 }
 /* ========================= */
 /* BOTÕES                    */
@@ -186,7 +188,7 @@
 
   transition: all 0.2s ease;
 
-  pointer-events: auto; /* 🔥 mantém aqui */
+  pointer-events: auto; /*  mantém aqui */
 }
 .cart-floating:hover {
   transform: scale(1.1);
@@ -258,7 +260,7 @@
   background: rgba(0, 0, 0, 0.6); /* escurece fundo */
 
   display: flex;
-  align-items: flex-end; /* 🔥 vem de baixo */
+  align-items: flex-end; /*  vem de baixo */
   justify-content: center;
 
   z-index: 9999;
