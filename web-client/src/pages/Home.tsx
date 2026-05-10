@@ -47,6 +47,16 @@ export default function Home() {
   const [adicionaisSelecionados, setAdicionaisSelecionados] = useState<any[]>(
     [],
   )
+  const agora = new Date()
+
+  const horaAtual = agora.getHours() * 60 + agora.getMinutes()
+
+  const abertura = 7 * 60 + 30 // 07:30
+  const fechamentoPedidos = 19 * 60 // 19:00
+
+  const antesDaAbertura = horaAtual < abertura
+
+  const pedidosEncerrados = horaAtual >= fechamentoPedidos
 
   function abrirPopup(produto: Produto) {
     setProdutoSelecionado(produto)
@@ -80,19 +90,19 @@ export default function Home() {
   }
 
   /* ============================= */
-  /* 🔥 CORREÇÃO DEFINITIVA REAL   */
+  /*  CORREÇÃO DEFINITIVA REAL   */
   /* ============================= */
   function confirmarProduto() {
     if (!produtoSelecionado) return
 
-    // 🔥 CLONE REAL DOS ADICIONAIS (ESSENCIAL)
+    //  CLONE REAL DOS ADICIONAIS (ESSENCIAL)
     const adicionaisClonados = (adicionaisSelecionados || []).map((a: any) => ({
       id: a.id,
       nome: a.nome,
       preco: Number(a.preco),
     }))
 
-    console.log('🔥 ENVIANDO ADICIONAIS:', adicionaisClonados)
+    console.log(' ENVIANDO ADICIONAIS:', adicionaisClonados)
 
     const idUnico = gerarIdItem(produtoSelecionado, adicionaisClonados)
 
@@ -104,7 +114,7 @@ export default function Home() {
       adicionais: adicionaisClonados,
     })
 
-    // 🔥 LIMPA SOMENTE DEPOIS
+    // LIMPA SOMENTE DEPOIS
     setAdicionaisSelecionados([])
 
     fecharPopup()
@@ -166,8 +176,15 @@ export default function Home() {
     <div className="page">
       <div
         className="cart-floating"
-        onClick={() => navigate('/carrinho')}
-        style={{ opacity: totalItens > 0 ? 1 : 0.6 }}
+        onClick={() => {
+          if (pedidosEncerrados) return
+
+          navigate('/carrinho')
+        }}
+        style={{
+          cursor: pedidosEncerrados ? 'not-allowed' : 'pointer',
+          opacity: totalItens > 0 ? 1 : 0.6,
+        }}
       >
         🛒
         {totalItens > 0 && <span className="cart-badge">{totalItens}</span>}
@@ -185,6 +202,48 @@ export default function Home() {
           📅
         </button>
       </div>
+      {antesDaAbertura && (
+        <div
+          style={{
+            background: 'rgba(255,193,7,0.12)',
+            border: '1px solid rgba(255,193,7,0.35)',
+            color: '#ffca28',
+
+            padding: 14,
+
+            borderRadius: 14,
+
+            marginBottom: 18,
+
+            fontWeight: 600,
+
+            textAlign: 'center',
+          }}
+        >
+          ⚠️ Pedidos realizados agora serão preparados após as 07:30.
+        </div>
+      )}
+      {pedidosEncerrados && (
+        <div
+          style={{
+            background: 'rgba(244,67,54,0.12)',
+            border: '1px solid rgba(244,67,54,0.35)',
+            color: '#ef5350',
+
+            padding: 16,
+
+            borderRadius: 14,
+
+            marginBottom: 18,
+
+            fontWeight: 700,
+
+            textAlign: 'center',
+          }}
+        >
+          🔒 Pedidos encerrados por hoje. Retornaremos amanhã às 07:30.
+        </div>
+      )}
 
       <div className="cardapio-container">
         <div className="cardapio-list">
@@ -209,8 +268,15 @@ export default function Home() {
                 </div>
 
                 <button
+                  disabled={pedidosEncerrados}
                   className={quantidade ? 'add-btn-added' : 'add-btn'}
+                  style={{
+                    opacity: pedidosEncerrados ? 0.5 : 1,
+                    cursor: pedidosEncerrados ? 'not-allowed' : 'pointer',
+                  }}
                   onClick={() => {
+                    if (pedidosEncerrados) return
+
                     if (produto.temAdicionais) {
                       abrirPopup(produto)
                     } else {
