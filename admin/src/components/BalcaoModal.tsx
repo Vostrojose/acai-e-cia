@@ -47,15 +47,10 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
   function toggleItem(produto: any) {
     setItens((prev) => {
-      const existente = prev.find((i) => i.id === produto.id)
-
-      if (existente) {
-        return prev.filter((i) => i.id !== produto.id)
-      }
-
       return [
         ...prev,
         {
+          uid: crypto.randomUUID(),
           id: produto.id,
           nome: produto.nome,
           preco: produto.preco,
@@ -69,19 +64,15 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   /* ============================= */
   /* QUANTIDADE                    */
   /* ============================= */
-
-  function alterarQuantidade(id: string, delta: number) {
+  function alterarQuantidade(uid: string, delta: number) {
     if (salvando) return
 
     setItens((prev) =>
       prev.map((i) =>
-        i.id === id
+        i.uid === uid
           ? {
               ...i,
-              quantidade: Math.max(
-                1,
-                (i.quantidade || 1) + delta,
-              ),
+              quantidade: Math.max(1, (i.quantidade || 1) + delta),
             }
           : i,
       ),
@@ -92,15 +83,12 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   /* ADICIONAL                     */
   /* ============================= */
 
-  function toggleAdicional(
-    itemId: string,
-    adicional: any,
-  ) {
+  function toggleAdicional(uid: string, adicional: any) {
     if (salvando) return
 
     setItens((prev) =>
       prev.map((item) => {
-        if (item.id !== itemId) return item
+        if (item.uid !== uid) return item
 
         const existente = item.adicionais?.find(
           (a: any) => a.id === adicional.id,
@@ -136,7 +124,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   /* ============================= */
 
   function alterarQtdAdicional(
-    itemId: string,
+    uid: string,
     adicionalId: string,
     delta: number,
   ) {
@@ -144,21 +132,17 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
     setItens((prev) =>
       prev.map((item) => {
-        if (item.id !== itemId) return item
+        if (item.uid !== uid) return item
 
         return {
           ...item,
-          adicionais: (item.adicionais || []).map(
-            (a: any) =>
-              a.id === adicionalId
-                ? {
-                    ...a,
-                    quantidade: Math.max(
-                      1,
-                      (a.quantidade || 1) + delta,
-                    ),
-                  }
-                : a,
+          adicionais: (item.adicionais || []).map((a: any) =>
+            a.id === adicionalId
+              ? {
+                  ...a,
+                  quantidade: Math.max(1, (a.quantidade || 1) + delta),
+                }
+              : a,
           ),
         }
       }),
@@ -178,16 +162,10 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
     }
 
     const nomeNormalizado = clienteNome
-      ? clienteNome
-          .toUpperCase()
-          .replace(/\s+/g, ' ')
-          .trim()
+      ? clienteNome.toUpperCase().replace(/\s+/g, ' ').trim()
       : null
 
-    if (
-      formaPagamento !== 'PAGO' &&
-      !nomeNormalizado
-    ) {
+    if (formaPagamento !== 'PAGO' && !nomeNormalizado) {
       alert('Informe o nome do cliente')
       return
     }
@@ -198,32 +176,18 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
       const res = await api.post('/balcao', {
         itens,
         forma: formaPagamento,
-        clienteNome:
-          formaPagamento !== 'PAGO'
-            ? nomeNormalizado
-            : null,
+        clienteNome: formaPagamento !== 'PAGO' ? nomeNormalizado : null,
         pularPreparo,
       })
 
-      const {
-        creditoUsado,
-        valorRestante,
-      } = res.data
+      const { creditoUsado, valorRestante } = res.data
 
       if (creditoUsado > 0) {
-        alert(
-          `💳 Crédito usado: R$ ${creditoUsado.toFixed(
-            2,
-          )}`,
-        )
+        alert(`💳 Crédito usado: R$ ${creditoUsado.toFixed(2)}`)
       }
 
       if (valorRestante > 0) {
-        alert(
-          `💵 Pagar no caixa: R$ ${valorRestante.toFixed(
-            2,
-          )}`,
-        )
+        alert(`💵 Pagar no caixa: R$ ${valorRestante.toFixed(2)}`)
       }
 
       onSuccess?.()
@@ -239,14 +203,11 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   return (
     <div style={overlay}>
       <div style={modal}>
-
         {/* HEADER */}
 
         <div style={header}>
           <div>
-            <h2 style={{ margin: 0 }}>
-              🧾 Venda Balcão
-            </h2>
+            <h2 style={{ margin: 0 }}>🧾 Venda Balcão</h2>
 
             <p
               style={{
@@ -259,10 +220,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
             </p>
           </div>
 
-          <button
-            onClick={onClose}
-            style={closeBtn}
-          >
+          <button onClick={onClose} style={closeBtn}>
             ×
           </button>
         </div>
@@ -270,148 +228,99 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
         {/* BODY */}
 
         <div style={body}>
-
           {/* PRODUTOS */}
 
           <div style={coluna}>
-
             <input
               placeholder="🔍 Buscar produto"
               value={busca}
-              onChange={(e) =>
-                setBusca(e.target.value)
-              }
+              onChange={(e) => setBusca(e.target.value)}
               style={input}
             />
 
             {produtosFiltrados.map((p) => {
-              const selecionado = itens.find(
-                (i) => i.id === p.id,
-              )
+              const selecionado = itens.some((i) => i.id === p.id)
 
               return (
                 <div
                   key={p.id}
-                  style={produtoCard(
-                    !!selecionado,
-                  )}
+                  style={produtoCard(!!selecionado)}
                   onClick={() => toggleItem(p)}
                 >
-
                   <div style={produtoTopo}>
                     <div>
-                      <div style={produtoNome}>
-                        {p.nome}
-                      </div>
+                      <div style={produtoNome}>{p.nome}</div>
 
                       <div style={produtoPreco}>
-                        R${' '}
-                        {Number(
-                          p.preco,
-                        ).toFixed(2)}
+                        R$ {Number(p.preco).toFixed(2)}
                       </div>
                     </div>
 
                     <div
                       style={{
                         ...checkCircle,
-                        background:
-                          selecionado
-                            ? '#22c55e'
-                            : '#374151',
+                        background: selecionado ? '#22c55e' : '#374151',
                       }}
                     >
-                      {selecionado
-                        ? '✓'
-                        : ''}
+                      {selecionado ? '✓' : ''}
                     </div>
                   </div>
 
-                  {selecionado &&
-                    p.adicionais?.length >
-                      0 && (
+                  {selecionado && p.adicionais?.length > 0 && (
+                    <div
+                      style={{
+                        marginTop: 14,
+                      }}
+                    >
                       <div
                         style={{
-                          marginTop: 14,
+                          marginBottom: 10,
+                          fontSize: 13,
+                          opacity: 0.7,
                         }}
                       >
-                        <div
-                          style={{
-                            marginBottom: 10,
-                            fontSize: 13,
-                            opacity: 0.7,
-                          }}
-                        >
-                          Adicionais
-                        </div>
-
-                        <div
-                          style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: 8,
-                          }}
-                        >
-                          {p.adicionais.map(
-                            (add: any) => {
-                              const item =
-                                itens.find(
-                                  (i) =>
-                                    i.id ===
-                                    p.id,
-                                )
-
-                              const ativo =
-                                item?.adicionais?.find(
-                                  (
-                                    a: any,
-                                  ) =>
-                                    a.id ===
-                                    add.id,
-                                )
-
-                              return (
-                                <div
-                                  key={
-                                    add.id
-                                  }
-                                  style={adicionalTag(
-                                    !!ativo,
-                                  )}
-                                  onClick={(
-                                    e,
-                                  ) => {
-                                    e.stopPropagation()
-
-                                    toggleAdicional(
-                                      p.id,
-                                      add,
-                                    )
-                                  }}
-                                >
-                                  {ativo
-                                    ? '✓'
-                                    : '+'}
-
-                                  {
-                                    add.nome
-                                  }
-
-                                  <strong>
-                                    R${' '}
-                                    {Number(
-                                      add.preco,
-                                    ).toFixed(
-                                      2,
-                                    )}
-                                  </strong>
-                                </div>
-                              )
-                            },
-                          )}
-                        </div>
+                        Adicionais
                       </div>
-                    )}
+
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: 8,
+                        }}
+                      >
+                        {p.adicionais.map((add: any) => {
+                          const item = [...itens]
+                            .reverse()
+                            .find((i) => i.id === p.id)
+
+                          const ativo = item?.adicionais?.find(
+                            (a: any) => a.id === add.id,
+                          )
+
+                          return (
+                            <div
+                              key={add.id}
+                              style={adicionalTag(!!ativo)}
+                              onClick={(e) => {
+                                e.stopPropagation()
+
+                                if (!item) return
+
+                                toggleAdicional(item.uid, add)
+                              }}
+                            >
+                              {ativo ? '✓' : '+'}
+
+                              {add.nome}
+
+                              <strong>R$ {Number(add.preco).toFixed(2)}</strong>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )
             })}
@@ -420,79 +329,35 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           {/* RESUMO */}
 
           <div style={coluna}>
-
-            <h3 style={{ marginTop: 0 }}>
-              🛒 Itens selecionados
-            </h3>
+            <h3 style={{ marginTop: 0 }}>🛒 Itens selecionados</h3>
 
             {itens.length === 0 && (
-              <div style={emptyState}>
-                Nenhum item selecionado
-              </div>
+              <div style={emptyState}>Nenhum item selecionado</div>
             )}
 
             {itens.map((i) => (
-              <div
-                key={i.id}
-                style={resumoCard}
-              >
-
+              <div key={i.uid} style={resumoCard}>
                 <div style={resumoTopo}>
                   <div>
-                    <div style={resumoNome}>
-                      {i.nome}
-                    </div>
+                    <div style={resumoNome}>{i.nome}</div>
 
-                    {i.adicionais
-                      ?.length > 0 && (
-                      <div
-                        style={
-                          resumoAdicionais
-                        }
-                      >
-                        {i.adicionais.map(
-                          (
-                            a: any,
-                          ) => (
-                            <div
-                              key={
-                                a.id
-                              }
-                            >
-                              +{' '}
-                              {
-                                a.nome
-                              }{' '}
-                              x
-                              {
-                                a.quantidade
-                              }
-                            </div>
-                          ),
-                        )}
+                    {i.adicionais?.length > 0 && (
+                      <div style={resumoAdicionais}>
+                        {i.adicionais.map((a: any) => (
+                          <div key={a.id}>
+                            + {a.nome} x{a.quantidade}
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
 
-                  <div
-                    style={
-                      resumoPreco
-                    }
-                  >
+                  <div style={resumoPreco}>
                     R${' '}
                     {(
                       (i.preco +
-                        (
-                          i.adicionais ||
-                          []
-                        ).reduce(
-                          (
-                            s: number,
-                            a: any,
-                          ) =>
-                            s +
-                            a.preco *
-                              a.quantidade,
+                        (i.adicionais || []).reduce(
+                          (s: number, a: any) => s + a.preco * a.quantidade,
                           0,
                         )) *
                       i.quantidade
@@ -500,40 +365,20 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                   </div>
                 </div>
 
-                <div
-                  style={
-                    quantidadeBox
-                  }
-                >
+                <div style={quantidadeBox}>
                   <button
                     style={btnTouch}
-                    onClick={() =>
-                      alterarQuantidade(
-                        i.id,
-                        -1,
-                      )
-                    }
+                    onClick={() => alterarQuantidade(i.uid, -1)}
                     disabled={salvando}
                   >
                     -
                   </button>
 
-                  <div
-                    style={
-                      qtdNumero
-                    }
-                  >
-                    {i.quantidade}
-                  </div>
+                  <div style={qtdNumero}>{i.quantidade}</div>
 
                   <button
                     style={btnTouch}
-                    onClick={() =>
-                      alterarQuantidade(
-                        i.id,
-                        +1,
-                      )
-                    }
+                    onClick={() => alterarQuantidade(i.uid, +1)}
                     disabled={salvando}
                   >
                     +
@@ -544,36 +389,21 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
             <select
               value={formaPagamento}
-              onChange={(e) =>
-                setFormaPagamento(
-                  e.target.value,
-                )
-              }
+              onChange={(e) => setFormaPagamento(e.target.value)}
               style={input}
             >
-              <option value="PAGO">
-                💵 Pago
-              </option>
+              <option value="PAGO">💵 Pago</option>
 
-              <option value="FIADO">
-                🧾 Fiado
-              </option>
+              <option value="FIADO">🧾 Fiado</option>
 
-              <option value="CREDITO">
-                💳 Usar Crédito
-              </option>
+              <option value="CREDITO">💳 Usar Crédito</option>
             </select>
 
-            {formaPagamento !==
-              'PAGO' && (
+            {formaPagamento !== 'PAGO' && (
               <input
                 placeholder="Nome do cliente"
                 value={clienteNome}
-                onChange={(e) =>
-                  setClienteNome(
-                    e.target.value.toUpperCase(),
-                  )
-                }
+                onChange={(e) => setClienteNome(e.target.value.toUpperCase())}
                 style={input}
               />
             )}
@@ -582,54 +412,25 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
               <input
                 type="checkbox"
                 checked={pularPreparo}
-                onChange={(e) =>
-                  setPularPreparo(
-                    e.target.checked,
-                  )
-                }
+                onChange={(e) => setPularPreparo(e.target.checked)}
               />
-
               Pedido já pronto
             </label>
 
             <div style={totalBox}>
-
-              <div style={totalLabel}>
-                Total da venda
-              </div>
+              <div style={totalLabel}>Total da venda</div>
 
               <div style={totalValor}>
                 R${' '}
                 {itens
-                  .reduce(
-                    (
-                      total,
-                      i,
-                    ) => {
-                      const adicionais =
-                        (
-                          i.adicionais ||
-                          []
-                        ).reduce(
-                          (
-                            s: number,
-                            a: any,
-                          ) =>
-                            s +
-                            a.preco *
-                              a.quantidade,
-                          0,
-                        )
+                  .reduce((total, i) => {
+                    const adicionais = (i.adicionais || []).reduce(
+                      (s: number, a: any) => s + a.preco * a.quantidade,
+                      0,
+                    )
 
-                      return (
-                        total +
-                        (i.preco +
-                          adicionais) *
-                          i.quantidade
-                      )
-                    },
-                    0,
-                  )
+                    return total + (i.preco + adicionais) * i.quantidade
+                  }, 0)
                   .toFixed(2)}
               </div>
 
@@ -638,24 +439,15 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                 disabled={salvando}
                 style={{
                   ...btn,
-                  opacity:
-                    salvando
-                      ? 0.6
-                      : 1,
+                  opacity: salvando ? 0.6 : 1,
                 }}
               >
-                {salvando
-                  ? 'Salvando venda...'
-                  : '💾 Salvar venda'}
+                {salvando ? 'Salvando venda...' : '💾 Salvar venda'}
               </button>
 
-              <button
-                onClick={onClose}
-                style={btnDanger}
-              >
+              <button onClick={onClose} style={btnDanger}>
                 Cancelar
               </button>
-
             </div>
           </div>
         </div>
@@ -690,16 +482,13 @@ const modal: React.CSSProperties = {
   overflow: 'hidden',
   display: 'flex',
   flexDirection: 'column',
-  boxShadow:
-    '0 20px 60px rgba(0,0,0,0.45)',
-  border:
-    '1px solid rgba(255,255,255,0.06)',
+  boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
+  border: '1px solid rgba(255,255,255,0.06)',
 }
 
 const header: React.CSSProperties = {
   padding: '24px 28px',
-  borderBottom:
-    '1px solid rgba(255,255,255,0.06)',
+  borderBottom: '1px solid rgba(255,255,255,0.06)',
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
@@ -731,8 +520,7 @@ const input: React.CSSProperties = {
   width: '100%',
   padding: 14,
   borderRadius: 14,
-  border:
-    '1px solid rgba(255,255,255,0.06)',
+  border: '1px solid rgba(255,255,255,0.06)',
   background: '#1f2937',
   color: '#fff',
   fontSize: 15,
@@ -740,15 +528,9 @@ const input: React.CSSProperties = {
   marginBottom: 14,
 }
 
-const produtoCard = (
-  ativo: boolean,
-): React.CSSProperties => ({
-  background: ativo
-    ? '#312e81'
-    : '#1f2937',
-  border: ativo
-    ? '2px solid #8b5cf6'
-    : '1px solid rgba(255,255,255,0.05)',
+const produtoCard = (ativo: boolean): React.CSSProperties => ({
+  background: ativo ? '#312e81' : '#1f2937',
+  border: ativo ? '2px solid #8b5cf6' : '1px solid rgba(255,255,255,0.05)',
   borderRadius: 18,
   padding: 16,
   marginBottom: 14,
@@ -782,17 +564,11 @@ const checkCircle: React.CSSProperties = {
   fontWeight: 'bold',
 }
 
-const adicionalTag = (
-  ativo: boolean,
-): React.CSSProperties => ({
+const adicionalTag = (ativo: boolean): React.CSSProperties => ({
   padding: '8px 12px',
   borderRadius: 999,
-  background: ativo
-    ? '#4c1d95'
-    : '#111827',
-  border: ativo
-    ? '1px solid #a855f7'
-    : '1px solid rgba(255,255,255,0.05)',
+  background: ativo ? '#4c1d95' : '#111827',
+  border: ativo ? '1px solid #a855f7' : '1px solid rgba(255,255,255,0.05)',
   display: 'inline-flex',
   alignItems: 'center',
   gap: 6,
@@ -805,8 +581,7 @@ const resumoCard: React.CSSProperties = {
   borderRadius: 18,
   padding: 16,
   marginBottom: 14,
-  border:
-    '1px solid rgba(255,255,255,0.05)',
+  border: '1px solid rgba(255,255,255,0.05)',
 }
 
 const resumoTopo: React.CSSProperties = {
@@ -820,25 +595,23 @@ const resumoNome: React.CSSProperties = {
   fontSize: 16,
 }
 
-const resumoAdicionais: React.CSSProperties =
-  {
-    marginTop: 8,
-    fontSize: 13,
-    opacity: 0.8,
-  }
+const resumoAdicionais: React.CSSProperties = {
+  marginTop: 8,
+  fontSize: 13,
+  opacity: 0.8,
+}
 
 const resumoPreco: React.CSSProperties = {
   color: '#4ade80',
   fontWeight: 'bold',
 }
 
-const quantidadeBox: React.CSSProperties =
-  {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 10,
-    marginTop: 10,
-  }
+const quantidadeBox: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 10,
+  marginTop: 10,
+}
 
 const btnTouch: React.CSSProperties = {
   width: 42,
@@ -859,13 +632,12 @@ const qtdNumero: React.CSSProperties = {
   fontSize: 18,
 }
 
-const checkboxLabel: React.CSSProperties =
-  {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 10,
-    marginTop: 10,
-  }
+const checkboxLabel: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 10,
+  marginTop: 10,
+}
 
 const emptyState: React.CSSProperties = {
   opacity: 0.6,
@@ -879,8 +651,7 @@ const totalBox: React.CSSProperties = {
   background: '#111827',
   paddingTop: 16,
   marginTop: 16,
-  borderTop:
-    '1px solid rgba(255,255,255,0.06)',
+  borderTop: '1px solid rgba(255,255,255,0.06)',
 }
 
 const totalLabel: React.CSSProperties = {
