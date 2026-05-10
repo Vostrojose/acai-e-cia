@@ -1,9 +1,18 @@
 .page {
   min-height: 100vh;
-  background: radial-gradient(circle at top, #2a0040, #0f0018 70%);
+
+  background:
+    linear-gradient(rgba(8, 8, 12, 0.78), rgba(8, 8, 12, 0.88)),
+    url('/bg-acai.jpg');
+
+  background-size: cover;
+
+  background-position: center;
+
+  background-attachment: fixed;
+
   color: #fff;
 }
-
 /* ========================= */
 /* HEADER                    */
 /* ========================= */
@@ -21,8 +30,7 @@
 
   text-align: center;
 
-  text-shadow:
-    0 0 10px rgba(170,0,255,.35);
+  text-shadow: 0 0 10px rgba(170, 0, 255, 0.35);
 }
 
 .subtitle {
@@ -84,6 +92,13 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 
   transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+
+  background: linear-gradient(
+    135deg,
+    rgba(26, 0, 38, 0.78),
+    rgba(42, 0, 64, 0.72)
+  );
 }
 .produto-info {
   display: flex;
@@ -442,13 +457,11 @@
 
   overflow: hidden;
 
-  background: rgba(255,255,255,.04);
+  background: rgba(255, 255, 255, 0.04);
 
-  border:
-    1px solid rgba(255,255,255,.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 
-  box-shadow:
-    0 10px 24px rgba(0,0,0,.25);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
 }
 
 .header-logo img {
