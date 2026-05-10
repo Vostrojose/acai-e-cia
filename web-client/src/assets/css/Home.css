@@ -59,8 +59,7 @@
 
   box-sizing: border-box;
 
-  background:
-    linear-gradient(135deg, #1a0026, #2a0040);
+  background: linear-gradient(135deg, #1a0026, #2a0040);
 
   border-radius: 16px;
 
@@ -68,11 +67,9 @@
 
   margin-bottom: 12px;
 
-  border:
-    1px solid rgba(170, 0, 255, 0.2);
+  border: 1px solid rgba(170, 0, 255, 0.2);
 
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 
   transition: all 0.2s ease;
 }
@@ -118,7 +115,7 @@
 /* ========================= */
 
 .add-btn {
-  background: linear-gradient(135deg, #ff2e8b, #ff6ec7);
+  background: linear-gradient(135deg, #7c3aed, #5b21b6);
   color: #000;
   border: none;
   padding: 8px 12px;
@@ -187,7 +184,7 @@
   justify-content: center;
 
   background: linear-gradient(135deg, #374151, #1f2937);
-  color: #000;
+  color: #fff;
 
   border-radius: 50%;
 
@@ -328,7 +325,7 @@
 .produto-card:hover {
   box-shadow:
     0 10px 22px rgba(0, 0, 0, 0.4),
-    0 0 10px rgba(170, 0, 255, 0.3);
+    0 0 6px rgba(170, 0, 255, 0.18);
 }
 
 .header {
@@ -345,16 +342,20 @@
 
 @media (max-width: 768px) {
   .produto-header {
-    grid-template-columns: 1fr 110px;
+    flex-direction: column;
+
+    gap: 4px;
   }
 
   .produto-preco {
-    width: 110px;
+    align-self: flex-end;
 
     font-size: 14px;
 
-    text-align: right;
+    opacity: 0.92;
+  }
 
-    justify-self: end;
+  .produto-nome {
+    white-space: normal;
   }
 }
