@@ -28,7 +28,14 @@
 
 .cardapio-container {
   width: 100%;
+
   max-width: 700px;
+
+  margin: 0 auto;
+
+  padding: 0 14px;
+
+  box-sizing: border-box;
 }
 
 .cardapio-list {
@@ -48,15 +55,24 @@
 /* ========================= */
 
 .produto-card {
-  display: flex;
-  flex-direction: column;
   width: 100%;
-  background: linear-gradient(135deg, #1a0026, #2a0040);
+
+  box-sizing: border-box;
+
+  background:
+    linear-gradient(135deg, #1a0026, #2a0040);
+
   border-radius: 16px;
+
   padding: 14px;
+
   margin-bottom: 12px;
-  border: 1px solid rgba(170, 0, 255, 0.2);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+
+  border:
+    1px solid rgba(170, 0, 255, 0.2);
+
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.5);
 
   transition: all 0.2s ease;
 }
@@ -70,13 +86,13 @@
 .produto-header {
   display: flex;
 
-  align-items: flex-start;
-
   justify-content: space-between;
 
-  gap: 14px;
+  align-items: flex-start;
 
   width: 100%;
+
+  gap: 12px;
 }
 .produto-nome {
   flex: 1;
@@ -94,7 +110,7 @@
 }
 
 .produto-preco {
-  min-width: 90px;
+  min-width: 92px;
 
   text-align: right;
 
