@@ -387,7 +387,7 @@
 
   align-items: center;
 
-  margin-bottom: 20px;
+  margin-bottom: 28px;
 }
 
 .btn-semana:hover {
@@ -416,27 +416,39 @@
     white-space: normal;
   }
 }
-
 .header-branding {
+  width: 100%;
+
   display: flex;
 
-  align-items: center;
+  justify-content: center;
 
-  gap: 16px;
+  position: relative;
 }
 .header-logo {
+  position: absolute;
+
+  left: 0;
+
+  top: 50%;
+
+  transform: translateY(-50%);
+
   width: 58px;
+
   height: 58px;
 
   border-radius: 18px;
 
   overflow: hidden;
 
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255,255,255,.04);
 
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border:
+    1px solid rgba(255,255,255,.06);
 
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+  box-shadow:
+    0 10px 24px rgba(0,0,0,.25);
 }
 
 .header-logo img {
@@ -450,7 +462,11 @@
 
   flex-direction: column;
 
+  align-items: center;
+
   justify-content: center;
+
+  text-align: center;
 }
 
 .online-status {
