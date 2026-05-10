@@ -256,10 +256,11 @@ export default function Home() {
               <div key={produto.id} className="produto-card">
                 <div className="produto-info">
                   <div className="produto-header">
-                    <span className="produto-nome">{produto.nome}</span>
-                    <span className="produto-preco">
+                    <div className="produto-nome">{produto.nome}</div>
+
+                    <div className="produto-preco">
                       R$ {produto.preco.toFixed(2)}
-                    </span>
+                    </div>
                   </div>
 
                   {produto.descricao && (

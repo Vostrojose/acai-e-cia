@@ -70,14 +70,20 @@
 .produto-header {
   display: flex;
 
+  align-items: flex-start;
+
+  justify-content: space-between;
+
+  gap: 14px;
+
   width: 100%;
 }
 .produto-nome {
-  width: calc(100% - 110px);
+  flex: 1;
 
   font-weight: 700;
 
-  color: #ffffff;
+  color: #fff;
 
   line-height: 1.35;
 }
@@ -88,15 +94,13 @@
 }
 
 .produto-preco {
-  width: 110px;
+  min-width: 90px;
+
+  text-align: right;
 
   color: #d1d5db !important;
 
   font-weight: 700;
-
-  font-size: 15px;
-
-  text-align: right;
 
   white-space: nowrap;
 }
