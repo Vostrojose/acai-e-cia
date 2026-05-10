@@ -346,15 +346,16 @@
 
 @media (max-width: 768px) {
   .produto-header {
-    flex-direction: column;
-    gap: 6px;
+    grid-template-columns: 1fr 110px;
   }
 
   .produto-preco {
-    align-self: flex-end;
+    width: 110px;
 
     font-size: 14px;
 
-    opacity: 0.9;
+    text-align: right;
+
+    justify-self: end;
   }
 }
