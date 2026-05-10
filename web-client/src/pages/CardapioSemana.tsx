@@ -26,22 +26,17 @@ export default function CardapioSemana() {
 
   const hoje = new Date().getDay()
 
-  /* ============================= */
-  /* 🔥 FUNÇÃO BLINDADA BOOLEAN    */
-  /* ============================= */
+ 
+  /*  FUNÇÃO BLINDADA BOOLEAN    */
+
 
   function toBoolean(value: any): boolean {
-    return (
-      value === true ||
-      value === 'true' ||
-      value === 1 ||
-      value === '1'
-    )
+    return value === true || value === 'true' || value === 1 || value === '1'
   }
 
-  /* ============================= */
-  /* 🔥 DIAS DA SEMANA             */
-  /* ============================= */
+ 
+  /*  DIAS DA SEMANA             */
+ 
 
   const dias = [
     { nome: 'Segunda', key: 'disponivelSeg', numero: 1 },
@@ -55,14 +50,11 @@ export default function CardapioSemana() {
 
   const indexHoje = dias.findIndex((d) => d.numero === hoje)
 
-  const diasOrdenados = [
-    ...dias.slice(indexHoje),
-    ...dias.slice(0, indexHoje),
-  ]
+  const diasOrdenados = [...dias.slice(indexHoje), ...dias.slice(0, indexHoje)]
 
-  /* ============================= */
-  /* 🔥 CARREGAR PRODUTOS          */
-  /* ============================= */
+ 
+  /*  CARREGAR PRODUTOS          */
+ 
 
   useEffect(() => {
     async function loadProdutos() {
@@ -86,15 +78,15 @@ export default function CardapioSemana() {
     loadProdutos()
   }, [])
 
-  /* ============================= */
-  /* 🔥 DESTAQUE                  */
-  /* ============================= */
+
+  /*  DESTAQUE                  */
+  
 
   const destaque = produtos.find((p) => p.destaque && p.ativo)
 
-  /* ============================= */
-  /* 🔥 INTERESSE                 */
-  /* ============================= */
+ 
+  /*  INTERESSE                 */
+ 
 
   function registrarInteresse(produto: Produto, dia: string) {
     const interesses = JSON.parse(localStorage.getItem('interesses') || '[]')
@@ -113,15 +105,29 @@ export default function CardapioSemana() {
     console.log('📌 Interesse registrado:', novo)
   }
 
-  /* ============================= */
-  /* 🔥 RENDER                    */
-  /* ============================= */
+
+  /*  RENDER                    */
+ 
 
   return (
     <div className="cardapio-semana-page">
-      <button className="btn-voltar" onClick={() => navigate('/')}>
-        📅
-      </button>
+      <div className="acoes-flutuantes-semana">
+        <button
+          className="btn-floating"
+          onClick={() => navigate('/')}
+          title="Ir para Home"
+        >
+          ☰
+        </button>
+
+        <button
+          className="btn-floating"
+          onClick={() => navigate('/cardapio')}
+          title="Cardápio do dia"
+        >
+          ◫
+        </button>
+      </div>
 
       <h1 className="titulo-semana">🍽️ Cardápio da Semana</h1>
 
@@ -152,9 +158,7 @@ export default function CardapioSemana() {
         return (
           <div key={dia.nome} style={{ width: '100%', maxWidth: 700 }}>
             <div
-              className={`dia-card ${
-                hoje === dia.numero ? 'dia-hoje' : ''
-              }`}
+              className={`dia-card ${hoje === dia.numero ? 'dia-hoje' : ''}`}
             >
               <h2 className="dia-titulo">
                 📅 {dia.nome}
@@ -168,9 +172,7 @@ export default function CardapioSemana() {
                   <div key={produto.id} className="produto-card">
                     <div className="produto-info">
                       <div className="produto-header">
-                        <div className="produto-nome">
-                          {produto.nome}
-                        </div>
+                        <div className="produto-nome">{produto.nome}</div>
 
                         <div className="produto-preco">
                           R$ {Number(produto.preco || 0).toFixed(2)}
@@ -186,9 +188,7 @@ export default function CardapioSemana() {
 
                     <button
                       className="add-btn"
-                      onClick={() =>
-                        registrarInteresse(produto, dia.nome)
-                      }
+                      onClick={() => registrarInteresse(produto, dia.nome)}
                     >
                       Tenho interesse
                     </button>

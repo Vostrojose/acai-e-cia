@@ -2,7 +2,15 @@
   min-height: 100vh;
   width: 100%;
 
-  background: radial-gradient(circle at top, #2a0040, #0f0018 70%);
+  background:
+    linear-gradient(rgba(8, 8, 12, 0.78), rgba(8, 8, 12, 0.88)),
+    url('/bg-acai.jpg');
+
+  background-size: cover;
+
+  background-position: center;
+
+  background-attachment: fixed;
 
   display: flex;
   flex-direction: column;
@@ -29,7 +37,7 @@
   font-weight: bold;
   color: #fff;
 
-  text-shadow: 0 0 10px rgba(170, 0, 255, 0.6);
+  text-shadow: 0 0 6px rgba(170, 0, 255, 0.22);
 }
 
 /* ========================= */
@@ -40,15 +48,26 @@
   width: 100%;
   max-width: 700px;
 
-  background: linear-gradient(135deg, #1a0026, #2a0040);
-  border-radius: 16px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(26,0,38,.78),
+      rgba(42,0,64,.72)
+    );
 
-  padding: 20px;
+  backdrop-filter: blur(10px);
+
+  border-radius: 22px;
+
+  padding: 22px;
+
   margin-bottom: 25px;
 
-  border: 1px solid rgba(170, 0, 255, 0.2);
+  border:
+    1px solid rgba(255,255,255,.06);
 
-  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+  box-shadow:
+    0 8px 24px rgba(0,0,0,.35);
 
   text-align: center;
 }
@@ -56,7 +75,7 @@
 .destaque-label {
   font-size: 12px;
   font-weight: bold;
-   color: #aaff00;
+  color: #d1d5db;
   margin-bottom: 8px;
 }
 
@@ -76,7 +95,7 @@
   margin-top: 10px;
   font-size: 18px;
   font-weight: bold;
-  color: #aaff00;
+ color: #d1d5db;
 }
 
 /* ========================= */
@@ -87,21 +106,32 @@
   width: 100%;
   max-width: 700px;
 
-  background: linear-gradient(135deg, #1a0026, #2a0040);
-  border-radius: 16px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(26,0,38,.78),
+      rgba(42,0,64,.72)
+    );
 
-  padding: 18px;
+  backdrop-filter: blur(10px);
+
+  border-radius: 22px;
+
+  padding: 20px;
+
   margin-bottom: 18px;
 
-  border: 1px solid rgba(170, 0, 255, 0.2);
+  border:
+    1px solid rgba(255,255,255,.06);
 
-  box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+  box-shadow:
+    0 8px 24px rgba(0,0,0,.35);
 }
 
 /* destaque do dia atual */
 .dia-hoje {
-  border: 2px solid #aaff00;
-  box-shadow: 0 8px 22px rgba(0,0,0,0.6);
+ border: 1px solid rgba(255,255,255,.14);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.6);
 }
 
 /* título do dia */
@@ -119,14 +149,23 @@
 
 /* badge HOJE */
 .badge-hoje {
-  background: linear-gradient(135deg, #aaff00, #7edc00);
-  color: #000;
+  background:
+    rgba(255,255,255,.08);
 
-  font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 8px;
+  color: #fff;
 
-  font-weight: bold;
+  backdrop-filter: blur(10px);
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  font-size: 11px;
+
+  padding: 4px 10px;
+
+  border-radius: 999px;
+
+  font-weight: 700;
 }
 
 /* ========================= */
@@ -144,20 +183,28 @@
 /* ========================= */
 
 .produto-card {
-  background: linear-gradient(135deg, #1a0026, #2a0040);
-  border-radius: 14px;
+  background:
+    rgba(255,255,255,.04);
 
-  padding: 14px;
+  backdrop-filter: blur(10px);
+
+  border-radius: 18px;
+
+  padding: 16px;
 
   display: flex;
+
   justify-content: space-between;
+
   align-items: center;
 
   gap: 12px;
 
-  border: 1px solid rgba(170, 0, 255, 0.2);
+  border:
+    1px solid rgba(255,255,255,.05);
 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  box-shadow:
+    0 4px 16px rgba(0,0,0,.28);
 
   transition: all 0.2s ease;
 }
@@ -165,7 +212,7 @@
 .produto-card:hover {
   transform: translateY(-2px);
   box-shadow:
-    0 8px 18px rgba(0,0,0,0.4),
+    0 8px 18px rgba(0, 0, 0, 0.4),
     0 0 10px rgba(170, 0, 255, 0.3);
 }
 
@@ -197,27 +244,36 @@
 .produto-preco {
   font-size: 15px;
   font-weight: bold;
-  color: #aaff00;
+  color: #d1d5db;
 }
 
 /* ========================= */
 /* BOTÃO                     */
 /* ========================= */
-
 .add-btn {
-  background: linear-gradient(135deg, #ff2e8b, #ff6ec7);
-  color: #000;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.12),
+      rgba(255,255,255,.04)
+    );
 
-  border: none;
-  padding: 10px 12px;
+  backdrop-filter: blur(10px);
 
-  border-radius: 10px;
-  cursor: pointer;
+  color: #fff;
+
+  border:
+    1px solid rgba(255,255,255,.06);
+
+  padding: 10px 14px;
+
+  border-radius: 14px;
 
   font-size: 13px;
-  font-weight: bold;
 
-  transition: all 0.2s ease;
+  font-weight: 700;
+
+  transition: all .2s ease;
 }
 
 .add-btn:hover {
