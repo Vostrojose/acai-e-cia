@@ -108,22 +108,24 @@
 
 /*  NOVO */
 .produto-header {
-  display: flex;
+  display: grid;
 
-  justify-content: space-between;
+  grid-template-columns: 1fr 120px;
 
-  align-items: flex-start;
+  align-items: start;
 
   gap: 12px;
+
+  width: 100%;
 }
 .produto-nome {
-  max-width: 100%;
-
   overflow: hidden;
 
   text-overflow: ellipsis;
 
   white-space: nowrap;
+
+  min-width: 0;
 }
 .produto-descricao {
   color: #bbb;
@@ -131,6 +133,10 @@
 }
 
 .produto-preco {
+  width: 120px;
+
+  text-align: right;
+
   color: #d1d5db !important;
 
   font-weight: 700;
