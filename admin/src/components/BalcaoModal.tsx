@@ -339,15 +339,45 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
               <div key={i.uid} style={resumoCard}>
                 <div style={resumoTopo}>
                   <div>
-                    <div style={resumoNome}>{i.nome}</div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                      }}
+                    >
+                      <span style={{ fontSize: 18 }}>🥙</span>
+
+                      <div style={resumoNome}>{i.nome}</div>
+                    </div>
 
                     {i.adicionais?.length > 0 && (
                       <div style={resumoAdicionais}>
-                        {i.adicionais.map((a: any) => (
-                          <div key={a.id}>
-                            + {a.nome} x{a.quantidade}
-                          </div>
-                        ))}
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: 8,
+                            marginTop: 10,
+                          }}
+                        >
+                          {i.adicionais.map((a: any) => (
+                            <div
+                              key={a.id}
+                              style={{
+                                background: 'rgba(168,85,247,0.18)',
+                                border: '1px solid rgba(168,85,247,0.35)',
+                                color: '#e9d5ff',
+                                borderRadius: 999,
+                                padding: '6px 10px',
+                                fontSize: 12,
+                                fontWeight: 600,
+                              }}
+                            >
+                              + {a.quantidade}x {a.nome}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -575,13 +605,14 @@ const adicionalTag = (ativo: boolean): React.CSSProperties => ({
   cursor: 'pointer',
   fontSize: 13,
 })
-
 const resumoCard: React.CSSProperties = {
-  background: '#1f2937',
-  borderRadius: 18,
-  padding: 16,
-  marginBottom: 14,
-  border: '1px solid rgba(255,255,255,0.05)',
+  background: 'linear-gradient(180deg,#1f2937 0%,#111827 100%)',
+  borderRadius: 20,
+  padding: 18,
+  marginBottom: 16,
+  border: '1px solid rgba(255,255,255,0.06)',
+  boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
+  transition: 'all 0.2s ease',
 }
 
 const resumoTopo: React.CSSProperties = {
@@ -604,6 +635,8 @@ const resumoAdicionais: React.CSSProperties = {
 const resumoPreco: React.CSSProperties = {
   color: '#4ade80',
   fontWeight: 'bold',
+  fontSize: 22,
+  textShadow: '0 0 12px rgba(74,222,128,0.25)',
 }
 
 const quantidadeBox: React.CSSProperties = {
@@ -616,13 +649,16 @@ const quantidadeBox: React.CSSProperties = {
 const btnTouch: React.CSSProperties = {
   width: 42,
   height: 42,
-  borderRadius: 12,
-  border: 'none',
-  background: '#111827',
+  borderRadius: 14,
+  border: '1px solid rgba(255,255,255,0.06)',
+  background:
+    'linear-gradient(180deg,#1f2937,#111827)',
   color: '#fff',
   fontSize: 20,
   cursor: 'pointer',
   fontWeight: 'bold',
+  boxShadow:
+    '0 6px 20px rgba(0,0,0,0.25)',
 }
 
 const qtdNumero: React.CSSProperties = {
