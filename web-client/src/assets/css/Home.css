@@ -65,17 +65,17 @@
 
 /*  NOVO */
 .produto-header {
-  display: grid;
+  display: flex;
 
-  grid-template-columns: 1fr 110px;
-
-  align-items: start;
+  align-items: flex-start;
 
   width: 100%;
 
-  gap: 12px;
+  gap: 14px;
 }
 .produto-nome {
+  flex: 1;
+
   font-weight: 700;
 
   color: #ffffff;
@@ -89,17 +89,19 @@
 }
 
 .produto-preco {
+  width: 90px;
+
+  flex-shrink: 0;
+
+  text-align: right;
+
   color: #d1d5db;
 
   font-weight: 700;
 
-  text-align: right;
-
-  white-space: nowrap;
-
   font-size: 15px;
 
-  letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 /* ========================= */
 /* BOTÕES                    */
