@@ -220,7 +220,7 @@ export default function Home() {
           onClick={() => navigate('/')}
           title="Voltar para home"
         >
-          🏠
+          ≡
         </button>
       </div>
       {antesDaAbertura && (
