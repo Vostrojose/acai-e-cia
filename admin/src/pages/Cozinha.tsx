@@ -6,6 +6,8 @@ import { theme } from '../assets/styles/adminTheme'
 
 import BalcaoModal from '../components/BalcaoModal'
 
+
+
 export default function Cozinha() {
   const [pedidos, setPedidos] = useState<any[]>([])
   const [mostrarEntregues, setMostrarEntregues] = useState(false)
@@ -67,7 +69,7 @@ export default function Cozinha() {
 
     const carregarPedidos = async () => {
       try {
-       const res = await api.get('/pedidos?limit=50')
+        const res = await api.get('/pedidos?limit=50')
         setPedidos(res.data?.data || [])
       } catch {}
     }
@@ -130,6 +132,25 @@ export default function Cozinha() {
 
   return (
     <div style={theme.page}>
+      <div style={brandingHeader}>
+        <div style={brandingLogo}>
+          <img
+            src="/logo.png"
+            alt="Açaí & Cia"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+          />
+        </div>
+
+        <div style={brandingInfo}>
+          <div style={brandingTitle}>Açaí & Cia</div>
+
+          <div style={brandingSub}>Painel Operacional • Cozinha</div>
+        </div>
+      </div>
       <CardMenu navigate={navigate} onBalcao={() => setAbrirBalcao(true)} />
 
       <div style={headerGrid}>
@@ -255,7 +276,7 @@ function CardClima() {
 }
 
 /* ============================= */
-/* 🔥 CARD STATUS NOVO ESTILO    */
+/*  CARD STATUS NOVO ESTILO    */
 /* ============================= */
 
 function CardStatus({ titulo, valor, cor }: any) {
@@ -294,8 +315,8 @@ function CardStatus({ titulo, valor, cor }: any) {
           fontSize: 26,
           fontWeight: 'bold',
           marginTop: 10,
-          textAlign: 'left', // 👈 move número
-          paddingLeft: 10, // 👈 ajuste fino
+          textAlign: 'left', //  move número
+          paddingLeft: 10, //  ajuste fino
         }}
       >
         {valor}
@@ -305,7 +326,7 @@ function CardStatus({ titulo, valor, cor }: any) {
 }
 
 /* ============================= */
-/* 🔥 PEDIDO CARD NOVO ESTILO    */
+/*  PEDIDO CARD NOVO ESTILO    */
 /* ============================= */
 
 function PedidoCard({ pedido }: any) {
@@ -486,6 +507,62 @@ const btnMenu = {
   borderRadius: 6,
   fontSize: 16,
   cursor: 'pointer',
+}
+const brandingHeader: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 16,
+
+  position: 'sticky',
+  top: 10,
+  zIndex: 50,
+  backdropFilter: 'blur(10px)',
+
+  marginBottom: 24,
+
+  padding: '18px 22px',
+
+  borderRadius: 18,
+
+  background: 'linear-gradient(135deg, rgba(25,25,25,.96), rgba(40,40,40,.96))',
+
+  border: '1px solid rgba(255,255,255,0.06)',
+
+  boxShadow: '0 10px 30px rgba(0,0,0,0.35)',
+}
+
+const brandingLogo: React.CSSProperties = {
+  width: 78,
+  height: 78,
+
+  borderRadius: 20,
+
+  overflow: 'hidden',
+
+  background: '#111',
+
+  border: '1px solid rgba(255,255,255,0.08)',
+
+  boxShadow: '0 12px 24px rgba(0,0,0,0.35)',
+}
+
+const brandingInfo: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+}
+
+const brandingTitle: React.CSSProperties = {
+  fontSize: 28,
+  fontWeight: 800,
+  color: '#fff',
+}
+
+const brandingSub: React.CSSProperties = {
+  marginTop: 4,
+
+  fontSize: 14,
+
+  color: 'rgba(255,255,255,.65)',
 }
 
 function Coluna({ titulo, pedidos }: any) {
