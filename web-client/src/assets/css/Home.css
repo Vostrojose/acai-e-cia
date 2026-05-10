@@ -377,7 +377,7 @@
 }
 
 .header {
-  position: fixed;
+  position: relative;
 
   padding: 20px;
 
