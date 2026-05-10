@@ -39,7 +39,7 @@ export default function Login() {
 
     <div style={{ padding: 40 }}>
 
-      <h1>Painel Admin teste</h1>
+      <h1>Painel Admin </h1>
 
       <form onSubmit={entrar}>
 
