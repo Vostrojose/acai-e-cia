@@ -529,8 +529,8 @@ const brandingHeader: React.CSSProperties = {
     '0 10px 24px rgba(0,0,0,0.25)',
 }
 const brandingLogo: React.CSSProperties = {
-  width: 32,
-  height: 32,
+  width: 52,
+  height: 52,
 
   borderRadius: 14,
 
