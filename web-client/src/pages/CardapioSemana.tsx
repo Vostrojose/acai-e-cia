@@ -129,7 +129,31 @@ export default function CardapioSemana() {
         </button>
       </div>
 
-      <h1 className="titulo-semana">🍽️ Cardápio da Semana</h1>
+     <div className="header">
+  <div className="header-branding">
+    <div className="header-logo">
+      <img
+        src="/logo.png"
+        alt="Açaí & Co"
+      />
+    </div>
+
+    <div className="header-texts">
+      <h1 className="title">
+        🍽️ Cardápio da Semana
+      </h1>
+
+      <p className="subtitle">
+        Descubra os sabores da semana
+      </p>
+
+      <div className="online-status">
+        <span className="status-dot" />
+        Atualizado em tempo real
+      </div>
+    </div>
+  </div>
+</div>
 
       {destaque && (
         <div className="destaque-card">
