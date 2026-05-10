@@ -191,13 +191,27 @@ export default function Home() {
       </div>
 
       <div className="header">
-        <h1 className="title">Açaí & Co</h1>
-        <p className="subtitle">Monte seu pedido</p>
+        <div className="header-branding">
+          <div className="header-logo">
+            <img src="/logo.png" alt="Açaí & Co" />
+          </div>
+
+          <div className="header-texts">
+            <h1 className="title">Açaí & Co</h1>
+
+            <p className="subtitle">Pedidos em tempo real</p>
+
+            <div className="online-status">
+              <span className="status-dot" />
+              Online agora
+            </div>
+          </div>
+        </div>
 
         <button
           className="btn-semana"
           onClick={() => navigate(`/cardapio-semana/${origem || '1'}`)}
-          title="Ver cardápio da semana" // aparece como tooltip
+          title="Ver cardápio da semana"
         >
           📅
         </button>
