@@ -136,7 +136,7 @@ export default function Cozinha() {
         <div style={brandingLogo}>
           <img
             src="/logo.png"
-            alt="Açaí & Cia"
+            alt="Açaí & Company"
             style={{
               width: '100%',
               height: '100%',
@@ -509,41 +509,40 @@ const btnMenu = {
   cursor: 'pointer',
 }
 const brandingHeader: React.CSSProperties = {
-  display: 'flex',
+  display: 'inline-flex',
   alignItems: 'center',
-  gap: 16,
+  gap: 12,
 
-  position: 'sticky',
-  top: 10,
-  zIndex: 50,
-  backdropFilter: 'blur(10px)',
-
-  marginBottom: 24,
-
-  padding: '18px 22px',
+  padding: '10px 14px',
 
   borderRadius: 18,
 
-  background: 'linear-gradient(135deg, rgba(25,25,25,.96), rgba(40,40,40,.96))',
+  marginBottom: 18,
 
-  border: '1px solid rgba(255,255,255,0.06)',
+  background:
+    'linear-gradient(135deg, rgba(25,25,25,.96), rgba(40,40,40,.96))',
 
-  boxShadow: '0 10px 30px rgba(0,0,0,0.35)',
+  border:
+    '1px solid rgba(255,255,255,0.06)',
+
+  boxShadow:
+    '0 10px 24px rgba(0,0,0,0.25)',
 }
-
 const brandingLogo: React.CSSProperties = {
-  width: 78,
-  height: 78,
+  width: 52,
+  height: 52,
 
-  borderRadius: 20,
+  borderRadius: 14,
 
   overflow: 'hidden',
 
   background: '#111',
 
-  border: '1px solid rgba(255,255,255,0.08)',
+  border:
+    '1px solid rgba(255,255,255,0.08)',
 
-  boxShadow: '0 12px 24px rgba(0,0,0,0.35)',
+  boxShadow:
+    '0 8px 18px rgba(0,0,0,0.25)',
 }
 
 const brandingInfo: React.CSSProperties = {
