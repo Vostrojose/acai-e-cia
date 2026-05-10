@@ -146,7 +146,7 @@ export default function Cozinha() {
         </div>
 
         <div style={brandingInfo}>
-          <div style={brandingTitle}>Açaí & Cia</div>
+          <div style={brandingTitle}>Açaí & Company</div>
 
           <div style={brandingSub}>Painel Operacional • Cozinha</div>
         </div>
