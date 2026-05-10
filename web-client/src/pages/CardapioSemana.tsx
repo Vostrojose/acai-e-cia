@@ -140,7 +140,7 @@ export default function CardapioSemana() {
 
     <div className="header-texts">
       <h1 className="title">
-        🍽️ Cardápio da Semana
+         Cardápio da Semana
       </h1>
 
       <p className="subtitle">
