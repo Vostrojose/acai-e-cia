@@ -329,7 +329,74 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           {/* RESUMO */}
 
           <div style={coluna}>
-            <h3 style={{ marginTop: 0 }}>🛒 Itens selecionados</h3>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 20,
+                position: 'sticky',
+                top: 0,
+                zIndex: 20,
+                background: '#111827',
+                paddingBottom: 12,
+                borderBottom: '1px solid rgba(255,255,255,0.06)',
+              }}
+            >
+              <div>
+                <h3
+                  style={{
+                    margin: 0,
+                    fontSize: 20,
+                  }}
+                >
+                  🛒 Itens selecionados
+                </h3>
+
+                <div
+                  style={{
+                    fontSize: 13,
+                    opacity: 0.7,
+                    marginTop: 4,
+                  }}
+                >
+                  Pedido sendo montado
+                </div>
+              </div>
+
+              <div style={{ textAlign: 'right' }}>
+                <div
+                  style={{
+                    fontSize: 12,
+                    opacity: 0.6,
+                    marginBottom: 4,
+                  }}
+                >
+                  TOTAL
+                </div>
+
+                <div
+                  style={{
+                    fontSize: 28,
+                    fontWeight: 'bold',
+                    color: '#4ade80',
+                    textShadow: '0 0 14px rgba(74,222,128,0.25)',
+                  }}
+                >
+                  R${' '}
+                  {itens
+                    .reduce((total, i) => {
+                      const adicionais = (i.adicionais || []).reduce(
+                        (s: number, a: any) => s + a.preco * a.quantidade,
+                        0,
+                      )
+
+                      return total + (i.preco + adicionais) * i.quantidade
+                    }, 0)
+                    .toFixed(2)}
+                </div>
+              </div>
+            </div>
 
             {itens.length === 0 && (
               <div style={emptyState}>Nenhum item selecionado</div>
@@ -446,24 +513,11 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
               />
               Pedido já pronto
             </label>
-
-            <div style={totalBox}>
-              <div style={totalLabel}>Total da venda</div>
-
-              <div style={totalValor}>
-                R${' '}
-                {itens
-                  .reduce((total, i) => {
-                    const adicionais = (i.adicionais || []).reduce(
-                      (s: number, a: any) => s + a.preco * a.quantidade,
-                      0,
-                    )
-
-                    return total + (i.preco + adicionais) * i.quantidade
-                  }, 0)
-                  .toFixed(2)}
-              </div>
-
+            <div
+              style={{
+                marginTop: 24,
+              }}
+            >
               <button
                 onClick={salvar}
                 disabled={salvando}
@@ -651,14 +705,12 @@ const btnTouch: React.CSSProperties = {
   height: 42,
   borderRadius: 14,
   border: '1px solid rgba(255,255,255,0.06)',
-  background:
-    'linear-gradient(180deg,#1f2937,#111827)',
+  background: 'linear-gradient(180deg,#1f2937,#111827)',
   color: '#fff',
   fontSize: 20,
   cursor: 'pointer',
   fontWeight: 'bold',
-  boxShadow:
-    '0 6px 20px rgba(0,0,0,0.25)',
+  boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
 }
 
 const qtdNumero: React.CSSProperties = {
@@ -680,27 +732,6 @@ const emptyState: React.CSSProperties = {
   textAlign: 'center',
   marginTop: 40,
 }
-
-const totalBox: React.CSSProperties = {
-  position: 'sticky',
-  bottom: 0,
-  background: '#111827',
-  paddingTop: 16,
-  marginTop: 16,
-  borderTop: '1px solid rgba(255,255,255,0.06)',
-}
-
-const totalLabel: React.CSSProperties = {
-  opacity: 0.7,
-  marginBottom: 4,
-}
-
-const totalValor: React.CSSProperties = {
-  fontSize: 32,
-  fontWeight: 'bold',
-  color: '#4ade80',
-}
-
 const btn: React.CSSProperties = {
   width: '100%',
   background: '#22c55e',
