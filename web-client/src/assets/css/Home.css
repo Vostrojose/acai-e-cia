@@ -67,11 +67,12 @@
 .produto-header {
   display: grid;
 
-  grid-template-columns: 1fr 110px;
+  grid-template-columns: 1fr 140px;
 
   align-items: start;
 
   width: 100%;
+  padding-right: 4px;
 
   gap: 12px;
 }
@@ -99,7 +100,7 @@
 
   font-size: 15px;
 
-  min-width: 95px;
+  width: 140px;
 
   text-align: right;
 
@@ -131,8 +132,7 @@
 }
 
 .add-btn-added {
-  background:
-    linear-gradient(135deg, #374151, #1f2937);
+  background: linear-gradient(135deg, #374151, #1f2937);
 
   color: #fff;
 }
