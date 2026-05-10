@@ -65,22 +65,26 @@
 
 /*  NOVO */
 .produto-header {
-  display: flex;
+  display: grid;
 
-  align-items: flex-start;
+  grid-template-columns: 1fr 110px;
+
+  align-items: start;
 
   width: 100%;
 
-  gap: 14px;
+  gap: 12px;
 }
 .produto-nome {
-  flex: 1;
-
   font-weight: 700;
 
   color: #ffffff;
 
-  line-height: 1.35;
+  flex: 1;
+
+  padding-right: 18px;
+
+  line-height: 1.3;
 }
 
 .produto-descricao {
@@ -89,19 +93,21 @@
 }
 
 .produto-preco {
-  width: 90px;
-
-  flex-shrink: 0;
-
-  text-align: right;
-
-  color: #d1d5db;
+  color: #d1d5db !important;
 
   font-weight: 700;
 
   font-size: 15px;
 
-  white-space: nowrap;
+  min-width: 95px;
+
+  text-align: right;
+
+  display: flex;
+
+  justify-content: flex-end;
+
+  flex-shrink: 0;
 }
 /* ========================= */
 /* BOTÕES                    */
