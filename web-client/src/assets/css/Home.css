@@ -467,7 +467,7 @@
 .header-logo {
   position: absolute;
 
-  left: 30px;
+  left: clamp(16px, 4vw, 28px);
 
   top: 50%;
 
