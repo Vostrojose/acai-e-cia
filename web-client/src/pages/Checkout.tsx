@@ -27,7 +27,7 @@ export default function Checkout() {
 
   const [qrCode, setQrCode] = useState<string | null>(null)
 
-  // 🔥 NOVO
+  //  NOVO
   const [foraDaArea, setForaDaArea] = useState(false)
 
   const [endereco, setEndereco] = useState({
@@ -38,14 +38,14 @@ export default function Checkout() {
     cep: '',
   })
 
-  function capturarLocalizacao() {
+  async function capturarLocalizacao() {
     if (!navigator.geolocation) {
       setErroLocalizacao('Seu navegador não suporta localização')
       return
     }
 
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
         setCoordenadas({
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
@@ -54,7 +54,35 @@ export default function Checkout() {
         setErroLocalizacao(null)
 
         console.log('📍 LOCALIZAÇÃO:', pos.coords)
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`,
+            {
+              headers: {
+                Accept: 'application/json',
+              },
+            },
+          )
+          const data = await response.json()
+
+          const address = data.address || {}
+
+          setEndereco({
+            rua: address.road || address.pedestrian || '',
+
+            numero: address.house_number || '',
+
+            bairro: address.suburb || address.neighbourhood || '',
+
+            cidade: address.city || address.town || address.village || '',
+
+            cep: address.postcode || '',
+          })
+        } catch (err) {
+          console.error('Erro ao buscar endereço:', err)
+        }
       },
+
       (error) => {
         console.error('Erro localização:', error)
         setErroLocalizacao('Não foi possível obter sua localização')
@@ -96,6 +124,13 @@ export default function Checkout() {
 
       if (telefoneLimpo.length < 10) {
         alert('Digite um WhatsApp válido.')
+        return
+      }
+      if (
+        tipoPedido === 'entrega' &&
+        (!endereco.rua || !endereco.numero || !endereco.bairro)
+      ) {
+        alert('Preencha o endereço completo.')
         return
       }
 
@@ -265,11 +300,13 @@ export default function Checkout() {
               </p>
             )}
 
-            {erroLocalizacao && <p style={{ color: 'red' }}>{erroLocalizacao}</p>}
+            {erroLocalizacao && (
+              <p style={{ color: 'red' }}>{erroLocalizacao}</p>
+            )}
 
-            <button type="button" onClick={capturarLocalizacao}>
+            <Button onClick={capturarLocalizacao}>
               📍 Usar minha localização
-            </button>
+            </Button>
 
             {coordenadas && (
               <p style={{ color: 'green' }}>
@@ -277,11 +314,61 @@ export default function Checkout() {
               </p>
             )}
 
-            <input className="checkout-input" placeholder="Rua" />
-            <input className="checkout-input" placeholder="Número" />
-            <input className="checkout-input" placeholder="Bairro" />
-            <input className="checkout-input" placeholder="Cidade" />
-            <input className="checkout-input" placeholder="CEP" />
+            <input
+              className="checkout-input"
+              placeholder="Rua"
+              value={endereco.rua}
+              onChange={(e) =>
+                setEndereco({
+                  ...endereco,
+                  rua: e.target.value,
+                })
+              }
+            />
+            <input
+              className="checkout-input"
+              placeholder="Número"
+              value={endereco.numero}
+              onChange={(e) =>
+                setEndereco({
+                  ...endereco,
+                  numero: e.target.value,
+                })
+              }
+            />
+            <input
+              className="checkout-input"
+              placeholder="Bairro"
+              value={endereco.bairro}
+              onChange={(e) =>
+                setEndereco({
+                  ...endereco,
+                  bairro: e.target.value,
+                })
+              }
+            />
+            <input
+              className="checkout-input"
+              placeholder="Cidade"
+              value={endereco.cidade}
+              onChange={(e) =>
+                setEndereco({
+                  ...endereco,
+                  cidade: e.target.value,
+                })
+              }
+            />
+            <input
+              className="checkout-input"
+              placeholder="CEP"
+              value={endereco.cep}
+              onChange={(e) =>
+                setEndereco({
+                  ...endereco,
+                  cep: e.target.value,
+                })
+              }
+            />
           </div>
         )}
 
@@ -299,13 +386,18 @@ export default function Checkout() {
             <option value="PIX">PIX</option>
           </select>
         </div>
-         <div className="checkout-acoes">
-        <Button onClick={finalizarPedido}>
-          {loading ? 'Processando...' : 'Confirmar Pedido'}
-        </Button>
+        <div className="checkout-acoes">
+          <Button onClick={finalizarPedido}>
+            {loading ? 'Processando...' : 'Confirmar Pedido'}
+          </Button>
         </div>
+        {qrCode && (
+          <div className="checkout-card checkout-qr">
+            <h3>Pagamento PIX</h3>
 
-        {qrCode && <img src={`data:image/png;base64,${qrCode}`} />}
+            <img src={`data:image/png;base64,${qrCode}`} alt="QR Code PIX" />
+          </div>
+        )}
       </div>
     </Container>
   )
