@@ -2,11 +2,17 @@
    Variáveis de cores e fontes
    =========================== */
 :root {
-  --bg-gradient: linear-gradient(135deg, #4b2e83, #7b3ff2);
-  --text-main: #0d0101;
-  --accent-1: #f67708;   /* laranja/energia */
-  --accent-2: #f8f5fa;   /* roxo profundo */
-  --shadow: rgba(0,0,0,0.25);
+  --bg-gradient: linear-gradient(
+    180deg,
+    #120018 0%,
+    #24002f 35%,
+    #3b0053 70%,
+    #14001c 100%
+  );
+  --text-main: #ffffff;
+  --accent-1: #ff4fd8;
+  --accent-2: #9eff00;
+  --shadow: rgba(0, 0, 0, 0.25);
   --font-main: 'Poppins', Arial, Helvetica, sans-serif;
 }
 
@@ -16,12 +22,22 @@
 body {
   margin: 0;
   font-family: var(--font-main);
-  background: var(--bg-gradient);
+
+  background:
+    linear-gradient(
+      rgba(0,0,0,0.65),
+      rgba(0,0,0,0.75)
+    ),
+    url("assets/splash-bg.png");
+
+  background-size: cover;
+  background-position: center;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   height: 100vh;
-  color: var(--text-main);
 }
 
 /* ===========================
@@ -31,10 +47,19 @@ body {
   text-align: center;
   max-width: 450px;
   padding: 70px 20px;
-  background: #fff(179, 19, 19, 0.05);
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 25px var(--shadow);
+
+  background: rgba(20, 0, 30, 0.45);
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  border-radius: 28px;
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 /* ===========================
@@ -73,35 +98,64 @@ h2 {
   flex-direction: column;
   gap: 18px;
 }
-
 .btn {
   text-decoration: none;
-  padding: 14px;
-  border-radius: 10px;
+
+  padding: 18px;
+
+  border-radius: 18px;
+
   font-weight: 600;
   font-size: 1rem;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+
+  color: #fff;
+
+  background: rgba(255,255,255,0.08);
+
+  border: 1px solid rgba(255,255,255,0.12);
+
+  backdrop-filter: blur(12px);
+
+  box-shadow:
+    0 6px 20px rgba(0,0,0,0.35);
+
+  transition: all 0.25s ease;
 }
 
 .btn:hover {
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  transform: translateY(-3px) scale(1.02);
+
+  background: rgba(255,255,255,0.12);
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.4);
 }
 
 .primary {
-  background: linear-gradient(135deg, #f9d423, #ff4e50);
-  color: #fff;
+  background:
+    linear-gradient(
+      135deg,
+      #ff00c8,
+      #7b2cff
+    );
 }
 
 .secondary {
-  background: linear-gradient(135deg, #ff6a88, #ff99ac);
-  color:#fff;
+  background:
+    linear-gradient(
+      135deg,
+      #9d00ff,
+      #ff4fd8
+    );
 }
 
 .download {
-  background: linear-gradient(135deg, #ff9800, #ff5722);
-  color: #fff;
+  background:
+    linear-gradient(
+      135deg,
+      #8fff00,
+      #00c853
+    );
 }
 
 /* ===========================
@@ -119,17 +173,16 @@ h2 {
 }
 
 .developer-info {
-  position: fixed;          /* fixo na janela */
-  bottom: 10px;             /* distância do rodapé */
-               /* colado no canto direito */
+  position: fixed; /* fixo na janela */
+  bottom: 10px; /* distância do rodapé */
+  /* colado no canto direito */
   font-size: 0.65rem;
   letter-spacing: 1px;
   opacity: 0.6;
   color: #fdfcfc;
   font-weight: 10;
-  text-align: center;        /* texto alinhado à direita */
+  text-align: center; /* texto alinhado à direita */
 }
-
 
 /* ===========================
    Responsividade
