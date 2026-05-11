@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { useEffect, useState } from 'react'
 import api from '../services/api'
+import '../assets/css/Sucesso.css'
 
 export default function Sucesso() {
   const { id } = useParams()
@@ -10,22 +11,20 @@ export default function Sucesso() {
 
   const [codigo, setCodigo] = useState<number | null>(null)
 
-  /* ============================= */
-  /* 🧹 LIMPAR CARRINHO */
-  /* ============================= */
+  /* LIMPAR CARRINHO */
+
   useEffect(() => {
     limparCarrinho()
 
-    // 🔥 MANTER pedidoId para fluxo inteligente
+    //  MANTER pedidoId para fluxo inteligente
     if (id) {
       localStorage.setItem('pedidoId', id)
       localStorage.setItem('pedidoStatus', 'RECEBIDO')
     }
   }, [limparCarrinho, id])
 
-  /* ============================= */
-  /* 🔎 BUSCAR PEDIDO */
-  /* ============================= */
+  /*  BUSCAR PEDIDO */
+
   useEffect(() => {
     if (!id) return
 
@@ -42,83 +41,38 @@ export default function Sucesso() {
   }, [id])
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #6a11cb, #2575fc)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: '#fff'
-    }}>
-      <div style={{
-        background: '#fff',
-        color: '#333',
-        padding: 30,
-        borderRadius: 16,
-        width: '90%',
-        maxWidth: 400,
-        textAlign: 'center',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
-      }}>
+    <div className="sucesso-page">
+      <div className="sucesso-card">
+        <h1 className="sucesso-title">Pedido confirmado!</h1>
 
-        <h1 style={{ fontSize: 28 }}> Pedido confirmado!</h1>
+        <p className="sucesso-subtitle">Obrigado pela sua compra 💜</p>
 
-        <p style={{ marginTop: 10 }}>
-          Obrigado pela sua compra 💜
-        </p>
+        <p className="sucesso-label">Número do pedido</p>
 
-        <p style={{ marginTop: 20, fontSize: 14 }}>
-          Número do pedido:
-        </p>
+        <div className="sucesso-codigo">
+          {codigo ? `#${codigo.toString().padStart(4, '0')}` : 'Carregando...'}
+        </div>
 
-        <h2 style={{ wordBreak: 'break-all' }}>
-          {codigo
-            ? `#${codigo.toString().padStart(4, '0')}`
-            : 'Carregando...'}
-        </h2>
-
-        <div style={{ marginTop: 30 }}>
-
+        <div className="sucesso-actions">
           <button
             onClick={() => navigate(`/acompanhamento/${id}`)}
-            style={btn('#333')}
+            className="sucesso-btn"
           >
             📡 Acompanhar pedido
           </button>
 
-          <button
-            onClick={() => navigate('/m/1')}
-            style={btn('#4CAF50')}
-          >
-            🛒 Cardápio de hoje
+          <button onClick={() => navigate('/m/1')} className="sucesso-btn">
+            🍧 Cardápio do dia
           </button>
 
           <button
             onClick={() => navigate('/cardapio-semana/1')}
-            style={btn('#FF9800')}
+            className="sucesso-btn"
           >
             📅 Cardápio da semana
           </button>
-
         </div>
-
       </div>
     </div>
   )
-}
-
-/* 🎨 botão padrão */
-function btn(color: string) {
-  return {
-    width: '100%',
-    padding: '14px',
-    marginTop: 10,
-    background: color,
-    color: '#fff',
-    border: 'none',
-    borderRadius: 10,
-    fontSize: 16,
-    fontWeight: 'bold',
-    cursor: 'pointer'
-  }
 }
