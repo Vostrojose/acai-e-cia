@@ -11,9 +11,7 @@
 
   object-fit: cover;
 
-  filter:
-    brightness(0.88)
-    saturate(1.05);
+  filter: brightness(0.88) saturate(1.05);
 }
 .splash-overlay {
   position: absolute;
@@ -27,31 +25,30 @@
   align-items: center;
   gap: 12px;
 
-  padding:
-    80px 20px 40px;
+  padding: 80px 20px 40px;
 
   background: linear-gradient(
     to top,
-    rgba(0,0,0,0.82),
-    rgba(0,0,0,0.55),
+    rgba(0, 0, 0, 0.82),
+    rgba(0, 0, 0, 0.55),
     transparent
   );
 }
 
 .splash-overlay button {
   width: 90%;
-   max-width: 250px;
-  padding: 12px;
+  max-width: 250px;
+  padding: 120px;
   border-radius: 12px;
 
-  border: 1px solid rgba(255,255,255,0.2); /*  borda leve */
-  background: rgba(0,0,0,0.5);             /*  transparência */
+  border: 1px solid rgba(255, 255, 255, 0.2); /*  borda leve */
+  background: rgba(0, 0, 0, 0.5); /*  transparência */
 
   color: #fff;
   font-size: 14px;
   font-weight: 600;
 
-  backdrop-filter: blur(8px);              /*  efeito vidro */
+  backdrop-filter: blur(8px); /*  efeito vidro */
   -webkit-backdrop-filter: blur(8px);
 
   transition: all 0.25s ease;
