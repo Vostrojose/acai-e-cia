@@ -5,7 +5,15 @@
 .acompanhamento-page {
   min-height: 100vh;
   padding: 20px;
-  background: linear-gradient(180deg, #4A148C 0%, #6A1B9A 100%);
+  background:
+    linear-gradient(rgba(8, 8, 12, 0.78), rgba(8, 8, 12, 0.88)),
+    url('/bg-acai.jpg');
+
+  background-size: cover;
+
+  background-position: center;
+
+  background-attachment: fixed;
 
   display: flex;
   flex-direction: column;
@@ -29,7 +37,7 @@
   border-radius: 18px;
   padding: 24px;
 
-  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   text-align: center;
 
   /* 🔥 ANIMAÇÃO CORRETA */
@@ -102,12 +110,30 @@
 /* CORES STATUS              */
 /* ========================= */
 
-.status-AGUARDANDO_PAGAMENTO { background: #fff3cd; color: #856404; }
-.status-RECEBIDO { background: #cce5ff; color: #004085; }
-.status-EM_PREPARO { background: #ffeeba; color: #856404; }
-.status-PRONTO { background: #d4edda; color: #155724; }
-.status-ENTREGUE { background: #d1ecf1; color: #0c5460; }
-.status-CANCELADO { background: #f8d7da; color: #721c24; }
+.status-AGUARDANDO_PAGAMENTO {
+  background: #fff3cd;
+  color: #856404;
+}
+.status-RECEBIDO {
+  background: #cce5ff;
+  color: #004085;
+}
+.status-EM_PREPARO {
+  background: #ffeeba;
+  color: #856404;
+}
+.status-PRONTO {
+  background: #d4edda;
+  color: #155724;
+}
+.status-ENTREGUE {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+.status-CANCELADO {
+  background: #f8d7da;
+  color: #721c24;
+}
 
 /* ========================= */
 /* LOADING                   */
@@ -129,9 +155,15 @@
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.04); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* ========================= */
@@ -169,7 +201,7 @@
   background: linear-gradient(
     120deg,
     transparent,
-    rgba(255,255,255,0.5),
+    rgba(255, 255, 255, 0.5),
     transparent
   );
 
@@ -177,8 +209,12 @@
 }
 
 @keyframes brilho {
-  0% { left: -40%; }
-  100% { left: 120%; }
+  0% {
+    left: -40%;
+  }
+  100% {
+    left: 120%;
+  }
 }
 
 /* ========================= */
@@ -235,14 +271,14 @@
 
 .banner-card {
   width: 100%;
-  max-width:  420px;
+  max-width: 420px;
 
   background: linear-gradient(135deg, #ff9800, #ffb74d);
   padding: 14px;
   border-radius: 12px;
   color: #fff;
 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* ========================= */
