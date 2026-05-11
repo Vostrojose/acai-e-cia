@@ -458,14 +458,14 @@
 .header-branding {
   width: 100%;
 
-  display: flex;
+  display: grid;
 
-  justify-content: center;
+  grid-template-columns: 70px 1fr 70px;
 
-  position: relative;
+  align-items: center;
 }
 .header-logo {
-  position: absolute;
+  position: relative;
 
   left: clamp(16px, 4vw, 28px);
 
