@@ -62,7 +62,7 @@ export default function Sucesso() {
           </button>
 
           <button onClick={() => navigate('/m/1')} className="sucesso-btn">
-            🍧 Cardápio do dia
+            ◫ Cardápio do dia
           </button>
 
           <button
