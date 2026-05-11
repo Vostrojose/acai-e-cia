@@ -24,8 +24,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center; /* centraliza verticalmente */
-  transform: translateY(-80px);
-  transform: translateX(-40px);
+  transform: translateY(-40px);
+  transform: translateX(-20px);
   align-items: center;     /* centraliza horizontalmente */
 
   gap: 12px;
