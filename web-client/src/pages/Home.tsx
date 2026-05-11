@@ -52,7 +52,8 @@ export default function Home() {
   const horaAtual = agora.getHours() * 60 + agora.getMinutes()
 
   const abertura = 7 * 60 + 30 // 07:30
-  const fechamentoPedidos = 19 * 60 // 19:00
+  const fechamentoPedidos = 0 * 60 // 19:00
+   //const fechamentoPedidos = 19 * 60 // original
 
   const antesDaAbertura = horaAtual < abertura
 
