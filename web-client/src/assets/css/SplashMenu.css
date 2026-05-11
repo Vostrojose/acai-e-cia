@@ -14,8 +14,8 @@
   filter: brightness(0.88) saturate(1.05);
 }
 .splash-overlay {
-  position: absolute;
-  bottom: 0;
+  position: relative;
+  bottom: 4;
   left: 0;
 
   width: 100%;
