@@ -3,21 +3,31 @@
 /* ========================= */
 
 .checkout-container {
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 16px;
-}
+  min-height: 100vh;
 
+  max-width: 500px;
+
+  margin: 0 auto;
+
+  padding: 20px 16px 120px;
+
+  box-sizing: border-box;
+}
 /* ========================= */
 /* TÍTULO                    */
 /* ========================= */
-
 .checkout-title {
   text-align: center;
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  color: #e0e0e0;
+
+  font-size: 30px;
+
+  font-weight: 800;
+
+  margin-bottom: 28px;
+
+  color: #fff;
+
+  text-shadow: 0 0 6px rgba(170, 0, 255, 0.22);
 }
 
 /* ========================= */
@@ -25,48 +35,67 @@
 /* ========================= */
 
 .checkout-card {
-  background: #121212; /* 🔥 preto moderno */
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(26, 0, 38, 0.82),
+    rgba(42, 0, 64, 0.74)
+  );
+
+  backdrop-filter: blur(10px);
+
+  border-radius: 22px;
+
+  padding: 20px;
+
+  margin-bottom: 18px;
+
   color: #fff;
 
-  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 
-  backdrop-filter: blur(4px); /* 🔥 efeito premium */
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
 }
-
 /* ========================= */
 /* INPUTS                    */
 /* ========================= */
 
 .checkout-input {
   width: 100%;
-  padding: 12px;
 
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.08);
+  padding: 14px;
 
-  font-size: 16px;
+  border-radius: 14px;
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  font-size: 15px;
 
   margin-top: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 
-  background: rgba(255,255,255,0.05);
+  background:
+    rgba(255,255,255,.05);
+
   color: #fff;
 
   outline: none;
-  transition: all 0.2s ease;
+
+  transition: all .2s ease;
+
+  box-sizing: border-box;
 }
 
 .checkout-input:focus {
-  border-color: #00e676;
+border-color: #7c3aed;
+
+box-shadow:
+  0 0 0 3px rgba(124,58,237,.18);
 }
 
 /* placeholder */
 .checkout-input::placeholder {
-  color: rgba(255,255,255,0.5);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 /* ========================= */
@@ -75,18 +104,25 @@
 
 .checkout-select {
   width: 100%;
-  padding: 12px;
 
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.08);
+  padding: 14px;
 
-  font-size: 16px;
+  border-radius: 14px;
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  font-size: 15px;
 
   margin-top: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 
-  background: rgba(255,255,255,0.05);
+  background:
+    rgba(255,255,255,.05);
+
   color: #fff;
+
+  box-sizing: border-box;
 }
 
 /* ========================= */
@@ -95,31 +131,49 @@
 
 .checkout-button {
   width: 100%;
+
   max-width: 400px;
+
   margin: 0 auto;
 
   padding: 16px;
 
   border: none;
-  border-radius: 12px;
 
-  background: linear-gradient(135deg, #00c853, #00e676);
-  color: white;
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(124,58,237,.92),
+      rgba(91,33,182,.92)
+    );
+
+  color: #fff;
 
   font-size: 16px;
-  font-weight: bold;
+
+  font-weight: 700;
 
   cursor: pointer;
 
-  transition: all 0.2s ease;
+  transition: all .2s ease;
 
   display: flex;
+
   align-items: center;
+
   justify-content: center;
+
+  box-shadow:
+    0 10px 24px rgba(0,0,0,.25);
+}
+.checkout-button:hover {
+  transform: translateY(-2px);
 }
 
 .checkout-button:active {
-  transform: scale(0.98);
+  transform: scale(.98);
 }
 
 /* ========================= */
@@ -132,8 +186,14 @@
 }
 
 .checkout-total h2 {
-  font-size: 22px;
-  margin-top: 6px;
+  font-size: 28px;
+
+  margin-top: 10px;
+
+  color: #fff;
+
+  text-shadow:
+    0 0 6px rgba(170,0,255,.18);
 }
 
 /* ========================= */
@@ -146,8 +206,19 @@
 
 .checkout-qr img {
   width: 100%;
+
   max-width: 220px;
-  margin-top: 10px;
+
+  margin-top: 14px;
+
+  border-radius: 18px;
+
+  background: #fff;
+
+  padding: 10px;
+
+  box-shadow:
+    0 8px 20px rgba(0,0,0,.3);
 }
 
 /* ========================= */
