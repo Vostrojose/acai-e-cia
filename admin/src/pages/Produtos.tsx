@@ -282,18 +282,46 @@ export default function Produtos() {
 
             {editando === p.id ? (
               <>
-                <input
-                  type="number"
-                  value={novoPreco}
-                  onChange={(e) => setNovoPreco(Number(e.target.value))}
-                  style={input}
-                />
-                <button
-                  onClick={() => salvarPreco(p.id)}
-                  style={{ ...theme.button, ...theme.buttonSuccess }}
-                >
-                  Salvar
-                </button>
+                <>
+                  <input
+                    type="number"
+                    value={novoPreco}
+                    onChange={(e) => setNovoPreco(Number(e.target.value))}
+                    style={input}
+                  />
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: 8,
+                      marginTop: 8,
+                    }}
+                  >
+                    <button
+                      onClick={() => salvarPreco(p.id)}
+                      style={{
+                        ...theme.button,
+                        ...theme.buttonSuccess,
+                        flex: 1,
+                      }}
+                    >
+                      💾 Salvar
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setEditando(null)
+                        setNovoPreco(0)
+                      }}
+                      style={{
+                        ...btnDanger,
+                        flex: 1,
+                      }}
+                    >
+                      ❌ Cancelar
+                    </button>
+                  </div>
+                </>
               </>
             ) : (
               <p>💰 R$ {p.preco.toFixed(2)}</p>
