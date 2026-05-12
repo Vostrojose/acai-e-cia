@@ -23,6 +23,7 @@ export default function Produtos() {
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [alterandoStatus, setAlterandoStatus] = useState<string | null>(null)
+  const [mensagemSucesso, setMensagemSucesso] = useState('')
 
   /* 🔐 AUTH */
   const [mostrarLogin, setMostrarLogin] = useState(false)
@@ -166,6 +167,10 @@ export default function Produtos() {
         await api.patch(`/produtos/${p.id}/status`, {
           ativo: !p.ativo,
         })
+        setMensagemSucesso('Status atualizado com sucesso')
+        setTimeout(() => {
+          setMensagemSucesso('')
+        }, 2500)
 
         setProdutos((prev) =>
           prev.map((item) =>
@@ -226,6 +231,17 @@ export default function Produtos() {
 
       {carregando && <p>Carregando...</p>}
       {erro && <p style={{ color: '#ff5252' }}>{erro}</p>}
+      {mensagemSucesso && (
+        <p
+          style={{
+            color: '#22c55e',
+            marginBottom: 12,
+            fontWeight: 'bold',
+          }}
+        >
+          ✅ {mensagemSucesso}
+        </p>
+      )}
 
       <div style={grid}>
         {produtosFiltrados.map((p) => (
