@@ -167,7 +167,11 @@ export default function Produtos() {
           ativo: !p.ativo,
         })
 
-        carregarProdutos()
+        setProdutos((prev) =>
+          prev.map((item) =>
+            item.id === p.id ? { ...item, ativo: !item.ativo } : item,
+          ),
+        )
       } catch {
         alert('Erro ao alterar status')
       } finally {
