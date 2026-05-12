@@ -22,6 +22,7 @@ export default function Produtos() {
 
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
+  const [alterandoStatus, setAlterandoStatus] = useState<string | null>(null)
 
   /* 🔐 AUTH */
   const [mostrarLogin, setMostrarLogin] = useState(false)
@@ -159,10 +160,19 @@ export default function Produtos() {
 
   async function toggleAtivo(p: Produto) {
     exigirReautenticacao(async () => {
-      await api.patch(`/produtos/${p.id}/status`, {
-        ativo: !p.ativo,
-      })
-      carregarProdutos()
+      try {
+        setAlterandoStatus(p.id)
+
+        await api.patch(`/produtos/${p.id}/status`, {
+          ativo: !p.ativo,
+        })
+
+        carregarProdutos()
+      } catch {
+        alert('Erro ao alterar status')
+      } finally {
+        setAlterandoStatus(null)
+      }
     })
   }
 
@@ -243,13 +253,21 @@ export default function Produtos() {
               </button>
 
               <button
+                disabled={alterandoStatus === p.id}
                 onClick={() => toggleAtivo(p)}
                 style={{
                   ...btn,
+
+                  opacity: alterandoStatus === p.id ? 0.6 : 1,
+
                   background: p.ativo ? '#22c55e' : '#ef4444',
                 }}
               >
-                {p.ativo ? '🟢 Ativo' : '🔴 Inativo'}
+                {alterandoStatus === p.id
+                  ? 'Atualizando...'
+                  : p.ativo
+                    ? '🟢 Ativo'
+                    : '🔴 Inativo'}
               </button>
 
               <button onClick={() => remover(p.id)} style={btnDanger}>
