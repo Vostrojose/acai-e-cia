@@ -300,17 +300,19 @@ export default function Produtos() {
             )}
 
             <div style={acoes}>
-              <button onClick={() => iniciarEdicao(p)} style={btn}>
-                ✏️ Editar
-              </button>
+              {editando !== p.id && (
+                <button onClick={() => iniciarEdicao(p)} style={btn}>
+                  ✏️ Editar
+                </button>
+              )}
 
               <button
-                disabled={alterandoStatus === p.id}
+                disabled={editando === p.id}
                 onClick={() => toggleAtivo(p)}
                 style={{
                   ...btn,
 
-                  opacity: alterandoStatus === p.id ? 0.6 : 1,
+                  opacity: editando === p.id ? 0.5 : 1,
 
                   background: p.ativo ? '#22c55e' : '#ef4444',
                 }}
@@ -322,7 +324,14 @@ export default function Produtos() {
                     : '🔴 Inativo'}
               </button>
 
-              <button onClick={() => remover(p.id)} style={btnDanger}>
+              <button
+                disabled={editando === p.id}
+                onClick={() => remover(p.id)}
+                style={{
+                  ...btnDanger,
+                  opacity: editando === p.id ? 0.5 : 1,
+                }}
+              >
                 🗑 Remover
               </button>
             </div>
