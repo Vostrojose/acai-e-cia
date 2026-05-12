@@ -245,8 +245,40 @@ export default function Produtos() {
 
       <div style={grid}>
         {produtosFiltrados.map((p) => (
-          <div key={p.id} style={theme.card}>
-            <strong>{p.nome}</strong>
+          <div
+            key={p.id}
+            style={{
+              ...theme.card,
+
+              opacity: p.ativo ? 1 : 0.55,
+
+              border: p.ativo
+                ? '1px solid rgba(255,255,255,0.08)'
+                : '1px solid rgba(239,68,68,0.45)',
+
+              transition: 'all .25s ease',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 8,
+              }}
+            >
+              <strong>{p.nome}</strong>
+
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 'bold',
+                  color: p.ativo ? '#22c55e' : '#ef4444',
+                }}
+              >
+                {p.ativo ? 'ATIVO' : 'INATIVO'}
+              </span>
+            </div>
 
             {editando === p.id ? (
               <>
