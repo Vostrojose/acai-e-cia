@@ -246,19 +246,32 @@ export default function Produtos() {
       <div style={grid}>
         {produtosFiltrados.map((p) => (
           <div
-            key={p.id}
-            style={{
-              ...theme.card,
+  key={p.id}
+  style={{
+    ...theme.card,
 
-              opacity: p.ativo ? 1 : 0.55,
+    opacity: p.ativo ? 1 : 0.55,
 
-              border: p.ativo
-                ? '1px solid rgba(255,255,255,0.08)'
-                : '1px solid rgba(239,68,68,0.45)',
+    border:
+      editando === p.id
+        ? "1px solid #22c55e"
+        : p.ativo
+          ? "1px solid rgba(255,255,255,0.08)"
+          : "1px solid rgba(239,68,68,0.45)",
 
-              transition: 'all .25s ease',
-            }}
-          >
+    boxShadow:
+      editando === p.id
+        ? "0 0 18px rgba(34,197,94,.45)"
+        : "0 4px 12px rgba(0,0,0,.25)",
+
+    transform:
+      editando === p.id
+        ? "scale(1.01)"
+        : "scale(1)",
+
+    transition: "all .25s ease",
+  }}
+>
             <div
               style={{
                 display: 'flex',
