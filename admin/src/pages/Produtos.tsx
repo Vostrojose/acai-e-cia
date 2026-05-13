@@ -203,20 +203,9 @@ export default function Produtos() {
     return mapaDias[dia]
   }
 
-  const produtosFiltrados = produtos.filter((p) => {
-    const campoDia = obterCampoDiaAtual() as keyof Produto
-    const disponivelHoje = Boolean(p[campoDia])
-
-    const correspondeBusca = p.nome.toLowerCase().includes(busca.toLowerCase())
-    console.log({
-      nome: p.nome,
-      campoDia,
-      valorCampo: p[campoDia],
-      disponivelHoje,
-    })
-
-    return disponivelHoje && correspondeBusca
-  })
+  const produtosFiltrados = produtos.filter((p) =>
+    p.nome.toLowerCase().includes(busca.toLowerCase()),
+  )
   return (
     <div style={theme.page}>
       <CardMenu navigate={navigate} exigirLogin={exigirLogin} />
