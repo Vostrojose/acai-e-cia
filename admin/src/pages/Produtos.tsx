@@ -182,7 +182,11 @@ export default function Produtos() {
 
   async function salvarPreco(id: string) {
     exigirReautenticacao(async () => {
-      await api.put(`/produtos/${id}`, { preco: novoPreco })
+      await api.put(`/produtos/${id}`, {
+        preco: novoPreco,
+
+        ...diasEdicao,
+      })
       setEditando(null)
       carregarProdutos()
     })
