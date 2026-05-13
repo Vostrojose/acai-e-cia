@@ -24,13 +24,13 @@ class ProdutoService {
         preco: data.preco,
         ativo: data.ativo ?? true,
 
-        disponivelDom: data.disponivelDom ?? false,
-        disponivelSeg: data.disponivelSeg ?? false,
-        disponivelTer: data.disponivelTer ?? false,
-        disponivelQua: data.disponivelQua ?? false,
-        disponivelQui: data.disponivelQui ?? false,
-        disponivelSex: data.disponivelSex ?? false,
-        disponivelSab: data.disponivelSab ?? false,
+        disponivelDom: data.disponivelDom ?? true,
+        disponivelSeg: data.disponivelSeg ?? true,
+        disponivelTer: data.disponivelTer ?? true,
+        disponivelQua: data.disponivelQua ?? true,
+        disponivelQui: data.disponivelQui ?? true,
+        disponivelSex: data.disponivelSex ?? true,
+        disponivelSab: data.disponivelSab ?? true,
       },
     })
   }
