@@ -157,25 +157,25 @@ const produtosDisponiveis = produtos.filter((produto) => {
   switch (hoje) {
 
     case 0:
-      return produto.disponivelDom === true
+      return Boolean(produto.disponivelDom)
 
     case 1:
-      return produto.disponivelSeg === true
+      return Boolean(produto.disponivelSeg)
 
     case 2:
-      return produto.disponivelTer === true
+      return Boolean(produto.disponivelTer)
 
     case 3:
-      return produto.disponivelQua === true
+      return Boolean(produto.disponivelQua)
 
     case 4:
-      return produto.disponivelQui === true
+      return Boolean(produto.disponivelQui)
 
     case 5:
-      return produto.disponivelSex === true
+      return Boolean(produto.disponivelSex)
 
     case 6:
-      return produto.disponivelSab === true
+      return Boolean(produto.disponivelSab)
 
     default:
       return false
