@@ -10,6 +10,13 @@ type Produto = {
   descricao?: string
   preco: number
   ativo?: boolean
+  disponivelDom: boolean
+  disponivelSeg: boolean
+  disponivelTer: boolean
+  disponivelQua: boolean
+  disponivelQui: boolean
+  disponivelSex: boolean
+  disponivelSab: boolean
 
   dias?: string[]
 }
@@ -21,6 +28,15 @@ export default function Produtos() {
   const [busca, setBusca] = useState('')
   const [editando, setEditando] = useState<string | null>(null)
   const [novoPreco, setNovoPreco] = useState(0)
+  const [diasEdicao, setDiasEdicao] = useState({
+    disponivelDom: false,
+    disponivelSeg: false,
+    disponivelTer: false,
+    disponivelQua: false,
+    disponivelQui: false,
+    disponivelSex: false,
+    disponivelSab: false,
+  })
 
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
@@ -149,7 +165,18 @@ export default function Produtos() {
   function iniciarEdicao(p: Produto) {
     exigirReautenticacao(() => {
       setEditando(p.id)
+
       setNovoPreco(p.preco)
+
+      setDiasEdicao({
+        disponivelDom: p.disponivelDom,
+        disponivelSeg: p.disponivelSeg,
+        disponivelTer: p.disponivelTer,
+        disponivelQua: p.disponivelQua,
+        disponivelQui: p.disponivelQui,
+        disponivelSex: p.disponivelSex,
+        disponivelSab: p.disponivelSab,
+      })
     })
   }
 
