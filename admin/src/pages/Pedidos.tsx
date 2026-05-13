@@ -166,7 +166,7 @@ function CardMenu({ navigate }: any) {
         }}
       >
         <button onClick={() => navigate('/cozinha')} style={btnMenu}>
-          🍳
+          👨‍🍳
         </button>
         <button onClick={() => navigate('/produtos')} style={btnMenu}>
           🛒
