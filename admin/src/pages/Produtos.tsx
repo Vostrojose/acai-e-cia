@@ -198,7 +198,8 @@ export default function Produtos() {
       'disponivelSex',
       'disponivelSab',
     ]
-
+    console.log('DIA ATUAL:', dia)
+    console.log('CAMPO DIA:', mapaDias[dia])
     return mapaDias[dia]
   }
 
@@ -207,6 +208,12 @@ export default function Produtos() {
     const disponivelHoje = Boolean(p[campoDia])
 
     const correspondeBusca = p.nome.toLowerCase().includes(busca.toLowerCase())
+    console.log({
+      nome: p.nome,
+      campoDia,
+      valorCampo: p[campoDia],
+      disponivelHoje,
+    })
 
     return disponivelHoje && correspondeBusca
   })
