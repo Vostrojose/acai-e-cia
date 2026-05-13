@@ -156,25 +156,25 @@ export default function CardapioSemana() {
         const produtosDoDia = produtos.filter((p: Produto) => {
           switch (dia.key) {
             case 'disponivelDom':
-              return p.ativo && p.disponivelDom === true
+              return p.disponivelDom === true
 
             case 'disponivelSeg':
-              return p.ativo && p.disponivelSeg === true
+              return p.disponivelSeg === true
 
             case 'disponivelTer':
-              return p.ativo && p.disponivelTer === true
+              return p.disponivelTer === true
 
             case 'disponivelQua':
-              return p.ativo && p.disponivelQua === true
+              return p.disponivelQua === true
 
             case 'disponivelQui':
-              return p.ativo && p.disponivelQui === true
+              return p.disponivelQui === true
 
             case 'disponivelSex':
-              return p.ativo && p.disponivelSex === true
+              return p.disponivelSex === true
 
             case 'disponivelSab':
-              return p.ativo && p.disponivelSab === true
+              return p.disponivelSab === true
 
             default:
               return false
