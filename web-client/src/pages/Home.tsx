@@ -152,26 +152,36 @@ export default function Home() {
 
   if (loading) return <p style={{ padding: 20 }}>Carregando...</p>
 
-  const produtosDisponiveis = produtos.filter((produto) => {
-    switch (hoje) {
-      case 0:
-        return produto.disponivelDom
-      case 1:
-        return produto.disponivelSeg
-      case 2:
-        return produto.disponivelTer
-      case 3:
-        return produto.disponivelQua
-      case 4:
-        return produto.disponivelQui
-      case 5:
-        return produto.disponivelSex
-      case 6:
-        return produto.disponivelSab
-      default:
-        return true
-    }
-  })
+const produtosDisponiveis = produtos.filter((produto) => {
+
+  switch (hoje) {
+
+    case 0:
+      return produto.disponivelDom === true
+
+    case 1:
+      return produto.disponivelSeg === true
+
+    case 2:
+      return produto.disponivelTer === true
+
+    case 3:
+      return produto.disponivelQua === true
+
+    case 4:
+      return produto.disponivelQui === true
+
+    case 5:
+      return produto.disponivelSex === true
+
+    case 6:
+      return produto.disponivelSab === true
+
+    default:
+      return false
+  }
+
+})
 
   return (
     <div className="page">

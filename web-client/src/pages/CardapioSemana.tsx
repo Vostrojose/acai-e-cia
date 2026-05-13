@@ -26,17 +26,13 @@ export default function CardapioSemana() {
 
   const hoje = new Date().getDay()
 
- 
   /*  FUNÇÃO BLINDADA BOOLEAN    */
-
 
   function toBoolean(value: any): boolean {
     return value === true || value === 'true' || value === 1 || value === '1'
   }
 
- 
   /*  DIAS DA SEMANA             */
- 
 
   const dias = [
     { nome: 'Segunda', key: 'disponivelSeg', numero: 1 },
@@ -52,9 +48,7 @@ export default function CardapioSemana() {
 
   const diasOrdenados = [...dias.slice(indexHoje), ...dias.slice(0, indexHoje)]
 
- 
   /*  CARREGAR PRODUTOS          */
- 
 
   useEffect(() => {
     async function loadProdutos() {
@@ -78,15 +72,11 @@ export default function CardapioSemana() {
     loadProdutos()
   }, [])
 
-
   /*  DESTAQUE                  */
-  
 
   const destaque = produtos.find((p) => p.destaque && p.ativo)
 
- 
   /*  INTERESSE                 */
- 
 
   function registrarInteresse(produto: Produto, dia: string) {
     const interesses = JSON.parse(localStorage.getItem('interesses') || '[]')
@@ -105,9 +95,7 @@ export default function CardapioSemana() {
     console.log('📌 Interesse registrado:', novo)
   }
 
-
   /*  RENDER                    */
- 
 
   return (
     <div className="cardapio-semana-page">
@@ -129,31 +117,24 @@ export default function CardapioSemana() {
         </button>
       </div>
 
-     <div className="header">
-  <div className="header-branding">
-    <div className="header-logo">
-      <img
-        src="/logo.png"
-        alt="Açaí & Co"
-      />
-    </div>
+      <div className="header">
+        <div className="header-branding">
+          <div className="header-logo">
+            <img src="/logo.png" alt="Açaí & Co" />
+          </div>
 
-    <div className="header-texts">
-      <h1 className="title">
-         Cardápio da Semana
-      </h1>
+          <div className="header-texts">
+            <h1 className="title">Cardápio da Semana</h1>
 
-      <p className="subtitle">
-        Descubra os sabores da semana
-      </p>
+            <p className="subtitle">Descubra os sabores da semana</p>
 
-      <div className="online-status">
-        <span className="status-dot" />
-        Atualizado em tempo real
+            <div className="online-status">
+              <span className="status-dot" />
+              Atualizado em tempo real
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</div>
 
       {destaque && (
         <div className="destaque-card">
@@ -172,9 +153,32 @@ export default function CardapioSemana() {
       )}
 
       {diasOrdenados.map((dia, index) => {
-        const produtosDoDia = produtos.filter((produto) => {
-          const disponivel = produto[dia.key as keyof Produto]
-          return produto.ativo === true && toBoolean(disponivel)
+        const produtosDoDia = produtos.filter((p: Produto) => {
+          switch (dia.key) {
+            case 'disponivelDom':
+              return p.ativo && p.disponivelDom === true
+
+            case 'disponivelSeg':
+              return p.ativo && p.disponivelSeg === true
+
+            case 'disponivelTer':
+              return p.ativo && p.disponivelTer === true
+
+            case 'disponivelQua':
+              return p.ativo && p.disponivelQua === true
+
+            case 'disponivelQui':
+              return p.ativo && p.disponivelQui === true
+
+            case 'disponivelSex':
+              return p.ativo && p.disponivelSex === true
+
+            case 'disponivelSab':
+              return p.ativo && p.disponivelSab === true
+
+            default:
+              return false
+          }
         })
 
         if (produtosDoDia.length === 0) return null
