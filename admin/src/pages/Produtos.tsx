@@ -204,8 +204,7 @@ export default function Produtos() {
 
   const produtosFiltrados = produtos.filter((p) => {
     const campoDia = obterCampoDiaAtual() as keyof Produto
-
-    const disponivelHoje = campoDia in p ? Boolean(p[campoDia]) : true
+    const disponivelHoje = Boolean(p[campoDia])
 
     const correspondeBusca = p.nome.toLowerCase().includes(busca.toLowerCase())
 
