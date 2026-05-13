@@ -10,6 +10,8 @@ type Produto = {
   descricao?: string
   preco: number
   ativo?: boolean
+
+  dias?: string[]
 }
 
 export default function Produtos() {
@@ -184,11 +186,31 @@ export default function Produtos() {
       }
     })
   }
+  function obterCampoDiaAtual() {
+    const dia = new Date().getDay()
 
-  const produtosFiltrados = produtos.filter((p) =>
-    p.nome.toLowerCase().includes(busca.toLowerCase()),
-  )
+    const mapaDias = [
+      'disponivelDom',
+      'disponivelSeg',
+      'disponivelTer',
+      'disponivelQua',
+      'disponivelQui',
+      'disponivelSex',
+      'disponivelSab',
+    ]
 
+    return mapaDias[dia]
+  }
+
+  const produtosFiltrados = produtos.filter((p) => {
+    const campoDia = obterCampoDiaAtual() as keyof Produto
+
+    const disponivelHoje = campoDia in p ? Boolean(p[campoDia]) : true
+
+    const correspondeBusca = p.nome.toLowerCase().includes(busca.toLowerCase())
+
+    return disponivelHoje && correspondeBusca
+  })
   return (
     <div style={theme.page}>
       <CardMenu navigate={navigate} exigirLogin={exigirLogin} />
@@ -246,32 +268,29 @@ export default function Produtos() {
       <div style={grid}>
         {produtosFiltrados.map((p) => (
           <div
-  key={p.id}
-  style={{
-    ...theme.card,
+            key={p.id}
+            style={{
+              ...theme.card,
 
-    opacity: p.ativo ? 1 : 0.55,
+              opacity: p.ativo ? 1 : 0.55,
 
-    border:
-      editando === p.id
-        ? "1px solid #22c55e"
-        : p.ativo
-          ? "1px solid rgba(255,255,255,0.08)"
-          : "1px solid rgba(239,68,68,0.45)",
+              border:
+                editando === p.id
+                  ? '1px solid #22c55e'
+                  : p.ativo
+                    ? '1px solid rgba(255,255,255,0.08)'
+                    : '1px solid rgba(239,68,68,0.45)',
 
-    boxShadow:
-      editando === p.id
-        ? "0 0 18px rgba(34,197,94,.45)"
-        : "0 4px 12px rgba(0,0,0,.25)",
+              boxShadow:
+                editando === p.id
+                  ? '0 0 18px rgba(34,197,94,.45)'
+                  : '0 4px 12px rgba(0,0,0,.25)',
 
-    transform:
-      editando === p.id
-        ? "scale(1.01)"
-        : "scale(1)",
+              transform: editando === p.id ? 'scale(1.01)' : 'scale(1)',
 
-    transition: "all .25s ease",
-  }}
->
+              transition: 'all .25s ease',
+            }}
+          >
             <div
               style={{
                 display: 'flex',
