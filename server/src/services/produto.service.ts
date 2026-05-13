@@ -38,7 +38,7 @@ class ProdutoService {
   async listarProdutos() {
     const produtos = await prisma.produto.findMany({
       orderBy: {
-        criadoEm: 'desc',
+        nome: 'asc',
       },
       include: {
         adicionais: true, // 🔥 ESSENCIAL
