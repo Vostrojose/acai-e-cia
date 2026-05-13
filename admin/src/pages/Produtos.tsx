@@ -388,39 +388,6 @@ export default function Produtos() {
                       marginBottom: 12,
                     }}
                   >
-                    {Object.entries(diasEdicao).map(([key, value]) => (
-                      <label
-                        key={key}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 6,
-                          fontSize: 13,
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={value}
-                          onChange={(e) =>
-                            setDiasEdicao((prev) => ({
-                              ...prev,
-                              [key]: e.target.checked,
-                            }))
-                          }
-                        />
-
-                        {key.replace('disponivel', '')}
-                      </label>
-                    ))}
-                  </div>
-
-                  <div
-                    style={{
-                      display: 'flex',
-                      gap: 8,
-                      marginTop: 8,
-                    }}
-                  >
                     <button
                       onClick={() => salvarPreco(p.id)}
                       style={{
