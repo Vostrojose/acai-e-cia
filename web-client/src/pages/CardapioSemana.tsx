@@ -153,6 +153,7 @@ export default function CardapioSemana() {
       )}
 
       {diasOrdenados.map((dia, index) => {
+        console.log('TODOS PRODUTOS:', produtos)
         const produtosDoDia = produtos.filter((p: Produto) => {
           switch (dia.key) {
             case 'disponivelDom':
