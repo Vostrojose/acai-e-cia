@@ -343,6 +343,76 @@ export default function Produtos() {
                     onChange={(e) => setNovoPreco(Number(e.target.value))}
                     style={input}
                   />
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(2, 1fr)',
+                      gap: 8,
+                      marginTop: 12,
+                      marginBottom: 12,
+                    }}
+                  >
+                    {Object.entries(diasEdicao).map(([key, value]) => (
+                      <label
+                        key={key}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          fontSize: 13,
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={value}
+                          onChange={(e) =>
+                            setDiasEdicao((prev) => ({
+                              ...prev,
+
+                              [key]: e.target.checked,
+                            }))
+                          }
+                        />
+
+                        {key.replace('disponivel', '')}
+                      </label>
+                    ))}
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(2, 1fr)',
+                      gap: 8,
+                      marginTop: 12,
+                      marginBottom: 12,
+                    }}
+                  >
+                    {Object.entries(diasEdicao).map(([key, value]) => (
+                      <label
+                        key={key}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          fontSize: 13,
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={value}
+                          onChange={(e) =>
+                            setDiasEdicao((prev) => ({
+                              ...prev,
+                              [key]: e.target.checked,
+                            }))
+                          }
+                        />
+
+                        {key.replace('disponivel', '')}
+                      </label>
+                    ))}
+                  </div>
 
                   <div
                     style={{
