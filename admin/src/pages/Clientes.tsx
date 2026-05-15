@@ -1,53 +1,53 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import api from "../services/api";
-import { theme } from "../assets/styles/adminTheme";
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import api from '../services/api'
+import { theme } from '../assets/styles/adminTheme'
 
 export default function Clientes() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
-  const [clientes, setClientes] = useState<any[]>([]);
-  const [valores, setValores] = useState<{ [key: string]: string }>({});
-  const [novoNome, setNovoNome] = useState("");
-  const [novoCredito, setNovoCredito] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [clientes, setClientes] = useState<any[]>([])
+  const [valores, setValores] = useState<{ [key: string]: string }>({})
+  const [novoNome, setNovoNome] = useState('')
+  const [novoCredito, setNovoCredito] = useState('')
+  const [loading, setLoading] = useState(false)
 
   async function carregar() {
     try {
-      setLoading(true);
-      const res = await api.get("/clientes");
-      setClientes(res.data.data || []);
+      setLoading(true)
+      const res = await api.get('/clientes')
+      setClientes(res.data.data || [])
     } catch {
-      alert("Erro ao carregar clientes");
+      alert('Erro ao carregar clientes')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
   useEffect(() => {
-    carregar();
-  }, []);
+    carregar()
+  }, [])
 
   /* ============================= */
   /* 💰 ADICIONAR CRÉDITO EXISTENTE */
   /* ============================= */
   async function adicionarCredito(id: string) {
-    const valorNumber = Number(valores[id]);
+    const valorNumber = Number(valores[id])
 
     if (!valorNumber || valorNumber <= 0) {
-      alert("Valor inválido");
-      return;
+      alert('Valor inválido')
+      return
     }
 
     try {
       await api.post(`/clientes/${id}/credito`, {
         valor: valorNumber,
-      });
+      })
 
-      setValores({ ...valores, [id]: "" });
-      carregar();
+      setValores({ ...valores, [id]: '' })
+      carregar()
     } catch {
-      alert("Erro ao adicionar crédito");
+      alert('Erro ao adicionar crédito')
     }
   }
 
@@ -55,38 +55,35 @@ export default function Clientes() {
   /* ➕ CRIAR CLIENTE COM CRÉDITO  */
   /* ============================= */
   async function criarCliente() {
-    const credito = Number(novoCredito);
+    const credito = Number(novoCredito)
 
     if (!novoNome.trim()) {
-      alert("Informe o nome");
-      return;
+      alert('Informe o nome')
+      return
     }
 
     try {
-      await api.post("/clientes", {
+      await api.post('/clientes', {
         nome: novoNome.toUpperCase().trim(),
         credito: credito || 0,
-      });
+      })
 
-      setNovoNome("");
-      setNovoCredito("");
-      carregar();
+      setNovoNome('')
+      setNovoCredito('')
+      carregar()
     } catch {
-      alert("Erro ao criar cliente");
+      alert('Erro ao criar cliente')
     }
   }
 
   return (
     <div style={theme.page}>
-
-      {/* 🔥 MENU DE NAVEGAÇÃO */}
+      {/*  MENU DE NAVEGAÇÃO */}
       <CardMenu navigate={navigate} />
 
-      <h1 style={{ ...theme.title, textAlign: "center" }}>
-        💳 Clientes
-      </h1>
+      <h1 style={{ ...theme.title, textAlign: 'center' }}>Clientes & Créditos</h1>
 
-      {/* 🔥 NOVO CLIENTE */}
+      {/* NOVO CLIENTE */}
       <div style={boxTopo}>
         <input
           placeholder="Nome do cliente"
@@ -109,9 +106,7 @@ export default function Clientes() {
 
       {loading && <p>Carregando...</p>}
 
-      {!loading && clientes.length === 0 && (
-        <p>Nenhum cliente encontrado</p>
-      )}
+      {!loading && clientes.length === 0 && <p>Nenhum cliente encontrado</p>}
 
       {clientes.map((c) => (
         <div key={c.id} style={cardCliente}>
@@ -124,24 +119,21 @@ export default function Clientes() {
           <div style={{ marginTop: 10 }}>
             <input
               placeholder="Valor"
-              value={valores[c.id] || ""}
+              value={valores[c.id] || ''}
               onChange={(e) =>
                 setValores({ ...valores, [c.id]: e.target.value })
               }
               style={input}
             />
 
-            <button
-              onClick={() => adicionarCredito(c.id)}
-              style={btnSuccess}
-            >
+            <button onClick={() => adicionarCredito(c.id)} style={btnSuccess}>
               ➕ Adicionar crédito
             </button>
           </div>
         </div>
       ))}
     </div>
-  );
+  )
 }
 
 /* ============================= */
@@ -150,26 +142,40 @@ export default function Clientes() {
 
 function CardMenu({ navigate }: any) {
   return (
-    <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+    <div
+      style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}
+    >
       <div
         style={{
-          background: "#000",
-          padding: 10,
-          borderRadius: 10,
-          display: "flex",
-          gap: 10,
-          flexWrap: "wrap",
+          background: 'rgba(20,20,20,.75)',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255,255,255,.08)',
+          boxShadow: '0 8px 30px rgba(0,0,0,.35)',
+          padding: 14,
+          borderRadius: 18,
         }}
       >
-        <button style={btnMenu} onClick={() => navigate("/cozinha")}>🍳</button>
-        <button style={btnMenu} onClick={() => navigate("/pedidos")}>📦</button>
-        <button style={btnMenu} onClick={() => navigate("/produtos")}>🛒</button>
-        <button style={btnMenu} onClick={() => navigate("/auditoria")}>📊</button>
-        <button style={btnMenu} onClick={() => navigate("/clientes")}>💳</button>
-        <button style={btnMenu} onClick={() => navigate("/financeiro")}>💰</button>
+        <button style={btnMenu} onClick={() => navigate('/cozinha')}>
+          👨‍🍳
+        </button>
+        <button style={btnMenu} onClick={() => navigate('/pedidos')}>
+          📦
+        </button>
+        <button style={btnMenu} onClick={() => navigate('/produtos')}>
+          🛒
+        </button>
+        <button style={btnMenu} onClick={() => navigate('/auditoria')}>
+          📊
+        </button>
+        <button style={btnMenu} onClick={() => navigate('/clientes')}>
+          💳
+        </button>
+        <button style={btnMenu} onClick={() => navigate('/financeiro')}>
+          💰
+        </button>
       </div>
     </div>
-  );
+  )
 }
 
 /* ============================= */
@@ -178,52 +184,56 @@ function CardMenu({ navigate }: any) {
 
 const cardCliente: React.CSSProperties = {
   marginBottom: 12,
-  padding: 16,
-  background: "linear-gradient(135deg, #1e1e1e, #2a2a2a)",
-  borderRadius: 12,
-  color: "#fff",
-  boxShadow: "0 4px 10px rgba(0,0,0,0.4)",
-};
+  background: 'linear-gradient(135deg, #1e1e1e, #2a2a2a)',
+  color: '#fff',
+  boxShadow: '0 4px 10px rgba(0,0,0,0.4)',
+  borderRadius: 20,
+  border: '1px solid rgba(255,255,255,.06)',
+  backdropFilter: 'blur(10px)',
+  padding: 20,
+}
 
 const boxTopo: React.CSSProperties = {
   marginBottom: 20,
-  display: "flex",
+  display: 'flex',
   gap: 10,
-  flexWrap: "wrap",
-};
+  flexWrap: 'wrap',
+}
 
 const input: React.CSSProperties = {
-  background: "#222",
-  color: "#fff",
-  border: "1px solid #444",
-  padding: "10px",
-  borderRadius: 6,
-};
+  background: 'rgba(255,255,255,.04)',
+  backdropFilter: 'blur(8px)',
+  color: '#fff',
+  border: '1px solid rgba(255,255,255,.08)',
+  padding: '12px 14px',
+  borderRadius: 12,
+  fontSize: 15,
+}
 
 const btnPrimary: React.CSSProperties = {
-  background: "#2196f3",
-  color: "#fff",
-  border: "none",
-  padding: "10px 14px",
+  background: '#2196f3',
+  color: '#fff',
+  border: 'none',
+  padding: '10px 14px',
   borderRadius: 6,
-  cursor: "pointer",
-};
+  cursor: 'pointer',
+}
 
 const btnSuccess: React.CSSProperties = {
-  background: "#4caf50",
-  color: "#fff",
-  border: "none",
-  padding: "10px 14px",
+  background: '#4caf50',
+  color: '#fff',
+  border: 'none',
+  padding: '10px 14px',
   borderRadius: 6,
-  cursor: "pointer",
-};
+  cursor: 'pointer',
+}
 
 const btnMenu: React.CSSProperties = {
-  background: "#333",
-  color: "#fff",
-  border: "none",
-  padding: "10px 12px",
+  background: '#333',
+  color: '#fff',
+  border: 'none',
+  padding: '10px 12px',
   borderRadius: 6,
   fontSize: 16,
-  cursor: "pointer",
-};
+  cursor: 'pointer',
+}
