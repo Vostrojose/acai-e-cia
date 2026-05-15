@@ -4,7 +4,6 @@ import api from '../services/api'
 import { theme } from '../assets/styles/adminTheme'
 
 export default function Clientes() {
-
   const navigate = useNavigate()
 
   /* ============================= */
@@ -17,11 +16,11 @@ export default function Clientes() {
 
   const [senha, setSenha] = useState('')
 
-  const [acaoPendente, setAcaoPendente] =
-    useState<null | (() => void)>(null)
+  const [acaoPendente, setAcaoPendente] = useState<null | (() => void)>(null)
 
-  const [ultimoLoginSensivel, setUltimoLoginSensivel] =
-    useState<number | null>(null)
+  const [ultimoLoginSensivel, setUltimoLoginSensivel] = useState<number | null>(
+    null,
+  )
 
   const TEMPO_REAUTENTICACAO = 5 * 60 * 1000
 
@@ -46,31 +45,21 @@ export default function Clientes() {
   /* ============================= */
 
   async function carregar() {
-
     try {
-
       setLoading(true)
 
       const res = await api.get('/clientes')
 
       setClientes(res.data.data || [])
-
     } catch {
-
       alert('Erro ao carregar clientes')
-
     } finally {
-
       setLoading(false)
-
     }
-
   }
 
   useEffect(() => {
-
     carregar()
-
   }, [])
 
   /* ============================= */
@@ -78,9 +67,7 @@ export default function Clientes() {
   /* ============================= */
 
   async function login() {
-
     try {
-
       await api.post('/auth/login', {
         email,
         senha,
@@ -95,13 +82,9 @@ export default function Clientes() {
       setEmail('')
 
       acaoPendente?.()
-
     } catch {
-
       alert('Senha inválida')
-
     }
-
   }
 
   /* ============================= */
@@ -109,24 +92,20 @@ export default function Clientes() {
   /* ============================= */
 
   function exigirReautenticacao(callback: () => void) {
-
     const agora = Date.now()
 
     if (
       ultimoLoginSensivel &&
       agora - ultimoLoginSensivel < TEMPO_REAUTENTICACAO
     ) {
-
       callback()
 
       return
-
     }
 
     setAcaoPendente(() => callback)
 
     setMostrarLogin(true)
-
   }
 
   /* ============================= */
@@ -134,19 +113,15 @@ export default function Clientes() {
   /* ============================= */
 
   async function adicionarCredito(id: string) {
-
     const valorNumber = Number(valores[id])
 
     if (!valorNumber || valorNumber <= 0) {
-
       alert('Valor inválido')
 
       return
-
     }
 
     try {
-
       await api.post(`/clientes/${id}/credito`, {
         valor: valorNumber,
       })
@@ -157,13 +132,9 @@ export default function Clientes() {
       })
 
       carregar()
-
     } catch {
-
       alert('Erro ao adicionar crédito')
-
     }
-
   }
 
   /* ============================= */
@@ -171,25 +142,19 @@ export default function Clientes() {
   /* ============================= */
 
   async function criarCliente() {
-
     const credito = Number(novoCredito)
 
     if (!novoNome.trim()) {
-
       alert('Informe o nome')
 
       return
-
     }
 
     try {
-
       await api.post('/clientes', {
-
         nome: novoNome.toUpperCase().trim(),
 
         credito: credito || 0,
-
       })
 
       setNovoNome('')
@@ -197,75 +162,41 @@ export default function Clientes() {
       setNovoCredito('')
 
       carregar()
-
     } catch {
-
       alert('Erro ao criar cliente')
-
     }
-
   }
 
   return (
-
     <div style={theme.page}>
-
-      <h1 style={theme.title}>
-        💳 Clientes & Créditos
-      </h1>
+      <h1 style={theme.title}>💳 Clientes & Créditos</h1>
 
       {/* MENU */}
 
       <div style={menuContainer}>
-
-        <button
-          style={btnMenu}
-          onClick={() => navigate('/cozinha')}
-        >
+        <button style={btnMenu} onClick={() => navigate('/cozinha')}>
           👨‍🍳
         </button>
 
-        <button
-          style={btnMenu}
-          onClick={() => navigate('/pedidos')}
-        >
+        <button style={btnMenu} onClick={() => navigate('/pedidos')}>
           📦
         </button>
 
-        <button
-          style={btnMenu}
-          onClick={() => navigate('/produtos')}
-        >
+        <button style={btnMenu} onClick={() => navigate('/produtos')}>
           🛒
         </button>
 
-        <button
-          style={btnMenu}
-          onClick={() => navigate('/auditoria')}
-        >
+        <button style={btnMenu} onClick={() => navigate('/auditoria')}>
           📊
         </button>
-
-        <button
-          style={btnMenu}
-          onClick={() => navigate('/clientes')}
-        >
-          💳
-        </button>
-
-        <button
-          style={btnMenu}
-          onClick={() => navigate('/financeiro')}
-        >
+        <button style={btnMenu} onClick={() => navigate('/financeiro')}>
           💰
         </button>
-
       </div>
 
       {/* NOVO CLIENTE */}
 
       <div style={boxTopo}>
-
         <input
           placeholder="Nome do cliente"
           value={novoNome}
@@ -280,38 +211,23 @@ export default function Clientes() {
           style={input}
         />
 
-        <button
-          onClick={criarCliente}
-          style={btnPrimary}
-        >
+        <button onClick={criarCliente} style={btnPrimary}>
           ➕ Criar cliente
         </button>
-
       </div>
 
-      {loading && (
-        <p>⏳ Carregando clientes...</p>
-      )}
+      {loading && <p>⏳ Carregando clientes...</p>}
 
-      {!loading && clientes.length === 0 && (
-        <p>Nenhum cliente encontrado</p>
-      )}
+      {!loading && clientes.length === 0 && <p>Nenhum cliente encontrado</p>}
 
       {/* CLIENTES */}
 
       {clientes.map((c) => (
-
-        <div
-          key={c.id}
-          style={cardCliente}
-        >
-
+        <div key={c.id} style={cardCliente}>
           <strong>{c.nome}</strong>
 
           <div style={{ marginTop: 6 }}>
-
             Saldo:
-
             <strong
               style={{
                 color: '#4ade80',
@@ -320,60 +236,41 @@ export default function Clientes() {
             >
               R$ {Number(c.credito).toFixed(2)}
             </strong>
-
           </div>
 
           <div style={{ marginTop: 12 }}>
-
             <input
               placeholder="Valor"
               value={valores[c.id] || ''}
               onChange={(e) =>
-
                 setValores({
-
                   ...valores,
 
                   [c.id]: e.target.value,
-
                 })
-
               }
               style={input}
             />
 
             <button
-
               onClick={() =>
-
                 exigirReautenticacao(() => {
-
                   adicionarCredito(c.id)
-
                 })
-
               }
-
               style={btnSuccess}
-
             >
               ➕ Adicionar crédito
             </button>
-
           </div>
-
         </div>
-
       ))}
 
       {/* MODAL LOGIN */}
 
       {mostrarLogin && (
-
         <div style={overlay}>
-
           <div style={modal}>
-
             <h3>🔒 Confirme sua senha</h3>
 
             <input
@@ -392,23 +289,14 @@ export default function Clientes() {
               style={input}
             />
 
-            <button
-              style={btnSuccess}
-              onClick={login}
-            >
+            <button style={btnSuccess} onClick={login}>
               Confirmar
             </button>
-
           </div>
-
         </div>
-
       )}
-
     </div>
-
   )
-
 }
 
 /* ============================= */
@@ -416,7 +304,6 @@ export default function Clientes() {
 /* ============================= */
 
 const menuContainer: React.CSSProperties = {
-
   display: 'flex',
 
   gap: 10,
@@ -424,11 +311,9 @@ const menuContainer: React.CSSProperties = {
   marginBottom: 20,
 
   flexWrap: 'wrap',
-
 }
 
 const btnMenu: React.CSSProperties = {
-
   width: 52,
 
   height: 52,
@@ -444,11 +329,9 @@ const btnMenu: React.CSSProperties = {
   fontSize: 22,
 
   cursor: 'pointer',
-
 }
 
 const boxTopo: React.CSSProperties = {
-
   display: 'flex',
 
   flexDirection: 'column',
@@ -456,11 +339,9 @@ const boxTopo: React.CSSProperties = {
   gap: 12,
 
   marginBottom: 20,
-
 }
 
 const input: React.CSSProperties = {
-
   padding: 12,
 
   borderRadius: 12,
@@ -470,11 +351,9 @@ const input: React.CSSProperties = {
   background: '#1f1f1f',
 
   color: '#fff',
-
 }
 
 const cardCliente: React.CSSProperties = {
-
   background: '#1b1b1b',
 
   padding: 18,
@@ -484,11 +363,9 @@ const cardCliente: React.CSSProperties = {
   marginBottom: 14,
 
   border: '1px solid rgba(255,255,255,.05)',
-
 }
 
 const btnPrimary: React.CSSProperties = {
-
   padding: 12,
 
   borderRadius: 12,
@@ -502,11 +379,9 @@ const btnPrimary: React.CSSProperties = {
   fontWeight: 700,
 
   cursor: 'pointer',
-
 }
 
 const btnSuccess: React.CSSProperties = {
-
   padding: 12,
 
   borderRadius: 12,
@@ -522,11 +397,9 @@ const btnSuccess: React.CSSProperties = {
   cursor: 'pointer',
 
   marginTop: 10,
-
 }
 
 const overlay: React.CSSProperties = {
-
   position: 'fixed',
 
   inset: 0,
@@ -540,11 +413,9 @@ const overlay: React.CSSProperties = {
   justifyContent: 'center',
 
   zIndex: 9999,
-
 }
 
 const modal: React.CSSProperties = {
-
   background: '#1f1f1f',
 
   padding: 24,
@@ -558,5 +429,4 @@ const modal: React.CSSProperties = {
   flexDirection: 'column',
 
   gap: 12,
-
 }
