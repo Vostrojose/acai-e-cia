@@ -18,3 +18,18 @@ yarn-error.log*
 # build
 dist
 build
+
+# IDEs
+.vscode/
+.idea/
+
+# sistema
+.DS_Store
+Thumbs.db
+
+# testes
+coverage/
+
+# cache
+.cache/
+.vite/
