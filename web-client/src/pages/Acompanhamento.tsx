@@ -32,12 +32,26 @@ export default function Acompanhamento() {
         const response = await api.get(`/pedidos/${id}`)
         const pedidoData = response.data.data
 
-        if (!pedidoData) return
+        if (!pedidoData) {
+          localStorage.removeItem('pedidoId')
+
+          localStorage.removeItem('pedidoStatus')
+
+          window.location.href = '/m/1'
+
+          return
+        }
 
         setPedido(pedidoData)
         setStatus(pedidoData.status)
       } catch (error) {
         console.error('Erro ao carregar pedido:', error)
+
+        localStorage.removeItem('pedidoId')
+
+        localStorage.removeItem('pedidoStatus')
+
+        window.location.href = '/m/1'
       }
     }
 
