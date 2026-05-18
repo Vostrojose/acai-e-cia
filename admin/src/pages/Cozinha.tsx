@@ -6,8 +6,6 @@ import { theme } from '../assets/styles/adminTheme'
 
 import BalcaoModal from '../components/BalcaoModal'
 
-
-
 export default function Cozinha() {
   const [pedidos, setPedidos] = useState<any[]>([])
   const [mostrarEntregues, setMostrarEntregues] = useState(false)
@@ -33,6 +31,15 @@ export default function Cozinha() {
   }
 
   const [abrirBalcao, setAbrirBalcao] = useState(false)
+  const shiftPositions = [
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: 1, y: 1 },
+    { x: 0, y: 1 },
+    { x: -1, y: 1 },
+    { x: -1, y: 0 },
+  ]
+  const [shiftIndex, setShiftIndex] = useState(0)
 
   useEffect(() => {
     let wakeLock: any = null
@@ -56,6 +63,14 @@ export default function Cozinha() {
     return () => {
       wakeLock?.release()
     }
+  }, [])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShiftIndex((prev) => (prev + 1) % shiftPositions.length)
+    }, 60000)
+
+    return () => clearInterval(interval)
   }, [])
 
   useEffect((): (() => void) => {
@@ -129,9 +144,16 @@ export default function Cozinha() {
   const entregues = ordenar(
     pedidos.filter((p) => p.status === 'ENTREGUE' && isHoje(p.entregueEm)),
   )
+  const currentShift = shiftPositions[shiftIndex]
 
   return (
-    <div style={theme.page}>
+    <div
+      style={{
+        ...theme.page,
+        transform: `translate(${currentShift.x}px, ${currentShift.y}px)`,
+        transition: 'transform 2s linear',
+      }}
+    >
       <div style={brandingHeader}>
         <div style={brandingLogo}>
           <img
@@ -519,14 +541,11 @@ const brandingHeader: React.CSSProperties = {
 
   marginBottom: 18,
 
-  background:
-    'linear-gradient(135deg, rgba(25,25,25,.96), rgba(40,40,40,.96))',
+  background: 'linear-gradient(135deg, rgba(25,25,25,.96), rgba(40,40,40,.96))',
 
-  border:
-    '1px solid rgba(255,255,255,0.06)',
+  border: '1px solid rgba(255,255,255,0.06)',
 
-  boxShadow:
-    '0 10px 24px rgba(0,0,0,0.25)',
+  boxShadow: '0 10px 24px rgba(0,0,0,0.25)',
 }
 const brandingLogo: React.CSSProperties = {
   width: 52,
@@ -538,11 +557,9 @@ const brandingLogo: React.CSSProperties = {
 
   background: '#111',
 
-  border:
-    '1px solid rgba(255,255,255,0.08)',
+  border: '1px solid rgba(255,255,255,0.08)',
 
-  boxShadow:
-    '0 8px 18px rgba(0,0,0,0.25)',
+  boxShadow: '0 8px 18px rgba(0,0,0,0.25)',
 }
 
 const brandingInfo: React.CSSProperties = {
