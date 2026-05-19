@@ -2,9 +2,6 @@ import prisma from '../services/prisma'
 import { StatusPedido, StatusPagamento } from '@prisma/client'
 
 class PedidoService {
-  /* ============================= */
-  /* CRIAR PEDIDO (PROFISSIONAL)   */
-  /* ============================= */
   async criarPedido(data: any) {
     const { itens, telefone, endereco, origem } = data
 
@@ -71,14 +68,10 @@ class PedidoService {
           })
         }
       }
-
-      /* 🔥 ATUALIZA TOTAL */
       await tx.pedido.update({
         where: { id: pedido.id },
         data: { total },
       })
-
-      /* 🔥 RETORNA COMPLETO */
       return await tx.pedido.findUnique({
         where: { id: pedido.id },
         include: {
@@ -92,10 +85,6 @@ class PedidoService {
       })
     })
   }
-
-  /* ============================= */
-  /* LISTAR                        */
-  /* ============================= */
   async listarPedidos(status?: string) {
     return prisma.pedido.findMany({
       where: status ? { status: status as StatusPedido } : undefined,
@@ -111,9 +100,6 @@ class PedidoService {
     })
   }
 
-  /* ============================= */
-  /* BUSCAR POR ID (COMPLETO)      */
-  /* ============================= */
   async buscarPorId(id: string) {
     return prisma.pedido.findUnique({
       where: { id },
@@ -127,10 +113,6 @@ class PedidoService {
       },
     })
   }
-
-  /* ============================= */
-  /* 🔥 NOVO: BUSCAR COMPLETO PADRÃO */
-  /* ============================= */
   async buscarPorIdComProdutos(id: string) {
     return prisma.pedido.findUnique({
       where: { id },
@@ -144,14 +126,8 @@ class PedidoService {
       },
     })
   }
-
-  /* ============================= */
-  /* ATUALIZAR STATUS              */
-  /* ============================= */
   async atualizarStatus(id: string, status: StatusPedido) {
     const data: any = { status }
-
-    // 🔥 SALVA DATA REAL DE ENTREGA
     if (status === StatusPedido.ENTREGUE) {
       data.entregueEm = new Date()
     }
@@ -161,10 +137,6 @@ class PedidoService {
       data,
     })
   }
-
-  /* ============================= */
-  /* ATUALIZAR PAGAMENTO           */
-  /* ============================= */
   async atualizarPagamento(
     id: string,
     statusPagamento: string,
@@ -187,20 +159,32 @@ class PedidoService {
         pagamentoEnum = StatusPagamento.PENDENTE
         statusPedido = StatusPedido.AGUARDANDO_PAGAMENTO
     }
+    const pedidoAtual = await prisma.pedido.findUnique({
+      where: { id },
+    })
+    let podeAlterarStatus = true
+
+    if (
+      pedidoAtual?.status === StatusPedido.EM_PREPARO ||
+      pedidoAtual?.status === StatusPedido.PRONTO ||
+      pedidoAtual?.status === StatusPedido.ENTREGUE
+    ) {
+      podeAlterarStatus = false
+    }
 
     return prisma.pedido.update({
       where: { id },
+
       data: {
         statusPagamento: pagamentoEnum,
         pagamentoId,
-        status: statusPedido,
+
+        ...(podeAlterarStatus && {
+          status: statusPedido,
+        }),
       },
     })
   }
-
-  /* ============================= */
-  /* REMOVER                       */
-  /* ============================= */
   async removerPedido(id: string) {
     return prisma.pedido.delete({ where: { id } })
   }
