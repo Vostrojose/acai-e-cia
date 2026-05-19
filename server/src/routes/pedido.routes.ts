@@ -5,40 +5,15 @@ import { asyncHandler } from '../utils/asyncHandler'
 import { serializeDecimal } from '../utils/serializeDecimal'
 
 const router = Router()
-
-/**
- * Criar novo pedido (cliente)
- */
 router.post('/', pedidoController.criar)
-
-/**
- * Listar pedidos (cozinha)
- * 🔥 MANTIDO ORIGINAL (NÃO ALTERADO)
- */
-/*router.get("/", pedidoController.listar);*/
-
 router.get('/', async (req, res) => {
   try {
-    /* ============================= */
-    /* 🔥 PARÂMETROS DA REQUISIÇÃO   */
-    /* ============================= */
-
     const horas = Number(req.query.horas) || 36 // padrão 36h
     const page = Number(req.query.page) || 1
     const limit = Number(req.query.limit) || 10
-
     const skip = (page - 1) * limit
-
-    /* ============================= */
-    /* 🔥 FILTRO POR TEMPO           */
-    /* ============================= */
-
     const dataLimite = new Date()
     dataLimite.setHours(dataLimite.getHours() - horas)
-
-    /* ============================= */
-    /* 🔥 CONSULTA NO BANCO          */
-    /* ============================= */
 
     const [pedidos, total] = await Promise.all([
       prisma.pedido.findMany({
@@ -52,14 +27,14 @@ router.get('/', async (req, res) => {
         },
         skip: skip,
         take: limit,
-      include: {
-  itens: {
-    include: {
-      produto: true,
-      adicionais: true
-    }
-  }
-}
+        include: {
+          itens: {
+            include: {
+              produto: true,
+              adicionais: true,
+            },
+          },
+        },
       }),
 
       prisma.pedido.count({
@@ -70,11 +45,6 @@ router.get('/', async (req, res) => {
         },
       }),
     ])
-
-    /* ============================= */
-    /* 🔥 RESPOSTA COM PAGINAÇÃO     */
-    /* ============================= */
-
     return res.json({
       success: true,
       data: serializeDecimal(pedidos),
@@ -93,10 +63,6 @@ router.get('/', async (req, res) => {
     })
   }
 })
-
-/**
- * 🔥 LISTAR FIADOS (VERSÃO PRODUÇÃO)
- */
 router.get(
   '/fiados',
   asyncHandler(async (req, res) => {
@@ -123,18 +89,7 @@ router.get(
     })
   }),
 )
-
-/**
- * Dashboard (livre)
- * 🔥 IMPORTANTE: rota fixa vem antes da dinâmica
- */
 router.get('/dashboard', pedidoController.dashboard)
-
-/**
- * Dashboard (livre)
- * nova rota
- */
-
 router.get(
   '/entregues/hoje/count',
   asyncHandler(async (req, res) => {
@@ -144,7 +99,8 @@ router.get(
     const total = await prisma.pedido.count({
       where: {
         status: 'ENTREGUE',
-        atualizadoEm: {
+
+        entregueEm: {
           gte: inicioHoje,
         },
       },
@@ -156,20 +112,8 @@ router.get(
     })
   }),
 )
-
-/**
- * Buscar pedido por ID (livre)
- */
 router.get('/:id', pedidoController.buscarPorId)
-
-/**
- * 🔥 COZINHA ALTERA STATUS (SEM LOGIN)
- */
 router.patch('/:id/status', pedidoController.atualizarStatus)
-
-/**
- * 🔥 MARCAR COMO PAGO (FIADO)
- */
 router.patch(
   '/:id/pagar',
   asyncHandler(async (req, res) => {
