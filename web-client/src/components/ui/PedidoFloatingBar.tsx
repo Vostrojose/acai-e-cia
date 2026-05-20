@@ -1,156 +1,139 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import api from '../../services/api'
+import { useLocation, useNavigate } from 'react-router-dom'
 
-export default function PedidoFloatingBar() {
+export default function PedidoPopup() {
   const navigate = useNavigate()
+  const location = useLocation()
 
-  const [pedido, setPedido] = useState<any>(null)
-  const [oculto, setOculto] = useState(false)
+  const [pedidoId, setPedidoId] = useState<string | null>(null)
+  const [status, setStatus] = useState('')
+  const [popupFechado, setPopupFechado] = useState(false)
 
   useEffect(() => {
-    const pedidoId = localStorage.getItem('pedidoId')
+    const id = localStorage.getItem('pedidoId')
+    const statusSalvo = localStorage.getItem('pedidoStatus')
+    const fechado = localStorage.getItem('pedidoPopupFechado')
 
-    if (!pedidoId) return
+    if (id) setPedidoId(id)
 
-    async function carregarPedido() {
-      try {
-        const response = await api.get(`/pedidos/${pedidoId}`)
+    if (statusSalvo) setStatus(statusSalvo)
 
-        const pedidoData = response.data.data
-
-        if (!pedidoData) return
-
-        // NÃO mostra pedidos finalizados
-        if (
-          pedidoData.status === 'ENTREGUE' ||
-          pedidoData.status === 'CANCELADO'
-        ) {
-          return
-        }
-
-        setPedido(pedidoData)
-      } catch (err) {
-        console.warn('Erro floating bar:', err)
-      }
-    }
-
-    carregarPedido()
+    setPopupFechado(fechado === 'true')
   }, [])
 
-  if (!pedido || oculto) return null
+  // NÃO mostrar na página de acompanhamento
+  if (location.pathname.includes('/acompanhar')) {
+    return null
+  }
 
-  function getTextoStatus(status: string) {
-    switch (status) {
-      case 'AGUARDANDO_PAGAMENTO':
-        return 'aguardando pagamento 💳'
+  // NÃO mostrar se não existir pedido
+  if (!pedidoId || !status) {
+    return null
+  }
 
-      case 'RECEBIDO':
-        return 'recebido 📥'
+  // NÃO mostrar se usuário fechou
+  if (popupFechado) {
+    return null
+  }
 
-      case 'EM_PREPARO':
-        return 'em preparo 🍳'
+  const fecharPopup = () => {
+    localStorage.setItem('pedidoPopupFechado', 'true')
 
-      case 'PRONTO':
-        return 'pronto para retirada ✅'
-
-      default:
-        return status
-    }
+    setPopupFechado(true)
   }
 
   return (
-    <div style={container}>
-      <div style={info}>
-        <div style={titulo}>📦 Pedido #{pedido.codigo}</div>
+    <div
+      style={{
+        position: 'fixed',
+        bottom: 16,
+        left: 16,
+        right: 16,
+        zIndex: 9999,
 
-        <div style={status}>{getTextoStatus(pedido.status)}</div>
-      </div>
+        backdropFilter: 'blur(14px)',
+        background: 'rgba(20,20,20,0.85)',
 
-      <div style={acoes}>
+        border: '1px solid rgba(255,255,255,0.08)',
+
+        borderRadius: 20,
+
+        padding: 16,
+
+        boxShadow: '0 10px 30px rgba(0,0,0,0.35)',
+
+        color: '#fff',
+
+        animation: 'slideUp 0.3s ease',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          gap: 12,
+        }}
+      >
+        <div>
+          <div
+            style={{
+              fontWeight: 700,
+              fontSize: 16,
+              marginBottom: 6,
+            }}
+          >
+            🟣 Pedido {status.toLowerCase()}
+          </div>
+
+          <div
+            style={{
+              fontSize: 14,
+              opacity: 0.8,
+            }}
+          >
+            ⌛ acompanhe seu pedido em tempo real
+          </div>
+        </div>
+
         <button
-          style={btnAcompanhar}
-          onClick={() => navigate(`/acompanhamento/${pedido.id}`)}
+          onClick={fecharPopup}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: '#fff',
+            fontSize: 18,
+            cursor: 'pointer',
+          }}
         >
-          Acompanhar
-        </button>
-
-        <button style={btnFechar} onClick={() => setOculto(true)}>
           ✕
         </button>
       </div>
+
+      <button
+        onClick={() => navigate(`/acompanhar/${pedidoId}`)}
+        style={{
+          marginTop: 14,
+
+          width: '100%',
+
+          background: '#8b5cf6',
+
+          border: 'none',
+
+          borderRadius: 14,
+
+          padding: '12px 16px',
+
+          color: '#fff',
+
+          fontWeight: 700,
+
+          cursor: 'pointer',
+        }}
+      >
+        Acompanhar pedido
+      </button>
     </div>
   )
-}
-
-const container = {
-  position: 'fixed' as const,
-  bottom: 12,
-  left: 12,
-  right: 12,
-
-  background: '#111',
-  border: '1px solid rgba(255,255,255,0.08)',
-
-  borderRadius: 16,
-
-  padding: '12px 14px',
-
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-
-  zIndex: 9999,
-
-  boxShadow: '0 8px 30px rgba(0,0,0,0.35)',
-}
-
-const info = {
-  display: 'flex',
-  flexDirection: 'column' as const,
-}
-
-const titulo = {
-  color: '#fff',
-  fontWeight: 700,
-  fontSize: 14,
-}
-
-const status = {
-  color: '#aaa',
-  fontSize: 12,
-  marginTop: 2,
-}
-
-const acoes = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 8,
-}
-
-const btnAcompanhar = {
-  background: '#7b2cbf',
-  color: '#fff',
-
-  border: 'none',
-
-  borderRadius: 10,
-
-  padding: '8px 12px',
-
-  fontSize: 12,
-  fontWeight: 700,
-
-  cursor: 'pointer',
-}
-
-const btnFechar = {
-  background: 'transparent',
-  color: '#999',
-
-  border: 'none',
-
-  fontSize: 18,
-
-  cursor: 'pointer',
 }
