@@ -93,7 +93,14 @@ router.get('/dashboard', pedidoController.dashboard)
 router.get(
   '/entregues/hoje/count',
   asyncHandler(async (req, res) => {
-    const inicioHoje = new Date()
+    const agora = new Date()
+
+    const inicioHoje = new Date(
+      agora.toLocaleString('en-US', {
+        timeZone: 'America/Sao_Paulo',
+      }),
+    )
+
     inicioHoje.setHours(0, 0, 0, 0)
 
     const total = await prisma.pedido.count({
