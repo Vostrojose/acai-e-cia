@@ -110,6 +110,12 @@ export class MercadoPagoProvider {
               item.nome ||
               `Produto ${item.produtoId || 'sem-id'}`,
           ),
+          description: String(
+            item.produto?.descricao ||
+              item.descricao ||
+              item.produto?.nome ||
+              'Produto Açaí & Companhia',
+          ),
           quantity: quantidade,
           unit_price: precoFinal,
           currency_id: 'BRL',
