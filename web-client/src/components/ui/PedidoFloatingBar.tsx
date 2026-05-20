@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-export default function PedidoPopup() {
+export default function PedidoFloatingBar() {
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -10,68 +10,107 @@ export default function PedidoPopup() {
   const [popupFechado, setPopupFechado] = useState(false)
 
   useEffect(() => {
-    const id = localStorage.getItem('pedidoId')
-    const statusSalvo = localStorage.getItem('pedidoStatus')
-    const fechado = localStorage.getItem('pedidoPopupFechado')
+    const atualizarDados = () => {
+      const id = localStorage.getItem('pedidoId')
 
-    if (id) setPedidoId(id)
+      const statusSalvo =
+        localStorage.getItem('pedidoStatus')
 
-    if (statusSalvo) setStatus(statusSalvo)
+      const fechado =
+        localStorage.getItem('pedidoPopupFechado')
 
-    setPopupFechado(fechado === 'true')
+      setPedidoId(id)
+
+      setStatus(statusSalvo || '')
+
+      setPopupFechado(fechado === 'true')
+    }
+
+    atualizarDados()
+
+    window.addEventListener('storage', atualizarDados)
+
+    return () => {
+      window.removeEventListener(
+        'storage',
+        atualizarDados,
+      )
+    }
   }, [])
 
-  // NÃO mostrar na página de acompanhamento
-  if (location.pathname.includes('/acompanhar')) {
+  // NÃO mostrar na tela acompanhamento
+  if (
+    location.pathname.includes('/acompanhar') ||
+    location.pathname.includes('/acompanhamento')
+  ) {
     return null
   }
 
-  // NÃO mostrar se não existir pedido
+  // sem pedido
   if (!pedidoId || !status) {
     return null
   }
 
-  // NÃO mostrar se usuário fechou
+  // popup fechado
   if (popupFechado) {
     return null
   }
 
   const fecharPopup = () => {
-    localStorage.setItem('pedidoPopupFechado', 'true')
+    localStorage.setItem(
+      'pedidoPopupFechado',
+      'true',
+    )
 
     setPopupFechado(true)
+  }
+
+  const abrirPedido = () => {
+    navigate(`/acompanhar/${pedidoId}`)
   }
 
   return (
     <div
       style={{
         position: 'fixed',
+
         bottom: 16,
+
         left: 16,
+
         right: 16,
+
         zIndex: 9999,
 
-        backdropFilter: 'blur(14px)',
-        background: 'rgba(20,20,20,0.85)',
+        maxWidth: 420,
 
-        border: '1px solid rgba(255,255,255,0.08)',
+        margin: '0 auto',
+
+        backdropFilter: 'blur(14px)',
+
+        background: 'rgba(20,20,20,0.88)',
+
+        border:
+          '1px solid rgba(255,255,255,0.08)',
 
         borderRadius: 20,
 
         padding: 16,
 
-        boxShadow: '0 10px 30px rgba(0,0,0,0.35)',
+        boxShadow:
+          '0 10px 30px rgba(0,0,0,0.35)',
 
         color: '#fff',
-
-        animation: 'slideUp 0.3s ease',
       }}
     >
       <div
         style={{
           display: 'flex',
+
           justifyContent: 'space-between',
+
           alignItems: 'flex-start',
+
           gap: 12,
         }}
       >
@@ -79,7 +118,9 @@ export default function PedidoPopup() {
           <div
             style={{
               fontWeight: 700,
+
               fontSize: 16,
+
               marginBottom: 6,
             }}
           >
@@ -89,6 +130,7 @@ export default function PedidoPopup() {
           <div
             style={{
               fontSize: 14,
+
               opacity: 0.8,
             }}
           >
@@ -100,9 +142,13 @@ export default function PedidoPopup() {
           onClick={fecharPopup}
           style={{
             background: 'transparent',
+
             border: 'none',
+
             color: '#fff',
+
             fontSize: 18,
+
             cursor: 'pointer',
           }}
         >
@@ -111,7 +157,7 @@ export default function PedidoPopup() {
       </div>
 
       <button
-        onClick={() => navigate(`/acompanhar/${pedidoId}`)}
+        onClick={abrirPedido}
         style={{
           marginTop: 14,
 
