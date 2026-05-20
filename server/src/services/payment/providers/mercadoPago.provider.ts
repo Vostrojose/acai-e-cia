@@ -83,7 +83,7 @@ export class MercadoPagoProvider {
 
         const totalAdicionais = adicionais.reduce(
           (soma: number, add: any) => soma + Number(add.preco),
-          0
+          0,
         )
 
         const precoFinal = Number((precoProduto + totalAdicionais).toFixed(2))
@@ -108,7 +108,7 @@ export class MercadoPagoProvider {
           title: String(
             item.produto?.nome ||
               item.nome ||
-              `Produto ${item.produtoId || 'sem-id'}`
+              `Produto ${item.produtoId || 'sem-id'}`,
           ),
           quantity: quantidade,
           unit_price: precoFinal,
@@ -144,6 +144,7 @@ export class MercadoPagoProvider {
       /* ============================= */
 
       const payload = {
+        statement_descriptor: 'ACAIECIA',
         external_reference: String(pedido.id),
 
         notification_url: `${process.env.BASE_URL}/api/pagamento/webhook`,
@@ -203,66 +204,63 @@ export class MercadoPagoProvider {
   /* BUSCAR PAGAMENTO              */
   /* ============================= */
 
-/* ============================= */
-/* BUSCAR PAGAMENTO              */
-/* ============================= */
+  /* ============================= */
+  /* BUSCAR PAGAMENTO              */
+  /* ============================= */
 
-async buscarPagamento(paymentId: string) {
-  if (!paymentId) {
-    throw new Error('paymentId não informado')
+  async buscarPagamento(paymentId: string) {
+    if (!paymentId) {
+      throw new Error('paymentId não informado')
+    }
+
+    try {
+      const response: any = await this.payment.get({
+        id: paymentId,
+      })
+
+      console.log('📦 [MP] RESPOSTA BRUTA:', JSON.stringify(response, null, 2))
+
+      /* ============================= */
+      /* 🔥 COMPATIBILIDADE SDK        */
+      /* ============================= */
+
+      const body = response?.body || response
+
+      const externalReference =
+        body?.external_reference ||
+        body?.externalReference ||
+        body?.metadata?.pedido_id ||
+        undefined
+
+      const pagamento = {
+        id: body?.id?.toString(),
+        status: body?.status,
+        transaction_amount: Number(body?.transaction_amount || 0),
+        external_reference: externalReference,
+
+        /* 🔥 RETROCOMPATIBILIDADE */
+        externalReference: externalReference,
+      }
+
+      console.log('✅ [MP] PAGAMENTO NORMALIZADO:', pagamento)
+
+      return pagamento
+    } catch (error: any) {
+      console.error('❌ [MP BUSCAR PAGAMENTO] ERRO COMPLETO:')
+      console.error(error)
+
+      if (error?.cause) {
+        console.error('CAUSE:', error.cause)
+      }
+
+      if (error?.response?.data) {
+        console.error(
+          'MP RESPONSE:',
+          JSON.stringify(error.response.data, null, 2),
+        )
+      }
+
+      throw error
+    }
   }
-
-  try {
-    const response: any = await this.payment.get({
-      id: paymentId,
-    })
-
-    console.log(
-      '📦 [MP] RESPOSTA BRUTA:',
-      JSON.stringify(response, null, 2),
-    )
-
-    /* ============================= */
-    /* 🔥 COMPATIBILIDADE SDK        */
-    /* ============================= */
-
-    const body = response?.body || response
-
-    const externalReference =
-      body?.external_reference ||
-      body?.externalReference ||
-      body?.metadata?.pedido_id ||
-      undefined
-
-    const pagamento = {
-      id: body?.id?.toString(),
-      status: body?.status,
-      transaction_amount: Number(body?.transaction_amount || 0),
-      external_reference: externalReference,
-
-      /* 🔥 RETROCOMPATIBILIDADE */
-      externalReference: externalReference,
-    }
-
-    console.log('✅ [MP] PAGAMENTO NORMALIZADO:', pagamento)
-
-    return pagamento
-  } catch (error: any) {
-    console.error('❌ [MP BUSCAR PAGAMENTO] ERRO COMPLETO:')
-    console.error(error)
-
-    if (error?.cause) {
-      console.error('CAUSE:', error.cause)
-    }
-
-    if (error?.response?.data) {
-      console.error(
-        'MP RESPONSE:',
-        JSON.stringify(error.response.data, null, 2),
-      )
-    }
-
-    throw error
-  }
-}
 }
