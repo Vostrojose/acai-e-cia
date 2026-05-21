@@ -22,6 +22,7 @@ type Pedido = {
   endereco: string | null
   criadoEm: string
   atualizadoEm: string
+  entregueEm: string | null
   itens: ItemPedido[]
 }
 
@@ -95,6 +96,17 @@ export default function Pedidos() {
               <div style={linha}>
                 <strong>Total:</strong> R$ {pedido.total.toFixed(2)}
               </div>
+              <div style={linha}>
+                <strong>Criado:</strong>{' '}
+                {new Date(pedido.criadoEm).toLocaleString('pt-BR')}
+              </div>
+
+              {pedido.entregueEm && (
+                <div style={linha}>
+                  <strong>Entregue:</strong>{' '}
+                  {new Date(pedido.entregueEm).toLocaleString('pt-BR')}
+                </div>
+              )}
 
               {pedido.telefone && (
                 <div style={linha}>
