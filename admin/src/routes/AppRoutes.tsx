@@ -1,5 +1,4 @@
 import { Routes, Route } from 'react-router-dom'
-
 import Dashboard from '../pages/Dashboard'
 import Produtos from '../pages/Produtos'
 import Pedidos from '../pages/Pedidos'
@@ -9,25 +8,14 @@ import Login from '../pages/Login'
 import ChangePassword from '../pages/ChangePassword'
 import Clientes from '../pages/Clientes'
 import DashboardFinanceiro from '../pages/DashboardFinanceiro'
-
-//  NOVA TELA DE ADICIONAIS
 import Adicionais from '../pages/Adicionais'
-
 import PrivateRoute from './PrivateRoute'
-
 import Fiados from '../pages/Fiados'
 
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* ========================= */}
-      {/* LOGIN (PÚBLICO)          */}
-      {/* ========================= */}
       <Route path="/login" element={<Login />} />
-
-      {/* ========================= */}
-      {/* ROTA PRINCIPAL            */}
-      {/* ========================= */}
       <Route
         path="/"
         element={
@@ -36,10 +24,6 @@ export default function AppRoutes() {
           </PrivateRoute>
         }
       />
-
-      {/* ========================= */}
-      {/* COZINHA                   */}
-      {/* ========================= */}
       <Route
         path="/cozinha"
         element={
@@ -48,10 +32,6 @@ export default function AppRoutes() {
           </PrivateRoute>
         }
       />
-
-      {/* ========================= */}
-      {/* PRODUTOS                  */}
-      {/* ========================= */}
       <Route
         path="/produtos"
         element={
@@ -60,8 +40,6 @@ export default function AppRoutes() {
           </PrivateRoute>
         }
       />
-
-      {/*  NOVA ROTA ADICIONAIS */}
       <Route
         path="/produtos/:id/adicionais"
         element={
@@ -70,10 +48,6 @@ export default function AppRoutes() {
           </PrivateRoute>
         }
       />
-
-      {/* ========================= */}
-      {/* PEDIDOS                   */}
-      {/* ========================= */}
       <Route
         path="/pedidos"
         element={
@@ -82,7 +56,6 @@ export default function AppRoutes() {
           </PrivateRoute>
         }
       />
-
       <Route
         path="/fiados"
         element={
@@ -91,10 +64,6 @@ export default function AppRoutes() {
           </PrivateRoute>
         }
       />
-
-      {/* ========================= */}
-      {/* AUDITORIA                 */}
-      {/* ========================= */}
       <Route
         path="/auditoria"
         element={
@@ -103,10 +72,6 @@ export default function AppRoutes() {
           </PrivateRoute>
         }
       />
-
-      {/* ========================= */}
-      {/* DASHBOARD                 */}
-      {/* ========================= */}
       <Route
         path="/dashboard"
         element={

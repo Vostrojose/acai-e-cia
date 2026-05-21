@@ -92,6 +92,7 @@ router.get(
 router.get('/dashboard', pedidoController.dashboard)
 router.get(
   '/entregues/hoje/count',
+  
   asyncHandler(async (req, res) => {
     const agora = new Date()
 
@@ -100,6 +101,50 @@ router.get(
         timeZone: 'America/Sao_Paulo',
       }),
     )
+    router.get(
+  '/entregues/hoje',
+  asyncHandler(async (_req, res) => {
+
+    const agora = new Date()
+
+    const inicioHoje = new Date(
+      agora.toLocaleString('en-US', {
+        timeZone: 'America/Sao_Paulo',
+      }),
+    )
+
+    inicioHoje.setHours(0, 0, 0, 0)
+
+    const pedidos = await prisma.pedido.findMany({
+      where: {
+        status: 'ENTREGUE',
+
+        entregueEm: {
+          gte: inicioHoje,
+        },
+      },
+
+      orderBy: {
+        entregueEm: 'desc',
+      },
+
+      include: {
+        itens: {
+          include: {
+            produto: true,
+            adicionais: true,
+          },
+        },
+      },
+    })
+
+    return res.json({
+      success: true,
+      total: pedidos.length,
+      data: serializeDecimal(pedidos),
+    })
+  }),
+)
 
     inicioHoje.setHours(0, 0, 0, 0)
 
