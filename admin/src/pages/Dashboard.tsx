@@ -45,8 +45,8 @@ export default function Dashboard() {
           0,
         )
 
-        const pedidosAbertos = pedidos.filter(
-          (p: any) => p.status !== 'ENTREGUE',
+        const pedidosAbertos = pedidos.filter((p: any) =>
+          ['RECEBIDO', 'EM_PREPARO', 'PRONTO'].includes(p.status),
         ).length
 
         const contador: any = {}
@@ -108,7 +108,6 @@ export default function Dashboard() {
 
     carregar()
 
-    // 🔥 atualiza automático
     const interval = setInterval(carregar, 10000)
 
     return () => clearInterval(interval)
@@ -153,7 +152,6 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* 🔥 FIADOS */}
       {fiados.length > 0 && (
         <div style={fiadoBox}>
           <h2>💰 Fiados em aberto</h2>
@@ -175,8 +173,6 @@ export default function Dashboard() {
     </div>
   )
 }
-
-/* COMPONENTES */
 
 function CardMenu({ navigate }: any) {
   return (
@@ -208,8 +204,8 @@ function CardMenu({ navigate }: any) {
         <button style={btnMenu} onClick={() => navigate('/clientes')}>
           💳
         </button>
-       <button style={btnMenu} onClick={() => navigate("/financeiro")}>
-        💰
+        <button style={btnMenu} onClick={() => navigate('/financeiro')}>
+          💰
         </button>
       </div>
     </div>
@@ -220,7 +216,7 @@ function Card({ titulo, valor, cor }: any) {
   return (
     <div
       style={{
-        flex: 1, // 🔥 ESSENCIAL
+        flex: 1, 
         background: 'linear-gradient(135deg, #1e1e1e, #2a2a2a)',
         padding: 20,
         borderRadius: 16,
@@ -230,7 +226,6 @@ function Card({ titulo, valor, cor }: any) {
         position: 'relative',
       }}
     >
-      {/* LINHA DE COR */}
       <div
         style={{
           position: 'absolute',
@@ -259,7 +254,6 @@ function Card({ titulo, valor, cor }: any) {
   )
 }
 
-/* ESTILOS */
 
 const grid: React.CSSProperties = {
   display: 'flex',
