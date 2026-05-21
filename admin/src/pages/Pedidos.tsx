@@ -77,62 +77,66 @@ export default function Pedidos() {
 
       {!carregando && !erro && pedidos.length > 0 && (
         <div style={gridPedidos}>
-          {pedidos.map((pedido) => (
-            <div key={pedido.id} style={theme.card}>
-              <div style={linha}>
-                <strong>Pedido:</strong>{' '}
-                {pedido.origem === 'BALCAO'
-                  ? 'Balcão'
-                  : pedido.codigo
-                    ? `#${pedido.codigo}`
-                    : '—'}
-              </div>
-
-              <div style={linha}>
-                <strong>Status:</strong>{' '}
-                <span style={badgeStatus(pedido.status)}>{pedido.status}</span>
-              </div>
-
-              <div style={linha}>
-                <strong>Total:</strong> R$ {pedido.total.toFixed(2)}
-              </div>
-              <div style={linha}>
-                <strong>Criado:</strong>{' '}
-                {new Date(pedido.criadoEm).toLocaleString('pt-BR')}
-              </div>
-
-              {pedido.entregueEm && (
+          {pedidos
+            .filter((pedido) => pedido.status !== 'CANCELADO')
+            .map((pedido) => (
+              <div key={pedido.id} style={theme.card}>
                 <div style={linha}>
-                  <strong>Entregue:</strong>{' '}
-                  {new Date(pedido.entregueEm).toLocaleString('pt-BR')}
+                  <strong>Pedido:</strong>{' '}
+                  {pedido.origem === 'BALCAO'
+                    ? 'Balcão'
+                    : pedido.codigo
+                      ? `#${pedido.codigo}`
+                      : '—'}
                 </div>
-              )}
 
-              {pedido.telefone && (
                 <div style={linha}>
-                  <strong>Telefone:</strong> {pedido.telefone}
+                  <strong>Status:</strong>{' '}
+                  <span style={badgeStatus(pedido.status)}>
+                    {pedido.status}
+                  </span>
                 </div>
-              )}
 
-              {pedido.endereco && (
                 <div style={linha}>
-                  <strong>Endereço:</strong> {pedido.endereco}
+                  <strong>Total:</strong> R$ {pedido.total.toFixed(2)}
                 </div>
-              )}
+                <div style={linha}>
+                  <strong>Criado:</strong>{' '}
+                  {new Date(pedido.criadoEm).toLocaleString('pt-BR')}
+                </div>
 
-              <div style={{ marginTop: 10 }}>
-                <strong>Itens:</strong>
+                {pedido.entregueEm && (
+                  <div style={linha}>
+                    <strong>Entregue:</strong>{' '}
+                    {new Date(pedido.entregueEm).toLocaleString('pt-BR')}
+                  </div>
+                )}
 
-                <ul style={listaItens}>
-                  {pedido.itens.map((item) => (
-                    <li key={item.id}>
-                      {item.quantidade} × R$ {item.precoUnit.toFixed(2)}
-                    </li>
-                  ))}
-                </ul>
+                {pedido.telefone && (
+                  <div style={linha}>
+                    <strong>Telefone:</strong> {pedido.telefone}
+                  </div>
+                )}
+
+                {pedido.endereco && (
+                  <div style={linha}>
+                    <strong>Endereço:</strong> {pedido.endereco}
+                  </div>
+                )}
+
+                <div style={{ marginTop: 10 }}>
+                  <strong>Itens:</strong>
+
+                  <ul style={listaItens}>
+                    {pedido.itens.map((item) => (
+                      <li key={item.id}>
+                        {item.quantidade} × R$ {item.precoUnit.toFixed(2)}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       )}
       <div style={paginacao}>
