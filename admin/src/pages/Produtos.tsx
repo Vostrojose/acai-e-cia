@@ -587,7 +587,7 @@ function CardMenu({ navigate, exigirLogin }: any) {
           📦
         </button>
         <button onClick={() => navigate('/dashboard')} style={btnMenu}>
-          📈
+         📋 
         </button>
         <button onClick={() => navigate('/auditoria')} style={btnMenu}>
           📊
