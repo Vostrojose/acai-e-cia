@@ -4,6 +4,7 @@ import pedidoService from '../services/pedido.service'
 import { StatusPagamento } from '@prisma/client'
 import { getIO } from '../websocket/socket'
 import { serializeDecimal } from '../utils/serializeDecimal'
+import securityLogService from '../services/securityLog.service'
 
 const mpProvider = new MercadoPagoProvider()
 
@@ -65,6 +66,18 @@ export class WebhookController {
         novoStatusPagamento,
         pagamento.id,
       )
+      await securityLogService.registrar({
+        tipo: 'PAGAMENTO',
+        acao: 'WEBHOOK_MP',
+
+        entidade: 'Pedido',
+        entidadeId: externalReference,
+
+        detalhes: {
+          pagamentoId: pagamento.id,
+          status: pagamento.status,
+        },
+      })
 
       // 🔔 Emitir atualização via websocket
       getIO().emit('pedido_atualizado', serializeDecimal(pedidoAtualizado))

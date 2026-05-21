@@ -7,23 +7,30 @@ import { criarPedidoSchema } from '../validators/pedido.schema'
 import { getIO } from '../websocket/socket'
 import { NotificationService } from '../services/notification'
 import { serializeDecimal } from '../utils/serializeDecimal'
+import securityLogService from '../services/securityLog.service'
 
 const LOJA = {
   lat: -23.3292963,
-  lng: -46.7277476
+  lng: -46.7277476,
 }
 
-function calcularDistancia(lat1: number, lng1: number, lat2: number, lng2: number) {
+function calcularDistancia(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number,
+) {
   const R = 6371 // km
 
-  const dLat = (lat2 - lat1) * Math.PI / 180
-  const dLng = (lng2 - lng1) * Math.PI / 180
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLng = ((lng2 - lng1) * Math.PI) / 180
 
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) *
-    Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLng / 2) * Math.sin(dLng / 2)
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2)
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 
@@ -31,9 +38,7 @@ function calcularDistancia(lat1: number, lng1: number, lat2: number, lng2: numbe
 }
 
 class PedidoController {
-
   criar: RequestHandler = asyncHandler(async (req, res) => {
-
     const parsed = criarPedidoSchema.parse(req.body)
 
     /* ============================= */
@@ -49,7 +54,7 @@ class PedidoController {
         LOJA.lat,
         LOJA.lng,
         coordenadas.lat,
-        coordenadas.lng
+        coordenadas.lng,
       )
 
       console.log('📏 DISTÂNCIA CLIENTE:', distancia)
@@ -65,7 +70,7 @@ class PedidoController {
 
     const pedidoCompleto = await pedidoService.criarPedido({
       ...parsed,
-      endereco: parsed.endereco ?? ''
+      endereco: parsed.endereco ?? '',
     })
 
     // ❌ continua sem socket (correto)
@@ -74,7 +79,7 @@ class PedidoController {
     return res.status(201).json({
       success: true,
       data: serializeDecimal(pedidoCompleto),
-      foraDaArea // 🔥 NOVO (não quebra nada existente)
+      foraDaArea, // 🔥 NOVO (não quebra nada existente)
     })
   })
 
@@ -107,11 +112,31 @@ class PedidoController {
   })
 
   atualizarStatus: RequestHandler = asyncHandler(async (req, res) => {
-
     const { id } = req.params
     const data = atualizarStatusSchema.parse(req.body)
 
     await pedidoService.atualizarStatus(id, data.status as StatusPedido)
+    if (data.status === 'CANCELADO') {
+      await securityLogService.registrar({
+        tipo: 'PEDIDO',
+        acao: 'CANCELAMENTO',
+
+        entidade: 'Pedido',
+        entidadeId: id,
+      })
+    }
+
+    await securityLogService.registrar({
+      tipo: 'PEDIDO',
+      acao: 'ALTEROU_STATUS',
+
+      entidade: 'Pedido',
+      entidadeId: id,
+
+      detalhes: {
+        status: data.status,
+      },
+    })
 
     const pedidoCompleto = await pedidoService.buscarPorId(id)
     const serializado = serializeDecimal(pedidoCompleto)
@@ -122,11 +147,14 @@ class PedidoController {
       console.warn('WebSocket não iniciado')
     }
 
-    if (pedidoCompleto?.status === StatusPedido.PRONTO && pedidoCompleto.telefone) {
+    if (
+      pedidoCompleto?.status === StatusPedido.PRONTO &&
+      pedidoCompleto.telefone
+    ) {
       try {
         await NotificationService.enviarMensagem(
           pedidoCompleto.telefone,
-          ' Seu pedido está PRONTO!'
+          ' Seu pedido está PRONTO!',
         )
       } catch {
         console.warn('Erro ao enviar notificação')

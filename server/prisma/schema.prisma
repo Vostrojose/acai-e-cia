@@ -53,12 +53,12 @@ model Pedido {
 
   origem            OrigemPedido?
 
-  // 🔥 FIADO / CRÉDITO
+  //  FIADO / CRÉDITO
   clienteNome       String?
   formaPagamentoBalcao FormaPagamentoBalcao?
   pago              Boolean          @default(true)
 
-  // 🔥 RELAÇÃO COM CLIENTE (CORRETO)
+  //  RELAÇÃO COM CLIENTE (CORRETO)
   clienteId         String?
   cliente           Cliente? @relation(fields: [clienteId], references: [id])
 
@@ -111,7 +111,7 @@ model ItemPedidoAdicional {
   nome          String
   preco         Decimal @db.Decimal(10, 2)
 
-  quantidade    Int      @default(1) // 🔥 NOVO
+  quantidade    Int      @default(1) //  NOVO
 
   itemPedidoId  String
   itemPedido    ItemPedido @relation(fields: [itemPedidoId], references: [id], onDelete: Cascade)
@@ -204,5 +204,25 @@ model Cliente {
   atualizadoEm DateTime @updatedAt
 
   pedidos   Pedido[]
+}
+
+model SecurityLog {
+  id          String   @id @default(uuid())
+
+  tipo        String
+  acao        String
+
+  usuario     String?
+
+  entidade    String?
+  entidadeId  String?
+
+  detalhes    Json?
+
+  criadoEm    DateTime @default(now())
+
+  @@index([tipo])
+  @@index([acao])
+  @@index([criadoEm])
 }
 
