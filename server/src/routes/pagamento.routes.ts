@@ -5,6 +5,7 @@ import PedidoService from '../services/pedido.service'
 import { StatusPedido } from '@prisma/client'
 import { AppError } from '../utils/AppError'
 import { getIO } from '../websocket/socket'
+import prisma from '../lib/prisma'
 
 const router = Router()
 
@@ -93,11 +94,15 @@ router.post('/checkout', async (req, res) => {
 /* CONCILIAÇÃO PAGAMENTO         */
 /* ============================= */
 
-router.get('/conciliacao/:pedidoId', async (req, res) => {
+router.get('/conciliacao/:codigo', async (req, res) => {
   try {
-    const { pedidoId } = req.params
+   const { codigo } = req.params
 
-    const pedido = await PedidoService.buscarPorId(pedidoId)
+    const pedido = await prisma.pedido.findFirst({
+  where: {
+    codigo: Number(codigo),
+  },
+})
 
     if (!pedido) {
       throw new AppError('Pedido não encontrado.', 404)

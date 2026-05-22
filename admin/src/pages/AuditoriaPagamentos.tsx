@@ -6,7 +6,7 @@ import { theme } from '../assets/styles/adminTheme'
 export default function AuditoriaPagamentos() {
   const navigate = useNavigate()
 
-  const [pedidoId, setPedidoId] = useState('')
+  const [codigoPedido, setCodigoPedido] = useState('')
   const [dados, setDados] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
@@ -16,32 +16,22 @@ export default function AuditoriaPagamentos() {
       setErro('')
       setLoading(true)
 
-      const response = await api.get(
-        `/pagamento/conciliacao/${pedidoId}`,
-      )
+      const response = await api.get(`/pagamento/conciliacao/${codigoPedido}`)
 
       setDados(response.data)
-
     } catch (err: any) {
-
       console.error(err)
 
-      setErro(
-        err?.response?.data?.message ||
-        'Erro ao consultar pagamento.',
-      )
+      setErro(err?.response?.data?.message || 'Erro ao consultar pagamento.')
 
       setDados(null)
-
     } finally {
-
       setLoading(false)
     }
   }
 
   return (
     <div style={theme.page}>
-
       <CardMenu navigate={navigate} />
 
       <h1 style={{ ...theme.title, textAlign: 'center' }}>
@@ -49,37 +39,23 @@ export default function AuditoriaPagamentos() {
       </h1>
 
       <div style={box}>
-
         <input
           style={input}
-          placeholder="UUID do pedido"
-          value={pedidoId}
-          onChange={(e) => setPedidoId(e.target.value)}
+          placeholder="Número do pedido"
+          value={codigoPedido}
+          onChange={(e) => setCodigoPedido(e.target.value)}
         />
 
-        <button
-          style={botao}
-          onClick={consultar}
-          disabled={loading}
-        >
+        <button style={botao} onClick={consultar} disabled={loading}>
           {loading ? 'Consultando...' : 'Consultar'}
         </button>
-
       </div>
 
-      {erro && (
-        <div style={erroBox}>
-          {erro}
-        </div>
-      )}
+      {erro && <div style={erroBox}>{erro}</div>}
 
       {dados && (
-
         <div style={resultadoBox}>
-
-          <h2>
-            Pedido #{dados.pedido.codigo}
-          </h2>
+          <h2>Pedido #{dados.pedido.codigo}</h2>
 
           <div style={linha}>
             <strong>Status Pedido:</strong>
@@ -98,17 +74,13 @@ export default function AuditoriaPagamentos() {
 
           <div style={linha}>
             <strong>Total Banco:</strong>
-            <span>
-              R$ {Number(dados.pedido.total).toFixed(2)}
-            </span>
+            <span>R$ {Number(dados.pedido.total).toFixed(2)}</span>
           </div>
 
           <div style={linha}>
             <strong>Total Mercado Pago:</strong>
             <span>
-              R$ {Number(
-                dados.mercadoPago?.transaction_amount || 0,
-              ).toFixed(2)}
+              R$ {Number(dados.mercadoPago?.transaction_amount || 0).toFixed(2)}
             </span>
           </div>
 
@@ -120,35 +92,25 @@ export default function AuditoriaPagamentos() {
           <div
             style={{
               ...statusBox,
-              background:
-                dados.analise.divergenciaStatus
-                  ? '#ff5252'
-                  : '#4caf50',
+              background: dados.analise.divergenciaStatus
+                ? '#ff5252'
+                : '#4caf50',
             }}
           >
-            Divergência Status:
-            {' '}
-            {dados.analise.divergenciaStatus
-              ? 'SIM'
-              : 'NÃO'}
+            Divergência Status:{' '}
+            {dados.analise.divergenciaStatus ? 'SIM' : 'NÃO'}
           </div>
 
           <div
             style={{
               ...statusBox,
-              background:
-                dados.analise.divergenciaValor
-                  ? '#ff5252'
-                  : '#4caf50',
+              background: dados.analise.divergenciaValor
+                ? '#ff5252'
+                : '#4caf50',
             }}
           >
-            Divergência Valor:
-            {' '}
-            {dados.analise.divergenciaValor
-              ? 'SIM'
-              : 'NÃO'}
+            Divergência Valor: {dados.analise.divergenciaValor ? 'SIM' : 'NÃO'}
           </div>
-
         </div>
       )}
     </div>
@@ -174,31 +136,19 @@ function CardMenu({ navigate }: any) {
           flexWrap: 'wrap',
         }}
       >
-        <button
-          style={btnMenu}
-          onClick={() => navigate('/cozinha')}
-        >
+        <button style={btnMenu} onClick={() => navigate('/cozinha')}>
           👨‍🍳
         </button>
 
-        <button
-          style={btnMenu}
-          onClick={() => navigate('/pedidos')}
-        >
+        <button style={btnMenu} onClick={() => navigate('/pedidos')}>
           📦
         </button>
 
-        <button
-          style={btnMenu}
-          onClick={() => navigate('/produtos')}
-        >
+        <button style={btnMenu} onClick={() => navigate('/produtos')}>
           🛒
         </button>
 
-        <button
-          style={btnMenu}
-          onClick={() => navigate('/dashboard')}
-        >
+        <button style={btnMenu} onClick={() => navigate('/dashboard')}>
           📊
         </button>
 
