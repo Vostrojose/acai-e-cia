@@ -3,8 +3,8 @@ import { io } from 'socket.io-client'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { theme } from '../assets/styles/adminTheme'
-
 import BalcaoModal from '../components/BalcaoModal'
+import ScreenSaver from '../components/ScreenSaver'
 
 export default function Cozinha() {
   const [pedidos, setPedidos] = useState<any[]>([])
@@ -39,7 +39,53 @@ export default function Cozinha() {
     { x: -1, y: 1 },
     { x: -1, y: 0 },
   ]
+  const [screenSaver, setScreenSaver] = useState(false)
   const [shiftIndex, setShiftIndex] = useState(0)
+
+  useEffect(() => {
+    let timeout: any
+
+    function resetScreenSaver() {
+      setScreenSaver(false)
+
+      clearTimeout(timeout)
+
+      timeout = setTimeout(
+        () => {
+          /* ============================= */
+          /* NÃO ATIVA SE EXISTIR PEDIDOS */
+          /* ============================= */
+
+          if (pedidos.length > 0) {
+            console.log('📦 Existem pedidos na tela → proteção cancelada')
+
+            return
+          }
+
+          console.log('🖥️ Ativando proteção de tela')
+
+          setScreenSaver(true)
+        },
+        5 * 60 * 1000,
+      )
+    }
+
+    const eventos = ['mousemove', 'click', 'keydown', 'touchstart', 'scroll']
+
+    eventos.forEach((evento) => {
+      window.addEventListener(evento, resetScreenSaver)
+    })
+
+    resetScreenSaver()
+
+    return () => {
+      eventos.forEach((evento) => {
+        window.removeEventListener(evento, resetScreenSaver)
+      })
+
+      clearTimeout(timeout)
+    }
+  }, [pedidos])
 
   useEffect(() => {
     let wakeLock: any = null
@@ -97,6 +143,8 @@ export default function Cozinha() {
     inicializar()
 
     socket.on('novo_pedido', async () => {
+      setScreenSaver(false)
+
       tocarSom()
 
       await carregarPedidos()
@@ -218,6 +266,7 @@ export default function Cozinha() {
           </div>
         </div>
       )}
+      {screenSaver && <ScreenSaver />}
 
       {abrirBalcao && (
         <BalcaoModal
@@ -451,7 +500,7 @@ function CardMenu({ navigate, onBalcao }: any) {
           🛒
         </button>
         <button onClick={() => navigate('/dashboard')} style={btnMenu}>
-          📋 
+          📋
         </button>
         <button onClick={() => navigate('/auditoria')} style={btnMenu}>
           📊
