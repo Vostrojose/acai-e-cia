@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 export default function ScreenSaver() {
 
   const [hora, setHora] = useState(new Date())
+
   const [offset, setOffset] = useState({
     x: 0,
     y: 0,
@@ -10,17 +11,28 @@ export default function ScreenSaver() {
 
   useEffect(() => {
 
-    const timer = setInterval(() => {
+    const relogio = setInterval(() => {
+
       setHora(new Date())
 
+    }, 1000)
+
+    return () => clearInterval(relogio)
+
+  }, [])
+
+  useEffect(() => {
+
+    const movimento = setInterval(() => {
+
       setOffset({
-        x: Math.random() * 40 - 20,
-        y: Math.random() * 40 - 20,
+        x: Math.random() * 80 - 40,
+        y: Math.random() * 80 - 40,
       })
 
-    }, 60000)
+    }, 30000)
 
-    return () => clearInterval(timer)
+    return () => clearInterval(movimento)
 
   }, [])
 
@@ -29,11 +41,18 @@ export default function ScreenSaver() {
     {
       hour: '2-digit',
       minute: '2-digit',
+      second: '2-digit',
     },
   )
 
   const dataFormatada = hora.toLocaleDateString(
     'pt-BR',
+    {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    },
   )
 
   return (
@@ -42,7 +61,8 @@ export default function ScreenSaver() {
         position: 'fixed',
         inset: 0,
 
-        background: '#000',
+        background:
+          'radial-gradient(circle at center, #1a1a1a 0%, #000 70%)',
 
         zIndex: 999999,
 
@@ -53,6 +73,8 @@ export default function ScreenSaver() {
         overflow: 'hidden',
 
         pointerEvents: 'none',
+
+        transition: 'all 1s ease',
       }}
     >
 
@@ -60,7 +82,7 @@ export default function ScreenSaver() {
         style={{
           transform: `translate(${offset.x}px, ${offset.y}px)`,
 
-          transition: 'transform 60s linear',
+          transition: 'transform 30s linear',
 
           display: 'flex',
           flexDirection: 'column',
@@ -74,17 +96,30 @@ export default function ScreenSaver() {
           src="/logo.png"
           alt="Logo"
           style={{
-            width: 180,
-            opacity: 0.9,
-            marginBottom: 30,
+            width: 220,
+
+            opacity: 0.92,
+
+            marginBottom: 40,
+
+            animation:
+              'pulseLogo 6s ease-in-out infinite',
+
+            filter:
+              'drop-shadow(0 0 20px rgba(255,255,255,0.15))',
           }}
         />
 
         <div
           style={{
-            fontSize: 110,
+            fontSize: 120,
+
             fontWeight: 'bold',
-            letterSpacing: 4,
+
+            letterSpacing: 6,
+
+            textShadow:
+              '0 0 20px rgba(255,255,255,0.15)',
           }}
         >
           {horaFormatada}
@@ -92,15 +127,56 @@ export default function ScreenSaver() {
 
         <div
           style={{
-            marginTop: 10,
+            marginTop: 18,
+
             fontSize: 28,
-            opacity: 0.7,
+
+            opacity: 0.72,
+
+            textTransform: 'capitalize',
           }}
         >
           {dataFormatada}
         </div>
 
+        <div
+          style={{
+            marginTop: 30,
+
+            fontSize: 14,
+
+            opacity: 0.4,
+
+            letterSpacing: 3,
+          }}
+        >
+          SISTEMA OPERACIONAL • AÇAÍ & COMPANY
+        </div>
+
       </div>
+
+      <style>
+        {`
+          @keyframes pulseLogo {
+
+            0% {
+              transform: scale(1);
+              opacity: 0.88;
+            }
+
+            50% {
+              transform: scale(1.04);
+              opacity: 1;
+            }
+
+            100% {
+              transform: scale(1);
+              opacity: 0.88;
+            }
+          }
+        `}
+      </style>
+
     </div>
   )
 }
