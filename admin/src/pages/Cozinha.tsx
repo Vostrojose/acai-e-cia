@@ -68,11 +68,6 @@ export default function Cozinha() {
 
             return
           }
-          {
-            console.log('📦 Existem pedidos na tela → proteção cancelada')
-
-            return
-          }
 
           console.log('🖥️ Ativando proteção de tela')
 
