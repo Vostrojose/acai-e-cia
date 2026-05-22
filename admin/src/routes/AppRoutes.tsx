@@ -11,6 +11,7 @@ import DashboardFinanceiro from '../pages/DashboardFinanceiro'
 import Adicionais from '../pages/Adicionais'
 import PrivateRoute from './PrivateRoute'
 import Fiados from '../pages/Fiados'
+import AuditoriaPagamentos from '../pages/AuditoriaPagamentos'
 
 export default function AppRoutes() {
   return (
@@ -95,6 +96,14 @@ export default function AppRoutes() {
         element={
           <PrivateRoute>
             <DashboardFinanceiro />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/auditoria-pagamentos"
+        element={
+          <PrivateRoute>
+            <AuditoriaPagamentos />
           </PrivateRoute>
         }
       />

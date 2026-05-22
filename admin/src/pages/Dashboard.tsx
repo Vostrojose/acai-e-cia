@@ -207,6 +207,12 @@ function CardMenu({ navigate }: any) {
         <button style={btnMenu} onClick={() => navigate('/financeiro')}>
           💰
         </button>
+        <button
+          style={btnMenu}
+          onClick={() => navigate('/auditoria-pagamentos')}
+        >
+          🧾
+        </button>
       </div>
     </div>
   )
@@ -216,7 +222,7 @@ function Card({ titulo, valor, cor }: any) {
   return (
     <div
       style={{
-        flex: 1, 
+        flex: 1,
         background: 'linear-gradient(135deg, #1e1e1e, #2a2a2a)',
         padding: 20,
         borderRadius: 16,
@@ -253,7 +259,6 @@ function Card({ titulo, valor, cor }: any) {
     </div>
   )
 }
-
 
 const grid: React.CSSProperties = {
   display: 'flex',

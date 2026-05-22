@@ -89,6 +89,97 @@ router.post('/checkout', async (req, res) => {
     })
   }
 })
+/* ============================= */
+/* CONCILIAÇÃO PAGAMENTO         */
+/* ============================= */
+
+router.get('/conciliacao/:pedidoId', async (req, res) => {
+  try {
+    const { pedidoId } = req.params
+
+    const pedido = await PedidoService.buscarPorId(pedidoId)
+
+    if (!pedido) {
+      throw new AppError('Pedido não encontrado.', 404)
+    }
+
+    if (!pedido.pagamentoId) {
+      return res.status(200).json({
+        success: true,
+
+        pedido: {
+          id: pedido.id,
+          status: pedido.status,
+          statusPagamento: pedido.statusPagamento,
+          total: pedido.total,
+        },
+
+        mercadoPago: null,
+
+        analise: {
+          possuiPagamentoMP: false,
+        },
+      })
+    }
+
+    const pagamentoMP = await PaymentProvider.buscarPagamento(
+      pedido.pagamentoId,
+    )
+
+    const normalizarStatus = (status?: string) => {
+      switch (status?.toLowerCase()) {
+        case 'approved':
+        case 'aprovado':
+          return 'APROVADO'
+
+        case 'pending':
+        case 'pendente':
+          return 'PENDENTE'
+
+        case 'rejected':
+        case 'recusado':
+          return 'RECUSADO'
+
+        default:
+          return status
+      }
+    }
+
+    const divergenciaStatus =
+      normalizarStatus(pedido.statusPagamento?.toString()) !==
+      normalizarStatus(pagamentoMP.status)
+
+    const divergenciaValor =
+      Number(pedido.total) !== Number(pagamentoMP.transaction_amount)
+
+    return res.json({
+      success: true,
+
+      pedido: {
+        id: pedido.id,
+        codigo: pedido.codigo,
+        status: pedido.status,
+        statusPagamento: pedido.statusPagamento,
+        total: pedido.total,
+        pagamentoId: pedido.pagamentoId,
+      },
+
+      mercadoPago: pagamentoMP,
+
+      analise: {
+        divergenciaStatus,
+        divergenciaValor,
+      },
+    })
+  } catch (error: any) {
+    console.error('ERRO CONCILIAÇÃO:', error)
+
+    return res.status(500).json({
+      success: false,
+      message: error?.message || 'Erro ao consultar conciliação.',
+    })
+  }
+})
 
 /* ============================= */
 /* WEBHOOK MERCADO PAGO          */
