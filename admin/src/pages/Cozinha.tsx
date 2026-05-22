@@ -56,7 +56,19 @@ export default function Cozinha() {
           /* NÃO ATIVA SE EXISTIR PEDIDOS */
           /* ============================= */
 
-          if (pedidos.length > 0) {
+          const possuiPedidosAtivos = pedidos.some(
+            (pedido) =>
+              pedido.status === 'RECEBIDO' ||
+              pedido.status === 'EM_PREPARO' ||
+              pedido.status === 'PRONTO',
+          )
+
+          if (possuiPedidosAtivos) {
+            console.log('🍧 Existem pedidos ativos → proteção cancelada')
+
+            return
+          }
+          {
             console.log('📦 Existem pedidos na tela → proteção cancelada')
 
             return
