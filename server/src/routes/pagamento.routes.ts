@@ -96,13 +96,13 @@ router.post('/checkout', async (req, res) => {
 
 router.get('/conciliacao/:codigo', async (req, res) => {
   try {
-   const { codigo } = req.params
+    const { codigo } = req.params
 
     const pedido = await prisma.pedido.findFirst({
-  where: {
-    codigo: Number(codigo),
-  },
-})
+      where: {
+        codigo: Number(codigo),
+      },
+    })
 
     if (!pedido) {
       throw new AppError('Pedido não encontrado.', 404)
@@ -159,14 +159,13 @@ router.get('/conciliacao/:codigo', async (req, res) => {
 
     return res.json({
       success: true,
-
       pedido: {
         id: pedido.id,
         codigo: pedido.codigo,
         status: pedido.status,
         statusPagamento: pedido.statusPagamento,
         total: pedido.total,
-        pagamentoId: pedido.pagamentoId,
+        criadoEm: pedido.criadoEm,
       },
 
       mercadoPago: pagamentoMP,

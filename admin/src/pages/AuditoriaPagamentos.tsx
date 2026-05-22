@@ -85,8 +85,11 @@ export default function AuditoriaPagamentos() {
           </div>
 
           <div style={linha}>
-            <strong>Payment ID:</strong>
-            <span>{dados.pedido.pagamentoId}</span>
+            <strong>Data Pedido:</strong>
+
+            <span>
+              {new Date(dados.pedido.criadoEm).toLocaleString('pt-BR')}
+            </span>
           </div>
 
           <div
