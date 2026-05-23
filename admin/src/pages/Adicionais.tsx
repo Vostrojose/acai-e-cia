@@ -31,7 +31,6 @@ export default function Adicionais() {
 
       const res = await api.get(`/produtos/${id}`)
       setAdicionais(res.data.data.adicionais || [])
-
     } catch (err: any) {
       console.error(err)
       alert('Erro ao carregar adicionais')
@@ -58,14 +57,13 @@ export default function Adicionais() {
       await api.post('/adicionais', {
         nome,
         preco,
-        produtoId: id
+        produtoId: id,
       })
 
       setNome('')
       setPreco(0)
 
       await carregar()
-
     } finally {
       setSalvando(false)
     }
@@ -85,7 +83,7 @@ export default function Adicionais() {
 
   async function salvarPreco(adicionalId: string) {
     await api.put(`/adicionais/${adicionalId}`, {
-      preco: novoPreco
+      preco: novoPreco,
     })
 
     setEditando(null)
@@ -94,7 +92,7 @@ export default function Adicionais() {
 
   async function toggleAtivo(a: Adicional) {
     await api.patch(`/adicionais/${a.id}/status`, {
-      ativo: !a.ativo
+      ativo: !a.ativo,
     })
 
     await carregar()
@@ -102,12 +100,16 @@ export default function Adicionais() {
 
   return (
     <div style={theme.page}>
-
       <button
         onClick={() => navigate('/produtos')}
-        style={{ ...theme.button, ...theme.buttonPrimary, marginBottom: 20 }}
+        style={{
+          ...theme.button,
+          ...theme.buttonSuccess,
+          marginBottom: 20,
+          marginLeft: 10,
+        }}
       >
-        ← Voltar
+        ✅ Salvar 
       </button>
 
       <h1 style={{ ...theme.title, textAlign: 'center' }}>
@@ -148,7 +150,6 @@ export default function Adicionais() {
       <div style={grid}>
         {adicionais.map((a) => (
           <div key={a.id} style={theme.card}>
-
             <strong style={{ fontSize: 18 }}>{a.nome}</strong>
 
             {editando === a.id ? (
@@ -168,9 +169,7 @@ export default function Adicionais() {
                 </button>
               </>
             ) : (
-              <p style={theme.textMuted}>
-                💰 R$ {Number(a.preco).toFixed(2)}
-              </p>
+              <p style={theme.textMuted}>💰 R$ {Number(a.preco).toFixed(2)}</p>
             )}
 
             <div>
@@ -198,12 +197,15 @@ export default function Adicionais() {
 
               <button
                 onClick={() => remover(a.id)}
-                style={{ ...theme.button, background: '#e53935', color: '#fff' }}
+                style={{
+                  ...theme.button,
+                  background: '#e53935',
+                  color: '#fff',
+                }}
               >
                 🗑 Remover
               </button>
             </div>
-
           </div>
         ))}
       </div>
@@ -218,7 +220,7 @@ export default function Adicionais() {
 const grid = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-  gap: 20
+  gap: 20,
 }
 
 const input = {
@@ -227,24 +229,24 @@ const input = {
   marginBottom: 10,
   borderRadius: 8,
   border: 'none',
-  fontSize: 16
+  fontSize: 16,
 }
 
 const acoes = {
   display: 'flex',
   flexDirection: 'column' as const,
   gap: 8,
-  marginTop: 10
+  marginTop: 10,
 }
 
 const badgeVerde = {
   background: '#43a047',
   padding: '4px 10px',
-  borderRadius: 6
+  borderRadius: 6,
 }
 
 const badgeCinza = {
   background: '#777',
   padding: '4px 10px',
-  borderRadius: 6
+  borderRadius: 6,
 }
