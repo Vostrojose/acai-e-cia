@@ -92,7 +92,7 @@ export default function Cozinha() {
 
       clearTimeout(timeout)
     }
-  }, [pedidos])
+  }, [])
 
   useEffect(() => {
     let wakeLock: any = null
@@ -199,6 +199,7 @@ export default function Cozinha() {
   const entregues = ordenar(
     pedidos.filter((p) => p.status === 'ENTREGUE' && isHoje(p.entregueEm)),
   )
+  console.log('ENTREGUES:', entregues)
   const currentShift = shiftPositions[shiftIndex]
 
   return (
@@ -246,7 +247,7 @@ export default function Cozinha() {
         >
           <CardStatus
             titulo="📦 Entregues Hoje"
-            valor={totalEntreguesHoje}
+            valor={entregues.length}
             cor="#757575"
           />
         </div>
@@ -266,9 +267,10 @@ export default function Cozinha() {
             {entregues.length === 0 && (
               <p style={theme.textMuted}>Nenhum pedido entregue hoje</p>
             )}
-
             {entregues.map((pedido: any) => (
-              <PedidoCard key={pedido.id} pedido={pedido} />
+              <div key={pedido.id} style={{ color: '#fff' }}>
+                Pedido #{pedido.codigo}
+              </div>
             ))}
           </div>
         </div>
