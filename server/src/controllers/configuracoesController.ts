@@ -1,10 +1,7 @@
 import { Request, Response } from 'express'
 import prisma from '../lib/prisma'
 
-export async function obterBannerAcompanhamento(
-  req: Request,
-  res: Response,
-) {
+export async function obterBannerAcompanhamento(req: Request, res: Response) {
   try {
     const configuracao = await prisma.configuracao.findUnique({
       where: {
@@ -23,8 +20,10 @@ export async function obterBannerAcompanhamento(
   } catch (err) {
     console.error(err)
 
+    console.error('ERRO BANNER:', err)
+
     return res.status(500).json({
-      erro: 'Erro ao carregar banner',
+      erro: String(err),
     })
   }
 }
@@ -54,8 +53,10 @@ export async function atualizarBannerAcompanhamento(
   } catch (err) {
     console.error(err)
 
+    console.error('ERRO UPDATE BANNER:', err)
+
     return res.status(500).json({
-      erro: 'Erro ao atualizar banner',
+      erro: String(err),
     })
   }
 }
