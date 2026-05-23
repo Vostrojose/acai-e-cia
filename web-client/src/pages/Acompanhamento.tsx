@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { io } from 'socket.io-client'
 import { useParams } from 'react-router-dom'
 import api from '../services/api'
@@ -11,8 +11,27 @@ export default function Acompanhamento() {
   const { id } = useParams()
   const [pedido, setPedido] = useState<any>(null)
   const [status, setStatus] = useState<string | null>(null)
-
+  const [banner, setBanner] = useState<{
+    titulo: string
+    itens: string[]
+  }>({
+    titulo: '',
+    itens: [],
+  })
+  const carregandoRef = useRef(false)
   const { limparCarrinho } = useCart()
+  async function carregarBanner() {
+    try {
+      const response = await api.get('/configuracoes/banner-acompanhamento')
+
+      setBanner({
+        titulo: response.data?.titulo || '',
+        itens: Array.isArray(response.data?.itens) ? response.data.itens : [],
+      })
+    } catch (error) {
+      console.error('Erro ao carregar banner:', error)
+    }
+  }
 
   useEffect(() => {
     if (id) {
@@ -26,23 +45,16 @@ export default function Acompanhamento() {
 
   useEffect(() => {
     if (!id) return
-    let carregando = false
 
     async function loadPedido() {
-      if (carregando) return
+      if (carregandoRef.current) return
 
-      carregando = true
+      carregandoRef.current = true
       try {
         const response = await api.get(`/pedidos/${id}`)
         const pedidoData = response.data.data
 
         if (!pedidoData) {
-          localStorage.removeItem('pedidoId')
-
-          localStorage.removeItem('pedidoStatus')
-
-          window.location.href = '/m/1'
-
           return
         }
 
@@ -50,22 +62,22 @@ export default function Acompanhamento() {
         setStatus(pedidoData.status)
       } catch (error) {
         console.error('Erro ao carregar pedido:', error)
-
-        localStorage.removeItem('pedidoId')
-
-        localStorage.removeItem('pedidoStatus')
-
-        window.location.href = '/m/1'
       } finally {
-        carregando = false
+        carregandoRef.current = false
       }
     }
 
     loadPedido()
+    if (document.visibilityState === 'visible') {
+      carregarBanner()
+    }
     const intervalo = setInterval(() => {
       loadPedido()
-    }, 5000)
 
+      if (document.visibilityState === 'visible') {
+        carregarBanner()
+      }
+    }, 5000)
     const socket = io(socketUrl, {
       transports: ['websocket'],
       reconnection: true,
@@ -100,6 +112,7 @@ export default function Acompanhamento() {
       socket.disconnect()
     }
   }, [id])
+
   useEffect(() => {
     if (status) {
       localStorage.setItem('pedidoStatus', status)
@@ -233,12 +246,12 @@ export default function Acompanhamento() {
         <div className="banner-card">
           <strong>Aproveite!</strong>
 
-          <p>Confira nossas bebidas geladas no balcão 😋</p>
+          <p>{banner.titulo}</p>
+
           <ul>
-            <li>🥤 Refrigerante lata — R$ 5,00</li>
-            <li>🧃 Suco natural — R$ 7,00</li>
-            <li>🍺 Cerveja long neck — R$ 8,00</li>
-            <li>🥛 Água de coco — R$ 6,00</li>
+            {banner.itens.map((item, index) => (
+              <li key={index}>{item}</li>
+            ))}
           </ul>
         </div>
       </div>
