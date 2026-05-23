@@ -12,6 +12,7 @@ import Adicionais from '../pages/Adicionais'
 import PrivateRoute from './PrivateRoute'
 import Fiados from '../pages/Fiados'
 import AuditoriaPagamentos from '../pages/AuditoriaPagamentos'
+import BannerAcompanhamento from '../pages/BannerAcompanhamento'
 
 export default function AppRoutes() {
   return (
@@ -104,6 +105,14 @@ export default function AppRoutes() {
         element={
           <PrivateRoute>
             <AuditoriaPagamentos />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/banner-acompanhamento"
+        element={
+          <PrivateRoute>
+            <BannerAcompanhamento />
           </PrivateRoute>
         }
       />

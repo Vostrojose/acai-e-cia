@@ -75,10 +75,6 @@ export default function Cozinha() {
 
       timeout = setTimeout(
         () => {
-          /* ============================= */
-          /* NÃO ATIVA SE EXISTIR PEDIDOS */
-          /* ============================= */
-
           const possuiPedidosAtivos = pedidosRef.current.some(
             (pedido) =>
               pedido.status === 'RECEBIDO' ||
@@ -283,7 +279,7 @@ export default function Cozinha() {
           onClick={() => setMostrarEntregues(!mostrarEntregues)}
           style={{
             flex: 1,
-            display: 'flex', // 🔥 IMPORTANTE
+            display: 'flex',
           }}
         >
           <CardStatus
@@ -325,11 +321,6 @@ export default function Cozinha() {
     </div>
   )
 }
-
-/* ============================= */
-/* 🔥 CARD CLIMA                 */
-/* ============================= */
-
 function CardClima() {
   const [status, setStatus] = useState<'ok' | 'alerta' | 'critico'>('ok')
   const [texto, setTexto] = useState('Carregando clima...')
@@ -354,7 +345,7 @@ function CardClima() {
 
         if (chuva > 5) {
           setStatus('critico')
-          setTexto('🚨 CHUVA FORTE')
+          setTexto('🚨 Atenção: chuva forte prevista\n📞 Defesa Civil Franco da Rocha: (11) 4800-6658')
         } else if (chuva > 0) {
           setStatus('alerta')
           setTexto('🌧️ Possível chuva')

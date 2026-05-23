@@ -225,4 +225,10 @@ model SecurityLog {
   @@index([acao])
   @@index([criadoEm])
 }
+model Configuracao {
+  chave        String   @id
+  valor        Json
+  atualizadoEm DateTime @default(now()) @updatedAt
 
+  @@map("configuracoes")
+}

@@ -19,6 +19,7 @@ import auditoriaRoutes from "./routes/auditoria.routes";
 import balcaoRoutes from "./routes/balcao.routes";
 import clienteRoutes from "./routes/cliente.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
+import configuracoesRoutes from './routes/configuracoes'
 
 const app = express();
 
@@ -49,6 +50,7 @@ app.use(httpLogger);
 /* =================================
    ROTAS PRINCIPAIS
 ================================= */
+app.use('/configuracoes', configuracoesRoutes)
 
 app.use("/api/auth", authRoutes);
 app.use("/api/pedidos", pedidoRoutes);
