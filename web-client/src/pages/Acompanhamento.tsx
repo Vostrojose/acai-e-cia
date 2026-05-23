@@ -26,8 +26,12 @@ export default function Acompanhamento() {
 
   useEffect(() => {
     if (!id) return
+    let carregando = false
 
     async function loadPedido() {
+      if (carregando) return
+
+      carregando = true
       try {
         const response = await api.get(`/pedidos/${id}`)
         const pedidoData = response.data.data
@@ -52,58 +56,59 @@ export default function Acompanhamento() {
         localStorage.removeItem('pedidoStatus')
 
         window.location.href = '/m/1'
+      } finally {
+        carregando = false
       }
     }
 
     loadPedido()
+    const intervalo = setInterval(() => {
+      loadPedido()
+    }, 5000)
 
     const socket = io(socketUrl, {
       transports: ['websocket'],
       reconnection: true,
     })
 
-    socket.on('pedido_atualizado', (pedidoAtualizado: any) => {
+    const handlePedidoAtualizado = (pedidoAtualizado: any) => {
       if (String(pedidoAtualizado.id) === String(id)) {
+        setPedido((prev: any) => ({
+          ...prev,
+          ...pedidoAtualizado,
+        }))
+
         setStatus(pedidoAtualizado.status)
+
+        if (
+          pedidoAtualizado.status === 'PRONTO' &&
+          'vibrate' in navigator &&
+          document.visibilityState !== 'visible'
+        ) {
+          navigator.vibrate([200, 100, 200])
+        }
       }
-    })
+    }
+
+    socket.on('pedido_atualizado', handlePedidoAtualizado)
 
     return () => {
+      clearInterval(intervalo)
+
+      socket.off('pedido_atualizado', handlePedidoAtualizado)
+
       socket.disconnect()
     }
   }, [id])
-
-  // 🔥 salva status para controle do Splash
   useEffect(() => {
     if (status) {
       localStorage.setItem('pedidoStatus', status)
     }
   }, [status])
-
-  // 🔥 remove dados quando pedido finalizar
   useEffect(() => {
     if (status === 'ENTREGUE' || status === 'CANCELADO') {
       localStorage.removeItem('pedidoId')
       localStorage.removeItem('pedidoStatus')
-    }
-  }, [status])
-
-  const [jaVibrou, setJaVibrou] = useState(false)
-
-  useEffect(() => {
-    if (!status) return
-    if (!('vibrate' in navigator)) return
-    if (status !== 'PRONTO') return
-    if (document.visibilityState === 'visible') return
-    if (jaVibrou) return
-
-    navigator.vibrate([120, 60, 120])
-    setJaVibrou(true)
-  }, [status, jaVibrou])
-
-  useEffect(() => {
-    if (status !== 'PRONTO') {
-      setJaVibrou(false)
     }
   }, [status])
 
@@ -112,7 +117,6 @@ export default function Acompanhamento() {
       window.close()
     } catch {}
     {
-      /* em produção a linha abaixo, trocar para -> navigate('/m/1') */
     }
     window.location.href = '/m/1'
   }
@@ -169,7 +173,6 @@ export default function Acompanhamento() {
 
   return (
     <div className="acompanhamento-page">
-      {/* 🔥 TEXTO AGORA ACIMA DO CARD */}
       <p className="banner-texto-topo">🍓 Enquanto seu pedido é preparado...</p>
 
       <div className="acompanhamento-card">
@@ -230,7 +233,13 @@ export default function Acompanhamento() {
         <div className="banner-card">
           <strong>Aproveite!</strong>
 
-          <p>Adicione uma bebida gelada por apenas R$ 5,00 no balcão 😋</p>
+          <p>Confira nossas bebidas geladas no balcão 😋</p>
+          <ul>
+            <li>🥤 Refrigerante lata — R$ 5,00</li>
+            <li>🧃 Suco natural — R$ 7,00</li>
+            <li>🍺 Cerveja long neck — R$ 8,00</li>
+            <li>🥛 Água de coco — R$ 6,00</li>
+          </ul>
         </div>
       </div>
     </div>
