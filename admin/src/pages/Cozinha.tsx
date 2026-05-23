@@ -199,7 +199,15 @@ export default function Cozinha() {
   const entregues = ordenar(
     pedidos.filter((p) => p.status === 'ENTREGUE' && isHoje(p.entregueEm)),
   )
-  console.log('ENTREGUES:', entregues)
+  console.log(
+    'ENTREGUES:',
+    entregues.map((p) => ({
+      id: p.id,
+      codigo: p.codigo,
+      status: p.status,
+      entregueEm: p.entregueEm,
+    })),
+  )
   const currentShift = shiftPositions[shiftIndex]
 
   return (
