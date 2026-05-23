@@ -228,7 +228,7 @@ model SecurityLog {
 model Configuracao {
   chave        String   @id
   valor        Json
-  atualizadoEm DateTime @default(now()) @updatedAt
+  atualizadoEm DateTime @default(now()) @updatedAt @map("atualizado_em")
 
   @@map("configuracoes")
 }
