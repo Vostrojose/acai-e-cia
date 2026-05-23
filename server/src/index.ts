@@ -50,7 +50,7 @@ app.use(httpLogger);
 /* =================================
    ROTAS PRINCIPAIS
 ================================= */
-app.use('/configuracoes', configuracoesRoutes)
+app.use('/api/configuracoes', configuracoesRoutes)
 
 app.use("/api/auth", authRoutes);
 app.use("/api/pedidos", pedidoRoutes);
