@@ -182,14 +182,16 @@ export default function Cozinha() {
 
   function isHoje(data: any) {
     if (!data) return false
-    const d = new Date(data)
-    const hoje = new Date()
 
-    return (
-      d.getDate() === hoje.getDate() &&
-      d.getMonth() === hoje.getMonth() &&
-      d.getFullYear() === hoje.getFullYear()
-    )
+    const dataSP = new Date(data).toLocaleDateString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+    })
+
+    const hojeSP = new Date().toLocaleDateString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+    })
+
+    return dataSP === hojeSP
   }
 
   const novos = ordenar(pedidos.filter((p) => p.status === 'RECEBIDO'))
