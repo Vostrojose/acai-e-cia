@@ -8,8 +8,6 @@ export default function Fiados() {
   async function carregar() {
     try {
       setLoading(true);
-
-      // ✅ ROTA CORRETA
       const res = await api.get("/pedidos/fiados");
 
       setFiados(res.data.data || []);
@@ -28,7 +26,7 @@ export default function Fiados() {
   async function marcarComoPago(id: string) {
     try {
       await api.patch(`/pedidos/${id}/pagar`);
-      carregar(); // 🔄 atualiza lista
+      carregar(); 
     } catch (err) {
       console.error("Erro ao marcar como pago:", err);
       alert("Erro ao atualizar pedido");
@@ -59,13 +57,9 @@ export default function Fiados() {
           <div>
             <strong>{p.clienteNome || "Sem nome"}</strong>
           </div>
-
-          {/* ✅ VALOR CORRIGIDO */}
           <div>
             Valor: <strong>R$ {Number(p.total).toFixed(2)}</strong>
           </div>
-
-          {/* 🔥 OPCIONAL (se quiser mostrar data) */}
           {p.criadoEm && (
             <div style={{ fontSize: 12, color: "#666" }}>
               {new Date(p.criadoEm).toLocaleString()}

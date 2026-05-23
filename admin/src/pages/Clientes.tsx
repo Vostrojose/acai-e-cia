@@ -6,10 +6,6 @@ import { theme } from '../assets/styles/adminTheme'
 export default function Clientes() {
   const navigate = useNavigate()
 
-  /* ============================= */
-  /* 🔒 REAUTENTICAÇÃO             */
-  /* ============================= */
-
   const [mostrarLogin, setMostrarLogin] = useState(false)
 
   const [email, setEmail] = useState('')
@@ -24,10 +20,6 @@ export default function Clientes() {
 
   const TEMPO_REAUTENTICACAO = 5 * 60 * 1000
 
-  /* ============================= */
-  /* CLIENTES                      */
-  /* ============================= */
-
   const [clientes, setClientes] = useState<any[]>([])
 
   const [valores, setValores] = useState<{
@@ -39,10 +31,6 @@ export default function Clientes() {
   const [novoCredito, setNovoCredito] = useState('')
 
   const [loading, setLoading] = useState(false)
-
-  /* ============================= */
-  /* CARREGAR CLIENTES             */
-  /* ============================= */
 
   async function carregar() {
     try {
@@ -61,11 +49,6 @@ export default function Clientes() {
   useEffect(() => {
     carregar()
   }, [])
-
-  /* ============================= */
-  /* LOGIN REAUTENTICAÇÃO          */
-  /* ============================= */
-
   async function login() {
     try {
       await api.post('/auth/login', {
@@ -86,11 +69,6 @@ export default function Clientes() {
       alert('Senha inválida')
     }
   }
-
-  /* ============================= */
-  /* EXIGIR RELOGIN                */
-  /* ============================= */
-
   function exigirReautenticacao(callback: () => void) {
     const agora = Date.now()
 
@@ -107,11 +85,6 @@ export default function Clientes() {
 
     setMostrarLogin(true)
   }
-
-  /* ============================= */
-  /* ADICIONAR CRÉDITO             */
-  /* ============================= */
-
   async function adicionarCredito(id: string) {
     const valorNumber = Number(valores[id])
 
@@ -136,11 +109,6 @@ export default function Clientes() {
       alert('Erro ao adicionar crédito')
     }
   }
-
-  /* ============================= */
-  /* CRIAR CLIENTE                 */
-  /* ============================= */
-
   async function criarCliente() {
     const credito = Number(novoCredito)
 
@@ -171,8 +139,6 @@ export default function Clientes() {
     <div style={theme.page}>
       <h1 style={theme.title}>💳 Clientes & Créditos</h1>
 
-      {/* MENU */}
-
       <div style={menuContainer}>
         <button style={btnMenu} onClick={() => navigate('/cozinha')}>
           👨‍🍳
@@ -193,8 +159,6 @@ export default function Clientes() {
           💰
         </button>
       </div>
-
-      {/* NOVO CLIENTE */}
 
       <div style={boxTopo}>
         <input
@@ -219,8 +183,6 @@ export default function Clientes() {
       {loading && <p>⏳ Carregando clientes...</p>}
 
       {!loading && clientes.length === 0 && <p>Nenhum cliente encontrado</p>}
-
-      {/* CLIENTES */}
 
       {clientes.map((c) => (
         <div key={c.id} style={cardCliente}>
@@ -266,8 +228,6 @@ export default function Clientes() {
         </div>
       ))}
 
-      {/* MODAL LOGIN */}
-
       {mostrarLogin && (
         <div style={overlay}>
           <div style={modal}>
@@ -298,10 +258,6 @@ export default function Clientes() {
     </div>
   )
 }
-
-/* ============================= */
-/* STYLES                        */
-/* ============================= */
 
 const menuContainer: React.CSSProperties = {
   display: 'flex',

@@ -164,8 +164,6 @@ export default function Pedidos() {
   )
 }
 
-/* COMPONENTES */
-
 function CardMenu({ navigate }: any) {
   return (
     <div
@@ -197,9 +195,6 @@ function CardMenu({ navigate }: any) {
     </div>
   )
 }
-
-/* ESTILOS */
-
 const gridPedidos = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
@@ -225,9 +220,6 @@ const btnMenu = {
   fontSize: 16,
   cursor: 'pointer',
 }
-
-/* BADGE STATUS */
-
 function badgeStatus(status: string) {
   switch (status) {
     case 'RECEBIDO':

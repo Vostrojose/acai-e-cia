@@ -35,7 +35,6 @@ export default function ChangePassword() {
 
       alert("Senha alterada com sucesso!");
 
-      // 🔐 opcional: forçar logout
       localStorage.removeItem("token");
       window.location.href = "/login";
 

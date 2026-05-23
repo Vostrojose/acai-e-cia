@@ -9,6 +9,7 @@ type Adicional = {
   preco: number
   ativo: boolean
 }
+const TEMPO_LIBERACAO_ADICIONAIS = 12 * 60 * 60 * 1000
 
 export default function Adicionais() {
   const { id } = useParams()
@@ -23,6 +24,7 @@ export default function Adicionais() {
 
   const [loading, setLoading] = useState(false)
   const [salvando, setSalvando] = useState(false)
+  const [liberado, setLiberado] = useState(false)
 
   async function carregar() {
     try {
@@ -42,6 +44,36 @@ export default function Adicionais() {
   useEffect(() => {
     if (id) carregar()
   }, [id])
+
+  useEffect(() => {
+    const liberadoAte = localStorage.getItem('adicionaisLiberadoAte')
+
+    if (liberadoAte && Number(liberadoAte) > Date.now()) {
+      setLiberado(true)
+      return
+    }
+
+    const senha = prompt('Digite a senha administrativa')
+
+    if (!senha) {
+      navigate('/produtos')
+      return
+    }
+
+    const senhaAdmin = localStorage.getItem('adminPassword')
+
+    if (senha !== senhaAdmin) {
+      alert('Senha inválida')
+      navigate('/produtos')
+      return
+    }
+
+    const expiraEm = Date.now() + TEMPO_LIBERACAO_ADICIONAIS
+
+    localStorage.setItem('adicionaisLiberadoAte', String(expiraEm))
+
+    setLiberado(true)
+  }, [])
 
   async function criar() {
     try {
@@ -97,21 +129,12 @@ export default function Adicionais() {
 
     await carregar()
   }
+  if (!liberado) {
+    return null
+  }
 
   return (
     <div style={theme.page}>
-      <button
-        onClick={() => navigate('/produtos')}
-        style={{
-          ...theme.button,
-          ...theme.buttonSuccess,
-          marginBottom: 20,
-          marginLeft: 10,
-        }}
-      >
-        ✅ Salvar 
-      </button>
-
       <h1 style={{ ...theme.title, textAlign: 'center' }}>
         Adicionais do Produto
       </h1>
@@ -209,14 +232,30 @@ export default function Adicionais() {
           </div>
         ))}
       </div>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          marginTop: 30,
+          marginBottom: 20,
+        }}
+      >
+        <button
+          onClick={() => navigate('/produtos')}
+          style={{
+            ...theme.button,
+            ...theme.buttonSuccess,
+            minWidth: 220,
+            fontSize: 18,
+            padding: '14px 20px',
+          }}
+        >
+          ✅ Salvar
+        </button>
+      </div>
     </div>
   )
 }
-
-/* ========================= */
-/* ESTILO LOCAL LIMPO        */
-/* ========================= */
-
 const grid = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',

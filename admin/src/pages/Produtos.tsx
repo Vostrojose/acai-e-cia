@@ -431,11 +431,7 @@ export default function Produtos() {
 
               <button
                 disabled={editando === p.id}
-                onClick={() =>
-                  exigirReautenticacao(() =>
-                    navigate(`/produtos/${p.id}/adicionais`),
-                  )
-                }
+                onClick={() => navigate(`/produtos/${p.id}/adicionais`)}
                 style={{
                   ...btn,
                   opacity: editando === p.id ? 0.5 : 1,

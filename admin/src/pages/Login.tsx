@@ -14,15 +14,12 @@ export default function Login() {
 
     try {
 
-      const res = await api.post("/auth/login", { // ✅ CORREÇÃO
+      const res = await api.post("/auth/login", { 
         email,
         senha
       })
-
-      //localStorage.setItem("token", res.data.token)
       sessionStorage.setItem("token", res.data.token)
 
-      //navigate("/dashboard")
       navigate("/", { replace: true })
 
     } catch (err: any) {

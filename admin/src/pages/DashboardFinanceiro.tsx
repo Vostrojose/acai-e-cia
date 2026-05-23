@@ -33,14 +33,12 @@ export default function DashboardFinanceiro() {
 
   return (
     <div style={theme.page}>
-      {/* 🔥 MENU DE NAVEGAÇÃO */}
       <CardMenu navigate={navigate} />
 
       <h1 style={{ ...theme.title, textAlign: 'center', marginBottom: 20 }}>
         📊 Financeiro
       </h1>
 
-      {/* 🔥 CARDS */}
       <div style={grid}>
         <Card titulo="💰 Vendas" valor={data.totalVendas} cor="#4caf50" />
         <Card titulo="💵 Pago" valor={data.totalPago} cor="#2196f3" />
@@ -50,11 +48,6 @@ export default function DashboardFinanceiro() {
     </div>
   )
 }
-
-/* ============================= */
-/* MENU PADRÃO                   */
-/* ============================= */
-
 function CardMenu({ navigate }: any) {
   return (
     <div
@@ -92,11 +85,6 @@ function CardMenu({ navigate }: any) {
     </div>
   )
 }
-
-/* ============================= */
-/* COMPONENTE CARD               */
-/* ============================= */
-
 function Card({
   titulo,
   valor,
@@ -120,7 +108,7 @@ function Card({
         textAlign: 'center',
       }}
     >
-      {/* LINHA DE DESTAQUE */}
+
       <div
         style={{
           position: 'absolute',
@@ -156,22 +144,12 @@ const numero = isNaN(Number(valor)) ? 0 : Number(valor)
     currency: 'BRL',
   }).format(numero)
 }
-
-/* ============================= */
-/* GRID                          */
-/* ============================= */
-
 const grid: React.CSSProperties = {
   display: 'flex',
   gap: 16,
   width: '100%',
   flexWrap: 'wrap',
 }
-
-/* ============================= */
-/* ESTILO BOTÃO                  */
-/* ============================= */
-
 const btnMenu: React.CSSProperties = {
   background: '#333',
   color: '#fff',

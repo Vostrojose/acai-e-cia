@@ -171,9 +171,6 @@ export default function Auditoria() {
     </div>
   )
 }
-
-/* COMPONENTES */
-
 function CardMenu({ navigate }: any) {
   return (
     <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
@@ -224,9 +221,6 @@ function CardResumo({ titulo, valor, cor }: any) {
     </div>
   )
 }
-
-/* ESTILOS */
-
 const resumoContainer = {
   display: "flex",
   gap: 20,
@@ -251,8 +245,6 @@ const aviso = {
   marginTop: 30,
   color: "#ccc"
 }
-
-/* 🔥 NOVO PADRÃO BOTÃO */
 const btnPadrao = {
   background: "#222",
   color: "#fff",
