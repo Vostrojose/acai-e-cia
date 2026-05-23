@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { io } from 'socket.io-client'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
@@ -8,6 +8,10 @@ import ScreenSaver from '../components/ScreenSaver'
 
 export default function Cozinha() {
   const [pedidos, setPedidos] = useState<any[]>([])
+  const pedidosRef = useRef<any[]>([])
+  useEffect(() => {
+    pedidosRef.current = pedidos
+  }, [pedidos])
   const [mostrarEntregues, setMostrarEntregues] = useState(false)
 
   const [totalEntreguesHoje, setTotalEntreguesHoje] = useState(0)
@@ -25,8 +29,13 @@ export default function Cozinha() {
 
   function tocarSom() {
     try {
-      const audio = new Audio('/novo-pedido.mp3')
-      audio.play().catch(() => {})
+      if (!audioRef.current) return
+
+      audioRef.current.currentTime = 0
+
+      audioRef.current.play().catch((err) => {
+        console.error('Erro áudio:', err)
+      })
     } catch {}
   }
 
@@ -40,7 +49,21 @@ export default function Cozinha() {
     { x: -1, y: 0 },
   ]
   const [screenSaver, setScreenSaver] = useState(false)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
   const [shiftIndex, setShiftIndex] = useState(0)
+  useEffect(() => {
+    audioRef.current = new Audio('/novo-pedido.mp3')
+
+    audioRef.current.preload = 'auto'
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.src = ''
+        audioRef.current = null
+      }
+    }
+  }, [])
 
   useEffect(() => {
     let timeout: any
@@ -56,7 +79,7 @@ export default function Cozinha() {
           /* NÃO ATIVA SE EXISTIR PEDIDOS */
           /* ============================= */
 
-          const possuiPedidosAtivos = pedidos.some(
+          const possuiPedidosAtivos = pedidosRef.current.some(
             (pedido) =>
               pedido.status === 'RECEBIDO' ||
               pedido.status === 'EM_PREPARO' ||
@@ -64,12 +87,8 @@ export default function Cozinha() {
           )
 
           if (possuiPedidosAtivos) {
-            console.log('🍧 Existem pedidos ativos → proteção cancelada')
-
             return
           }
-
-          console.log('🖥️ Ativando proteção de tela')
 
           setScreenSaver(true)
         },
@@ -94,27 +113,38 @@ export default function Cozinha() {
     }
   }, [])
 
-  useEffect(() => {
-    let wakeLock: any = null
+  const wakeLockRef = useRef<any>(null)
 
-    async function ativarWakeLock() {
-      try {
-        if ('wakeLock' in navigator) {
-          wakeLock = await (navigator as any).wakeLock.request('screen')
-        }
-      } catch {}
+  async function ativarWakeLock() {
+    try {
+      if ('wakeLock' in navigator && !wakeLockRef.current) {
+        wakeLockRef.current = await (navigator as any).wakeLock.request(
+          'screen',
+        )
+        wakeLockRef.current.addEventListener('release', () => {
+          wakeLockRef.current = null
+        })
+      }
+    } catch (err) {
+      console.error('WakeLock error:', err)
     }
+  }
 
+  useEffect(() => {
     ativarWakeLock()
 
-    document.addEventListener('visibilitychange', () => {
+    const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
         ativarWakeLock()
       }
-    })
+    }
+
+    document.addEventListener('visibilitychange', handleVisibility)
 
     return () => {
-      wakeLock?.release()
+      document.removeEventListener('visibilitychange', handleVisibility)
+      wakeLockRef.current?.release()
+      wakeLockRef.current = null
     }
   }, [])
 
@@ -137,9 +167,11 @@ export default function Cozinha() {
 
     const carregarPedidos = async () => {
       try {
-        const res = await api.get('/pedidos?limit=50')
+        const res = await api.get('/pedidos?limit=200')
         setPedidos(res.data?.data || [])
-      } catch {}
+      } catch (err) {
+        console.error(err)
+      }
     }
 
     async function inicializar() {
@@ -148,20 +180,23 @@ export default function Cozinha() {
     }
 
     inicializar()
-
-    socket.on('novo_pedido', async () => {
+    const handleNovoPedido = async () => {
       setScreenSaver(false)
+
+      await ativarWakeLock()
 
       tocarSom()
 
       await carregarPedidos()
       await carregarResumo()
-    })
+    }
+    socket.on('novo_pedido', handleNovoPedido)
 
-    socket.on('pedido_atualizado', async () => {
+    const handlePedidoAtualizado = async () => {
       await carregarPedidos()
       await carregarResumo()
-    })
+    }
+    socket.on('pedido_atualizado', handlePedidoAtualizado)
 
     const intervalo = setInterval(() => {
       carregarPedidos()
@@ -169,7 +204,12 @@ export default function Cozinha() {
     }, 10000)
 
     return () => {
+      socket.off('novo_pedido', handleNovoPedido)
+
+      socket.off('pedido_atualizado', handlePedidoAtualizado)
+
       socket.disconnect()
+
       clearInterval(intervalo)
     }
   }, [])
@@ -200,15 +240,6 @@ export default function Cozinha() {
 
   const entregues = ordenar(
     pedidos.filter((p) => p.status === 'ENTREGUE' && isHoje(p.entregueEm)),
-  )
-  console.log(
-    'ENTREGUES:',
-    entregues.map((p) => ({
-      id: p.id,
-      codigo: p.codigo,
-      status: p.status,
-      entregueEm: p.entregueEm,
-    })),
   )
   const currentShift = shiftPositions[shiftIndex]
 
@@ -278,9 +309,7 @@ export default function Cozinha() {
               <p style={theme.textMuted}>Nenhum pedido entregue hoje</p>
             )}
             {entregues.map((pedido: any) => (
-              <div key={pedido.id} style={{ color: '#fff' }}>
-                Pedido #{pedido.codigo}
-              </div>
+              <PedidoCard key={pedido.id} pedido={pedido} />
             ))}
           </div>
         </div>
@@ -307,12 +336,20 @@ function CardClima() {
 
   useEffect(() => {
     async function carregarClima() {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => {
+        controller.abort()
+      }, 5000)
       try {
         const res = await fetch(
           'https://api.open-meteo.com/v1/forecast?latitude=-23.52&longitude=-46.83&current=precipitation',
+          {
+            signal: controller.signal,
+          },
         )
 
         const data = await res.json()
+        clearTimeout(timeout)
         const chuva = data?.current?.precipitation || 0
 
         if (chuva > 5) {
@@ -325,7 +362,11 @@ function CardClima() {
           setStatus('ok')
           setTexto('☀️ Tempo estável')
         }
-      } catch {
+      } catch (err) {
+        clearTimeout(timeout)
+
+        console.error('Erro clima:', err)
+
         setTexto('Clima indisponível')
       }
     }
