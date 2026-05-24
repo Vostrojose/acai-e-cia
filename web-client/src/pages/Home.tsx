@@ -446,6 +446,7 @@ export default function Home() {
                 )
 
                 const quantidade = selecionado?.quantidade || 0
+                const gratis = Number(add.preco) === 0
 
                 return (
                   <div
@@ -463,29 +464,53 @@ export default function Home() {
                       <div>+R$ {Number(add.preco).toFixed(2)}</div>
                     </div>
 
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 10,
-                      }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => alterarQuantidadeAdicional(add, -1)}
+                    {gratis ? (
+                      <label
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8,
+                          cursor: 'pointer',
+                        }}
                       >
-                        -
-                      </button>
-
-                      <span>{quantidade}</span>
-
-                      <button
-                        type="button"
-                        onClick={() => alterarQuantidadeAdicional(add, 1)}
+                        <input
+                          type="checkbox"
+                          checked={quantidade > 0}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              alterarQuantidadeAdicional(add, 1)
+                            } else {
+                              alterarQuantidadeAdicional(add, -1)
+                            }
+                          }}
+                        />
+                        Grátis
+                      </label>
+                    ) : (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                        }}
                       >
-                        +
-                      </button>
-                    </div>
+                        <button
+                          type="button"
+                          onClick={() => alterarQuantidadeAdicional(add, -1)}
+                        >
+                          -
+                        </button>
+
+                        <span>{quantidade}</span>
+
+                        <button
+                          type="button"
+                          onClick={() => alterarQuantidadeAdicional(add, 1)}
+                        >
+                          +
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )
               })}
