@@ -409,7 +409,7 @@ export default function Home() {
             {produtoSelecionado.variacoes &&
               produtoSelecionado.variacoes.length > 0 && (
                 <div style={{ marginBottom: 20 }}>
-                  <h4>Escolha o tamanho:</h4>
+                  <h4>Selecione sua opção:</h4>
 
                   {produtoSelecionado.variacoes
                     .filter((v) => v.ativo)
