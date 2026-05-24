@@ -2,7 +2,6 @@ import { Request, Response } from 'express'
 import prisma from '../services/prisma'
 
 export class VariacaoController {
-
   async listar(req: Request, res: Response) {
     const { produtoId } = req.params
 
@@ -24,7 +23,13 @@ export class VariacaoController {
   async criar(req: Request, res: Response) {
     const { nome, preco, produtoId } = req.body
 
-    if (!nome || !preco || !produtoId) {
+    if (
+      !nome?.trim() ||
+      preco === undefined ||
+      preco === null ||
+      preco < 0 ||
+      !produtoId
+    ) {
       return res.status(400).json({
         message: 'Dados inválidos',
       })

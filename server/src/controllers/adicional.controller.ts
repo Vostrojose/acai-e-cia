@@ -2,11 +2,16 @@ import { Request, Response } from 'express'
 import prisma from '../services/prisma'
 
 export class AdicionalController {
-
   async criar(req: Request, res: Response) {
     const { nome, preco, produtoId } = req.body
 
-    if (!nome || !preco || !produtoId) {
+    if (
+      !nome?.trim() ||
+      preco === undefined ||
+      preco === null ||
+      preco < 0 ||
+      !produtoId
+    ) {
       return res.status(400).json({ message: 'Dados inválidos' })
     }
 
@@ -14,8 +19,8 @@ export class AdicionalController {
       data: {
         nome,
         preco,
-        produtoId
-      }
+        produtoId,
+      },
     })
 
     return res.status(201).json({ data: adicional })
@@ -25,7 +30,7 @@ export class AdicionalController {
     const { id } = req.params
 
     await prisma.adicional.delete({
-      where: { id }
+      where: { id },
     })
 
     return res.json({ success: true })
@@ -37,7 +42,7 @@ export class AdicionalController {
 
     const adicional = await prisma.adicional.update({
       where: { id },
-      data: { preco }
+      data: { preco },
     })
 
     return res.json({ data: adicional })
@@ -49,7 +54,7 @@ export class AdicionalController {
 
     const adicional = await prisma.adicional.update({
       where: { id },
-      data: { ativo }
+      data: { ativo },
     })
 
     return res.json({ data: adicional })
