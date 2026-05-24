@@ -345,7 +345,9 @@ function CardClima() {
 
         if (chuva > 5) {
           setStatus('critico')
-          setTexto('🚨 Atenção: chuva forte prevista\n📞 Defesa Civil Franco da Rocha: (11) 4800-6658')
+          setTexto(
+            '🚨 Atenção: chuva forte prevista\n📞 Defesa Civil Franco da Rocha: (11) 4800-6658',
+          )
         } else if (chuva > 0) {
           setStatus('alerta')
           setTexto('🌧️ Possível chuva')
@@ -489,13 +491,16 @@ function PedidoCard({ pedido }: any) {
       {pedido.itens?.map((item: any) => (
         <div key={item.id} style={{ marginBottom: 8 }}>
           <strong>
-            {item.quantidade}x {item.produto?.nome || 'Produto'}
+            {item.quantidade}x{' '}
+            {item.nomeProduto || item.produto?.nome || 'Produto'}
           </strong>
 
           {item.adicionais?.length > 0 && (
             <div style={{ marginLeft: 10, color: '#ffcc80' }}>
               {item.adicionais.map((add: any) => (
-                <div key={add.id}>+ {add.nome}</div>
+                <div key={add.id}>
+                  + {add.quantidade}x {add.nome}
+                </div>
               ))}
             </div>
           )}

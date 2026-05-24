@@ -440,6 +440,17 @@ export default function Produtos() {
               >
                 ➕ Adicionais
               </button>
+              <button
+                disabled={editando === p.id}
+                onClick={() => navigate(`/produtos/${p.id}/variacoes`)}
+                style={{
+                  ...btn,
+                  opacity: editando === p.id ? 0.5 : 1,
+                  background: '#2563eb',
+                }}
+              >
+                📏 Variações
+              </button>
 
               <button
                 disabled={editando === p.id}

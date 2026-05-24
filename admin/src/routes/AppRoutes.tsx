@@ -9,6 +9,7 @@ import ChangePassword from '../pages/ChangePassword'
 import Clientes from '../pages/Clientes'
 import DashboardFinanceiro from '../pages/DashboardFinanceiro'
 import Adicionais from '../pages/Adicionais'
+import Variacoes from '../pages/Variacoes'
 import PrivateRoute from './PrivateRoute'
 import Fiados from '../pages/Fiados'
 import AuditoriaPagamentos from '../pages/AuditoriaPagamentos'
@@ -47,6 +48,14 @@ export default function AppRoutes() {
         element={
           <PrivateRoute>
             <Adicionais />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/produtos/:id/variacoes"
+        element={
+          <PrivateRoute>
+            <Variacoes />
           </PrivateRoute>
         }
       />
