@@ -40,7 +40,7 @@ export default function Carrinho() {
                   <div className="carrinho-adicionais">
                     {item.adicionais.map((add: any, index: number) => (
                       <div key={index}>
-                        + {add.nome}
+                        {add.quantidade}x {add.nome}
                       </div>
                     ))}
                   </div>

@@ -27,6 +27,14 @@ interface Produto {
   }[]
 
   temAdicionais?: boolean
+  variacoes?: {
+    id: string
+    nome: string
+    preco: number
+    ativo: boolean
+  }[]
+
+  temVariacoes?: boolean
 }
 
 export default function Home() {
@@ -47,13 +55,16 @@ export default function Home() {
   const [adicionaisSelecionados, setAdicionaisSelecionados] = useState<any[]>(
     [],
   )
+  const [variacaoSelecionada, setVariacaoSelecionada] = useState<any | null>(
+    null,
+  )
   const agora = new Date()
 
   const horaAtual = agora.getHours() * 60 + agora.getMinutes()
 
   const abertura = 7 * 60 + 30 // 07:30
   const fechamentoPedidos = 24 * 60 // 19:00
-   //const fechamentoPedidos = 19 * 60 // original
+  //const fechamentoPedidos = 19 * 60 // original
 
   const antesDaAbertura = horaAtual < abertura
 
@@ -62,19 +73,65 @@ export default function Home() {
   function abrirPopup(produto: Produto) {
     setProdutoSelecionado(produto)
     setAdicionaisSelecionados([])
+    setVariacaoSelecionada(null)
   }
 
   function fecharPopup() {
     setProdutoSelecionado(null)
   }
+  function alterarQuantidadeAdicional(add: any, delta: number) {
+    setAdicionaisSelecionados((prev: any[]) => {
+      const existente = prev.find((a) => a.id === add.id)
 
-  function gerarIdItem(produto: Produto, adicionais: any[]) {
+      // ADICIONAR
+      if (!existente && delta > 0) {
+        return [
+          ...prev,
+          {
+            ...add,
+            quantidade: 1,
+          },
+        ]
+      }
+
+      // NÃO EXISTE
+      if (!existente) return prev
+
+      const novaQuantidade = existente.quantidade + delta
+
+      // REMOVER
+      if (novaQuantidade <= 0) {
+        return prev.filter((a) => a.id !== add.id)
+      }
+
+      // ATUALIZAR
+      return prev.map((a) =>
+        a.id === add.id
+          ? {
+              ...a,
+              quantidade: novaQuantidade,
+            }
+          : a,
+      )
+    })
+  }
+
+  function gerarIdItem(produto: Produto, adicionais: any[], variacao?: any) {
     const adicionaisOrdenados = [...adicionais].sort((a, b) =>
       a.nome.localeCompare(b.nome),
     )
 
     return (
-      produto.id + '-' + JSON.stringify(adicionaisOrdenados.map((a) => a.id))
+      produto.id +
+      '-' +
+      (variacao?.id || 'sem-variacao') +
+      '-' +
+      JSON.stringify(
+        adicionaisOrdenados.map((a) => ({
+          id: a.id,
+          quantidade: a.quantidade,
+        })),
+      )
     )
   }
 
@@ -95,23 +152,36 @@ export default function Home() {
   /* ============================= */
   function confirmarProduto() {
     if (!produtoSelecionado) return
+    if (produtoSelecionado.temVariacoes && !variacaoSelecionada) {
+      alert('Selecione um tamanho')
+      return
+    }
 
     //  CLONE REAL DOS ADICIONAIS (ESSENCIAL)
     const adicionaisClonados = (adicionaisSelecionados || []).map((a: any) => ({
       id: a.id,
       nome: a.nome,
       preco: Number(a.preco),
+      quantidade: a.quantidade,
     }))
 
     console.log(' ENVIANDO ADICIONAIS:', adicionaisClonados)
 
-    const idUnico = gerarIdItem(produtoSelecionado, adicionaisClonados)
+    const idUnico = gerarIdItem(
+      produtoSelecionado,
+      adicionaisClonados,
+      variacaoSelecionada,
+    )
 
     adicionarItem({
       id: idUnico,
       produtoId: produtoSelecionado.id,
-      nome: produtoSelecionado.nome,
-      preco: produtoSelecionado.preco,
+      nome: variacaoSelecionada
+        ? `${produtoSelecionado.nome} - ${variacaoSelecionada.nome}`
+        : produtoSelecionado.nome,
+      preco: variacaoSelecionada
+        ? Number(variacaoSelecionada.preco)
+        : produtoSelecionado.preco,
       adicionais: adicionaisClonados,
     })
 
@@ -132,6 +202,7 @@ export default function Home() {
             ...produto,
             preco: Number(produto.preco),
             temAdicionais: (produto.adicionais?.length ?? 0) > 0,
+            temVariacoes: (produto.variacoes?.length ?? 0) > 0,
           }))
           .filter((produto: Produto) => produto.ativo)
 
@@ -152,36 +223,33 @@ export default function Home() {
 
   if (loading) return <p style={{ padding: 20 }}>Carregando...</p>
 
-const produtosDisponiveis = produtos.filter((produto) => {
+  const produtosDisponiveis = produtos.filter((produto) => {
+    switch (hoje) {
+      case 0:
+        return Boolean(produto.disponivelDom)
 
-  switch (hoje) {
+      case 1:
+        return Boolean(produto.disponivelSeg)
 
-    case 0:
-      return Boolean(produto.disponivelDom)
+      case 2:
+        return Boolean(produto.disponivelTer)
 
-    case 1:
-      return Boolean(produto.disponivelSeg)
+      case 3:
+        return Boolean(produto.disponivelQua)
 
-    case 2:
-      return Boolean(produto.disponivelTer)
+      case 4:
+        return Boolean(produto.disponivelQui)
 
-    case 3:
-      return Boolean(produto.disponivelQua)
+      case 5:
+        return Boolean(produto.disponivelSex)
 
-    case 4:
-      return Boolean(produto.disponivelQui)
+      case 6:
+        return Boolean(produto.disponivelSab)
 
-    case 5:
-      return Boolean(produto.disponivelSex)
-
-    case 6:
-      return Boolean(produto.disponivelSab)
-
-    default:
-      return false
-  }
-
-})
+      default:
+        return false
+    }
+  })
 
   return (
     <div className="page">
@@ -291,7 +359,13 @@ const produtosDisponiveis = produtos.filter((produto) => {
                     <div className="produto-nome">{produto.nome}</div>
 
                     <div className="produto-preco">
-                      R$ {produto.preco.toFixed(2)}
+                      {produto.temVariacoes
+                        ? `A partir de R$ ${Math.min(
+                            ...(produto.variacoes || []).map((v) =>
+                              Number(v.preco),
+                            ),
+                          ).toFixed(2)}`
+                        : `R$ ${produto.preco.toFixed(2)}`}
                     </div>
                   </div>
 
@@ -310,7 +384,7 @@ const produtosDisponiveis = produtos.filter((produto) => {
                   onClick={() => {
                     if (pedidosEncerrados) return
 
-                    if (produto.temAdicionais) {
+                    if (produto.temAdicionais || produto.temVariacoes) {
                       abrirPopup(produto)
                     } else {
                       adicionarDireto(produto)
@@ -332,32 +406,124 @@ const produtosDisponiveis = produtos.filter((produto) => {
             onClick={(e) => e.stopPropagation()}
           >
             <h3>{produtoSelecionado.nome}</h3>
+            {produtoSelecionado.variacoes &&
+              produtoSelecionado.variacoes.length > 0 && (
+                <div style={{ marginBottom: 20 }}>
+                  <h4>Escolha o tamanho:</h4>
+
+                  {produtoSelecionado.variacoes
+                    .filter((v) => v.ativo)
+                    .map((v) => (
+                      <label
+                        key={v.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8,
+                          marginBottom: 10,
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          name="variacao"
+                          checked={variacaoSelecionada?.id === v.id}
+                          onChange={() => setVariacaoSelecionada(v)}
+                        />
+
+                        <span>
+                          {v.nome} (+R$ {Number(v.preco).toFixed(2)})
+                        </span>
+                      </label>
+                    ))}
+                </div>
+              )}
 
             {produtoSelecionado.adicionais
               ?.filter((a) => a.ativo)
-              .map((add) => (
-                <label key={add.id}>
-                  <input
-                    type="checkbox"
-                    checked={adicionaisSelecionados.some(
-                      (a) => a.id === add.id,
-                    )}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setAdicionaisSelecionados((prev) => [...prev, add])
-                      } else {
-                        setAdicionaisSelecionados((prev) =>
-                          prev.filter((a) => a.id !== add.id),
-                        )
-                      }
-                    }}
-                  />
-                  {add.nome} (+R$ {Number(add.preco).toFixed(2)})
-                </label>
-              ))}
+              .map((add) => {
+                const selecionado = adicionaisSelecionados.find(
+                  (a) => a.id === add.id,
+                )
 
-            <button onClick={confirmarProduto}>Confirmar</button>
-            <button onClick={fecharPopup}>Cancelar</button>
+                const quantidade = selecionado?.quantidade || 0
+
+                return (
+                  <div
+                    key={add.id}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: 12,
+                      gap: 12,
+                    }}
+                  >
+                    <div>
+                      <strong>{add.nome}</strong>
+                      <div>+R$ {Number(add.preco).toFixed(2)}</div>
+                    </div>
+
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => alterarQuantidadeAdicional(add, -1)}
+                      >
+                        -
+                      </button>
+
+                      <span>{quantidade}</span>
+
+                      <button
+                        type="button"
+                        onClick={() => alterarQuantidadeAdicional(add, 1)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            <div
+              style={{
+                marginTop: 20,
+                marginBottom: 20,
+                fontSize: 20,
+                fontWeight: 700,
+              }}
+            >
+              Total: R${' '}
+              {(
+                (variacaoSelecionada
+                  ? Number(variacaoSelecionada.preco)
+                  : produtoSelecionado.preco) +
+                adicionaisSelecionados.reduce(
+                  (soma, add) => soma + Number(add.preco) * add.quantidade,
+                  0,
+                )
+              ).toFixed(2)}
+            </div>
+            <button
+              onClick={confirmarProduto}
+              disabled={produtoSelecionado.temVariacoes && !variacaoSelecionada}
+              style={{
+                opacity:
+                  produtoSelecionado.temVariacoes && !variacaoSelecionada
+                    ? 0.5
+                    : 1,
+                cursor:
+                  produtoSelecionado.temVariacoes && !variacaoSelecionada
+                    ? 'not-allowed'
+                    : 'pointer',
+              }}
+            >
+              Confirmar
+            </button>
           </div>
         </div>
       )}

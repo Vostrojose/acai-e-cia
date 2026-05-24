@@ -5,12 +5,13 @@ interface Item {
   id: string
   produtoId: string
   nome: string
-  preco: number // 🔥 PREÇO BASE
+  preco: number 
   quantidade: number
   adicionais?: {
     id: string
     nome: string
     preco: number
+    quantidade: number
   }[]
 }
 
@@ -25,7 +26,6 @@ interface CartContextData {
 const CartContext = createContext({} as CartContextData)
 
 export function CartProvider({ children }: { children: ReactNode }) {
-
   const [itens, setItens] = useState<Item[]>(() => {
     try {
       const data = localStorage.getItem('carrinho')
@@ -41,44 +41,38 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   function adicionarItem(item: Omit<Item, 'quantidade'>) {
     setItens((prev) => {
-
-      const index = prev.findIndex(i => i.id === item.id)
+      const index = prev.findIndex((i) => i.id === item.id)
 
       if (index !== -1) {
-  const novos = [...prev]
+        const novos = [...prev]
+        novos[index] = {
+          ...novos[index],
+          quantidade: novos[index].quantidade + 1,
+        }
 
-  // 🔥 mantém adicionais intactos
-  novos[index] = {
-    ...novos[index],
-    quantidade: novos[index].quantidade + 1
-  }
-
-  return novos
-}
+        return novos
+      }
 
       return [...prev, { ...item, quantidade: 1 }]
     })
   }
 
   function removerItem(id: string) {
-    setItens((prev) => prev.filter(i => i.id !== id))
+    setItens((prev) => prev.filter((i) => i.id !== id))
   }
 
   function limparCarrinho() {
     setItens([])
   }
 
-  const total = itens.reduce(
-    (acc, item) => {
-      const adicionaisTotal = (item.adicionais || []).reduce(
-        (soma, add) => soma + Number(add.preco),
-        0
-      )
+  const total = itens.reduce((acc, item) => {
+    const adicionaisTotal = (item.adicionais || []).reduce(
+      (soma, add) => soma + Number(add.preco) * add.quantidade,
+      0,
+    )
 
-      return acc + (item.preco + adicionaisTotal) * item.quantidade
-    },
-    0
-  )
+    return acc + (item.preco + adicionaisTotal) * item.quantidade
+  }, 0)
 
   return (
     <CartContext.Provider
@@ -87,7 +81,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         adicionarItem,
         removerItem,
         limparCarrinho,
-        total
+        total,
       }}
     >
       {children}
