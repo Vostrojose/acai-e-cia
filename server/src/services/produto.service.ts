@@ -41,7 +41,8 @@ class ProdutoService {
         nome: 'asc',
       },
       include: {
-        adicionais: true, // 🔥 ESSENCIAL
+        adicionais: true,
+        variacoes: true,
       },
     })
 

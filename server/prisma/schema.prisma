@@ -32,6 +32,7 @@ model Produto {
 
   itensPedido   ItemPedido[]
   adicionais    Adicional[]
+  variacoes     VariacaoProduto[]
 }
 
 
@@ -80,6 +81,8 @@ model ItemPedido {
   id         String  @id @default(uuid())
   quantidade Int
   precoUnit  Decimal @db.Decimal(10, 2)
+  nomeProduto String?
+  descricaoProduto String?
 
   pedidoId   String
   produtoId  String
@@ -102,6 +105,22 @@ model Adicional {
   produto   Produto @relation(fields: [produtoId], references: [id])
 
   criadoEm  DateTime @default(now())
+}
+
+model VariacaoProduto {
+  id        String   @id @default(uuid())
+
+  nome      String
+  preco     Decimal  @db.Decimal(10, 2)
+
+  ativo     Boolean  @default(true)
+
+  produtoId String
+  produto   Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+
+  criadoEm  DateTime @default(now())
+
+  @@index([produtoId])
 }
 
 

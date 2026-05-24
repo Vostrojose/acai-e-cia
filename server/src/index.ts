@@ -15,6 +15,7 @@ import { httpLogger } from "./middlewares/logger.middleware";
 import { initSocket } from "./websocket/socket";
 
 import adicionalRoutes from "./routes/adicional.routes";
+import variacaoRoutes from "./routes/variacao.routes";
 import auditoriaRoutes from "./routes/auditoria.routes";
 import balcaoRoutes from "./routes/balcao.routes";
 import clienteRoutes from "./routes/cliente.routes";
@@ -61,6 +62,7 @@ app.use("/api/balcao", balcaoRoutes);
 app.use("/api/dashboard-financeiro", dashboardRoutes);
 app.use("/api/clientes", clienteRoutes);
 app.use("/api/adicionais", adicionalRoutes);
+app.use("/api/variacoes", variacaoRoutes);
 app.use("/api/auditoria", auditoriaRoutes);
 
 /* =================================

@@ -41,11 +41,14 @@ class PedidoService {
         const adicionais = Array.isArray(item.adicionais) ? item.adicionais : []
 
         const totalAdicionais = adicionais.reduce(
-          (soma: number, add: any) => soma + Number(add.preco || 0),
+          (soma: number, add: any) =>
+            soma + Number(add.preco || 0) * Number(add.quantidade || 1),
           0,
         )
 
-        const precoUnit = Number(produto.preco) + totalAdicionais
+        const precoBase = Number(item.preco || produto.preco)
+
+        const precoUnit = precoBase + totalAdicionais
 
         total += precoUnit * item.quantidade
 
@@ -63,6 +66,9 @@ class PedidoService {
             data: adicionais.map((add: any) => ({
               nome: add.nome,
               preco: Number(add.preco),
+
+              quantidade: Number(add.quantidade || 1),
+
               itemPedidoId: itemCriado.id,
             })),
           })
