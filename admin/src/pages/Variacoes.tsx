@@ -44,7 +44,7 @@ export default function Variacoes() {
 
   async function criar() {
     try {
-      if (!nome || preco <= 0) {
+      if (!nome || preco < 0) {
         alert('Preencha corretamente')
         return
       }
