@@ -9,7 +9,6 @@ type Variacao = {
   preco: number
   ativo: boolean
 }
-const TEMPO_LIBERACAO_VARIACOES = 12 * 60 * 60 * 1000
 
 export default function Variacoes() {
   const { id } = useParams()
@@ -24,7 +23,6 @@ export default function Variacoes() {
 
   const [loading, setLoading] = useState(false)
   const [salvando, setSalvando] = useState(false)
-  const [liberado, setLiberado] = useState(false)
 
   async function carregar() {
     try {
@@ -43,36 +41,6 @@ export default function Variacoes() {
   useEffect(() => {
     if (id) carregar()
   }, [id])
-
-  useEffect(() => {
-    const liberadoAte = localStorage.getItem('variacoesLiberadoAte')
-
-    if (liberadoAte && Number(liberadoAte) > Date.now()) {
-      setLiberado(true)
-      return
-    }
-
-    const senha = prompt('Digite a senha administrativa')
-
-    if (!senha) {
-      navigate('/produtos')
-      return
-    }
-
-    const senhaAdmin = localStorage.getItem('adminPassword')
-
-    if (senha !== senhaAdmin) {
-      alert('Senha inválida')
-      navigate('/produtos')
-      return
-    }
-
-    const expiraEm = Date.now() + TEMPO_LIBERACAO_VARIACOES
-
-    localStorage.setItem('variacoesLiberadoAte', String(expiraEm))
-
-    setLiberado(true)
-  }, [])
 
   async function criar() {
     try {
@@ -128,10 +96,6 @@ export default function Variacoes() {
 
     await carregar()
   }
-  if (!liberado) {
-    return null
-  }
-
   return (
     <div style={theme.page}>
       <h1 style={{ ...theme.title, textAlign: 'center' }}>
