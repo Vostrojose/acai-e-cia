@@ -24,7 +24,7 @@ class SecurityAlertService {
     try {
 
       await this.transporter.sendMail({
-        from: `"Açaí & Companhia" <${process.env.SMTP_USER}>`,
+        from: `"Açaí & Company" <${process.env.SMTP_USER}>`,
 
         to: process.env.SECURITY_ALERT_EMAIL,
 
