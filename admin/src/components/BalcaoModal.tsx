@@ -5,18 +5,22 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   const [busca, setBusca] = useState('')
   const [produtos, setProdutos] = useState<any[]>([])
   const [itens, setItens] = useState<any[]>([])
+  const [produtoSelecionado, setProdutoSelecionado] = useState<any | null>(null)
+
+  const [variacaoSelecionada, setVariacaoSelecionada] = useState<any | null>(
+    null,
+  )
+
+  const [adicionaisSelecionados, setAdicionaisSelecionados] = useState<any[]>(
+    [],
+  )
 
   const [formaPagamento, setFormaPagamento] = useState('PAGO')
   const [clienteNome, setClienteNome] = useState('')
 
   const [pularPreparo, setPularPreparo] = useState(true)
 
-  // 🔥 PROTEÇÃO DUPLICIDADE
   const [salvando, setSalvando] = useState(false)
-
-  /* ============================= */
-  /* BUSCAR PRODUTOS              */
-  /* ============================= */
 
   useEffect(() => {
     async function carregar() {
@@ -41,29 +45,13 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
     p.nome.toLowerCase().includes(busca.toLowerCase()),
   )
 
-  /* ============================= */
-  /* ITEM                          */
-  /* ============================= */
+  function abrirProduto(produto: any) {
+    setProdutoSelecionado(produto)
 
-  function toggleItem(produto: any) {
-    setItens((prev) => {
-      return [
-        ...prev,
-        {
-          uid: crypto.randomUUID(),
-          id: produto.id,
-          nome: produto.nome,
-          preco: produto.preco,
-          quantidade: 1,
-          adicionais: [],
-        },
-      ]
-    })
+    setVariacaoSelecionada(null)
+
+    setAdicionaisSelecionados([])
   }
-
-  /* ============================= */
-  /* QUANTIDADE                    */
-  /* ============================= */
   function alterarQuantidade(uid: string, delta: number) {
     if (salvando) return
 
@@ -78,11 +66,6 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
       ),
     )
   }
-
-  /* ============================= */
-  /* ADICIONAL                     */
-  /* ============================= */
-
   function toggleAdicional(uid: string, adicional: any) {
     if (salvando) return
 
@@ -119,10 +102,6 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
     )
   }
 
-  /* ============================= */
-  /* QTD ADICIONAL                 */
-  /* ============================= */
-
   function alterarQtdAdicional(
     uid: string,
     adicionalId: string,
@@ -148,10 +127,80 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
       }),
     )
   }
+  function alterarQuantidadePopup(add: any, delta: number) {
+    setAdicionaisSelecionados((prev: any[]) => {
+      const existente = prev.find((a) => a.id === add.id)
 
-  /* ============================= */
-  /* SALVAR                        */
-  /* ============================= */
+      if (!existente && delta > 0) {
+        return [
+          ...prev,
+          {
+            ...add,
+            quantidade: 1,
+          },
+        ]
+      }
+
+      if (!existente) return prev
+
+      const novaQuantidade = existente.quantidade + delta
+
+      if (novaQuantidade <= 0) {
+        return prev.filter((a) => a.id !== add.id)
+      }
+
+      return prev.map((a) =>
+        a.id === add.id
+          ? {
+              ...a,
+              quantidade: novaQuantidade,
+            }
+          : a,
+      )
+    })
+  }
+  function confirmarProduto() {
+    if (!produtoSelecionado) return
+
+    if (produtoSelecionado.variacoes?.length > 0 && !variacaoSelecionada) {
+      alert('Selecione um tamanho')
+      return
+    }
+
+    const adicionaisClonados = adicionaisSelecionados.map((a: any) => ({
+      id: a.id,
+      nome: a.nome,
+      preco: Number(a.preco),
+      quantidade: a.quantidade,
+    }))
+
+    setItens((prev) => [
+      ...prev,
+      {
+        uid: crypto.randomUUID(),
+
+        id: produtoSelecionado.id,
+
+        nome: variacaoSelecionada
+          ? `${produtoSelecionado.nome} - ${variacaoSelecionada.nome}`
+          : produtoSelecionado.nome,
+
+        preco: variacaoSelecionada
+          ? Number(variacaoSelecionada.preco)
+          : Number(produtoSelecionado.preco),
+
+        quantidade: 1,
+
+        adicionais: adicionaisClonados,
+      },
+    ])
+
+    setProdutoSelecionado(null)
+
+    setVariacaoSelecionada(null)
+
+    setAdicionaisSelecionados([])
+  }
 
   async function salvar() {
     if (salvando) return
@@ -203,7 +252,6 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   return (
     <div style={overlay}>
       <div style={modal}>
-        {/* HEADER */}
 
         <div style={header}>
           <div>
@@ -245,7 +293,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                 <div
                   key={p.id}
                   style={produtoCard(!!selecionado)}
-                  onClick={() => toggleItem(p)}
+                  onClick={() => abrirProduto(p)}
                 >
                   <div style={produtoTopo}>
                     <div>
@@ -536,6 +584,150 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           </div>
         </div>
       </div>
+
+      {produtoSelecionado && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.7)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 99999,
+            padding: 20,
+          }}
+          onClick={() => setProdutoSelecionado(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: '#111827',
+              borderRadius: 24,
+              width: '100%',
+              maxWidth: 500,
+              padding: 24,
+              color: '#fff',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+            }}
+          >
+            <h2>{produtoSelecionado.nome}</h2>
+
+            {produtoSelecionado.variacoes?.length > 0 && (
+              <div style={{ marginBottom: 20 }}>
+                <h3>Escolha o tamanho</h3>
+
+                {produtoSelecionado.variacoes
+                  .filter((v: any) => v.ativo)
+                  .map((v: any) => (
+                    <label
+                      key={v.id}
+                      style={{
+                        display: 'flex',
+                        gap: 8,
+                        marginBottom: 10,
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        checked={variacaoSelecionada?.id === v.id}
+                        onChange={() => setVariacaoSelecionada(v)}
+                      />
+
+                      <span>
+                        {v.nome} (+R$ {Number(v.preco).toFixed(2)})
+                      </span>
+                    </label>
+                  ))}
+              </div>
+            )}
+
+            {produtoSelecionado.adicionais
+              ?.filter((a: any) => a.ativo)
+              .map((add: any) => {
+                const selecionado = adicionaisSelecionados.find(
+                  (a) => a.id === add.id,
+                )
+
+                const quantidade = selecionado?.quantidade || 0
+
+                const gratis = Number(add.preco) === 0
+
+                return (
+                  <div
+                    key={add.id}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: 14,
+                    }}
+                  >
+                    <div>
+                      <strong>{add.nome}</strong>
+
+                      <div>
+                        {gratis
+                          ? 'GRÁTIS'
+                          : `+R$ ${Number(add.preco).toFixed(2)}`}
+                      </div>
+                    </div>
+
+                    {gratis ? (
+                      <input
+                        type="checkbox"
+                        checked={quantidade > 0}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            alterarQuantidadePopup(add, 1)
+                          } else {
+                            alterarQuantidadePopup(add, -1)
+                          }
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          display: 'flex',
+                          gap: 10,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <button onClick={() => alterarQuantidadePopup(add, -1)}>
+                          -
+                        </button>
+
+                        <span>{quantidade}</span>
+
+                        <button onClick={() => alterarQuantidadePopup(add, 1)}>
+                          +
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+
+            <button
+              onClick={confirmarProduto}
+              style={{
+                width: '100%',
+                marginTop: 20,
+                background: '#22c55e',
+                border: 'none',
+                padding: 16,
+                borderRadius: 14,
+                color: '#fff',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+              }}
+            >
+              Confirmar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
