@@ -252,7 +252,6 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   return (
     <div style={overlay}>
       <div style={modal}>
-
         <div style={header}>
           <div>
             <h2 style={{ margin: 0 }}>🧾 Venda Balcão</h2>
@@ -606,109 +605,122 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
               borderRadius: 24,
               width: '100%',
               maxWidth: 500,
-              padding: 24,
               color: '#fff',
               maxHeight: '90vh',
-              overflowY: 'auto',
+
+              display: 'flex',
+              flexDirection: 'column',
+
+              overflow: 'hidden',
             }}
           >
             <h2>{produtoSelecionado.nome}</h2>
+            <div
+              style={{
+                overflowY: 'auto',
+                padding: 24,
+                flex: 1,
+              }}
+            >
+              {produtoSelecionado.variacoes?.length > 0 && (
+                <div style={{ marginBottom: 20 }}>
+                  <h3>Escolha o tamanho</h3>
 
-            {produtoSelecionado.variacoes?.length > 0 && (
-              <div style={{ marginBottom: 20 }}>
-                <h3>Escolha o tamanho</h3>
-
-                {produtoSelecionado.variacoes
-                  .filter((v: any) => v.ativo)
-                  .map((v: any) => (
-                    <label
-                      key={v.id}
-                      style={{
-                        display: 'flex',
-                        gap: 8,
-                        marginBottom: 10,
-                      }}
-                    >
-                      <input
-                        type="radio"
-                        checked={variacaoSelecionada?.id === v.id}
-                        onChange={() => setVariacaoSelecionada(v)}
-                      />
-
-                      <span>
-                        {v.nome} (+R$ {Number(v.preco).toFixed(2)})
-                      </span>
-                    </label>
-                  ))}
-              </div>
-            )}
-
-            {produtoSelecionado.adicionais
-              ?.filter((a: any) => a.ativo)
-              .map((add: any) => {
-                const selecionado = adicionaisSelecionados.find(
-                  (a) => a.id === add.id,
-                )
-
-                const quantidade = selecionado?.quantidade || 0
-
-                const gratis = Number(add.preco) === 0
-
-                return (
-                  <div
-                    key={add.id}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: 14,
-                    }}
-                  >
-                    <div>
-                      <strong>{add.nome}</strong>
-
-                      <div>
-                        {gratis
-                          ? 'GRÁTIS'
-                          : `+R$ ${Number(add.preco).toFixed(2)}`}
-                      </div>
-                    </div>
-
-                    {gratis ? (
-                      <input
-                        type="checkbox"
-                        checked={quantidade > 0}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            alterarQuantidadePopup(add, 1)
-                          } else {
-                            alterarQuantidadePopup(add, -1)
-                          }
-                        }}
-                      />
-                    ) : (
-                      <div
+                  {produtoSelecionado.variacoes
+                    .filter((v: any) => v.ativo)
+                    .map((v: any) => (
+                      <label
+                        key={v.id}
                         style={{
                           display: 'flex',
-                          gap: 10,
-                          alignItems: 'center',
+                          gap: 8,
+                          marginBottom: 10,
                         }}
                       >
-                        <button onClick={() => alterarQuantidadePopup(add, -1)}>
-                          -
-                        </button>
+                        <input
+                          type="radio"
+                          checked={variacaoSelecionada?.id === v.id}
+                          onChange={() => setVariacaoSelecionada(v)}
+                        />
 
-                        <span>{quantidade}</span>
+                        <span>
+                          {v.nome} (+R$ {Number(v.preco).toFixed(2)})
+                        </span>
+                      </label>
+                    ))}
+                </div>
+              )}
 
-                        <button onClick={() => alterarQuantidadePopup(add, 1)}>
-                          +
-                        </button>
+              {produtoSelecionado.adicionais
+                ?.filter((a: any) => a.ativo)
+                .map((add: any) => {
+                  const selecionado = adicionaisSelecionados.find(
+                    (a) => a.id === add.id,
+                  )
+
+                  const quantidade = selecionado?.quantidade || 0
+
+                  const gratis = Number(add.preco) === 0
+
+                  return (
+                    <div
+                      key={add.id}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: 14,
+                      }}
+                    >
+                      <div>
+                        <strong>{add.nome}</strong>
+
+                        <div>
+                          {gratis
+                            ? 'GRÁTIS'
+                            : `+R$ ${Number(add.preco).toFixed(2)}`}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                )
-              })}
 
+                      {gratis ? (
+                        <input
+                          type="checkbox"
+                          checked={quantidade > 0}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              alterarQuantidadePopup(add, 1)
+                            } else {
+                              alterarQuantidadePopup(add, -1)
+                            }
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            display: 'flex',
+                            gap: 10,
+                            alignItems: 'center',
+                          }}
+                        >
+                          <button
+                            onClick={() => alterarQuantidadePopup(add, -1)}
+                          >
+                            -
+                          </button>
+
+                          <span>{quantidade}</span>
+
+                          <button
+                            onClick={() => alterarQuantidadePopup(add, 1)}
+                          >
+                            +
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+            </div>
             <button
               onClick={confirmarProduto}
               style={{
