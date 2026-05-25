@@ -404,12 +404,15 @@ export default function Home() {
           <div
             className="popup-adicionais"
             onClick={(e) => e.stopPropagation()}
+            
           >
             <h3>{produtoSelecionado.nome}</h3>
+            <div className="popup-conteudo">
             {produtoSelecionado.variacoes &&
               produtoSelecionado.variacoes.length > 0 && (
                 <div style={{ marginBottom: 20 }}>
                   <h4>Selecione sua opção:</h4>
+                  
 
                   {produtoSelecionado.variacoes
                     .filter((v) => v.ativo)
@@ -437,6 +440,7 @@ export default function Home() {
                     ))}
                 </div>
               )}
+              
 
             {produtoSelecionado.adicionais
               ?.filter((a) => a.ativo)
@@ -532,6 +536,7 @@ export default function Home() {
                   0,
                 )
               ).toFixed(2)}
+            </div>
             </div>
             <button
               onClick={confirmarProduto}

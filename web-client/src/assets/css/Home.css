@@ -291,38 +291,53 @@
 
 .popup-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
+
+  inset: 0;
+
   width: 100%;
   height: 100%;
 
-  background: rgba(0, 0, 0, 0.6); /* escurece fundo */
+  background: rgba(0, 0, 0, 0.7);
 
   display: flex;
-  align-items: flex-end; /*  vem de baixo */
+
+  align-items: center;
+
   justify-content: center;
 
+  padding: 16px;
+
+  box-sizing: border-box;
+
   z-index: 9999;
+
+  overflow: hidden;
 }
 
 .popup-adicionais {
   width: 100%;
 
-  max-width: 420px;
+  max-width: 520px;
+
+  height: min(92vh, 820px);
 
   background: linear-gradient(180deg, #1f102b, #14091d);
 
   color: #fff;
 
-  border-radius: 24px 24px 0 0;
-
-  padding: 24px;
+  border-radius: 24px;
 
   border: 1px solid rgba(255, 255, 255, 0.06);
 
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
 
-  animation: subir 0.3s ease;
+  display: flex;
+
+  flex-direction: column;
+
+  overflow: hidden;
+
+  animation: subir 0.25s ease;
 }
 
 @keyframes subir {
@@ -382,12 +397,11 @@
 
   border: none;
 
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255,255,255,.12),
-      rgba(255,255,255,.04)
-    );
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.12),
+    rgba(255, 255, 255, 0.04)
+  );
 
   backdrop-filter: blur(12px);
 
@@ -400,14 +414,14 @@
   justify-content: center;
 
   box-shadow:
-    0 8px 20px rgba(0,0,0,.28),
-    inset 0 1px 1px rgba(255,255,255,.08);
+    0 8px 20px rgba(0, 0, 0, 0.28),
+    inset 0 1px 1px rgba(255, 255, 255, 0.08);
 
   cursor: pointer;
 
   z-index: 9999;
 
-  transition: all .2s ease;
+  transition: all 0.2s ease;
 }
 .produto-card:hover {
   box-shadow:
@@ -543,12 +557,11 @@
 
   border: none;
 
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255,255,255,.12),
-      rgba(255,255,255,.04)
-    );
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.12),
+    rgba(255, 255, 255, 0.04)
+  );
 
   backdrop-filter: blur(12px);
 
@@ -561,31 +574,30 @@
   justify-content: center;
 
   box-shadow:
-    0 8px 20px rgba(0,0,0,.28),
-    inset 0 1px 1px rgba(255,255,255,.08);
+    0 8px 20px rgba(0, 0, 0, 0.28),
+    inset 0 1px 1px rgba(255, 255, 255, 0.08);
 
   cursor: pointer;
 
   z-index: 9999;
 
-  transition: all .2s ease;
+  transition: all 0.2s ease;
 }
 
 .btn-home:hover,
 .btn-semana:hover {
   transform: translateY(-2px);
 
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255,255,255,.16),
-      rgba(255,255,255,.06)
-    );
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0.06)
+  );
 }
 
 .btn-home:active,
 .btn-semana:active {
-  transform: scale(.96);
+  transform: scale(0.96);
 }
 .acoes-flutuantes-semana {
   position: fixed;
@@ -610,12 +622,11 @@
 
   border: none;
 
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255,255,255,.12),
-      rgba(255,255,255,.04)
-    );
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.12),
+    rgba(255, 255, 255, 0.04)
+  );
 
   backdrop-filter: blur(12px);
 
@@ -630,25 +641,34 @@
   justify-content: center;
 
   box-shadow:
-    0 8px 20px rgba(0,0,0,.28),
-    inset 0 1px 1px rgba(255,255,255,.08);
+    0 8px 20px rgba(0, 0, 0, 0.28),
+    inset 0 1px 1px rgba(255, 255, 255, 0.08);
 
   cursor: pointer;
 
-  transition: all .2s ease;
+  transition: all 0.2s ease;
 }
 
 .btn-floating:hover {
   transform: translateY(-2px);
 
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255,255,255,.16),
-      rgba(255,255,255,.06)
-    );
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0.06)
+  );
 }
 
 .btn-floating:active {
-  transform: scale(.96);
+  transform: scale(0.96);
+}
+
+.popup-conteudo {
+  flex: 1;
+
+  overflow-y: auto;
+
+  padding: 24px;
+
+  min-height: 0;
 }
