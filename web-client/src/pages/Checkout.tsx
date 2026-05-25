@@ -151,10 +151,19 @@ export default function Checkout() {
 
         return {
           produtoId: item.produtoId,
+
+          nome: item.nome,
+
+          preco: item.preco,
+
           quantidade: item.quantidade,
+
           adicionais: adicionaisSeguro.map((a: any) => ({
             nome: a?.nome ?? '',
+
             preco: Number(a?.preco ?? 0),
+
+            quantidade: Number(a?.quantidade ?? 1),
           })),
         }
       })
