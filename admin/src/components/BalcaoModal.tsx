@@ -179,7 +179,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
       {
         uid: crypto.randomUUID(),
 
-        id: produtoSelecionado.id,
+        produtoId: produtoSelecionado.id,
 
         nome: variacaoSelecionada
           ? `${produtoSelecionado.nome} - ${variacaoSelecionada.nome}`
@@ -286,7 +286,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
             />
 
             {produtosFiltrados.map((p) => {
-              const selecionado = itens.some((i) => i.id === p.id)
+              const selecionado = itens.some((i) => i.produtoId === p.id)
 
               return (
                 <div
@@ -339,7 +339,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                         {p.adicionais.map((add: any) => {
                           const item = [...itens]
                             .reverse()
-                            .find((i) => i.id === p.id)
+                            .find((i) => i.produtoId === p.id)
 
                           const ativo = item?.adicionais?.find(
                             (a: any) => a.id === add.id,
