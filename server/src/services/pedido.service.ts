@@ -55,8 +55,13 @@ class PedidoService {
         const itemCriado = await tx.itemPedido.create({
           data: {
             pedidoId: pedido.id,
+
             produtoId: produto.id,
+
+            nomeProduto: item.nome,
+
             quantidade: item.quantidade,
+
             precoUnit,
           },
         })
