@@ -1,6 +1,17 @@
-/* ========================= */
-/* CONTAINER GERAL           */
-/* ========================= */
+body {
+  background: radial-gradient(
+    circle at top,
+    #2a003f,
+    #12001c 60%,
+    #09000f 100%
+  );
+
+  min-height: 100vh;
+
+  margin: 0;
+
+  font-family: Inter, system-ui, sans-serif;
+}
 
 .checkout-container {
   min-height: 100vh;
@@ -143,9 +154,7 @@
 /* BOTÃO PRINCIPAL           */
 /* ========================= */
 
-
 .checkout-button {
-  
   width: 100%;
 
   max-width: 520px;
