@@ -21,9 +21,6 @@ export default function Checkout() {
   const [tipoPedido, setTipoPedido] = useState<'retirada' | 'entrega'>(
     'retirada',
   )
-  const [metodoPagamento, setMetodoPagamento] = useState<'PIX' | 'CHECKOUT'>(
-    'CHECKOUT',
-  )
 
   //  NOVO
   const [foraDaArea, setForaDaArea] = useState(false)
