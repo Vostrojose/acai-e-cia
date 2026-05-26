@@ -384,7 +384,6 @@ export default function Checkout() {
             className="checkout-select"
           >
             <option value="CHECKOUT">Ir para pagamento</option>
-
           </select>
         </div>
         <div className="checkout-acoes">
