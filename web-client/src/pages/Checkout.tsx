@@ -219,7 +219,16 @@ export default function Checkout() {
   }, 0)
 
   return (
-    <Container>
+    <Container
+      background="
+    radial-gradient(
+      circle at top,
+      #2a003f,
+      #12001c 60%,
+      #09000f 100%
+    )
+  "
+    >
       <div className="checkout-container">
         <h1 className="checkout-title">💳 Checkout</h1>
 
