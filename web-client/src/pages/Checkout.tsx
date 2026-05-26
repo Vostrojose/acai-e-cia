@@ -245,14 +245,19 @@ export default function Checkout() {
                 <strong>
                   {item.quantidade}x {item.nome}
                 </strong>
-
-                {item.adicionais?.map((add: any, i: number) => (
-                  <div key={i} className="checkout-adicional">
-                    + {add.nome} (R$ {Number(add.preco).toFixed(2)})
+                <div className="checkout-item-info">
+                  <div className="checkout-adicionais">
+                    {item.adicionais?.map((add: any, i: number) => (
+                      <div key={i} className="checkout-adicional">
+                        + {add.nome}
+                      </div>
+                    ))}
                   </div>
-                ))}
 
-                <div>R$ {(precoExibicao * item.quantidade).toFixed(2)}</div>
+                  <div className="checkout-item-preco">
+                    R$ {(precoExibicao * item.quantidade).toFixed(2)}
+                  </div>
+                </div>
               </div>
             )
           })}
@@ -382,8 +387,6 @@ export default function Checkout() {
             <span>💳 Cartão</span>
 
             <span>📱 PIX</span>
-
-            <span>🔒 Seguro</span>
           </div>
         </div>
         <div className="checkout-acoes">
