@@ -5,12 +5,25 @@ import { theme } from '../assets/styles/adminTheme'
 
 type ItemPedido = {
   id: string
+
   quantidade: number
   precoUnit: number
+
   pedidoId: string
   produtoId: string
-}
 
+  nomeProduto?: string
+
+  produto?: {
+    nome: string
+  }
+
+  adicionais?: {
+    id: string
+    nome: string
+    quantidade: number
+  }[]
+}
 type Pedido = {
   id: string
   codigo: number
@@ -130,7 +143,33 @@ export default function Pedidos() {
                   <ul style={listaItens}>
                     {pedido.itens.map((item) => (
                       <li key={item.id}>
-                        {item.quantidade} × R$ {item.precoUnit.toFixed(2)}
+                        <div>
+                          <strong>
+                            {item.quantidade}x{' '}
+                            {item.nomeProduto ||
+                              item.produto?.nome ||
+                              'Produto'}
+                          </strong>
+                        </div>
+
+                        <div>R$ {item.precoUnit.toFixed(2)}</div>
+
+                        {item.adicionais && item.adicionais.length > 0 && (
+                          <div
+                            style={{
+                              marginTop: 4,
+                              paddingLeft: 12,
+                              fontSize: 14,
+                              opacity: 0.9,
+                            }}
+                          >
+                            {item.adicionais.map((add) => (
+                              <div key={add.id}>
+                                + {add.quantidade}x {add.nome}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -186,7 +225,7 @@ function CardMenu({ navigate }: any) {
           🛒
         </button>
         <button onClick={() => navigate('/dashboard')} style={btnMenu}>
-          📋 
+          📋
         </button>
         <button onClick={() => navigate('/auditoria')} style={btnMenu}>
           📊
