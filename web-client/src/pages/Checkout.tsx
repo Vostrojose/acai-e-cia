@@ -6,7 +6,7 @@ import Button from '../components/ui/Button'
 import '../assets/css/Checkout.css'
 
 export default function Checkout() {
-  const { itens, limparCarrinho } = useCart()
+  const { itens } = useCart()
 
   const [coordenadas, setCoordenadas] = useState<{
     lat: number
@@ -24,13 +24,6 @@ export default function Checkout() {
   const [metodoPagamento, setMetodoPagamento] = useState<'PIX' | 'CHECKOUT'>(
     'CHECKOUT',
   )
-
-  const [qrCode, setQrCode] = useState<string | null>(null)
-  const [aguardandoPagamento, setAguardandoPagamento] = useState(false)
-
-  const [pagamentoConfirmado, setPagamentoConfirmado] = useState(false)
-
-  const [pedidoAtualId, setPedidoAtualId] = useState<string | null>(null)
 
   //  NOVO
   const [foraDaArea, setForaDaArea] = useState(false)
@@ -156,19 +149,10 @@ export default function Checkout() {
 
         return {
           produtoId: item.produtoId,
-
-          nome: item.nome,
-
-          preco: item.preco,
-
           quantidade: item.quantidade,
-
           adicionais: adicionaisSeguro.map((a: any) => ({
             nome: a?.nome ?? '',
-
             preco: Number(a?.preco ?? 0),
-
-            quantidade: Number(a?.quantidade ?? 1),
           })),
         }
       })
@@ -203,56 +187,6 @@ export default function Checkout() {
       }
 
       localStorage.setItem('pedidoId', pedidoId)
-
-      if (metodoPagamento === 'PIX') {
-        const res = await api.post('/pagamento/pix', {
-          pedidoId,
-        })
-
-        setQrCode(res.data.data.qr_code_base64)
-
-        setPedidoAtualId(pedidoId)
-
-        setAguardandoPagamento(true)
-
-        const interval = setInterval(async () => {
-          try {
-            const statusResponse = await api.get(`/pedidos/${pedidoId}`)
-
-            const pedido = statusResponse.data?.data
-
-            if (!pedido) return
-
-            // AJUSTAR AQUI PARA O STATUS REAL
-            console.log('STATUS PEDIDO:', pedido.status)
-            if (pedido.status !== 'PENDENTE') {
-              clearInterval(interval)
-
-              setPagamentoConfirmado(true)
-
-              setAguardandoPagamento(false)
-
-              setQrCode(null)
-
-              limparCarrinho()
-
-              localStorage.removeItem('carrinho')
-            }
-          } catch (err) {
-            console.error('Erro ao verificar pagamento:', err)
-          }
-        }, 3000)
-
-        // timeout segurança
-        setTimeout(
-          () => {
-            clearInterval(interval)
-          },
-          1000 * 60 * 15,
-        )
-
-        return
-      }
 
       const pagamentoResponse = await api.post('/pagamento/checkout', {
         pedidoId,
@@ -440,40 +374,25 @@ export default function Checkout() {
             }
             className="checkout-select"
           >
-            <option value="CHECKOUT">Cartão / Mercado Pago</option>
+            <option value="CHECKOUT">Cartão de crédito</option>
+
             <option value="PIX">PIX</option>
           </select>
         </div>
         <div className="checkout-acoes">
-          <Button onClick={finalizarPedido}>
-            {loading ? 'Processando...' : 'Confirmar Pedido'}
+          <Button onClick={finalizarPedido} disabled={loading}>
+            {loading
+              ? 'Redirecionando para pagamento...'
+              : 'Ir para pagamento seguro'}
           </Button>
         </div>
-        {qrCode && (
-          <div className="checkout-card checkout-qr">
-            <h3>Pagamento PIX</h3>
-
-            <img src={`data:image/png;base64,${qrCode}`} alt="QR Code PIX" />
-            <p
-              style={{
-                marginTop: 16,
-                fontWeight: 'bold',
-                color: '#facc15',
-              }}
-            >
-              ⏳ Aguardando confirmação do pagamento...
-            </p>
-          </div>
-        )}
-        {pagamentoConfirmado && (
-          <div className="checkout-card">
-            <h2 style={{ color: '#22c55e' }}>✅ Pagamento confirmado!</h2>
-
-            <p>Seu pedido foi enviado para preparo.</p>
-
-            {pedidoAtualId && <p>Pedido #{pedidoAtualId}</p>}
-          </div>
-        )}
+        <p className="checkout-seguro">
+          🔒 Pagamento 100% seguro via Mercado Pago
+        </p>
+        <p className="checkout-info">
+          Após confirmar o pedido, você será redirecionado para o ambiente
+          seguro do Mercado Pago.
+        </p>
       </div>
     </Container>
   )
