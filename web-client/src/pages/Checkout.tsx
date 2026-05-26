@@ -383,9 +383,8 @@ export default function Checkout() {
             }
             className="checkout-select"
           >
-            <option value="CHECKOUT">Cartão de crédito</option>
+            <option value="CHECKOUT">Ir para pagamento</option>
 
-            <option value="PIX">PIX</option>
           </select>
         </div>
         <div className="checkout-acoes">
