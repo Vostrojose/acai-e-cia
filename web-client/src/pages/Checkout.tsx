@@ -374,17 +374,20 @@ export default function Checkout() {
         )}
 
         <div className="checkout-card">
-          <label>Forma de pagamento</label>
+          <label>Pagamento seguro</label>
 
-          <select
-            value={metodoPagamento}
-            onChange={(e) =>
-              setMetodoPagamento(e.target.value as 'PIX' | 'CHECKOUT')
-            }
-            className="checkout-select"
-          >
-            <option value="CHECKOUT">Ir para pagamento</option>
-          </select>
+          <p className="checkout-info">
+            Você será redirecionado para o ambiente seguro do Mercado Pago para
+            concluir seu pagamento.
+          </p>
+
+          <div className="checkout-badges">
+            <span>💳 Cartão</span>
+
+            <span>📱 PIX</span>
+
+            <span>🔒 Seguro</span>
+          </div>
         </div>
         <div className="checkout-acoes">
           <Button onClick={finalizarPedido} disabled={loading}>
@@ -395,10 +398,6 @@ export default function Checkout() {
         </div>
         <p className="checkout-seguro">
           🔒 Pagamento 100% seguro via Mercado Pago
-        </p>
-        <p className="checkout-info">
-          Após confirmar o pedido, você será redirecionado para o ambiente
-          seguro do Mercado Pago.
         </p>
       </div>
     </Container>
