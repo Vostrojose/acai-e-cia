@@ -6,7 +6,7 @@ import Button from '../components/ui/Button'
 import '../assets/css/Checkout.css'
 
 export default function Checkout() {
-  const { itens } = useCart()
+  const { itens, limparCarrinho } = useCart()
 
   const [coordenadas, setCoordenadas] = useState<{
     lat: number
@@ -26,6 +26,11 @@ export default function Checkout() {
   )
 
   const [qrCode, setQrCode] = useState<string | null>(null)
+  const [aguardandoPagamento, setAguardandoPagamento] = useState(false)
+
+  const [pagamentoConfirmado, setPagamentoConfirmado] = useState(false)
+
+  const [pedidoAtualId, setPedidoAtualId] = useState<string | null>(null)
 
   //  NOVO
   const [foraDaArea, setForaDaArea] = useState(false)
@@ -200,8 +205,52 @@ export default function Checkout() {
       localStorage.setItem('pedidoId', pedidoId)
 
       if (metodoPagamento === 'PIX') {
-        const res = await api.post('/pagamento/pix', { pedidoId })
+        const res = await api.post('/pagamento/pix', {
+          pedidoId,
+        })
+
         setQrCode(res.data.data.qr_code_base64)
+
+        setPedidoAtualId(pedidoId)
+
+        setAguardandoPagamento(true)
+
+        const interval = setInterval(async () => {
+          try {
+            const statusResponse = await api.get(`/pedidos/${pedidoId}`)
+
+            const pedido = statusResponse.data?.data
+
+            if (!pedido) return
+
+            // AJUSTAR AQUI PARA O STATUS REAL
+            console.log('STATUS PEDIDO:', pedido.status)
+            if (pedido.status !== 'PENDENTE') {
+              clearInterval(interval)
+
+              setPagamentoConfirmado(true)
+
+              setAguardandoPagamento(false)
+
+              setQrCode(null)
+
+              limparCarrinho()
+
+              localStorage.removeItem('carrinho')
+            }
+          } catch (err) {
+            console.error('Erro ao verificar pagamento:', err)
+          }
+        }, 3000)
+
+        // timeout segurança
+        setTimeout(
+          () => {
+            clearInterval(interval)
+          },
+          1000 * 60 * 15,
+        )
+
         return
       }
 
@@ -405,6 +454,24 @@ export default function Checkout() {
             <h3>Pagamento PIX</h3>
 
             <img src={`data:image/png;base64,${qrCode}`} alt="QR Code PIX" />
+            <p
+              style={{
+                marginTop: 16,
+                fontWeight: 'bold',
+                color: '#facc15',
+              }}
+            >
+              ⏳ Aguardando confirmação do pagamento...
+            </p>
+          </div>
+        )}
+        {pagamentoConfirmado && (
+          <div className="checkout-card">
+            <h2 style={{ color: '#22c55e' }}>✅ Pagamento confirmado!</h2>
+
+            <p>Seu pedido foi enviado para preparo.</p>
+
+            {pedidoAtualId && <p>Pedido #{pedidoAtualId}</p>}
           </div>
         )}
       </div>
