@@ -1,157 +1,92 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import api from '../services/api'
 
-export default function Balcao() {
+export default function BalcaoModal({ onClose, onSuccess }: any) {
   const [busca, setBusca] = useState('')
-
   const [produtos, setProdutos] = useState<any[]>([])
-
   const [itens, setItens] = useState<any[]>([])
 
-  const [produtoSelecionado, setProdutoSelecionado] =
-    useState<any | null>(null)
+  const [itemSelecionadoUid, setItemSelecionadoUid] = useState<string | null>(
+    null,
+  )
 
-  const [variacaoSelecionada, setVariacaoSelecionada] =
-    useState<any | null>(null)
+  const [formaPagamento, setFormaPagamento] = useState('PAGO')
+  const [clienteNome, setClienteNome] = useState('')
 
-  const [adicionaisSelecionados, setAdicionaisSelecionados] =
-    useState<any[]>([])
+  const [pularPreparo, setPularPreparo] = useState(true)
 
-  const [clienteNome, setClienteNome] =
-    useState('')
+  // 🔥 PROTEÇÃO DUPLICIDADE
+  const [salvando, setSalvando] = useState(false)
 
-  const [formaPagamento, setFormaPagamento] =
-    useState('PAGO')
-
-  const [salvando, setSalvando] =
-    useState(false)
+  /* ============================= */
+  /* BUSCAR PRODUTOS              */
+  /* ============================= */
 
   useEffect(() => {
-    carregarProdutos()
+    async function carregar() {
+      try {
+        const res = await api.get('/produtos')
+        setProdutos(res.data.data || [])
+      } catch (err) {
+        console.error('Erro ao carregar produtos', err)
+      }
+    }
+
+    carregar()
+
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = 'auto'
+    }
   }, [])
 
-  async function carregarProdutos() {
-    try {
-      const response =
-        await api.get('/produtos')
+  const produtosFiltrados = produtos.filter((p) =>
+    p.nome.toLowerCase().includes(busca.toLowerCase()),
+  )
+  /* ============================= */
+  /* ITEM                          */
+  /* ============================= */
 
-      setProdutos(response.data.data || [])
-    } catch (err) {
-      console.error(err)
-    }
-  }
-
-  function abrirProduto(produto: any) {
-    setProdutoSelecionado(produto)
-
-    setVariacaoSelecionada(null)
-
-    setAdicionaisSelecionados([])
-  }
-
-  function alterarQuantidadePopup(
-    add: any,
-    delta: number,
-  ) {
-    setAdicionaisSelecionados((prev) => {
-      const existente = prev.find(
-        (a) => a.id === add.id,
-      )
-
-      if (!existente && delta > 0) {
-        return [
-          ...prev,
-
-          {
-            ...add,
-
-            quantidade: 1,
-          },
-        ]
-      }
-
-      if (!existente) return prev
-
-      const novaQuantidade =
-        existente.quantidade + delta
-
-      if (novaQuantidade <= 0) {
-        return prev.filter(
-          (a) => a.id !== add.id,
-        )
-      }
-
-      return prev.map((a) =>
-        a.id === add.id
-          ? {
-              ...a,
-
-              quantidade: novaQuantidade,
-            }
-          : a,
-      )
-    })
-  }
-
-  function confirmarProduto() {
-    if (!produtoSelecionado) return
-
-    if (
-      produtoSelecionado.variacoes?.length > 0 &&
-      !variacaoSelecionada
-    ) {
-      alert('Selecione uma variação')
-      return
-    }
-
-    const adicionaisClonados =
-      adicionaisSelecionados.map(
-        (a: any) => ({
-          id: a.id,
-
-          nome: a.nome,
-
-          preco: Number(a.preco),
-
-          quantidade: a.quantidade,
-        }),
-      )
-
+  function adicionarItem(produto: any) {
     const novoItem = {
       uid: crypto.randomUUID(),
 
-      produtoId: produtoSelecionado.id,
+      produtoId: produto.id,
 
-      nome: variacaoSelecionada
-        ? `${produtoSelecionado.nome} - ${variacaoSelecionada.nome}`
-        : produtoSelecionado.nome,
+      nome: produto.nome,
 
-      preco: Number(
-        variacaoSelecionada?.preco ??
-          produtoSelecionado.preco,
-      ),
+      preco: Number(produto.variacoes?.[0]?.preco ?? produto.preco),
+
+      variacaoId: produto.variacoes?.[0]?.id ?? null,
+
+      variacaoNome: produto.variacoes?.[0]?.nome ?? null,
 
       quantidade: 1,
 
-      adicionais: adicionaisClonados,
+      adicionais: [],
     }
 
-    setItens((prev) => [
-      ...prev,
-      novoItem,
-    ])
+    setItens((prev) => [...prev, novoItem])
 
-    setProdutoSelecionado(null)
-
-    setVariacaoSelecionada(null)
-
-    setAdicionaisSelecionados([])
+    setItemSelecionadoUid(novoItem.uid)
   }
 
-  function alterarQuantidade(
-    uid: string,
-    delta: number,
-  ) {
+  /* ============================= */
+  /* QUANTIDADE                    */
+  /* ============================= */
+
+  function removerItem(uid: string) {
+    if (salvando) return
+
+    setItens((prev) => prev.filter((i) => i.uid !== uid))
+
+    if (itemSelecionadoUid === uid) {
+      setItemSelecionadoUid(null)
+    }
+  }
+
+  function alterarQuantidade(uid: string, delta: number) {
     if (salvando) return
 
     setItens((prev) =>
@@ -159,669 +94,467 @@ export default function Balcao() {
         i.uid === uid
           ? {
               ...i,
-
-              quantidade: Math.max(
-                1,
-                (i.quantidade || 1) + delta,
-              ),
+              quantidade: Math.max(1, (i.quantidade || 1) + delta),
             }
           : i,
       ),
     )
   }
 
-  function removerItem(uid: string) {
+  /* ============================= */
+  /* ADICIONAL                     */
+  /* ============================= */
+
+  function toggleAdicional(itemId: string, adicional: any) {
     if (salvando) return
 
     setItens((prev) =>
-      prev.filter((i) => i.uid !== uid),
+      prev.map((item) => {
+        if (item.uid !== itemId) return item
+
+        const existente = item.adicionais?.find(
+          (a: any) => a.id === adicional.id,
+        )
+
+        if (existente) {
+          return {
+            ...item,
+            adicionais: item.adicionais.filter(
+              (a: any) => a.id !== adicional.id,
+            ),
+          }
+        }
+
+        return {
+          ...item,
+          adicionais: [
+            ...(item.adicionais || []),
+            {
+              id: adicional.id,
+              nome: adicional.nome,
+              preco: adicional.preco,
+              quantidade: 1,
+            },
+          ],
+        }
+      }),
     )
   }
 
-  const total = useMemo(() => {
-    return itens.reduce(
-      (acc: number, item: any) => {
-        const adicionaisTotal =
-          (item.adicionais || []).reduce(
-            (soma: number, add: any) =>
-              soma +
-              Number(add.preco) *
-                add.quantidade,
-            0,
-          )
+  /* ============================= */
+  /* QTD ADICIONAL                 */
+  /* ============================= */
 
-        return (
-          acc +
-          (Number(item.preco) +
-            adicionaisTotal) *
-            item.quantidade
-        )
-      },
+  function alterarQtdAdicional(
+    itemId: string,
+    adicionalId: string,
+    delta: number,
+  ) {
+    if (salvando) return
 
-      0,
+    setItens((prev) =>
+      prev.map((item) => {
+        if (item.uid !== itemId) return item
+
+        return {
+          ...item,
+          adicionais: (item.adicionais || []).map((a: any) =>
+            a.id === adicionalId
+              ? {
+                  ...a,
+                  quantidade: Math.max(1, (a.quantidade || 1) + delta),
+                }
+              : a,
+          ),
+        }
+      }),
     )
-  }, [itens])
+  }
 
-  async function finalizarPedido() {
+  /* ============================= */
+  /* SALVAR                        */
+  /* ============================= */
+
+  async function salvar() {
+    if (salvando) return
+
+    if (itens.length === 0) {
+      alert('Selecione pelo menos um item')
+      return
+    }
+
+    const nomeNormalizado = clienteNome
+      ? clienteNome.toUpperCase().replace(/\s+/g, ' ').trim()
+      : null
+
+    if (formaPagamento !== 'PAGO' && !nomeNormalizado) {
+      alert('Informe o nome do cliente')
+      return
+    }
+
     try {
       setSalvando(true)
 
-      const payload = {
-        clienteNome,
+      const res = await api.post('/balcao', {
+        itens,
+        forma: formaPagamento,
+        clienteNome: formaPagamento !== 'PAGO' ? nomeNormalizado : null,
+        pularPreparo,
+      })
 
-        formaPagamento,
+      const { creditoUsado, valorRestante } = res.data
 
-        itens: itens.map((i) => ({
-          produtoId: i.produtoId,
-
-          nomeProduto: i.nome,
-
-          quantidade: i.quantidade,
-
-          preco: i.preco,
-
-          adicionais: i.adicionais,
-        })),
+      if (creditoUsado > 0) {
+        alert(`💳 Crédito usado: R$ ${creditoUsado.toFixed(2)}`)
       }
 
-      await api.post(
-        '/pedidos/balcao',
-        payload,
-      )
+      if (valorRestante > 0) {
+        alert(`💵 Pagar no caixa: R$ ${valorRestante.toFixed(2)}`)
+      }
 
-      alert('Pedido criado')
-
-      setItens([])
-
-      setClienteNome('')
-
-      setProdutoSelecionado(null)
-
-      setVariacaoSelecionada(null)
-
-      setAdicionaisSelecionados([])
+      onSuccess?.()
+      onClose?.()
     } catch (err) {
       console.error(err)
-
-      alert('Erro ao criar pedido')
+      alert('Erro ao salvar venda')
     } finally {
       setSalvando(false)
     }
   }
 
-  const produtosFiltrados =
-    produtos.filter((p) =>
-      p.nome
-        .toLowerCase()
-        .includes(busca.toLowerCase()),
-    )
-
   return (
-    <div
-      style={{
-        padding: 20,
+    <div style={overlay}>
+      <div style={modal}>
+        {/* HEADER */}
 
-        display: 'grid',
+        <div style={header}>
+          <div>
+            <h2 style={{ margin: 0 }}>🧾 Venda Balcão</h2>
 
-        gridTemplateColumns:
-          window.innerWidth < 900
-            ? '1fr'
-            : '1fr 380px',
-
-        gap: 20,
-      }}
-    >
-      <div>
-        <input
-          value={busca}
-          onChange={(e) =>
-            setBusca(e.target.value)
-          }
-          placeholder="Buscar produto"
-          style={{
-            width: '100%',
-
-            padding: 16,
-
-            borderRadius: 16,
-
-            border: '1px solid #ddd',
-
-            marginBottom: 20,
-          }}
-        />
-
-        <div
-          style={{
-            display: 'grid',
-
-            gridTemplateColumns:
-              'repeat(auto-fill,minmax(220px,1fr))',
-
-            gap: 16,
-          }}
-        >
-          {produtosFiltrados.map((p) => {
-            const menorPreco =
-              p.variacoes?.length > 0
-                ? Math.min(
-                    ...p.variacoes.map(
-                      (v: any) =>
-                        Number(v.preco),
-                    ),
-                  )
-                : Number(p.preco)
-
-            return (
-              <div
-                key={p.id}
-                onClick={() =>
-                  abrirProduto(p)
-                }
-                style={{
-                  background: '#111827',
-
-                  color: '#fff',
-
-                  padding: 20,
-
-                  borderRadius: 20,
-
-                  cursor: 'pointer',
-                }}
-              >
-                <h3>{p.nome}</h3>
-
-                <div>
-                  A partir de R${' '}
-                  {menorPreco.toFixed(2)}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      <div
-        style={{
-          background: '#111827',
-
-          color: '#fff',
-
-          borderRadius: 24,
-
-          padding: 20,
-
-          maxHeight:
-            window.innerWidth < 900
-              ? 'auto'
-              : 'calc(100vh - 40px)',
-
-          display: 'flex',
-
-          flexDirection: 'column',
-        }}
-      >
-        <h2>Resumo do Pedido</h2>
-
-        <div
-          style={{
-            flex: 1,
-
-            overflowY: 'auto',
-
-            marginTop: 20,
-          }}
-        >
-          {itens.map((i) => (
-            <div
-              key={i.uid}
+            <p
               style={{
-                background:
-                  'rgba(255,255,255,0.05)',
-
-                padding: 16,
-
-                borderRadius: 16,
-
-                marginBottom: 14,
+                marginTop: 6,
+                opacity: 0.7,
+                fontSize: 14,
               }}
             >
-              <strong>{i.nome}</strong>
+              Operação rápida de pedidos
+            </p>
+          </div>
 
-              {(i.adicionais || []).map(
-                (a: any) => (
-                  <div key={a.id}>
-                    + {a.quantidade}x{' '}
-                    {a.nome}
-                  </div>
-                ),
-              )}
-
-              <div
-                style={{
-                  display: 'flex',
-
-                  gap: 10,
-
-                  marginTop: 14,
-                }}
-              >
-                <button
-                  onClick={() =>
-                    alterarQuantidade(
-                      i.uid,
-                      -1,
-                    )
-                  }
-                >
-                  -
-                </button>
-
-                <span>{i.quantidade}</span>
-
-                <button
-                  onClick={() =>
-                    alterarQuantidade(
-                      i.uid,
-                      1,
-                    )
-                  }
-                >
-                  +
-                </button>
-
-                <button
-                  onClick={() =>
-                    removerItem(i.uid)
-                  }
-                >
-                  🗑
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div
-          style={{
-            marginTop: 20,
-          }}
-        >
-          <input
-            placeholder="Nome cliente"
-            value={clienteNome}
-            onChange={(e) =>
-              setClienteNome(
-                e.target.value,
-              )
-            }
-            style={{
-              width: '100%',
-
-              padding: 14,
-
-              borderRadius: 14,
-
-              marginBottom: 14,
-            }}
-          />
-
-          <select
-            value={formaPagamento}
-            onChange={(e) =>
-              setFormaPagamento(
-                e.target.value,
-              )
-            }
-            style={{
-              width: '100%',
-
-              padding: 14,
-
-              borderRadius: 14,
-
-              marginBottom: 14,
-            }}
-          >
-            <option value="PAGO">
-              Pago
-            </option>
-
-            <option value="DINHEIRO">
-              Dinheiro
-            </option>
-
-            <option value="PIX">
-              Pix
-            </option>
-
-            <option value="CARTAO">
-              Cartão
-            </option>
-          </select>
-
-          <h2>
-            Total: R${' '}
-            {total.toFixed(2)}
-          </h2>
-
-          <button
-            onClick={finalizarPedido}
-            disabled={
-              itens.length === 0 ||
-              salvando
-            }
-            style={{
-              width: '100%',
-
-              padding: 18,
-
-              borderRadius: 16,
-
-              border: 'none',
-
-              background: '#22c55e',
-
-              color: '#fff',
-
-              fontWeight: 'bold',
-
-              fontSize: 18,
-
-              cursor: 'pointer',
-            }}
-          >
-            Finalizar Pedido
+          <button onClick={onClose} style={closeBtn}>
+            ×
           </button>
         </div>
-      </div>
 
-      {produtoSelecionado && (
-        <div
-          onClick={() =>
-            setProdutoSelecionado(null)
-          }
-          style={{
-            position: 'fixed',
+        {/* BODY */}
 
-            inset: 0,
+        <div style={body}>
+          {/* PRODUTOS */}
 
-            background:
-              'rgba(0,0,0,0.7)',
+          <div style={coluna}>
+            <input
+              placeholder="🔍 Buscar produto"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              style={input}
+            />
 
-            display: 'flex',
+            {produtosFiltrados.map((p) => {
+              const selecionado = itens.find(
+                (i) => i.produtoId === p.id && i.uid === itemSelecionadoUid,
+              )
 
-            justifyContent:
-              'center',
-
-            alignItems: 'center',
-
-            zIndex: 99999,
-
-            padding: 20,
-          }}
-        >
-          <div
-            onClick={(e) =>
-              e.stopPropagation()
-            }
-            style={{
-              background: '#111827',
-
-              width: '100%',
-
-              maxWidth: 500,
-
-              maxHeight: '90vh',
-
-              borderRadius: 24,
-
-              color: '#fff',
-
-              display: 'flex',
-
-              flexDirection: 'column',
-
-              overflow: 'hidden',
-            }}
-          >
-            <div
-              style={{
-                padding: 24,
-
-                borderBottom:
-                  '1px solid rgba(255,255,255,0.06)',
-              }}
-            >
-              <h2>
-                {
-                  produtoSelecionado.nome
-                }
-              </h2>
-            </div>
-
-            <div
-              style={{
-                flex: 1,
-
-                overflowY: 'auto',
-
-                padding: 24,
-              }}
-            >
-              {produtoSelecionado.variacoes
-                ?.length > 0 && (
+              return (
                 <div
-                  style={{
-                    marginBottom: 24,
+                  key={p.id}
+                  style={produtoCard(!!selecionado)}
+                  onClick={() => {
+                    if (selecionado) {
+                      setItemSelecionadoUid(selecionado.uid)
+                      return
+                    }
+
+                    adicionarItem(p)
                   }}
                 >
-                  <h3>
-                    Escolha o tamanho
-                  </h3>
+                  <div style={produtoTopo}>
+                    <div>
+                      <div style={produtoNome}>{p.nome}</div>
 
-                  {produtoSelecionado.variacoes
-                    .filter(
-                      (v: any) =>
-                        v.ativo,
-                    )
-                    .map((v: any) => (
-                      <label
-                        key={v.id}
-                        style={{
-                          display: 'flex',
+                      <div style={produtoPreco}>
+                        R$ {Number(p.preco).toFixed(2)}
+                      </div>
+                    </div>
 
-                          gap: 10,
-
-                          marginBottom: 12,
-                        }}
-                      >
-                        <input
-                          type="radio"
-                          checked={
-                            variacaoSelecionada?.id ===
-                            v.id
-                          }
-                          onChange={() =>
-                            setVariacaoSelecionada(
-                              v,
-                            )
-                          }
-                        />
-
-                        <span>
-                          {v.nome} — R${' '}
-                          {Number(
-                            v.preco,
-                          ).toFixed(2)}
-                        </span>
-                      </label>
-                    ))}
-                </div>
-              )}
-
-              {produtoSelecionado.adicionais
-                ?.filter(
-                  (a: any) => a.ativo,
-                )
-                .map((add: any) => {
-                  const selecionado =
-                    adicionaisSelecionados.find(
-                      (a) =>
-                        a.id === add.id,
-                    )
-
-                  const quantidade =
-                    selecionado?.quantidade ||
-                    0
-
-                  const gratis =
-                    Number(add.preco) ===
-                    0
-
-                  return (
                     <div
-                      key={add.id}
                       style={{
-                        display: 'flex',
-
-                        justifyContent:
-                          'space-between',
-
-                        alignItems:
-                          'center',
-
-                        marginBottom: 16,
+                        ...checkCircle,
+                        background: selecionado ? '#22c55e' : '#374151',
                       }}
                     >
-                      <div>
-                        <strong>
-                          {add.nome}
-                        </strong>
-
-                        <div>
-                          {gratis
-                            ? 'GRÁTIS'
-                            : `+R$ ${Number(
-                                add.preco,
-                              ).toFixed(2)}`}
-                        </div>
+                      {selecionado ? '✓' : ''}
+                    </div>
+                  </div>
+                  {selecionado && p.variacoes?.length > 0 && (
+                    <div
+                      style={{
+                        marginTop: 14,
+                      }}
+                    >
+                      <div
+                        style={{
+                          marginBottom: 10,
+                          fontSize: 13,
+                          opacity: 0.7,
+                        }}
+                      >
+                        Variações
                       </div>
 
-                      {gratis ? (
-                        <input
-                          type="checkbox"
-                          checked={
-                            quantidade > 0
-                          }
-                          onChange={(
-                            e,
-                          ) => {
-                            if (
-                              e.target
-                                .checked
-                            ) {
-                              alterarQuantidadePopup(
-                                add,
-                                1,
-                              )
-                            } else {
-                              alterarQuantidadePopup(
-                                add,
-                                -1,
-                              )
-                            }
-                          }}
-                        />
-                      ) : (
-                        <div
-                          style={{
-                            display:
-                              'flex',
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: 8,
+                        }}
+                      >
+                        {p.variacoes.map((v: any) => {
+                          const item = itens.find(
+                            (i) => i.uid === itemSelecionadoUid,
+                          )
 
-                            gap: 10,
+                          const ativo = item?.variacaoId === v.id
 
-                            alignItems:
-                              'center',
-                          }}
-                        >
-                          <button
-                            onClick={() =>
-                              alterarQuantidadePopup(
-                                add,
-                                -1,
-                              )
-                            }
-                          >
-                            -
-                          </button>
+                          return (
+                            <div
+                              key={v.id}
+                              style={adicionalTag(ativo)}
+                              onClick={(e) => {
+                                e.stopPropagation()
 
-                          <span>
-                            {quantidade}
-                          </span>
+                                setItens((prev) =>
+                                  prev.map((i) =>
+                                    i.uid === item?.uid
+                                      ? {
+                                          ...i,
 
-                          <button
-                            onClick={() =>
-                              alterarQuantidadePopup(
-                                add,
-                                1,
-                              )
-                            }
-                          >
-                            +
-                          </button>
-                        </div>
-                      )}
+                                          preco: Number(v.preco),
+
+                                          variacaoId: v.id,
+
+                                          variacaoNome: v.nome,
+
+                                          nome: `${p.nome} - ${v.nome}`,
+                                        }
+                                      : i,
+                                  ),
+                                )
+                              }}
+                            >
+                              {v.nome}
+
+                              <strong>R$ {Number(v.preco).toFixed(2)}</strong>
+                            </div>
+                          )
+                        })}
+                      </div>
                     </div>
-                  )
-                })}
-            </div>
+                  )}
 
-            <div
-              style={{
-                padding: 24,
+                  {selecionado && p.adicionais?.length > 0 && (
+                    <div
+                      style={{
+                        marginTop: 14,
+                      }}
+                    >
+                      <div
+                        style={{
+                          marginBottom: 10,
+                          fontSize: 13,
+                          opacity: 0.7,
+                        }}
+                      >
+                        Adicionais
+                      </div>
 
-                borderTop:
-                  '1px solid rgba(255,255,255,0.06)',
-              }}
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: 8,
+                        }}
+                      >
+                        {p.adicionais.map((add: any) => {
+                          const item = itens.find(
+                            (i) => i.uid === itemSelecionadoUid,
+                          )
+
+                          const ativo = item?.adicionais?.find(
+                            (a: any) => a.id === add.id,
+                          )
+
+                          return (
+                            <div
+                              key={add.id}
+                              style={adicionalTag(!!ativo)}
+                              onClick={(e) => {
+                                e.stopPropagation()
+
+                                toggleAdicional(item.uid, add)
+                              }}
+                            >
+                              {ativo ? '✓' : '+'}
+
+                              {add.nome}
+
+                              <strong>R$ {Number(add.preco).toFixed(2)}</strong>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          {/* RESUMO */}
+
+          <div style={coluna}>
+            <h3 style={{ marginTop: 0 }}>🛒 Itens selecionados</h3>
+
+            {itens.length === 0 && (
+              <div style={emptyState}>Nenhum item selecionado</div>
+            )}
+
+            {itens.map((i) => (
+              <div
+                key={i.uid}
+                style={resumoCard}
+                onClick={() => setItemSelecionadoUid(i.uid)}
+              >
+                <div style={resumoTopo}>
+                  <div>
+                    <div style={resumoNome}>{i.nome}</div>
+
+                    {i.adicionais?.length > 0 && (
+                      <div style={resumoAdicionais}>
+                        {i.adicionais.map((a: any) => (
+                          <div key={a.id}>
+                            + {a.nome} x{a.quantidade}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={resumoPreco}>
+                    R${' '}
+                    {(
+                      (i.preco +
+                        (i.adicionais || []).reduce(
+                          (s: number, a: any) => s + a.preco * a.quantidade,
+                          0,
+                        )) *
+                      i.quantidade
+                    ).toFixed(2)}
+                  </div>
+                </div>
+
+                <div style={quantidadeBox}>
+                  - quantidade +
+                  <button
+                    style={btnTouch}
+                    onClick={() => alterarQuantidade(i.uid, -1)}
+                    disabled={salvando}
+                  >
+                    -
+                  </button>
+                  <div style={qtdNumero}>{i.quantidade}</div>
+                  <button
+                    style={btnTouch}
+                    onClick={() => alterarQuantidade(i.uid, +1)}
+                    disabled={salvando}
+                  >
+                    +
+                  </button>
+                  <button style={btnDelete} onClick={() => removerItem(i.uid)}>
+                    🗑
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            <select
+              value={formaPagamento}
+              onChange={(e) => setFormaPagamento(e.target.value)}
+              style={input}
             >
+              <option value="PAGO">💵 Pago</option>
+
+              <option value="FIADO">🧾 Fiado</option>
+
+              <option value="CREDITO">💳 Usar Crédito</option>
+            </select>
+
+            {formaPagamento !== 'PAGO' && (
+              <input
+                placeholder="Nome do cliente"
+                value={clienteNome}
+                onChange={(e) => setClienteNome(e.target.value.toUpperCase())}
+                style={input}
+              />
+            )}
+
+            <label style={checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={pularPreparo}
+                onChange={(e) => setPularPreparo(e.target.checked)}
+              />
+              Pedido já pronto
+            </label>
+
+            <div style={totalBox}>
+              <div style={totalLabel}>Total da venda</div>
+
+              <div style={totalValor}>
+                R${' '}
+                {itens
+                  .reduce((total, i) => {
+                    const adicionais = (i.adicionais || []).reduce(
+                      (s: number, a: any) => s + a.preco * a.quantidade,
+                      0,
+                    )
+
+                    return total + (i.preco + adicionais) * i.quantidade
+                  }, 0)
+                  .toFixed(2)}
+              </div>
+
               <button
-                onClick={
-                  confirmarProduto
-                }
+                onClick={salvar}
+                disabled={salvando}
                 style={{
-                  width: '100%',
-
-                  background:
-                    '#22c55e',
-
-                  border: 'none',
-
-                  padding: 18,
-
-                  borderRadius: 16,
-
-                  color: '#fff',
-
-                  fontWeight: 'bold',
-
-                  fontSize: 18,
-
-                  cursor: 'pointer',
+                  ...btn,
+                  opacity: salvando ? 0.6 : 1,
                 }}
               >
-                ✅ Confirmar Produto
+                {salvando ? 'Salvando venda...' : '💾 Salvar venda'}
+              </button>
+
+              <button onClick={onClose} style={btnDanger}>
+                Cancelar
               </button>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }
-
-
 
 /* ============================= */
 /* ESTILOS                       */
