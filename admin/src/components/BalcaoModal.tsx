@@ -599,7 +599,9 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
             justifyContent: 'center',
 
-            alignItems: 'center',
+            alignItems: 'flex-start',
+
+            overflowY: 'auto',
 
             zIndex: 99999,
 
@@ -614,11 +616,9 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
               width: '100%',
 
-              height: '100vh',
-
               maxWidth: 1100,
 
-              maxHeight: '100vh',
+              margin: '40px 0',
 
               color: '#fff',
 
