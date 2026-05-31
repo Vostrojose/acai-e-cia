@@ -6,6 +6,10 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   const [produtos, setProdutos] = useState<any[]>([])
   const [itens, setItens] = useState<any[]>([])
 
+  const [itemSelecionadoUid, setItemSelecionadoUid] = useState<string | null>(
+    null,
+  )
+
   const [formaPagamento, setFormaPagamento] = useState('PAGO')
   const [clienteNome, setClienteNome] = useState('')
 
@@ -40,36 +44,32 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   const produtosFiltrados = produtos.filter((p) =>
     p.nome.toLowerCase().includes(busca.toLowerCase()),
   )
-
   /* ============================= */
   /* ITEM                          */
   /* ============================= */
 
   function adicionarItem(produto: any) {
-    setItens((prev) => {
-      const existente = prev.find((i) => i.id === produto.id)
+    const novoItem = {
+      uid: crypto.randomUUID(),
 
-      return [
-        ...prev,
-        {
-          uid: crypto.randomUUID(),
+      produtoId: produto.id,
 
-          produtoId: produto.id,
+      nome: produto.nome,
 
-          nome: produto.nome,
+      preco: Number(produto.variacoes?.[0]?.preco ?? produto.preco),
 
-          preco: Number(produto.variacoes?.[0]?.preco ?? produto.preco),
+      variacaoId: produto.variacoes?.[0]?.id ?? null,
 
-          variacaoId: produto.variacoes?.[0]?.id ?? null,
+      variacaoNome: produto.variacoes?.[0]?.nome ?? null,
 
-          variacaoNome: produto.variacoes?.[0]?.nome ?? null,
+      quantidade: 1,
 
-          quantidade: 1,
+      adicionais: [],
+    }
 
-          adicionais: [],
-        },
-      ]
-    })
+    setItens((prev) => [...prev, novoItem])
+
+    setItemSelecionadoUid(novoItem.uid)
   }
 
   /* ============================= */
@@ -251,13 +251,22 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
             />
 
             {produtosFiltrados.map((p) => {
-              const selecionado = itens.find((i) => i.produtoId === p.id)
+              const selecionado = itens.find(
+                (i) => i.produtoId === p.id && i.uid === itemSelecionadoUid,
+              )
 
               return (
                 <div
                   key={p.id}
                   style={produtoCard(!!selecionado)}
-                  onClick={() => adicionarItem(p)}
+                  onClick={() => {
+                    if (selecionado) {
+                      setItemSelecionadoUid(selecionado.uid)
+                      return
+                    }
+
+                    adicionarItem(p)
+                  }}
                 >
                   <div style={produtoTopo}>
                     <div>
@@ -301,7 +310,9 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                         }}
                       >
                         {p.variacoes.map((v: any) => {
-                          const item = itens.find((i) => i.produtoId === p.id)
+                          const item = itens.find(
+                            (i) => i.uid === itemSelecionadoUid,
+                          )
 
                           const ativo = item?.variacaoId === v.id
 
@@ -365,7 +376,9 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                         }}
                       >
                         {p.adicionais.map((add: any) => {
-                          const item = itens.find((i) => i.produtoId === p.id)
+                          const item = itens.find(
+                            (i) => i.uid === itemSelecionadoUid,
+                          )
 
                           const ativo = item?.adicionais?.find(
                             (a: any) => a.id === add.id,
@@ -407,7 +420,11 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
             )}
 
             {itens.map((i) => (
-              <div key={i.uid} style={resumoCard}>
+              <div
+                key={i.uid}
+                style={resumoCard}
+                onClick={() => setItemSelecionadoUid(i.uid)}
+              >
                 <div style={resumoTopo}>
                   <div>
                     <div style={resumoNome}>{i.nome}</div>
