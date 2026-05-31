@@ -5,22 +5,18 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   const [busca, setBusca] = useState('')
   const [produtos, setProdutos] = useState<any[]>([])
   const [itens, setItens] = useState<any[]>([])
-  const [produtoSelecionado, setProdutoSelecionado] = useState<any | null>(null)
-
-  const [variacaoSelecionada, setVariacaoSelecionada] = useState<any | null>(
-    null,
-  )
-
-  const [adicionaisSelecionados, setAdicionaisSelecionados] = useState<any[]>(
-    [],
-  )
 
   const [formaPagamento, setFormaPagamento] = useState('PAGO')
   const [clienteNome, setClienteNome] = useState('')
 
   const [pularPreparo, setPularPreparo] = useState(true)
 
+  // 🔥 PROTEÇÃO DUPLICIDADE
   const [salvando, setSalvando] = useState(false)
+
+  /* ============================= */
+  /* BUSCAR PRODUTOS              */
+  /* ============================= */
 
   useEffect(() => {
     async function carregar() {
@@ -45,19 +41,49 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
     p.nome.toLowerCase().includes(busca.toLowerCase()),
   )
 
-  function abrirProduto(produto: any) {
-    setProdutoSelecionado(produto)
+  /* ============================= */
+  /* ITEM                          */
+  /* ============================= */
 
-    setVariacaoSelecionada(null)
+  function toggleItem(produto: any) {
+    setItens((prev) => {
+      const existente = prev.find((i) => i.id === produto.id)
 
-    setAdicionaisSelecionados([])
+      if (existente) {
+        return prev.filter((i) => i.id !== produto.id)
+      }
+
+      return [
+        ...prev,
+        {
+          id: produto.id,
+
+          nome: produto.nome,
+
+          preco: produto.variacoes?.[0]?.preco ?? produto.preco,
+
+          variacaoId: produto.variacoes?.[0]?.id ?? null,
+
+          variacaoNome: produto.variacoes?.[0]?.nome ?? null,
+
+          quantidade: 1,
+
+          adicionais: [],
+        },
+      ]
+    })
   }
-  function alterarQuantidade(uid: string, delta: number) {
+
+  /* ============================= */
+  /* QUANTIDADE                    */
+  /* ============================= */
+
+  function alterarQuantidade(id: string, delta: number) {
     if (salvando) return
 
     setItens((prev) =>
       prev.map((i) =>
-        i.uid === uid
+        i.id === id
           ? {
               ...i,
               quantidade: Math.max(1, (i.quantidade || 1) + delta),
@@ -66,12 +92,17 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
       ),
     )
   }
-  function toggleAdicional(uid: string, adicional: any) {
+
+  /* ============================= */
+  /* ADICIONAL                     */
+  /* ============================= */
+
+  function toggleAdicional(itemId: string, adicional: any) {
     if (salvando) return
 
     setItens((prev) =>
       prev.map((item) => {
-        if (item.uid !== uid) return item
+        if (item.id !== itemId) return item
 
         const existente = item.adicionais?.find(
           (a: any) => a.id === adicional.id,
@@ -102,8 +133,12 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
     )
   }
 
+  /* ============================= */
+  /* QTD ADICIONAL                 */
+  /* ============================= */
+
   function alterarQtdAdicional(
-    uid: string,
+    itemId: string,
     adicionalId: string,
     delta: number,
   ) {
@@ -111,7 +146,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
     setItens((prev) =>
       prev.map((item) => {
-        if (item.uid !== uid) return item
+        if (item.id !== itemId) return item
 
         return {
           ...item,
@@ -127,80 +162,10 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
       }),
     )
   }
-  function alterarQuantidadePopup(add: any, delta: number) {
-    setAdicionaisSelecionados((prev: any[]) => {
-      const existente = prev.find((a) => a.id === add.id)
 
-      if (!existente && delta > 0) {
-        return [
-          ...prev,
-          {
-            ...add,
-            quantidade: 1,
-          },
-        ]
-      }
-
-      if (!existente) return prev
-
-      const novaQuantidade = existente.quantidade + delta
-
-      if (novaQuantidade <= 0) {
-        return prev.filter((a) => a.id !== add.id)
-      }
-
-      return prev.map((a) =>
-        a.id === add.id
-          ? {
-              ...a,
-              quantidade: novaQuantidade,
-            }
-          : a,
-      )
-    })
-  }
-  function confirmarProduto() {
-    if (!produtoSelecionado) return
-
-    if (produtoSelecionado.variacoes?.length > 0 && !variacaoSelecionada) {
-      alert('Selecione um tamanho')
-      return
-    }
-
-    const adicionaisClonados = adicionaisSelecionados.map((a: any) => ({
-      id: a.id,
-      nome: a.nome,
-      preco: Number(a.preco),
-      quantidade: a.quantidade,
-    }))
-
-    setItens((prev) => [
-      ...prev,
-      {
-        uid: crypto.randomUUID(),
-
-        id: produtoSelecionado.id,
-
-        nome: variacaoSelecionada
-          ? `${produtoSelecionado.nome} - ${variacaoSelecionada.nome}`
-          : produtoSelecionado.nome,
-
-        preco: variacaoSelecionada
-          ? Number(variacaoSelecionada.preco)
-          : Number(produtoSelecionado.preco),
-
-        quantidade: 1,
-
-        adicionais: adicionaisClonados,
-      },
-    ])
-
-    setProdutoSelecionado(null)
-
-    setVariacaoSelecionada(null)
-
-    setAdicionaisSelecionados([])
-  }
+  /* ============================= */
+  /* SALVAR                        */
+  /* ============================= */
 
   async function salvar() {
     if (salvando) return
@@ -252,6 +217,8 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   return (
     <div style={overlay}>
       <div style={modal}>
+        {/* HEADER */}
+
         <div style={header}>
           <div>
             <h2 style={{ margin: 0 }}>🧾 Venda Balcão</h2>
@@ -286,13 +253,13 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
             />
 
             {produtosFiltrados.map((p) => {
-              const selecionado = itens.some((i) => i.id === p.id)
+              const selecionado = itens.find((i) => i.id === p.id)
 
               return (
                 <div
                   key={p.id}
                   style={produtoCard(!!selecionado)}
-                  onClick={() => abrirProduto(p)}
+                  onClick={() => toggleItem(p)}
                 >
                   <div style={produtoTopo}>
                     <div>
@@ -312,6 +279,69 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                       {selecionado ? '✓' : ''}
                     </div>
                   </div>
+                  {selecionado && p.variacoes?.length > 0 && (
+                    <div
+                      style={{
+                        marginTop: 14,
+                      }}
+                    >
+                      <div
+                        style={{
+                          marginBottom: 10,
+                          fontSize: 13,
+                          opacity: 0.7,
+                        }}
+                      >
+                        Variações
+                      </div>
+
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: 8,
+                        }}
+                      >
+                        {p.variacoes.map((v: any) => {
+                          const item = itens.find((i) => i.id === p.id)
+
+                          const ativo = item?.variacaoId === v.id
+
+                          return (
+                            <div
+                              key={v.id}
+                              style={adicionalTag(ativo)}
+                              onClick={(e) => {
+                                e.stopPropagation()
+
+                                setItens((prev) =>
+                                  prev.map((i) =>
+                                    i.id === p.id
+                                      ? {
+                                          ...i,
+
+                                          preco: Number(v.preco),
+
+                                          variacaoId: v.id,
+
+                                          variacaoNome: v.nome,
+
+                                          nome: `${p.nome} - ${v.nome}`,
+                                        }
+                                      : i,
+                                  ),
+                                )
+                              }}
+                            >
+                              {v.nome}
+
+                              <strong>R$ {Number(v.preco).toFixed(2)}</strong>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                   {selecionado && p.adicionais?.length > 0 && (
                     <div
@@ -337,9 +367,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                         }}
                       >
                         {p.adicionais.map((add: any) => {
-                          const item = [...itens]
-                            .reverse()
-                            .find((i) => i.id === p.id)
+                          const item = itens.find((i) => i.id === p.id)
 
                           const ativo = item?.adicionais?.find(
                             (a: any) => a.id === add.id,
@@ -352,9 +380,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                               onClick={(e) => {
                                 e.stopPropagation()
 
-                                if (!item) return
-
-                                toggleAdicional(item.uid, add)
+                                toggleAdicional(p.id, add)
                               }}
                             >
                               {ativo ? '✓' : '+'}
@@ -376,122 +402,25 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           {/* RESUMO */}
 
           <div style={coluna}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: 20,
-                position: 'sticky',
-                top: 0,
-                zIndex: 20,
-                background: '#111827',
-                paddingBottom: 12,
-                borderBottom: '1px solid rgba(255,255,255,0.06)',
-              }}
-            >
-              <div>
-                <h3
-                  style={{
-                    margin: 0,
-                    fontSize: 20,
-                  }}
-                >
-                  🛒 Itens selecionados
-                </h3>
-
-                <div
-                  style={{
-                    fontSize: 13,
-                    opacity: 0.7,
-                    marginTop: 4,
-                  }}
-                >
-                  Pedido sendo montado
-                </div>
-              </div>
-
-              <div style={{ textAlign: 'right' }}>
-                <div
-                  style={{
-                    fontSize: 12,
-                    opacity: 0.6,
-                    marginBottom: 4,
-                  }}
-                >
-                  TOTAL
-                </div>
-
-                <div
-                  style={{
-                    fontSize: 28,
-                    fontWeight: 'bold',
-                    color: '#4ade80',
-                    textShadow: '0 0 14px rgba(74,222,128,0.25)',
-                  }}
-                >
-                  R${' '}
-                  {itens
-                    .reduce((total, i) => {
-                      const adicionais = (i.adicionais || []).reduce(
-                        (s: number, a: any) => s + a.preco * a.quantidade,
-                        0,
-                      )
-
-                      return total + (i.preco + adicionais) * i.quantidade
-                    }, 0)
-                    .toFixed(2)}
-                </div>
-              </div>
-            </div>
+            <h3 style={{ marginTop: 0 }}>🛒 Itens selecionados</h3>
 
             {itens.length === 0 && (
               <div style={emptyState}>Nenhum item selecionado</div>
             )}
 
             {itens.map((i) => (
-              <div key={i.uid} style={resumoCard}>
+              <div key={i.id} style={resumoCard}>
                 <div style={resumoTopo}>
                   <div>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 8,
-                      }}
-                    >
-                      <span style={{ fontSize: 18 }}>🥙</span>
-
-                      <div style={resumoNome}>{i.nome}</div>
-                    </div>
+                    <div style={resumoNome}>{i.nome}</div>
 
                     {i.adicionais?.length > 0 && (
                       <div style={resumoAdicionais}>
-                        <div
-                          style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: 8,
-                            marginTop: 10,
-                          }}
-                        >
-                          {i.adicionais.map((a: any) => (
-                            <div
-                              key={a.id}
-                              style={{
-                                background: 'rgba(168,85,247,0.18)',
-                                border: '1px solid rgba(168,85,247,0.35)',
-                                color: '#e9d5ff',
-                                borderRadius: 999,
-                                padding: '6px 10px',
-                                fontSize: 12,
-                                fontWeight: 600,
-                              }}
-                            >
-                              + {a.quantidade}x {a.nome}
-                            </div>
-                          ))}
-                        </div>
+                        {i.adicionais.map((a: any) => (
+                          <div key={a.id}>
+                            + {a.nome} x{a.quantidade}
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -512,7 +441,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                 <div style={quantidadeBox}>
                   <button
                     style={btnTouch}
-                    onClick={() => alterarQuantidade(i.uid, -1)}
+                    onClick={() => alterarQuantidade(i.id, -1)}
                     disabled={salvando}
                   >
                     -
@@ -522,7 +451,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
                   <button
                     style={btnTouch}
-                    onClick={() => alterarQuantidade(i.uid, +1)}
+                    onClick={() => alterarQuantidade(i.id, +1)}
                     disabled={salvando}
                   >
                     +
@@ -560,11 +489,24 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
               />
               Pedido já pronto
             </label>
-            <div
-              style={{
-                marginTop: 24,
-              }}
-            >
+
+            <div style={totalBox}>
+              <div style={totalLabel}>Total da venda</div>
+
+              <div style={totalValor}>
+                R${' '}
+                {itens
+                  .reduce((total, i) => {
+                    const adicionais = (i.adicionais || []).reduce(
+                      (s: number, a: any) => s + a.preco * a.quantidade,
+                      0,
+                    )
+
+                    return total + (i.preco + adicionais) * i.quantidade
+                  }, 0)
+                  .toFixed(2)}
+              </div>
+
               <button
                 onClick={salvar}
                 disabled={salvando}
@@ -583,163 +525,6 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
           </div>
         </div>
       </div>
-
-      {produtoSelecionado && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.7)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 99999,
-            padding: 20,
-          }}
-          onClick={() => setProdutoSelecionado(null)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: '#111827',
-              borderRadius: 24,
-              width: '100%',
-              maxWidth: 500,
-              color: '#fff',
-              maxHeight: '90vh',
-
-              display: 'flex',
-              flexDirection: 'column',
-
-              overflow: 'hidden',
-            }}
-          >
-            <h2>{produtoSelecionado.nome}</h2>
-            <div
-              style={{
-                overflowY: 'auto',
-                padding: 24,
-                flex: 1,
-              }}
-            >
-              {produtoSelecionado.variacoes?.length > 0 && (
-                <div style={{ marginBottom: 20 }}>
-                  <h3>Escolha o tamanho</h3>
-
-                  {produtoSelecionado.variacoes
-                    .filter((v: any) => v.ativo)
-                    .map((v: any) => (
-                      <label
-                        key={v.id}
-                        style={{
-                          display: 'flex',
-                          gap: 8,
-                          marginBottom: 10,
-                        }}
-                      >
-                        <input
-                          type="radio"
-                          checked={variacaoSelecionada?.id === v.id}
-                          onChange={() => setVariacaoSelecionada(v)}
-                        />
-
-                        <span>
-                          {v.nome} (+R$ {Number(v.preco).toFixed(2)})
-                        </span>
-                      </label>
-                    ))}
-                </div>
-              )}
-
-              {produtoSelecionado.adicionais
-                ?.filter((a: any) => a.ativo)
-                .map((add: any) => {
-                  const selecionado = adicionaisSelecionados.find(
-                    (a) => a.id === add.id,
-                  )
-
-                  const quantidade = selecionado?.quantidade || 0
-
-                  const gratis = Number(add.preco) === 0
-
-                  return (
-                    <div
-                      key={add.id}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: 14,
-                      }}
-                    >
-                      <div>
-                        <strong>{add.nome}</strong>
-
-                        <div>
-                          {gratis
-                            ? 'GRÁTIS'
-                            : `+R$ ${Number(add.preco).toFixed(2)}`}
-                        </div>
-                      </div>
-
-                      {gratis ? (
-                        <input
-                          type="checkbox"
-                          checked={quantidade > 0}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              alterarQuantidadePopup(add, 1)
-                            } else {
-                              alterarQuantidadePopup(add, -1)
-                            }
-                          }}
-                        />
-                      ) : (
-                        <div
-                          style={{
-                            display: 'flex',
-                            gap: 10,
-                            alignItems: 'center',
-                          }}
-                        >
-                          <button
-                            onClick={() => alterarQuantidadePopup(add, -1)}
-                          >
-                            -
-                          </button>
-
-                          <span>{quantidade}</span>
-
-                          <button
-                            onClick={() => alterarQuantidadePopup(add, 1)}
-                          >
-                            +
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-            </div>
-            <button
-              onClick={confirmarProduto}
-              style={{
-                width: '100%',
-                marginTop: 20,
-                background: '#22c55e',
-                border: 'none',
-                padding: 16,
-                borderRadius: 14,
-                color: '#fff',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-              }}
-            >
-              Confirmar
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
@@ -863,14 +648,13 @@ const adicionalTag = (ativo: boolean): React.CSSProperties => ({
   cursor: 'pointer',
   fontSize: 13,
 })
+
 const resumoCard: React.CSSProperties = {
-  background: 'linear-gradient(180deg,#1f2937 0%,#111827 100%)',
-  borderRadius: 20,
-  padding: 18,
-  marginBottom: 16,
-  border: '1px solid rgba(255,255,255,0.06)',
-  boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
-  transition: 'all 0.2s ease',
+  background: '#1f2937',
+  borderRadius: 18,
+  padding: 16,
+  marginBottom: 14,
+  border: '1px solid rgba(255,255,255,0.05)',
 }
 
 const resumoTopo: React.CSSProperties = {
@@ -893,8 +677,6 @@ const resumoAdicionais: React.CSSProperties = {
 const resumoPreco: React.CSSProperties = {
   color: '#4ade80',
   fontWeight: 'bold',
-  fontSize: 22,
-  textShadow: '0 0 12px rgba(74,222,128,0.25)',
 }
 
 const quantidadeBox: React.CSSProperties = {
@@ -907,14 +689,13 @@ const quantidadeBox: React.CSSProperties = {
 const btnTouch: React.CSSProperties = {
   width: 42,
   height: 42,
-  borderRadius: 14,
-  border: '1px solid rgba(255,255,255,0.06)',
-  background: 'linear-gradient(180deg,#1f2937,#111827)',
+  borderRadius: 12,
+  border: 'none',
+  background: '#111827',
   color: '#fff',
   fontSize: 20,
   cursor: 'pointer',
   fontWeight: 'bold',
-  boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
 }
 
 const qtdNumero: React.CSSProperties = {
@@ -936,6 +717,27 @@ const emptyState: React.CSSProperties = {
   textAlign: 'center',
   marginTop: 40,
 }
+
+const totalBox: React.CSSProperties = {
+  position: 'sticky',
+  bottom: 0,
+  background: '#111827',
+  paddingTop: 16,
+  marginTop: 16,
+  borderTop: '1px solid rgba(255,255,255,0.06)',
+}
+
+const totalLabel: React.CSSProperties = {
+  opacity: 0.7,
+  marginBottom: 4,
+}
+
+const totalValor: React.CSSProperties = {
+  fontSize: 32,
+  fontWeight: 'bold',
+  color: '#4ade80',
+}
+
 const btn: React.CSSProperties = {
   width: '100%',
   background: '#22c55e',
