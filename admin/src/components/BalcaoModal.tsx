@@ -45,18 +45,16 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   /* ITEM                          */
   /* ============================= */
 
-  function toggleItem(produto: any) {
+  function adicionarItem(produto: any) {
     setItens((prev) => {
       const existente = prev.find((i) => i.id === produto.id)
-
-      if (existente) {
-        return prev.filter((i) => i.id !== produto.id)
-      }
 
       return [
         ...prev,
         {
-          id: produto.id,
+          uid: crypto.randomUUID(),
+
+          produtoId: produto.id,
 
           nome: produto.nome,
 
@@ -78,12 +76,12 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   /* QUANTIDADE                    */
   /* ============================= */
 
-  function alterarQuantidade(id: string, delta: number) {
+  function alterarQuantidade(uid: string, delta: number) {
     if (salvando) return
 
     setItens((prev) =>
       prev.map((i) =>
-        i.id === id
+        i.uid === uid
           ? {
               ...i,
               quantidade: Math.max(1, (i.quantidade || 1) + delta),
@@ -102,7 +100,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
     setItens((prev) =>
       prev.map((item) => {
-        if (item.id !== itemId) return item
+        if (item.uid !== itemId) return item
 
         const existente = item.adicionais?.find(
           (a: any) => a.id === adicional.id,
@@ -146,7 +144,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
     setItens((prev) =>
       prev.map((item) => {
-        if (item.id !== itemId) return item
+        if (item.uid !== itemId) return item
 
         return {
           ...item,
@@ -253,13 +251,13 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
             />
 
             {produtosFiltrados.map((p) => {
-              const selecionado = itens.find((i) => i.id === p.id)
+              const selecionado = itens.find((i) => i.produtoId === p.id)
 
               return (
                 <div
                   key={p.id}
                   style={produtoCard(!!selecionado)}
-                  onClick={() => toggleItem(p)}
+                  onClick={() => adicionarItem(p)}
                 >
                   <div style={produtoTopo}>
                     <div>
@@ -380,7 +378,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                               onClick={(e) => {
                                 e.stopPropagation()
 
-                                toggleAdicional(p.id, add)
+                                toggleAdicional(item.uid, add)
                               }}
                             >
                               {ativo ? '✓' : '+'}
@@ -409,7 +407,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
             )}
 
             {itens.map((i) => (
-              <div key={i.id} style={resumoCard}>
+              <div key={i.uid} style={resumoCard}>
                 <div style={resumoTopo}>
                   <div>
                     <div style={resumoNome}>{i.nome}</div>
@@ -441,7 +439,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                 <div style={quantidadeBox}>
                   <button
                     style={btnTouch}
-                    onClick={() => alterarQuantidade(i.id, -1)}
+                    onClick={() => alterarQuantidade(i.uid, -1)}
                     disabled={salvando}
                   >
                     -
@@ -451,7 +449,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
                   <button
                     style={btnTouch}
-                    onClick={() => alterarQuantidade(i.id, +1)}
+                    onClick={() => alterarQuantidade(i.uid, +1)}
                     disabled={salvando}
                   >
                     +
