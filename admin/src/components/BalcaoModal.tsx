@@ -58,7 +58,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
           nome: produto.nome,
 
-          preco: produto.variacoes?.[0]?.preco ?? produto.preco,
+          preco: Number(produto.variacoes?.[0]?.preco ?? produto.preco),
 
           variacaoId: produto.variacoes?.[0]?.id ?? null,
 
@@ -301,7 +301,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                         }}
                       >
                         {p.variacoes.map((v: any) => {
-                          const item = itens.find((i) => i.id === p.id)
+                          const item = itens.find((i) => i.produtoId === p.id)
 
                           const ativo = item?.variacaoId === v.id
 
@@ -314,7 +314,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
                                 setItens((prev) =>
                                   prev.map((i) =>
-                                    i.id === p.id
+                                    i.uid === item?.uid
                                       ? {
                                           ...i,
 
@@ -365,7 +365,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                         }}
                       >
                         {p.adicionais.map((add: any) => {
-                          const item = itens.find((i) => i.id === p.id)
+                          const item = itens.find((i) => i.produtoId === p.id)
 
                           const ativo = item?.adicionais?.find(
                             (a: any) => a.id === add.id,
