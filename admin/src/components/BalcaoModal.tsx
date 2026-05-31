@@ -614,7 +614,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
               width: '100%',
 
-              height: '100%',
+              height: '100vh',
 
               maxWidth: 1100,
 
@@ -700,6 +700,8 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                 padding: 24,
 
                 flex: 1,
+
+                height: 0,
 
                 minHeight: 0,
 
@@ -816,6 +818,14 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                 background: '#111827',
 
                 flexShrink: 0,
+
+                position: 'sticky',
+
+                bottom: 0,
+
+                zIndex: 20,
+
+                boxShadow: '0 -8px 24px rgba(0,0,0,0.35)',
               }}
             >
               <button
