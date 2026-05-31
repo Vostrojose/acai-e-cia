@@ -76,6 +76,16 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
   /* QUANTIDADE                    */
   /* ============================= */
 
+  function removerItem(uid: string) {
+    if (salvando) return
+
+    setItens((prev) => prev.filter((i) => i.uid !== uid))
+
+    if (itemSelecionadoUid === uid) {
+      setItemSelecionadoUid(null)
+    }
+  }
+
   function alterarQuantidade(uid: string, delta: number) {
     if (salvando) return
 
@@ -454,6 +464,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                 </div>
 
                 <div style={quantidadeBox}>
+                  - quantidade +
                   <button
                     style={btnTouch}
                     onClick={() => alterarQuantidade(i.uid, -1)}
@@ -461,15 +472,16 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                   >
                     -
                   </button>
-
                   <div style={qtdNumero}>{i.quantidade}</div>
-
                   <button
                     style={btnTouch}
                     onClick={() => alterarQuantidade(i.uid, +1)}
                     disabled={salvando}
                   >
                     +
+                  </button>
+                  <button style={btnDelete} onClick={() => removerItem(i.uid)}>
+                    🗑
                   </button>
                 </div>
               </div>
@@ -713,6 +725,25 @@ const btnTouch: React.CSSProperties = {
   fontWeight: 'bold',
 }
 
+const btnDelete: React.CSSProperties = {
+  width: 42,
+
+  height: 42,
+
+  borderRadius: 12,
+
+  border: 'none',
+
+  background: '#7f1d1d',
+
+  color: '#fff',
+
+  fontSize: 18,
+
+  cursor: 'pointer',
+
+  fontWeight: 'bold',
+}
 const qtdNumero: React.CSSProperties = {
   minWidth: 40,
   textAlign: 'center',
