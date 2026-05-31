@@ -588,24 +588,13 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
         <div
           style={{
             position: 'fixed',
-
             inset: 0,
-
-            background: 'rgba(0,0,0,0.82)',
-
-            backdropFilter: 'blur(6px)',
-
+            background: 'rgba(0,0,0,0.7)',
             display: 'flex',
-
             justifyContent: 'center',
-
-            alignItems: 'flex-start',
-
-            overflowY: 'auto',
-
+            alignItems: 'center',
             zIndex: 99999,
-
-            padding: 0,
+            padding: 20,
           }}
           onClick={() => setProdutoSelecionado(null)}
         >
@@ -613,95 +602,24 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
             onClick={(e) => e.stopPropagation()}
             style={{
               background: '#111827',
-
+              borderRadius: 24,
               width: '100%',
-
-              maxWidth: 1100,
-
-              margin: '40px 0',
-
+              maxWidth: 500,
               color: '#fff',
+              maxHeight: '90vh',
 
-              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
 
-              borderRadius: window.innerWidth < 768 ? 0 : 28,
-
-              border:
-                window.innerWidth < 768
-                  ? 'none'
-                  : '1px solid rgba(255,255,255,0.06)',
-
-              boxShadow:
-                window.innerWidth < 768
-                  ? 'none'
-                  : '0 20px 60px rgba(0,0,0,0.45)',
+              overflow: 'hidden',
             }}
           >
-            <div
-              style={{
-                padding: '20px 24px',
-
-                borderBottom: '1px solid rgba(255,255,255,0.08)',
-
-                display: 'flex',
-
-                justifyContent: 'space-between',
-
-                alignItems: 'center',
-
-                background: '#111827',
-
-                flexShrink: 0,
-              }}
-            >
-              <div>
-                <h2
-                  style={{
-                    margin: 0,
-                    fontSize: 28,
-                  }}
-                >
-                  {produtoSelecionado.nome}
-                </h2>
-
-                <div
-                  style={{
-                    marginTop: 6,
-                    opacity: 0.7,
-                  }}
-                >
-                  Configure seu produto
-                </div>
-              </div>
-
-              <button
-                onClick={() => setProdutoSelecionado(null)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#fff',
-                  fontSize: 34,
-                  cursor: 'pointer',
-                }}
-              >
-                ×
-              </button>
-            </div>
+            <h2>{produtoSelecionado.nome}</h2>
             <div
               style={{
                 overflowY: 'auto',
-
-                overflowX: 'hidden',
-
                 padding: 24,
-
                 flex: 1,
-
-                minHeight: 0,
-
-                WebkitOverflowScrolling: 'touch',
-
-                overscrollBehavior: 'contain',
               }}
             >
               {produtoSelecionado.variacoes?.length > 0 && (
@@ -803,46 +721,22 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                   )
                 })}
             </div>
-            <div
+            <button
+              onClick={confirmarProduto}
               style={{
-                padding: 24,
-
-                borderTop: '1px solid rgba(255,255,255,0.08)',
-
-                background: '#111827',
-
-                flexShrink: 0,
-
-                zIndex: 20,
-
-                boxShadow: '0 -8px 24px rgba(0,0,0,0.35)',
+                width: '100%',
+                marginTop: 20,
+                background: '#22c55e',
+                border: 'none',
+                padding: 16,
+                borderRadius: 14,
+                color: '#fff',
+                fontWeight: 'bold',
+                cursor: 'pointer',
               }}
             >
-              <button
-                onClick={confirmarProduto}
-                style={{
-                  width: '100%',
-
-                  background: '#22c55e',
-
-                  border: 'none',
-
-                  padding: 20,
-
-                  borderRadius: 18,
-
-                  color: '#fff',
-
-                  fontWeight: 'bold',
-
-                  cursor: 'pointer',
-
-                  fontSize: 18,
-                }}
-              >
-                Confirmar produto
-              </button>
-            </div>
+              Confirmar
+            </button>
           </div>
         </div>
       )}
@@ -873,6 +767,9 @@ const modal: React.CSSProperties = {
   maxWidth: 950,
   color: '#fff',
   maxHeight: '92vh',
+  overflow: 'hidden',
+  display: 'flex',
+  flexDirection: 'column',
   boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
   border: '1px solid rgba(255,255,255,0.06)',
 }
@@ -898,11 +795,15 @@ const body: React.CSSProperties = {
   gridTemplateColumns: '1.2fr 0.8fr',
   gap: 20,
   padding: 20,
+  overflow: 'hidden',
 }
 
 const coluna: React.CSSProperties = {
+  overflowY: 'auto',
+  maxHeight: '72vh',
   paddingRight: 4,
 }
+
 const input: React.CSSProperties = {
   width: '100%',
   padding: 14,
