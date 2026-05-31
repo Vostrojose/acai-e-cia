@@ -622,11 +622,7 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
               color: '#fff',
 
-              display: 'flex',
-
-              flexDirection: 'column',
-
-              overflow: 'hidden',
+              overflowY: 'auto',
 
               borderRadius: window.innerWidth < 768 ? 0 : 28,
 
@@ -700,8 +696,6 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
                 padding: 24,
 
                 flex: 1,
-
-                height: 0,
 
                 minHeight: 0,
 
@@ -819,10 +813,6 @@ export default function BalcaoModal({ onClose, onSuccess }: any) {
 
                 flexShrink: 0,
 
-                position: 'sticky',
-
-                bottom: 0,
-
                 zIndex: 20,
 
                 boxShadow: '0 -8px 24px rgba(0,0,0,0.35)',
@@ -883,9 +873,6 @@ const modal: React.CSSProperties = {
   maxWidth: 950,
   color: '#fff',
   maxHeight: '92vh',
-  overflow: 'hidden',
-  display: 'flex',
-  flexDirection: 'column',
   boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
   border: '1px solid rgba(255,255,255,0.06)',
 }
@@ -911,15 +898,11 @@ const body: React.CSSProperties = {
   gridTemplateColumns: '1.2fr 0.8fr',
   gap: 20,
   padding: 20,
-  overflow: 'hidden',
 }
 
 const coluna: React.CSSProperties = {
-  overflowY: 'auto',
-  maxHeight: '72vh',
   paddingRight: 4,
 }
-
 const input: React.CSSProperties = {
   width: '100%',
   padding: 14,
