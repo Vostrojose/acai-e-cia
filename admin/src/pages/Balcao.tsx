@@ -132,32 +132,38 @@ export default function Balcao() {
     try {
       setSalvando(true)
 
-      const payload = {
-        clienteNome,
+await api.post('/balcao', {
+  itens: itens.map((i) => ({
+    produtoId: i.produtoId,
 
-        formaPagamento,
+    nome: i.nome,
 
-        itens: itens.map((i) => ({
-          produtoId: i.produtoId,
+    preco:
+      i.variacao?.preco ??
+      i.precoBase,
 
-          nomeProduto: i.nome,
+    quantidade: i.quantidade,
 
-          quantidade: i.quantidade,
+    variacaoId:
+      i.variacao?.id ?? null,
 
-          preco: i.precoBase,
+    variacaoNome:
+      i.variacao?.nome ?? null,
 
-          variacao: i.variacao,
+    adicionais: i.adicionais,
+  })),
 
-          adicionais: i.adicionais,
+  forma: formaPagamento,
 
-          observacao: i.observacao,
+  clienteNome:
+    formaPagamento !== 'PAGO'
+      ? clienteNome
+          .toUpperCase()
+          .trim()
+      : null,
 
-          totalItem: i.totalItem,
-        })),
-      }
-
-      await api.post('/pedidos', payload)
-
+  pularPreparo: true,
+})
       alert('Pedido criado')
 
       localStorage.removeItem('pedido-balcao')
