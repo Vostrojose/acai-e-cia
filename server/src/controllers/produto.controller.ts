@@ -7,7 +7,6 @@ import prisma from '../services/prisma'
 import { serializeDecimal } from '../utils/serializeDecimal'
 
 class ProdutoController {
-
   /* ============================= */
   /* CRIAR                         */
   /* ============================= */
@@ -28,11 +27,11 @@ class ProdutoController {
   listar = asyncHandler(async (req: Request, res: Response) => {
     const produtos = await produtoService.listarProdutos()
 
-    console.log("📦 PRODUTOS:", produtos)
+    console.log('📦 PRODUTOS:', produtos)
 
     return res.json({
       success: true,
-      data: produtos
+      data: produtos,
     })
   })
 
@@ -45,8 +44,9 @@ class ProdutoController {
     const produto = await prisma.produto.findUnique({
       where: { id },
       include: {
-        adicionais: true // 🔥 ESSENCIAL
-      }
+        adicionais: true,
+        variacoes: true,
+      },
     })
 
     if (!produto) {
@@ -55,7 +55,7 @@ class ProdutoController {
 
     return res.json({
       success: true,
-      data: serializeDecimal(produto)
+      data: serializeDecimal(produto),
     })
   })
 
