@@ -165,38 +165,65 @@ class BalcaoController {
     }
   }
   async listarPendentes(req: Request, res: Response) {
-  try {
-    const pedidos = await prisma.pedido.findMany({
-      where: {
-        origem: 'BALCAO',
-        pago: false,
-      },
+    try {
+      const pedidos = await prisma.pedido.findMany({
+        where: {
+          origem: 'BALCAO',
+          pago: false,
+        },
 
-      orderBy: {
-        criadoEm: 'desc',
-      },
+        orderBy: {
+          criadoEm: 'desc',
+        },
 
-      include: {
-        itens: {
-          include: {
-            adicionais: true,
+        include: {
+          itens: {
+            include: {
+              adicionais: true,
+            },
           },
         },
-      },
-    })
+      })
 
-    return res.json({
-      success: true,
-      data: pedidos,
-    })
-  } catch (err) {
-    console.error('Erro ao listar pendentes:', err)
+      return res.json({
+        success: true,
+        data: pedidos,
+      })
+    } catch (err) {
+      console.error('Erro ao listar pendentes:', err)
 
-    return res.status(500).json({
-      message: 'Erro ao listar pendentes',
-    })
+      return res.status(500).json({
+        message: 'Erro ao listar pendentes',
+      })
+    }
   }
-}
+
+  async quitar(req: Request, res: Response) {
+    try {
+      const { id } = req.params
+
+      const pedido = await prisma.pedido.update({
+        where: {
+          id,
+        },
+
+        data: {
+          pago: true,
+        },
+      })
+
+      return res.json({
+        success: true,
+        data: pedido,
+      })
+    } catch (err) {
+      console.error('Erro ao quitar pedido:', err)
+
+      return res.status(500).json({
+        message: 'Erro ao quitar pedido',
+      })
+    }
+  }
 }
 
 export default new BalcaoController()

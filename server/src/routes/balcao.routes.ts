@@ -1,13 +1,14 @@
-import { Router } from "express";
-import balcaoController from "../controllers/balcao.controller";
+import { Router } from 'express'
+import balcaoController from '../controllers/balcao.controller'
 
-const router = Router();
+const router = Router()
 
 /* =================================
    💰 VENDA BALCÃO
 ================================= */
-router.post("/", balcaoController.criar);
+router.post('/', balcaoController.criar)
 
-router.get("/pendentes", balcaoController.listarPendentes);
+router.get('/pendentes', balcaoController.listarPendentes)
+router.post('/', balcaoController.criar)
 
-export default router;
+export default router

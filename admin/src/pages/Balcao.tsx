@@ -137,6 +137,17 @@ export default function Balcao() {
       console.error(err)
     }
   }
+  async function quitarPedido(id: string) {
+    try {
+      await api.patch(`/balcao/quitar/${id}`)
+
+      carregarPendentes()
+    } catch (err) {
+      console.error(err)
+
+      alert('Erro ao quitar pedido')
+    }
+  }
 
   function removerItem(uid: string) {
     const confirmar = confirm('Remover item do pedido?')
@@ -186,7 +197,6 @@ export default function Balcao() {
 
       await api.post('/balcao', {
         itens: itens.map((i) => ({
-
           id: i.produtoId,
 
           nome: i.nome,
@@ -475,6 +485,22 @@ export default function Balcao() {
                         }}
                       >
                         R$ {Number(pedido.total).toFixed(2)}
+                        <button
+                          onClick={() => quitarPedido(pedido.id)}
+                          style={{
+                            marginTop: 12,
+                            width: '100%',
+                            padding: 12,
+                            borderRadius: 12,
+                            border: 'none',
+                            background: '#22c55e',
+                            color: '#fff',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          QUITAR
+                        </button>
                       </div>
                     </div>
                   ))}
