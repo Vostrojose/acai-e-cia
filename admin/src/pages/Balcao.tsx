@@ -47,7 +47,7 @@ type PedidoItem = {
 export default function Balcao() {
   const navigate = useNavigate()
 
-  const isMobile = window.matchMedia('(max-width: 900px)').matches
+  const isMobile = window.matchMedia('(max-width: 700px)').matches
 
   const [produtos, setProdutos] = useState<any[]>([])
 
@@ -58,6 +58,7 @@ export default function Balcao() {
   const [clienteNome, setClienteNome] = useState('')
 
   const [formaPagamento, setFormaPagamento] = useState('PAGO')
+  const [pendentePagamento, setPendentePagamento] = useState(false)
 
   const [salvando, setSalvando] = useState(false)
 
@@ -173,6 +174,8 @@ export default function Balcao() {
 
       await api.post('/balcao', {
         itens: itens.map((i) => ({
+          pago: !pendentePagamento,
+
           id: i.produtoId,
 
           nome: i.nome,
@@ -190,8 +193,9 @@ export default function Balcao() {
 
         forma: formaPagamento,
 
-        clienteNome:
-          formaPagamento !== 'PAGO' ? clienteNome.toUpperCase().trim() : null,
+        pago: !pendentePagamento,
+
+        clienteNome: clienteNome.toUpperCase().trim(),
 
         pularPreparo: true,
       })
@@ -376,6 +380,22 @@ export default function Balcao() {
 
               <option value="CREDITO">Crédito</option>
             </select>
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                marginBottom: 16,
+                color: '#fff',
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={pendentePagamento}
+                onChange={(e) => setPendentePagamento(e.target.checked)}
+              />
+              Consumo local / pagar depois
+            </label>
 
             <h2>Total: R$ {total.toFixed(2)}</h2>
             <button
