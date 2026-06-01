@@ -47,7 +47,7 @@ export default function ProdutoBalcao() {
       }
 
       const response = await api.get(`/produtos/${id}`)
-      console.log(response.data.data)
+      console.log(JSON.stringify(response.data.data, null, 2))
 
       setProduto(response.data.data)
     } catch (err) {
