@@ -134,7 +134,7 @@ export default function Balcao() {
 
 await api.post('/balcao', {
   itens: itens.map((i) => ({
-    produtoId: i.produtoId,
+   id: i.produtoId,
 
     nome: i.nome,
 
