@@ -149,17 +149,12 @@ class BalcaoController {
             ? Number(cliente.credito) - creditoUsado
             : null,
       })
+    } catch (err) {
+      console.error('Erro no balcão:', err)
+      return res.status(500).json({
+        message: 'Erro ao criar pedido',
+      })
     }
-catch (err: any) {
-  console.error('Erro no balcão:', err)
-
-  return res.status(500).json({
-    message: err.message,
-    stack: err.stack,
-  })
-}
-
-
   }
 }
 
