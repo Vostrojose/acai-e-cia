@@ -6,9 +6,11 @@ const router = Router()
 /* =================================
    💰 VENDA BALCÃO
 ================================= */
+
 router.post('/', balcaoController.criar)
 
 router.get('/pendentes', balcaoController.listarPendentes)
-router.post('/', balcaoController.criar)
+
+router.patch('/quitar/:id', balcaoController.quitar)
 
 export default router
