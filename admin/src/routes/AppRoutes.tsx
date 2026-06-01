@@ -14,6 +14,8 @@ import PrivateRoute from './PrivateRoute'
 import Fiados from '../pages/Fiados'
 import AuditoriaPagamentos from '../pages/AuditoriaPagamentos'
 import BannerAcompanhamento from '../pages/BannerAcompanhamento'
+import ProdutoBalcao from '../pages/ProdutoBalcao'
+import Balcao from '../pages/Balcao'
 
 export default function AppRoutes() {
   return (
@@ -122,6 +124,32 @@ export default function AppRoutes() {
         element={
           <PrivateRoute>
             <BannerAcompanhamento />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/balcao"
+        element={
+          <PrivateRoute>
+            <Balcao />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/balcao/produto/:id"
+        element={
+          <PrivateRoute>
+            <ProdutoBalcao />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/balcao/item/:uid"
+        element={
+          <PrivateRoute>
+            <ProdutoBalcao />
           </PrivateRoute>
         }
       />

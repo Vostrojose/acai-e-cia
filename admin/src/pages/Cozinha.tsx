@@ -3,8 +3,9 @@ import { io } from 'socket.io-client'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { theme } from '../assets/styles/adminTheme'
-import BalcaoModal from '../components/BalcaoModal'
+//port BalcaoModal from '../components/BalcaoModal'
 import ScreenSaver from '../components/ScreenSaver'
+
 
 export default function Cozinha() {
   const [pedidos, setPedidos] = useState<any[]>([])
@@ -266,7 +267,7 @@ export default function Cozinha() {
           <div style={brandingSub}>Painel Operacional • Cozinha</div>
         </div>
       </div>
-      <CardMenu navigate={navigate} onBalcao={() => setAbrirBalcao(true)} />
+      <CardMenu navigate={navigate} onBalcao={() => navigate('/balcao')} />
 
       <div style={headerGrid}>
         <CardRelogio />
@@ -312,12 +313,14 @@ export default function Cozinha() {
       )}
       {screenSaver && <ScreenSaver />}
 
-      {abrirBalcao && (
-        <BalcaoModal
-          onClose={() => setAbrirBalcao(false)}
-          onSuccess={() => console.log('Venda registrada')}
-        />
-      )}
+      {/*
+  {abrirBalcao && (
+    <BalcaoModal
+      onClose={() => setAbrirBalcao(false)}
+      onSuccess={() => console.log('Venda registrada')}
+    />
+  )}
+*/}
     </div>
   )
 }
