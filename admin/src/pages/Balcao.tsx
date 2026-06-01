@@ -56,7 +56,7 @@ export default function Balcao() {
 
   const [clienteNome, setClienteNome] = useState('')
 
-  const [formaPagamento, setFormaPagamento] = useState('DINHEIRO')
+  const [formaPagamento, setFormaPagamento] = useState('PAGO')
 
   const [salvando, setSalvando] = useState(false)
 
@@ -132,38 +132,30 @@ export default function Balcao() {
     try {
       setSalvando(true)
 
-await api.post('/balcao', {
-  itens: itens.map((i) => ({
-   id: i.produtoId,
+      await api.post('/balcao', {
+        itens: itens.map((i) => ({
+          id: i.produtoId,
 
-    nome: i.nome,
+          nome: i.nome,
 
-    preco:
-      i.variacao?.preco ??
-      i.precoBase,
+          preco: i.variacao?.preco ?? i.precoBase,
 
-    quantidade: i.quantidade,
+          quantidade: i.quantidade,
 
-    variacaoId:
-      i.variacao?.id ?? null,
+          variacaoId: i.variacao?.id ?? null,
 
-    variacaoNome:
-      i.variacao?.nome ?? null,
+          variacaoNome: i.variacao?.nome ?? null,
 
-    adicionais: i.adicionais,
-  })),
+          adicionais: i.adicionais,
+        })),
 
-  forma: formaPagamento,
+        forma: formaPagamento,
 
-  clienteNome:
-    formaPagamento !== 'PAGO'
-      ? clienteNome
-          .toUpperCase()
-          .trim()
-      : null,
+        clienteNome:
+          formaPagamento !== 'PAGO' ? clienteNome.toUpperCase().trim() : null,
 
-  pularPreparo: true,
-})
+        pularPreparo: true,
+      })
       alert('Pedido criado')
 
       localStorage.removeItem('pedido-balcao')
@@ -172,23 +164,15 @@ await api.post('/balcao', {
 
       setClienteNome('')
     } catch (err: any) {
-  console.error(err)
+      console.error(err)
 
-  console.log(
-    err?.response?.data,
-  )
+      console.log(err?.response?.data)
 
-  alert(
-    JSON.stringify(
-      err?.response?.data ||
-        'Erro ao criar pedido',
-    ),
-  )
-}
- finally {
-  setSalvando(false)
-}
-}
+      alert(JSON.stringify(err?.response?.data || 'Erro ao criar pedido'))
+    } finally {
+      setSalvando(false)
+    }
+  }
 
   const produtosFiltrados = produtos.filter((p) =>
     p.nome.toLowerCase().includes(busca.toLowerCase()),
@@ -323,21 +307,19 @@ await api.post('/balcao', {
               placeholder="Cliente"
               style={input}
             />
-
             <select
               value={formaPagamento}
               onChange={(e) => setFormaPagamento(e.target.value)}
               style={input}
             >
-              <option value="DINHEIRO">Dinheiro</option>
+              <option value="PAGO">Pago</option>
 
-              <option value="PIX">Pix</option>
+              <option value="FIADO">Fiado</option>
 
-              <option value="CARTAO">Cartão</option>
+              <option value="CREDITO">Crédito</option>
             </select>
-
+            
             <h2>Total: R$ {total.toFixed(2)}</h2>
-
             <button
               onClick={finalizarPedido}
               disabled={itens.length === 0 || salvando}
