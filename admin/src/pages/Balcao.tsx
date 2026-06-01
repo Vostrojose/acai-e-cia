@@ -151,6 +151,40 @@ export default function Balcao() {
       alert('Erro ao quitar pedido')
     }
   }
+  async function cancelarPedido(id: string) {
+    const confirmar = confirm('Deseja realmente cancelar este pedido?')
+
+    if (!confirmar) return
+
+    try {
+      const token = sessionStorage.getItem('token')
+
+      if (!token) {
+        alert('Faça login administrativo')
+
+        return
+      }
+
+      await api.patch(
+        `/balcao/${id}/cancelar`,
+        {},
+
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+
+      carregarPendentes()
+
+      alert('Pedido cancelado')
+    } catch (err) {
+      console.error(err)
+
+      alert('Erro ao cancelar pedido')
+    }
+  }
 
   function removerItem(uid: string) {
     const confirmar = confirm('Remover item do pedido?')
@@ -505,6 +539,22 @@ export default function Balcao() {
                         }}
                       >
                         QUITAR
+                      </button>
+                      <button
+                        onClick={() => cancelarPedido(pedido.id)}
+                        style={{
+                          marginTop: 10,
+                          width: '100%',
+                          padding: 12,
+                          borderRadius: 12,
+                          border: 'none',
+                          background: '#b91c1c',
+                          color: '#fff',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        🛑 CANCELAR
                       </button>
                     </div>
                   ))}

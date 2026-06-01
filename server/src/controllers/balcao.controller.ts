@@ -198,6 +198,46 @@ class BalcaoController {
     }
   }
 
+  async cancelar(req: Request, res: Response) {
+  try {
+    const { id } = req.params
+
+    const pedido = await prisma.pedido.findUnique({
+      where: { id },
+    })
+
+    if (!pedido) {
+      return res.status(404).json({
+        message: 'Pedido não encontrado',
+      })
+    }
+
+    if (pedido.origem !== 'BALCAO') {
+      return res.status(400).json({
+        message: 'Somente pedidos balcão podem ser cancelados',
+      })
+    }
+
+    await prisma.pedido.update({
+      where: { id },
+
+      data: {
+        status: 'CANCELADO',
+      },
+    })
+
+    return res.json({
+      success: true,
+    })
+  } catch (err) {
+    console.error('Erro ao cancelar pedido:', err)
+
+    return res.status(500).json({
+      message: 'Erro ao cancelar pedido',
+    })
+  }
+}
+
   async quitar(req: Request, res: Response) {
     try {
       const { id } = req.params
