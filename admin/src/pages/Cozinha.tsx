@@ -6,7 +6,6 @@ import { theme } from '../assets/styles/adminTheme'
 //port BalcaoModal from '../components/BalcaoModal'
 import ScreenSaver from '../components/ScreenSaver'
 
-
 export default function Cozinha() {
   const [pedidos, setPedidos] = useState<any[]>([])
   const pedidosRef = useRef<any[]>([])
@@ -483,7 +482,45 @@ function PedidoCard({ pedido }: any) {
         boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
       }}
     >
-      <strong>Pedido #{pedido.codigo}</strong>
+      {/*<strong>Pedido #{pedido.codigo}</strong>*/}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 6,
+        }}
+      >
+        {pedido.origem !== 'BALCAO' && <strong>Pedido #{pedido.codigo}</strong>}
+
+        {!pedido.pago && (
+          <div
+            style={{
+              background: '#b91c1c',
+              color: '#fff',
+              padding: '8px 10px',
+              borderRadius: 10,
+              fontWeight: 'bold',
+              fontSize: 14,
+              display: 'inline-flex',
+              flexDirection: 'column',
+              gap: 4,
+            }}
+          >
+            <span>🔴 PAGAMENTO PENDENTE</span>
+
+            {pedido.clienteNome && (
+              <span
+                style={{
+                  fontSize: 13,
+                  opacity: 0.95,
+                }}
+              >
+                👤 {pedido.clienteNome}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
 
       {pedido.status === 'PRONTO' && (
         <div style={{ marginTop: 6, color: '#4caf50', fontWeight: 'bold' }}>
