@@ -62,12 +62,13 @@ export default function Balcao() {
   const [salvando, setSalvando] = useState(false)
 
   const timeoutRef = useRef<any>(null)
+  const itensRef = useRef<PedidoItem[]>([])
 
   useEffect(() => {
     carregarProdutos()
 
     carregarPedido()
-  }, [itens])
+  }, [])
 
   useEffect(() => {
     resetarTimeout()
@@ -97,14 +98,13 @@ export default function Balcao() {
 
     timeoutRef.current = setTimeout(
       () => {
-        if (itens.length === 0) {
+        if (itensRef.current.length === 0) {
           navigate('/cozinha')
         }
       },
       3 * 60 * 1000,
     )
   }
-
   function carregarPedido() {
     try {
       const pedido = JSON.parse(localStorage.getItem('pedido-balcao') || '[]')
