@@ -46,29 +46,19 @@ type PedidoItem = {
 export default function Balcao() {
   const navigate = useNavigate()
 
-  const isMobile =
-    window.matchMedia(
-      '(max-width: 900px)',
-    ).matches
+  const isMobile = window.matchMedia('(max-width: 900px)').matches
 
-  const [produtos, setProdutos] =
-    useState<any[]>([])
+  const [produtos, setProdutos] = useState<any[]>([])
 
-  const [busca, setBusca] =
-    useState('')
+  const [busca, setBusca] = useState('')
 
-  const [itens, setItens] =
-    useState<PedidoItem[]>([])
+  const [itens, setItens] = useState<PedidoItem[]>([])
 
-  const [clienteNome, setClienteNome] =
-    useState('')
+  const [clienteNome, setClienteNome] = useState('')
 
-  const [formaPagamento,
-    setFormaPagamento] =
-    useState('DINHEIRO')
+  const [formaPagamento, setFormaPagamento] = useState('DINHEIRO')
 
-  const [salvando, setSalvando] =
-    useState(false)
+  const [salvando, setSalvando] = useState(false)
 
   useEffect(() => {
     carregarProdutos()
@@ -78,12 +68,7 @@ export default function Balcao() {
 
   function carregarPedido() {
     try {
-      const pedido =
-        JSON.parse(
-          localStorage.getItem(
-            'pedido-balcao',
-          ) || '[]',
-        )
+      const pedido = JSON.parse(localStorage.getItem('pedido-balcao') || '[]')
 
       setItens(pedido)
     } catch {
@@ -93,8 +78,7 @@ export default function Balcao() {
 
   async function carregarProdutos() {
     try {
-      const response =
-        await api.get('/produtos')
+      const response = await api.get('/produtos')
 
       setProdutos(response.data.data || [])
     } catch (err) {
@@ -103,63 +87,42 @@ export default function Balcao() {
   }
 
   function removerItem(uid: string) {
-    const confirmar = confirm(
-      'Remover item do pedido?',
-    )
+    const confirmar = confirm('Remover item do pedido?')
 
     if (!confirmar) return
 
-    const atualizado = itens.filter(
-      (i) => i.uid !== uid,
-    )
+    const atualizado = itens.filter((i) => i.uid !== uid)
 
     setItens(atualizado)
 
-    localStorage.setItem(
-      'pedido-balcao',
-      JSON.stringify(atualizado),
-    )
+    localStorage.setItem('pedido-balcao', JSON.stringify(atualizado))
   }
 
-  function alterarQuantidade(
-    uid: string,
-    delta: number,
-  ) {
+  function alterarQuantidade(uid: string, delta: number) {
     const atualizado = itens.map((i) => {
       if (i.uid !== uid) return i
 
-      const novaQuantidade =
-        Math.max(
-          1,
-          i.quantidade + delta,
-        )
+      const novaQuantidade = Math.max(1, i.quantidade + delta)
 
-      const valorUnitario =
-        i.totalItem / i.quantidade
+      const valorUnitario = i.totalItem / i.quantidade
 
       return {
         ...i,
 
         quantidade: novaQuantidade,
 
-        totalItem:
-          valorUnitario *
-          novaQuantidade,
+        totalItem: valorUnitario * novaQuantidade,
       }
     })
 
     setItens(atualizado)
 
-    localStorage.setItem(
-      'pedido-balcao',
-      JSON.stringify(atualizado),
-    )
+    localStorage.setItem('pedido-balcao', JSON.stringify(atualizado))
   }
 
   const total = useMemo(() => {
     return itens.reduce(
-      (acc, item) =>
-        acc + item.totalItem,
+      (acc, item) => acc + item.totalItem,
 
       0,
     )
@@ -193,16 +156,11 @@ export default function Balcao() {
         })),
       }
 
-      await api.post(
-        '/pedidos/balcao',
-        payload,
-      )
+      await api.post('/pedidos', payload)
 
       alert('Pedido criado')
 
-      localStorage.removeItem(
-        'pedido-balcao',
-      )
+      localStorage.removeItem('pedido-balcao')
 
       setItens([])
 
@@ -216,83 +174,52 @@ export default function Balcao() {
     }
   }
 
-  const produtosFiltrados =
-    produtos.filter((p) =>
-      p.nome
-        .toLowerCase()
-        .includes(busca.toLowerCase()),
-    )
+  const produtosFiltrados = produtos.filter((p) =>
+    p.nome.toLowerCase().includes(busca.toLowerCase()),
+  )
 
   return (
     <div style={theme.page}>
       <div style={header}>
-        <h1 style={title}>
-          🧾 Vendas Balcão
-        </h1>
+        <h1 style={title}>🧾 Vendas Balcão</h1>
       </div>
 
       <div
         style={{
           ...layout,
 
-          gridTemplateColumns:
-            isMobile
-              ? '1fr'
-              : '1fr 380px',
+          gridTemplateColumns: isMobile ? '1fr' : '1fr 380px',
         }}
       >
         <div>
           <input
             value={busca}
-            onChange={(e) =>
-              setBusca(e.target.value)
-            }
+            onChange={(e) => setBusca(e.target.value)}
             placeholder="Buscar produto"
             style={inputBusca}
           />
 
           <div style={gridProdutos}>
-            {produtosFiltrados.map(
-              (produto) => {
-                const menorPreco =
-                  produto.variacoes
-                    ?.length > 0
-                    ? Math.min(
-                        ...produto.variacoes.map(
-                          (v: any) =>
-                            Number(
-                              v.preco,
-                            ),
-                        ),
-                      )
-                    : Number(
-                        produto.preco,
-                      )
+            {produtosFiltrados.map((produto) => {
+              const menorPreco =
+                produto.variacoes?.length > 0
+                  ? Math.min(
+                      ...produto.variacoes.map((v: any) => Number(v.preco)),
+                    )
+                  : Number(produto.preco)
 
-                return (
-                  <div
-                    key={produto.id}
-                    onClick={() =>
-                      navigate(
-                        `/balcao/produto/${produto.id}`,
-                      )
-                    }
-                    style={produtoCard}
-                  >
-                    <h3>
-                      {produto.nome}
-                    </h3>
+              return (
+                <div
+                  key={produto.id}
+                  onClick={() => navigate(`/balcao/produto/${produto.id}`)}
+                  style={produtoCard}
+                >
+                  <h3>{produto.nome}</h3>
 
-                    <div>
-                      A partir de R${' '}
-                      {menorPreco.toFixed(
-                        2,
-                      )}
-                    </div>
-                  </div>
-                )
-              },
-            )}
+                  <div>A partir de R$ {menorPreco.toFixed(2)}</div>
+                </div>
+              )
+            })}
           </div>
         </div>
 
@@ -300,22 +227,15 @@ export default function Balcao() {
           style={{
             ...sidebar,
 
-            height: isMobile
-              ? 'auto'
-              : 'calc(100vh - 40px)',
+            height: isMobile ? 'auto' : 'calc(100vh - 40px)',
           }}
         >
           <h2>Resumo Pedido</h2>
 
           <div style={pedidoLista}>
             {itens.map((item) => (
-              <div
-                key={item.uid}
-                style={pedidoCard}
-              >
-                <strong>
-                  {item.nome}
-                </strong>
+              <div key={item.uid} style={pedidoCard}>
+                <strong>{item.nome}</strong>
 
                 {item.variacao && (
                   <div
@@ -325,97 +245,46 @@ export default function Balcao() {
                       opacity: 0.8,
                     }}
                   >
-                    🥤{' '}
-                    {
-                      item.variacao
-                        .nome
-                    }
+                    🥤 {item.variacao.nome}
                   </div>
                 )}
 
-                {(item.adicionais ||
-                  []).map(
-                  (add) => (
-                    <div
-                      key={add.id}
-                    >
-                      +{' '}
-                      {
-                        add.quantidade
-                      }
-                      x {add.nome}
-                    </div>
-                  ),
-                )}
+                {(item.adicionais || []).map((add) => (
+                  <div key={add.id}>
+                    + {add.quantidade}x {add.nome}
+                  </div>
+                ))}
 
                 {item.observacao && (
                   <div
                     style={{
                       marginTop: 8,
 
-                      fontStyle:
-                        'italic',
+                      fontStyle: 'italic',
 
                       opacity: 0.7,
                     }}
                   >
-                    📝{' '}
-                    {
-                      item.observacao
-                    }
+                    📝 {item.observacao}
                   </div>
                 )}
 
-                <div
-                  style={acoesQtd}
-                >
-                  <button
-                    onClick={() =>
-                      alterarQuantidade(
-                        item.uid,
-                        -1,
-                      )
-                    }
-                  >
+                <div style={acoesQtd}>
+                  <button onClick={() => alterarQuantidade(item.uid, -1)}>
                     -
                   </button>
 
-                  <span>
-                    {
-                      item.quantidade
-                    }
-                  </span>
+                  <span>{item.quantidade}</span>
 
-                  <button
-                    onClick={() =>
-                      alterarQuantidade(
-                        item.uid,
-                        1,
-                      )
-                    }
-                  >
+                  <button onClick={() => alterarQuantidade(item.uid, 1)}>
                     +
                   </button>
 
-                  <button
-                    onClick={() =>
-                      navigate(
-                        `/balcao/item/${item.uid}`,
-                      )
-                    }
-                  >
+                  <button onClick={() => navigate(`/balcao/item/${item.uid}`)}>
                     ✏️
                   </button>
 
-                  <button
-                    onClick={() =>
-                      removerItem(
-                        item.uid,
-                      )
-                    }
-                  >
-                    🗑
-                  </button>
+                  <button onClick={() => removerItem(item.uid)}>🗑</button>
                 </div>
 
                 <div
@@ -425,10 +294,7 @@ export default function Balcao() {
                     fontWeight: 700,
                   }}
                 >
-                  R${' '}
-                  {item.totalItem.toFixed(
-                    2,
-                  )}
+                  R$ {item.totalItem.toFixed(2)}
                 </div>
               </div>
             ))}
@@ -437,57 +303,31 @@ export default function Balcao() {
           <div style={footerPedido}>
             <input
               value={clienteNome}
-              onChange={(e) =>
-                setClienteNome(
-                  e.target.value,
-                )
-              }
+              onChange={(e) => setClienteNome(e.target.value)}
               placeholder="Cliente"
               style={input}
             />
 
             <select
-              value={
-                formaPagamento
-              }
-              onChange={(e) =>
-                setFormaPagamento(
-                  e.target.value,
-                )
-              }
+              value={formaPagamento}
+              onChange={(e) => setFormaPagamento(e.target.value)}
               style={input}
             >
-              <option value="DINHEIRO">
-                Dinheiro
-              </option>
+              <option value="DINHEIRO">Dinheiro</option>
 
-              <option value="PIX">
-                Pix
-              </option>
+              <option value="PIX">Pix</option>
 
-              <option value="CARTAO">
-                Cartão
-              </option>
+              <option value="CARTAO">Cartão</option>
             </select>
 
-            <h2>
-              Total: R${' '}
-              {total.toFixed(2)}
-            </h2>
+            <h2>Total: R$ {total.toFixed(2)}</h2>
 
             <button
-              onClick={
-                finalizarPedido
-              }
-              disabled={
-                itens.length ===
-                  0 || salvando
-              }
+              onClick={finalizarPedido}
+              disabled={itens.length === 0 || salvando}
               style={btnFinalizar}
             >
-              {salvando
-                ? 'Finalizando...'
-                : 'Finalizar Pedido'}
+              {salvando ? 'Finalizando...' : 'Finalizar Pedido'}
             </button>
           </div>
         </div>
@@ -533,15 +373,13 @@ const inputBusca: React.CSSProperties = {
 const gridProdutos: React.CSSProperties = {
   display: 'grid',
 
-  gridTemplateColumns:
-    'repeat(auto-fill,minmax(220px,1fr))',
+  gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))',
 
   gap: 18,
 }
 
 const produtoCard: React.CSSProperties = {
-  background:
-    'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
+  background: 'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
 
   padding: 20,
 
@@ -557,8 +395,7 @@ const produtoCard: React.CSSProperties = {
 }
 
 const sidebar: React.CSSProperties = {
-  background:
-    'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
+  background: 'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
 
   borderRadius: 20,
 
@@ -578,8 +415,7 @@ const pedidoLista: React.CSSProperties = {
 }
 
 const pedidoCard: React.CSSProperties = {
-  background:
-    'rgba(255,255,255,0.05)',
+  background: 'rgba(255,255,255,0.05)',
 
   padding: 16,
 
