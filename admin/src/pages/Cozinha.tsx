@@ -482,7 +482,7 @@ function PedidoCard({ pedido }: any) {
         boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
       }}
     >
-      {/*<strong>Pedido #{pedido.codigo}</strong>*/}
+
       <div
         style={{
           display: 'flex',
