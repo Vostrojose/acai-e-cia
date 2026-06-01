@@ -59,6 +59,7 @@ export default function Balcao() {
 
   const [formaPagamento, setFormaPagamento] = useState('PAGO')
   const [pendentePagamento, setPendentePagamento] = useState(false)
+  const [pendentes, setPendentes] = useState<any[]>([])
 
   const [salvando, setSalvando] = useState(false)
 
@@ -69,6 +70,8 @@ export default function Balcao() {
     carregarProdutos()
 
     carregarPedido()
+
+    carregarPendentes()
   }, [])
 
   useEffect(() => {
@@ -125,6 +128,15 @@ export default function Balcao() {
       console.error(err)
     }
   }
+  async function carregarPendentes() {
+    try {
+      const response = await api.get('/balcao/pendentes')
+
+      setPendentes(response.data.data || [])
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   function removerItem(uid: string) {
     const confirmar = confirm('Remover item do pedido?')
@@ -174,7 +186,6 @@ export default function Balcao() {
 
       await api.post('/balcao', {
         itens: itens.map((i) => ({
-          pago: !pendentePagamento,
 
           id: i.produtoId,
 
@@ -206,6 +217,9 @@ export default function Balcao() {
       setItens([])
 
       setClienteNome('')
+      setPendentePagamento(false)
+
+      carregarPendentes()
     } catch (err: any) {
       console.error(err)
 
@@ -405,6 +419,68 @@ export default function Balcao() {
             >
               {salvando ? 'Finalizando...' : 'Finalizar Pedido'}
             </button>
+            {pendentes.length > 0 && (
+              <div
+                style={{
+                  marginTop: 20,
+                }}
+              >
+                <h2
+                  style={{
+                    color: '#ef4444',
+                    marginBottom: 14,
+                  }}
+                >
+                  Pendentes de Pagamento
+                </h2>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 12,
+                    maxHeight: 300,
+                    overflowY: 'auto',
+                  }}
+                >
+                  {pendentes.map((pedido) => (
+                    <div
+                      key={pedido.id}
+                      style={{
+                        background: 'rgba(239,68,68,0.12)',
+                        border: '1px solid rgba(239,68,68,0.35)',
+                        borderRadius: 16,
+                        padding: 14,
+                        color: '#fff',
+                      }}
+                    >
+                      <strong>
+                        {pedido.clienteNome || 'Consumidor sem identificação'}
+                      </strong>
+
+                      <div
+                        style={{
+                          marginTop: 8,
+                          opacity: 0.8,
+                        }}
+                      >
+                        {pedido.itens.length} item(ns)
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: 8,
+                          fontWeight: 700,
+                          color: '#fca5a5',
+                        }}
+                      >
+                        R$ {Number(pedido.total).toFixed(2)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

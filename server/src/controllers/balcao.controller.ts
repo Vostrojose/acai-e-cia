@@ -3,21 +3,25 @@ import prisma from '../lib/prisma'
 
 class BalcaoController {
   async criar(req: Request, res: Response) {
+    
     try {
+      
       /*const { itens, forma, clienteNome } = req.body*/ /*se a cozinha crescer usar este para fluxo completo de pedidos*/
 
-      const { itens, forma, clienteNome, pularPreparo } = req.body
+      const { itens, forma, clienteNome, pularPreparo, pago } = req.body
 
       const clienteNomeNormalizado = clienteNome
         ? clienteNome.toUpperCase().trim()
         : null
 
       const formaFinal = forma || 'PAGO'
-      const pago = formaFinal !== 'FIADO'
+      const pedidoPago =
+        typeof pago === 'boolean' ? pago : formaFinal !== 'FIADO'
 
       if (!itens || itens.length === 0) {
         return res.status(400).json({ message: 'Itens obrigatórios' })
       }
+      
 
       if (
         (formaFinal === 'FIADO' || formaFinal === 'CREDITO') &&
@@ -27,6 +31,9 @@ class BalcaoController {
           message: 'Nome do cliente obrigatório',
         })
       }
+      
+      
+      
 
       /* ============================= */
       /* 🔥 BUSCAR OU CRIAR CLIENTE    */
@@ -43,6 +50,7 @@ class BalcaoController {
           },
         })
       }
+      
 
       /* ============================= */
       /* 🔥 CÁLCULO TOTAL              */
@@ -102,7 +110,7 @@ class BalcaoController {
           clienteId: cliente?.id,
 
           formaPagamentoBalcao: formaFinal,
-          pago: formaFinal !== 'FIADO',
+         pago: pedidoPago,
 
           total: total,
 
@@ -156,6 +164,39 @@ class BalcaoController {
       })
     }
   }
+  async listarPendentes(req: Request, res: Response) {
+  try {
+    const pedidos = await prisma.pedido.findMany({
+      where: {
+        origem: 'BALCAO',
+        pago: false,
+      },
+
+      orderBy: {
+        criadoEm: 'desc',
+      },
+
+      include: {
+        itens: {
+          include: {
+            adicionais: true,
+          },
+        },
+      },
+    })
+
+    return res.json({
+      success: true,
+      data: pedidos,
+    })
+  } catch (err) {
+    console.error('Erro ao listar pendentes:', err)
+
+    return res.status(500).json({
+      message: 'Erro ao listar pendentes',
+    })
+  }
+}
 }
 
 export default new BalcaoController()

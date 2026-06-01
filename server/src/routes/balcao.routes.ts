@@ -8,4 +8,6 @@ const router = Router();
 ================================= */
 router.post("/", balcaoController.criar);
 
+router.get("/pendentes", balcaoController.listarPendentes);
+
 export default router;
