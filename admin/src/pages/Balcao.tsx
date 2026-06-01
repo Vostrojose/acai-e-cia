@@ -96,6 +96,9 @@ export default function Balcao() {
       window.removeEventListener('touchstart', resetarTimeout)
     }
   }, [])
+  useEffect(() => {
+    itensRef.current = itens
+  }, [itens])
 
   function resetarTimeout() {
     clearTimeout(timeoutRef.current)
@@ -485,23 +488,24 @@ export default function Balcao() {
                         }}
                       >
                         R$ {Number(pedido.total).toFixed(2)}
-                        <button
-                          onClick={() => quitarPedido(pedido.id)}
-                          style={{
-                            marginTop: 12,
-                            width: '100%',
-                            padding: 12,
-                            borderRadius: 12,
-                            border: 'none',
-                            background: '#22c55e',
-                            color: '#fff',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                          }}
-                        >
-                          QUITAR
-                        </button>
                       </div>
+
+                      <button
+                        onClick={() => quitarPedido(pedido.id)}
+                        style={{
+                          marginTop: 12,
+                          width: '100%',
+                          padding: 12,
+                          borderRadius: 12,
+                          border: 'none',
+                          background: '#22c55e',
+                          color: '#fff',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        QUITAR
+                      </button>
                     </div>
                   ))}
                 </div>
