@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+
 import { useNavigate } from 'react-router-dom'
 
 import api from '../services/api'
@@ -60,11 +61,49 @@ export default function Balcao() {
 
   const [salvando, setSalvando] = useState(false)
 
+  const timeoutRef = useRef<any>(null)
+
   useEffect(() => {
     carregarProdutos()
 
     carregarPedido()
+  }, [itens])
+
+  useEffect(() => {
+    resetarTimeout()
+    window.addEventListener('pointerdown', resetarTimeout)
+
+    window.addEventListener('keydown', resetarTimeout)
+
+    window.addEventListener('click', resetarTimeout)
+
+    window.addEventListener('touchstart', resetarTimeout)
+
+    return () => {
+      clearTimeout(timeoutRef.current)
+
+      window.removeEventListener('pointerdown', resetarTimeout)
+
+      window.removeEventListener('keydown', resetarTimeout)
+
+      window.removeEventListener('click', resetarTimeout)
+
+      window.removeEventListener('touchstart', resetarTimeout)
+    }
   }, [])
+
+  function resetarTimeout() {
+    clearTimeout(timeoutRef.current)
+
+    timeoutRef.current = setTimeout(
+      () => {
+        if (itens.length === 0) {
+          navigate('/cozinha')
+        }
+      },
+      3 * 60 * 1000,
+    )
+  }
 
   function carregarPedido() {
     try {
@@ -180,7 +219,26 @@ export default function Balcao() {
 
   return (
     <div style={theme.page}>
-      <div style={header}>
+      <div style={headerTop}>
+        <button
+          onClick={() => {
+            if (itens.length > 0) {
+              const confirmar = confirm(
+                'Existem itens no pedido. Deseja sair mesmo?',
+              )
+
+              if (!confirmar) {
+                return
+              }
+            }
+
+            navigate('/cozinha')
+          }}
+          style={btnVoltar}
+        >
+          ← Cozinha
+        </button>
+
         <h1 style={title}>🧾 Vendas Balcão</h1>
       </div>
 
@@ -318,7 +376,7 @@ export default function Balcao() {
 
               <option value="CREDITO">Crédito</option>
             </select>
-            
+
             <h2>Total: R$ {total.toFixed(2)}</h2>
             <button
               onClick={finalizarPedido}
@@ -474,4 +532,29 @@ const btnFinalizar: React.CSSProperties = {
   fontSize: 18,
 
   cursor: 'pointer',
+}
+const headerTop: React.CSSProperties = {
+  display: 'flex',
+
+  alignItems: 'center',
+
+  gap: 16,
+
+  marginBottom: 20,
+}
+
+const btnVoltar: React.CSSProperties = {
+  padding: '12px 18px',
+
+  borderRadius: 14,
+
+  border: 'none',
+
+  background: '#333',
+
+  color: '#fff',
+
+  cursor: 'pointer',
+
+  fontWeight: 700,
 }
