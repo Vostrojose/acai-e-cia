@@ -171,14 +171,20 @@ await api.post('/balcao', {
       setItens([])
 
       setClienteNome('')
-    } catch (err) {
-      console.error(err)
+    } catch (err: any) {
+  console.error(err)
 
-      alert('Erro ao criar pedido')
-    } finally {
-      setSalvando(false)
-    }
-  }
+  console.log(
+    err?.response?.data,
+  )
+
+  alert(
+    JSON.stringify(
+      err?.response?.data ||
+        'Erro ao criar pedido',
+    ),
+  )
+}
 
   const produtosFiltrados = produtos.filter((p) =>
     p.nome.toLowerCase().includes(busca.toLowerCase()),
@@ -482,4 +488,4 @@ const btnFinalizar: React.CSSProperties = {
   fontSize: 18,
 
   cursor: 'pointer',
-}
+}}
