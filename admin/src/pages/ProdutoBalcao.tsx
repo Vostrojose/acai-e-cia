@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 
-import {
-  useNavigate,
-  useParams,
-} from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import api from '../services/api'
 
@@ -26,26 +23,17 @@ export default function ProdutoBalcao() {
 
   const isEdicao = !!uid
 
-  const [produto, setProduto] =
-    useState<any>(null)
+  const [produto, setProduto] = useState<any>(null)
 
-  const [variacaoSelecionada,
-    setVariacaoSelecionada] =
-    useState<any>(null)
+  const [variacaoSelecionada, setVariacaoSelecionada] = useState<any>(null)
 
-  const [adicionaisSelecionados,
-    setAdicionaisSelecionados] =
-    useState<
-      AdicionalSelecionado[]
-    >([])
+  const [adicionaisSelecionados, setAdicionaisSelecionados] = useState<
+    AdicionalSelecionado[]
+  >([])
 
-  const [quantidade,
-    setQuantidade] =
-    useState(1)
+  const [quantidade, setQuantidade] = useState(1)
 
-  const [observacao,
-    setObservacao] =
-    useState('')
+  const [observacao, setObservacao] = useState('')
 
   useEffect(() => {
     carregar()
@@ -58,8 +46,8 @@ export default function ProdutoBalcao() {
         return
       }
 
-      const response =
-        await api.get(`/produtos/${id}`)
+      const response = await api.get(`/produtos/${id}`)
+      console.log(response.data.data)
 
       setProduto(response.data.data)
     } catch (err) {
@@ -68,152 +56,90 @@ export default function ProdutoBalcao() {
   }
 
   async function carregarItemEdicao() {
-    const pedido =
-      JSON.parse(
-        localStorage.getItem(
-          'pedido-balcao',
-        ) || '[]',
-      )
+    const pedido = JSON.parse(localStorage.getItem('pedido-balcao') || '[]')
 
-    const item = pedido.find(
-      (i: any) => i.uid === uid,
-    )
+    const item = pedido.find((i: any) => i.uid === uid)
 
     if (!item) {
       navigate('/balcao')
       return
     }
 
-    const response =
-      await api.get(
-        `/produtos/${item.produtoId}`,
-      )
+    const response = await api.get(`/produtos/${item.produtoId}`)
 
     setProduto(response.data.data)
 
-    setVariacaoSelecionada(
-      item.variacao || null,
-    )
+    setVariacaoSelecionada(item.variacao || null)
 
-    setAdicionaisSelecionados(
-      item.adicionais || [],
-    )
+    setAdicionaisSelecionados(item.adicionais || [])
 
-    setQuantidade(
-      item.quantidade || 1,
-    )
+    setQuantidade(item.quantidade || 1)
 
-    setObservacao(
-      item.observacao || '',
-    )
+    setObservacao(item.observacao || '')
   }
 
-  function alterarQuantidadeAdicional(
-    add: any,
-    delta: number,
-  ) {
-    setAdicionaisSelecionados(
-      (prev) => {
-        const existente =
-          prev.find(
-            (a) => a.id === add.id,
-          )
+  function alterarQuantidadeAdicional(add: any, delta: number) {
+    setAdicionaisSelecionados((prev) => {
+      const existente = prev.find((a) => a.id === add.id)
 
-        if (
-          !existente &&
-          delta > 0
-        ) {
-          return [
-            ...prev,
+      if (!existente && delta > 0) {
+        return [
+          ...prev,
 
-            {
-              id: add.id,
+          {
+            id: add.id,
 
-              nome: add.nome,
+            nome: add.nome,
 
-              preco: Number(
-                add.preco,
-              ),
+            preco: Number(add.preco),
 
-              quantidade: 1,
-            },
-          ]
-        }
+            quantidade: 1,
+          },
+        ]
+      }
 
-        if (!existente)
-          return prev
+      if (!existente) return prev
 
-        const novaQuantidade =
-          existente.quantidade +
-          delta
+      const novaQuantidade = existente.quantidade + delta
 
-        if (novaQuantidade <= 0) {
-          return prev.filter(
-            (a) => a.id !== add.id,
-          )
-        }
+      if (novaQuantidade <= 0) {
+        return prev.filter((a) => a.id !== add.id)
+      }
 
-        return prev.map((a) =>
-          a.id === add.id
-            ? {
-                ...a,
+      return prev.map((a) =>
+        a.id === add.id
+          ? {
+              ...a,
 
-                quantidade:
-                  novaQuantidade,
-              }
-            : a,
-        )
-      },
-    )
+              quantidade: novaQuantidade,
+            }
+          : a,
+      )
+    })
   }
 
   const total = useMemo(() => {
-    const precoBase =
-      Number(
-        variacaoSelecionada?.preco ??
-          produto?.preco ??
-          0,
-      )
+    const precoBase = Number(variacaoSelecionada?.preco ?? produto?.preco ?? 0)
 
-    const adicionais =
-      adicionaisSelecionados.reduce(
-        (acc, add) =>
-          acc +
-          Number(add.preco) *
-            add.quantidade,
-        0,
-      )
-
-    return (
-      (precoBase + adicionais) *
-      quantidade
+    const adicionais = adicionaisSelecionados.reduce(
+      (acc, add) => acc + Number(add.preco) * add.quantidade,
+      0,
     )
-  }, [
-    produto,
-    variacaoSelecionada,
-    adicionaisSelecionados,
-    quantidade,
-  ])
+
+    return (precoBase + adicionais) * quantidade
+  }, [produto, variacaoSelecionada, adicionaisSelecionados, quantidade])
 
   function salvarItem() {
     if (!produto) return
 
-    if (
-      produto.variacoes
-        ?.length > 0 &&
-      !variacaoSelecionada
-    ) {
-      alert(
-        'Selecione uma variação',
-      )
+    if (produto.variacoes?.length > 0 && !variacaoSelecionada) {
+      alert('Selecione uma variação')
 
       return
     }
 
     const item = {
-      uid:
-        uid ??
-        crypto.randomUUID(),
+      uid: uid ?? crypto.randomUUID(),
 
       produtoId: produto.id,
 
@@ -221,46 +147,28 @@ export default function ProdutoBalcao() {
 
       quantidade,
 
-      precoBase: Number(
-        produto.preco,
-      ),
+      precoBase: Number(produto.preco),
 
-      variacao:
-        variacaoSelecionada,
+      variacao: variacaoSelecionada,
 
-      adicionais:
-        adicionaisSelecionados,
+      adicionais: adicionaisSelecionados,
 
       observacao,
 
       totalItem: total,
     }
 
-    const pedido =
-      JSON.parse(
-        localStorage.getItem(
-          'pedido-balcao',
-        ) || '[]',
-      )
+    const pedido = JSON.parse(localStorage.getItem('pedido-balcao') || '[]')
 
     let atualizado = [...pedido]
 
     if (isEdicao) {
-      atualizado =
-        atualizado.map(
-          (i: any) =>
-            i.uid === uid
-              ? item
-              : i,
-        )
+      atualizado = atualizado.map((i: any) => (i.uid === uid ? item : i))
     } else {
       atualizado.push(item)
     }
 
-    localStorage.setItem(
-      'pedido-balcao',
-      JSON.stringify(atualizado),
-    )
+    localStorage.setItem('pedido-balcao', JSON.stringify(atualizado))
 
     navigate('/balcao')
   }
@@ -276,62 +184,32 @@ export default function ProdutoBalcao() {
   return (
     <div style={theme.page}>
       <div style={container}>
-        <button
-          onClick={() =>
-            navigate('/balcao')
-          }
-          style={btnVoltar}
-        >
+        <button onClick={() => navigate('/balcao')} style={btnVoltar}>
           ← Voltar
         </button>
 
-        <h1 style={titulo}>
-          {produto.nome}
-        </h1>
+        <h1 style={titulo}>{produto.nome}</h1>
 
-        {produto.variacoes
-          ?.length > 0 && (
+        {produto.variacoes?.length > 0 && (
           <div style={bloco}>
-            <h2>
-              Escolha a variação
-            </h2>
+            <h2>Escolha a variação</h2>
 
-            {produto.variacoes
-              .filter(
-                (v: any) =>
-                  v.ativo,
-              )
-              .map((v: any) => (
-                <label
-                  key={v.id}
-                  style={
-                    variacaoCard(
-                      variacaoSelecionada?.id ===
-                        v.id,
-                    )
-                  }
-                >
-                  <input
-                    type="radio"
-                    checked={
-                      variacaoSelecionada?.id ===
-                      v.id
-                    }
-                    onChange={() =>
-                      setVariacaoSelecionada(
-                        v,
-                      )
-                    }
-                  />
+            {produto.variacoes?.map((v: any) => (
+              <label
+                key={v.id}
+                style={variacaoCard(variacaoSelecionada?.id === v.id)}
+              >
+                <input
+                  type="radio"
+                  checked={variacaoSelecionada?.id === v.id}
+                  onChange={() => setVariacaoSelecionada(v)}
+                />
 
-                  <span>
-                    {v.nome} — R${' '}
-                    {Number(
-                      v.preco,
-                    ).toFixed(2)}
-                  </span>
-                </label>
-              ))}
+                <span>
+                  {v.nome} — R$ {Number(v.preco).toFixed(2)}
+                </span>
+              </label>
+            ))}
           </div>
         )}
 
@@ -339,100 +217,52 @@ export default function ProdutoBalcao() {
           <h2>Adicionais</h2>
 
           {produto.adicionais
-            ?.filter(
-              (a: any) => a.ativo,
-            )
+            ?.filter((a: any) => a.ativo)
             .map((add: any) => {
-              const selecionado =
-                adicionaisSelecionados.find(
-                  (a) =>
-                    a.id === add.id,
-                )
+              const selecionado = adicionaisSelecionados.find(
+                (a) => a.id === add.id,
+              )
 
-              const quantidade =
-                selecionado?.quantidade ||
-                0
+              const quantidade = selecionado?.quantidade || 0
 
-              const gratis =
-                Number(add.preco) ===
-                0
+              const gratis = Number(add.preco) === 0
 
               return (
-                <div
-                  key={add.id}
-                  style={
-                    adicionalCard
-                  }
-                >
+                <div key={add.id} style={adicionalCard}>
                   <div>
-                    <strong>
-                      {add.nome}
-                    </strong>
+                    <strong>{add.nome}</strong>
 
                     <div>
                       {gratis
                         ? 'GRÁTIS'
-                        : `+R$ ${Number(
-                            add.preco,
-                          ).toFixed(2)}`}
+                        : `+R$ ${Number(add.preco).toFixed(2)}`}
                     </div>
                   </div>
 
                   {gratis ? (
                     <input
                       type="checkbox"
-                      checked={
-                        quantidade > 0
-                      }
-                      onChange={(
-                        e,
-                      ) => {
-                        if (
-                          e.target
-                            .checked
-                        ) {
-                          alterarQuantidadeAdicional(
-                            add,
-                            1,
-                          )
+                      checked={quantidade > 0}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          alterarQuantidadeAdicional(add, 1)
                         } else {
-                          alterarQuantidadeAdicional(
-                            add,
-                            -1,
-                          )
+                          alterarQuantidadeAdicional(add, -1)
                         }
                       }}
                     />
                   ) : (
-                    <div
-                      style={
-                        qtdBox
-                      }
-                    >
+                    <div style={qtdBox}>
                       <button
-                        onClick={() =>
-                          alterarQuantidadeAdicional(
-                            add,
-                            -1,
-                          )
-                        }
+                        onClick={() => alterarQuantidadeAdicional(add, -1)}
                       >
                         -
                       </button>
 
-                      <span>
-                        {
-                          quantidade
-                        }
-                      </span>
+                      <span>{quantidade}</span>
 
                       <button
-                        onClick={() =>
-                          alterarQuantidadeAdicional(
-                            add,
-                            1,
-                          )
-                        }
+                        onClick={() => alterarQuantidadeAdicional(add, 1)}
                       >
                         +
                       </button>
@@ -447,33 +277,13 @@ export default function ProdutoBalcao() {
           <h2>Quantidade</h2>
 
           <div style={qtdBox}>
-            <button
-              onClick={() =>
-                setQuantidade(
-                  (q) =>
-                    Math.max(
-                      1,
-                      q - 1,
-                    ),
-                )
-              }
-            >
+            <button onClick={() => setQuantidade((q) => Math.max(1, q - 1))}>
               -
             </button>
 
-            <span>
-              {quantidade}
-            </span>
+            <span>{quantidade}</span>
 
-            <button
-              onClick={() =>
-                setQuantidade(
-                  (q) => q + 1,
-                )
-              }
-            >
-              +
-            </button>
+            <button onClick={() => setQuantidade((q) => q + 1)}>+</button>
           </div>
         </div>
 
@@ -482,29 +292,17 @@ export default function ProdutoBalcao() {
 
           <textarea
             value={observacao}
-            onChange={(e) =>
-              setObservacao(
-                e.target.value,
-              )
-            }
+            onChange={(e) => setObservacao(e.target.value)}
             style={textarea}
             placeholder="Ex: sem granola"
           />
         </div>
 
         <div style={footer}>
-          <h1>
-            Total: R${' '}
-            {total.toFixed(2)}
-          </h1>
+          <h1>Total: R$ {total.toFixed(2)}</h1>
 
-          <button
-            onClick={salvarItem}
-            style={btnSalvar}
-          >
-            {isEdicao
-              ? 'Salvar Alterações'
-              : 'Adicionar Pedido'}
+          <button onClick={salvarItem} style={btnSalvar}>
+            {isEdicao ? 'Salvar Alterações' : 'Adicionar Pedido'}
           </button>
         </div>
       </div>
@@ -512,43 +310,37 @@ export default function ProdutoBalcao() {
   )
 }
 
-const container: React.CSSProperties =
-  {
-    maxWidth: 900,
+const container: React.CSSProperties = {
+  maxWidth: 900,
 
-    margin: '0 auto',
+  margin: '0 auto',
 
-    display: 'flex',
+  display: 'flex',
 
-    flexDirection: 'column',
+  flexDirection: 'column',
 
-    gap: 24,
-  }
+  gap: 24,
+}
 
-const titulo: React.CSSProperties =
-  {
-    color: '#fff',
+const titulo: React.CSSProperties = {
+  color: '#fff',
 
-    fontSize: 36,
+  fontSize: 36,
 
-    fontWeight: 800,
-  }
+  fontWeight: 800,
+}
 
-const bloco: React.CSSProperties =
-  {
-    background:
-      'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
+const bloco: React.CSSProperties = {
+  background: 'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
 
-    borderRadius: 20,
+  borderRadius: 20,
 
-    padding: 24,
+  padding: 24,
 
-    color: '#fff',
-  }
+  color: '#fff',
+}
 
-const variacaoCard = (
-  ativo: boolean,
-): React.CSSProperties => ({
+const variacaoCard = (ativo: boolean): React.CSSProperties => ({
   display: 'flex',
 
   gap: 12,
@@ -557,116 +349,103 @@ const variacaoCard = (
 
   borderRadius: 14,
 
-  border: ativo
-    ? '2px solid #22c55e'
-    : '1px solid #333',
+  border: ativo ? '2px solid #22c55e' : '1px solid #333',
 
   marginTop: 14,
 
   cursor: 'pointer',
 })
 
-const adicionalCard: React.CSSProperties =
-  {
-    display: 'flex',
+const adicionalCard: React.CSSProperties = {
+  display: 'flex',
 
-    justifyContent:
-      'space-between',
+  justifyContent: 'space-between',
 
-    alignItems: 'center',
+  alignItems: 'center',
 
-    marginTop: 18,
+  marginTop: 18,
 
-    paddingBottom: 18,
+  paddingBottom: 18,
 
-    borderBottom:
-      '1px solid rgba(255,255,255,0.08)',
-  }
+  borderBottom: '1px solid rgba(255,255,255,0.08)',
+}
 
-const qtdBox: React.CSSProperties =
-  {
-    display: 'flex',
+const qtdBox: React.CSSProperties = {
+  display: 'flex',
 
-    alignItems: 'center',
+  alignItems: 'center',
 
-    gap: 12,
-  }
+  gap: 12,
+}
 
-const textarea: React.CSSProperties =
-  {
-    width: '100%',
+const textarea: React.CSSProperties = {
+  width: '100%',
 
-    minHeight: 120,
+  minHeight: 120,
 
-    borderRadius: 16,
+  borderRadius: 16,
 
-    border: '1px solid #333',
+  border: '1px solid #333',
 
-    background: '#111',
+  background: '#111',
 
-    color: '#fff',
+  color: '#fff',
 
-    padding: 16,
-  }
+  padding: 16,
+}
 
-const footer: React.CSSProperties =
-  {
-    position: 'sticky',
+const footer: React.CSSProperties = {
+  position: 'sticky',
 
-    bottom: 0,
+  bottom: 0,
 
-    background:
-      'rgba(15,15,15,0.95)',
+  background: 'rgba(15,15,15,0.95)',
 
-    backdropFilter: 'blur(10px)',
+  backdropFilter: 'blur(10px)',
 
-    padding: 20,
+  padding: 20,
 
-    borderRadius: 20,
+  borderRadius: 20,
 
-    display: 'flex',
+  display: 'flex',
 
-    justifyContent:
-      'space-between',
+  justifyContent: 'space-between',
 
-    alignItems: 'center',
+  alignItems: 'center',
 
-    gap: 20,
-  }
+  gap: 20,
+}
 
-const btnSalvar: React.CSSProperties =
-  {
-    padding:
-      '18px 28px',
+const btnSalvar: React.CSSProperties = {
+  padding: '18px 28px',
 
-    borderRadius: 16,
+  borderRadius: 16,
 
-    border: 'none',
+  border: 'none',
 
-    background: '#22c55e',
+  background: '#22c55e',
 
-    color: '#fff',
+  color: '#fff',
 
-    fontWeight: 700,
+  fontWeight: 700,
 
-    fontSize: 18,
+  fontSize: 18,
 
-    cursor: 'pointer',
-  }
+  cursor: 'pointer',
+}
 
-const btnVoltar: React.CSSProperties =
-  {
-    width: 140,
+const btnVoltar: React.CSSProperties = {
+  width: 140,
 
-    padding: 14,
+  padding: 14,
 
-    borderRadius: 14,
+  borderRadius: 14,
 
-    border: 'none',
+  border: 'none',
 
-    background: '#333',
+  background: '#333',
 
-    color: '#fff',
+  color: '#fff',
 
-    cursor: 'pointer',
-  }
+  cursor: 'pointer',
+}
