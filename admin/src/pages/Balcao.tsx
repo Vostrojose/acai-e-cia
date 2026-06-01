@@ -185,6 +185,10 @@ await api.post('/balcao', {
     ),
   )
 }
+ finally {
+  setSalvando(false)
+}
+}
 
   const produtosFiltrados = produtos.filter((p) =>
     p.nome.toLowerCase().includes(busca.toLowerCase()),
@@ -488,4 +492,4 @@ const btnFinalizar: React.CSSProperties = {
   fontSize: 18,
 
   cursor: 'pointer',
-}}
+}
