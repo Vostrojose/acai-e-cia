@@ -256,7 +256,9 @@ export default function Cozinha() {
     <div
       style={{
         ...theme.page,
-        transform: `translate(${currentShift.x}px, ${currentShift.y}px)`,
+        transform: screenSaver
+          ? `translate(${currentShift.x}px, ${currentShift.y}px)`
+          : 'translate(0px, 0px)',
         transition: 'transform 2s linear',
       }}
     >
