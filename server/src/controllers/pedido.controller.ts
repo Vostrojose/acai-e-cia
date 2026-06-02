@@ -114,6 +114,24 @@ class PedidoController {
   atualizarStatus: RequestHandler = asyncHandler(async (req, res) => {
     const { id } = req.params
     const data = atualizarStatusSchema.parse(req.body)
+    const pedidoAtual = await pedidoService.buscarPorId(id)
+
+    if (!pedidoAtual) {
+      return res.status(404).json({
+        success: false,
+        message: 'Pedido não encontrado',
+      })
+    }
+
+    if (
+      pedidoAtual.status === StatusPedido.CANCELADO &&
+      data.status !== StatusPedido.CANCELADO
+    ) {
+      return res.status(409).json({
+        success: false,
+        message: 'Pedido cancelado não pode ser alterado',
+      })
+    }
 
     await pedidoService.atualizarStatus(id, data.status as StatusPedido)
     if (data.status === 'CANCELADO') {
