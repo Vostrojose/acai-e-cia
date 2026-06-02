@@ -852,9 +852,9 @@ const headerTop: React.CSSProperties = {
 const statusGrid: React.CSSProperties = {
   display: 'grid',
 
-  gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))',
+  gridTemplateColumns: 'repeat(4,1fr)',
 
-  gap: 20,
+  gap: 40,
 }
 
 const btnVoltar: React.CSSProperties = {
@@ -885,7 +885,7 @@ const statusCard = (cor: string): React.CSSProperties => ({
 
   fontWeight: 700,
 
-  minWidth: 140,
+  minWidth: 0,
 
   textAlign: 'center',
 
