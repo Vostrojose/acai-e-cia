@@ -60,6 +60,9 @@ export default function Balcao() {
   const [formaPagamento, setFormaPagamento] = useState('PAGO')
   const [pendentePagamento, setPendentePagamento] = useState(false)
   const [pendentes, setPendentes] = useState<any[]>([])
+  const [novos, setNovos] = useState<any[]>([])
+  const [preparo, setPreparo] = useState<any[]>([])
+  const [prontos, setProntos] = useState<any[]>([])
 
   const [salvando, setSalvando] = useState(false)
 
@@ -95,6 +98,13 @@ export default function Balcao() {
 
       window.removeEventListener('touchstart', resetarTimeout)
     }
+  }, [])
+  useEffect(() => {
+    const interval = setInterval(() => {
+      carregarPainelCozinha()
+    }, 5000)
+
+    return () => clearInterval(interval)
   }, [])
   useEffect(() => {
     itensRef.current = itens
@@ -151,6 +161,22 @@ export default function Balcao() {
       alert('Erro ao quitar pedido')
     }
   }
+
+  async function carregarPainelCozinha() {
+    try {
+      const response = await api.get('/pedidos?limit=200')
+
+      const pedidos = response.data.data || []
+
+      setNovos(pedidos.filter((p: any) => p.status === 'RECEBIDO'))
+
+      setPreparo(pedidos.filter((p: any) => p.status === 'EM_PREPARO'))
+
+      setProntos(pedidos.filter((p: any) => p.status === 'PRONTO'))
+    } catch (err) {
+      console.error(err)
+    }
+  }
   async function cancelarPedido(id: string) {
     const confirmar = confirm('Deseja realmente cancelar este pedido?')
 
@@ -177,6 +203,7 @@ export default function Balcao() {
       )
 
       carregarPendentes()
+      carregarPainelCozinha()
 
       alert('Pedido cancelado')
     } catch (err) {
@@ -305,6 +332,20 @@ export default function Balcao() {
         </button>
 
         <h1 style={title}>🧾 Vendas Balcão</h1>
+        <div
+          style={{
+            display: 'flex',
+            gap: 12,
+            marginBottom: 20,
+            flexWrap: 'wrap',
+          }}
+        >
+          <div style={statusCard('#ef4444')}>🆕 {novos.length} NOVOS</div>
+
+          <div style={statusCard('#f59e0b')}>👨‍🍳 {preparo.length} PREPARO</div>
+
+          <div style={statusCard('#22c55e')}>✅ {prontos.length} PRONTOS</div>
+        </div>
       </div>
 
       <div
@@ -734,3 +775,22 @@ const btnVoltar: React.CSSProperties = {
 
   fontWeight: 700,
 }
+const statusCard = (cor: string): React.CSSProperties => ({
+  background: '#1e1e1e',
+
+  border: `1px solid ${cor}`,
+
+  color: '#fff',
+
+  padding: '12px 18px',
+
+  borderRadius: 14,
+
+  fontWeight: 700,
+
+  minWidth: 140,
+
+  textAlign: 'center',
+
+  boxShadow: `0 0 10px ${cor}33`,
+})
