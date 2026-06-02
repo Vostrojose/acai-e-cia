@@ -570,6 +570,24 @@ function PedidoCard({ pedido }: any) {
       {pedido.status === 'PRONTO' && (
         <>
           <button onClick={() => atualizarStatus('ENTREGUE')}>FINALIZAR</button>
+          {pedido.origem === 'BALCAO' && (
+            <button
+              onClick={() => {
+                const confirmar = confirm('Cancelar este pedido do balcão?')
+
+                if (!confirmar) return
+
+                atualizarStatus('CANCELADO')
+              }}
+              style={{
+                marginTop: 8,
+                background: '#b91c1c',
+                color: '#fff',
+              }}
+            >
+              🛑 CANCELAR
+            </button>
+          )}
 
           {pedido.telefone && (
             <button onClick={enviarWhatsApp} style={{ marginTop: 8 }}>
