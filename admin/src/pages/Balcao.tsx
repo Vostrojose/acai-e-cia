@@ -802,7 +802,7 @@ const footerPedido: React.CSSProperties = {
 const input: React.CSSProperties = {
   width: '100%',
 
-  padding: 14,
+  padding: 10,
 
   borderRadius: 14,
 
@@ -850,7 +850,7 @@ const statusGrid: React.CSSProperties = {
 
   gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))',
 
-  gap: 14,
+  gap: 20,
 }
 
 const btnVoltar: React.CSSProperties = {
@@ -881,7 +881,7 @@ const statusCard = (cor: string): React.CSSProperties => ({
 
   fontWeight: 700,
 
-  minWidth: 180,
+  minWidth: 140,
 
   textAlign: 'center',
 
