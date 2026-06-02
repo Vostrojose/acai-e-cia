@@ -388,35 +388,31 @@ export default function Balcao() {
       <style>{pulseStyle}</style>
 
       <div style={theme.page}>
-        <div style={headerTop}>
-          <button
-            onClick={() => {
-              if (itens.length > 0) {
-                const confirmar = confirm(
-                  'Existem itens no pedido. Deseja sair mesmo?',
-                )
+        <div style={headerWrapper}>
+          <div style={headerTop}>
+            <button
+              onClick={() => {
+                if (itens.length > 0) {
+                  const confirmar = confirm(
+                    'Existem itens no pedido. Deseja sair mesmo?',
+                  )
 
-                if (!confirmar) {
-                  return
+                  if (!confirmar) {
+                    return
+                  }
                 }
-              }
 
-              navigate('/cozinha')
-            }}
-            style={btnVoltar}
-          >
-            ← Cozinha
-          </button>
+                navigate('/cozinha')
+              }}
+              style={btnVoltar}
+            >
+              ← Cozinha
+            </button>
 
-          <h1 style={title}>🧾 Vendas Balcão</h1>
-          <div
-            style={{
-              display: 'flex',
-              gap: 12,
-              marginBottom: 20,
-              flexWrap: 'wrap',
-            }}
-          >
+            <h1 style={title}>🧾 Vendas Balcão</h1>
+          </div>
+
+          <div style={statusGrid}>
             <div
               style={{
                 ...statusCard('#ef4444'),
@@ -843,9 +839,18 @@ const headerTop: React.CSSProperties = {
 
   alignItems: 'center',
 
+  justifyContent: 'space-between',
+
   gap: 16,
 
-  marginBottom: 20,
+  flexWrap: 'wrap',
+}
+const statusGrid: React.CSSProperties = {
+  display: 'grid',
+
+  gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))',
+
+  gap: 14,
 }
 
 const btnVoltar: React.CSSProperties = {
@@ -882,6 +887,16 @@ const statusCard = (cor: string): React.CSSProperties => ({
 
   boxShadow: `0 0 10px ${cor}33`,
 })
+const headerWrapper: React.CSSProperties = {
+  display: 'flex',
+
+  flexDirection: 'column',
+
+  gap: 18,
+
+  marginBottom: 24,
+}
+
 const pulseStyle = `
 @keyframes pulseNovo {
 
