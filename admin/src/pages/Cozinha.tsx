@@ -67,9 +67,7 @@ export default function Cozinha() {
         () => {
           const possuiPedidosAtivos = pedidosRef.current.some(
             (pedido) =>
-              pedido.status === 'RECEBIDO' ||
-              pedido.status === 'EM_PREPARO' ||
-              pedido.status === 'PRONTO',
+              pedido.status === 'RECEBIDO' || pedido.status === 'EM_PREPARO',
           )
 
           if (possuiPedidosAtivos) {
