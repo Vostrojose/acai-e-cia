@@ -210,12 +210,20 @@ export default function Cozinha() {
     return dataSP === hojeSP
   }
 
-  const novos = ordenar(pedidos.filter((p) => p.status === 'RECEBIDO'))
-  const preparo = ordenar(pedidos.filter((p) => p.status === 'EM_PREPARO'))
-  const prontos = ordenar(pedidos.filter((p) => p.status === 'PRONTO'))
+  const pedidosValidos = pedidos.filter((p) => p.status !== 'CANCELADO')
+
+  const novos = ordenar(pedidosValidos.filter((p) => p.status === 'RECEBIDO'))
+
+  const preparo = ordenar(
+    pedidosValidos.filter((p) => p.status === 'EM_PREPARO'),
+  )
+
+  const prontos = ordenar(pedidosValidos.filter((p) => p.status === 'PRONTO'))
 
   const entregues = ordenar(
-    pedidos.filter((p) => p.status === 'ENTREGUE' && isHoje(p.entregueEm)),
+    pedidosValidos.filter(
+      (p) => p.status === 'ENTREGUE' && isHoje(p.entregueEm),
+    ),
   )
 
   return (
