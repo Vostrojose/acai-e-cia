@@ -881,7 +881,7 @@ const statusCard = (cor: string): React.CSSProperties => ({
 
   fontWeight: 700,
 
-  minWidth: 140,
+  minWidth: 180,
 
   textAlign: 'center',
 
