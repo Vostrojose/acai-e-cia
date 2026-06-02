@@ -854,7 +854,7 @@ const statusGrid: React.CSSProperties = {
 
   gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))',
 
-  gap: 40,
+  gap: 20,
 }
 
 const btnVoltar: React.CSSProperties = {
