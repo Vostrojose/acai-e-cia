@@ -426,6 +426,10 @@ export default function Balcao() {
             <div style={statusCard('#f59e0b')}>👨‍🍳 {preparo.length} PREPARO</div>
 
             <div style={statusCard('#22c55e')}>✅ {prontos.length} PRONTOS</div>
+
+            <div style={statusCard('#a855f7')}>
+              💰 {pendentes.length} PENDENTES
+            </div>
           </div>
         </div>
 
