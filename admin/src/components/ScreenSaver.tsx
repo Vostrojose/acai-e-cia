@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 
 export default function ScreenSaver() {
-
   const [hora, setHora] = useState(new Date())
 
   const [offset, setOffset] = useState({
@@ -10,50 +9,36 @@ export default function ScreenSaver() {
   })
 
   useEffect(() => {
-
     const relogio = setInterval(() => {
-
       setHora(new Date())
-
     }, 1000)
 
     return () => clearInterval(relogio)
-
   }, [])
 
   useEffect(() => {
-
     const movimento = setInterval(() => {
-
       setOffset({
-        x: Math.random() * 80 - 40,
-        y: Math.random() * 80 - 40,
+        x: Math.random() * 700 - 350,
+        y: Math.random() * 400 - 200,
       })
-
-    }, 30000)
+    }, 15000)
 
     return () => clearInterval(movimento)
-
   }, [])
 
-  const horaFormatada = hora.toLocaleTimeString(
-    'pt-BR',
-    {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    },
-  )
+  const horaFormatada = hora.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  })
 
-  const dataFormatada = hora.toLocaleDateString(
-    'pt-BR',
-    {
-      weekday: 'long',
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-    },
-  )
+  const dataFormatada = hora.toLocaleDateString('pt-BR', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  })
 
   return (
     <div
@@ -61,8 +46,7 @@ export default function ScreenSaver() {
         position: 'fixed',
         inset: 0,
 
-        background:
-          'radial-gradient(circle at center, #1a1a1a 0%, #000 70%)',
+        background: 'radial-gradient(circle at center, #1a1a1a 0%, #000 70%)',
 
         zIndex: 999999,
 
@@ -77,12 +61,11 @@ export default function ScreenSaver() {
         transition: 'all 1s ease',
       }}
     >
-
       <div
         style={{
           transform: `translate(${offset.x}px, ${offset.y}px)`,
 
-          transition: 'transform 30s linear',
+          transition: 'transform 15s linear',
 
           display: 'flex',
           flexDirection: 'column',
@@ -91,7 +74,6 @@ export default function ScreenSaver() {
           color: '#fff',
         }}
       >
-
         <img
           src="/logo.png"
           alt="Logo"
@@ -102,11 +84,9 @@ export default function ScreenSaver() {
 
             marginBottom: 40,
 
-            animation:
-              'pulseLogo 6s ease-in-out infinite',
+            animation: 'pulseLogo 6s ease-in-out infinite',
 
-            filter:
-              'drop-shadow(0 0 20px rgba(255,255,255,0.15))',
+            filter: 'drop-shadow(0 0 20px rgba(255,255,255,0.15))',
           }}
         />
 
@@ -118,8 +98,7 @@ export default function ScreenSaver() {
 
             letterSpacing: 6,
 
-            textShadow:
-              '0 0 20px rgba(255,255,255,0.15)',
+            textShadow: '0 0 20px rgba(255,255,255,0.15)',
           }}
         >
           {horaFormatada}
@@ -152,7 +131,6 @@ export default function ScreenSaver() {
         >
           SISTEMA OPERACIONAL • AÇAÍ & COMPANY
         </div>
-
       </div>
 
       <style>
@@ -176,7 +154,6 @@ export default function ScreenSaver() {
           }
         `}
       </style>
-
     </div>
   )
 }

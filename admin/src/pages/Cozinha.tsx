@@ -3,7 +3,6 @@ import { io } from 'socket.io-client'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { theme } from '../assets/styles/adminTheme'
-//port BalcaoModal from '../components/BalcaoModal'
 import ScreenSaver from '../components/ScreenSaver'
 
 export default function Cozinha() {
@@ -40,30 +39,8 @@ export default function Cozinha() {
   }
 
   const [abrirBalcao, setAbrirBalcao] = useState(false)
-  const shiftPositions = [
-    { x: 0, y: 0 },
-
-    { x: 120, y: 40 },
-
-    { x: 220, y: 120 },
-
-    { x: -180, y: 80 },
-
-    { x: -250, y: -60 },
-
-    { x: 180, y: -120 },
-
-    { x: 60, y: 180 },
-
-    { x: -120, y: 200 },
-
-    { x: 260, y: -180 },
-
-    { x: -260, y: 140 },
-  ]
   const [screenSaver, setScreenSaver] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
-  const [shiftIndex, setShiftIndex] = useState(0)
   useEffect(() => {
     audioRef.current = new Audio('/novo-pedido.mp3')
 
@@ -157,14 +134,6 @@ export default function Cozinha() {
     }
   }, [])
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setShiftIndex((prev) => (prev + 1) % shiftPositions.length)
-    }, 15000)
-
-    return () => clearInterval(interval)
-  }, [])
-
   useEffect((): (() => void) => {
     const socket = io('https://api.acaiecompanhia.com.br', {
       transports: ['websocket'],
@@ -250,16 +219,12 @@ export default function Cozinha() {
   const entregues = ordenar(
     pedidos.filter((p) => p.status === 'ENTREGUE' && isHoje(p.entregueEm)),
   )
-  const currentShift = shiftPositions[shiftIndex]
 
   return (
     <div
       style={{
         ...theme.page,
-        transform: screenSaver
-          ? `translate(${currentShift.x}px, ${currentShift.y}px)`
-          : 'translate(0px, 0px)',
-        transition: 'transform 2s linear',
+        transform: 'translate(0px, 0px)',
       }}
     >
       <div style={brandingHeader}>
@@ -326,15 +291,6 @@ export default function Cozinha() {
         </div>
       )}
       {screenSaver && <ScreenSaver />}
-
-      {/*
-  {abrirBalcao && (
-    <BalcaoModal
-      onClose={() => setAbrirBalcao(false)}
-      onSuccess={() => console.log('Venda registrada')}
-    />
-  )}
-*/}
     </div>
   )
 }
@@ -415,11 +371,6 @@ function CardClima() {
     </div>
   )
 }
-
-/* ============================= */
-/*  CARD STATUS NOVO ESTILO    */
-/* ============================= */
-
 function CardStatus({ titulo, valor, cor }: any) {
   return (
     <div
@@ -465,10 +416,6 @@ function CardStatus({ titulo, valor, cor }: any) {
     </div>
   )
 }
-
-/* ============================= */
-/*  PEDIDO CARD NOVO ESTILO    */
-/* ============================= */
 
 function PedidoCard({ pedido }: any) {
   async function atualizarStatus(status: string) {
@@ -601,10 +548,6 @@ function PedidoCard({ pedido }: any) {
     </div>
   )
 }
-
-/* ============================= */
-/* RESTANTE INALTERADO           */
-/* ============================= */
 
 function CardMenu({ navigate, onBalcao }: any) {
   return (
