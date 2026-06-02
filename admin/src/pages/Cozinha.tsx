@@ -42,11 +42,24 @@ export default function Cozinha() {
   const [abrirBalcao, setAbrirBalcao] = useState(false)
   const shiftPositions = [
     { x: 0, y: 0 },
-    { x: 1, y: 0 },
-    { x: 1, y: 1 },
-    { x: 0, y: 1 },
-    { x: -1, y: 1 },
-    { x: -1, y: 0 },
+
+    { x: 120, y: 40 },
+
+    { x: 220, y: 120 },
+
+    { x: -180, y: 80 },
+
+    { x: -250, y: -60 },
+
+    { x: 180, y: -120 },
+
+    { x: 60, y: 180 },
+
+    { x: -120, y: 200 },
+
+    { x: 260, y: -180 },
+
+    { x: -260, y: 140 },
   ]
   const [screenSaver, setScreenSaver] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -147,7 +160,7 @@ export default function Cozinha() {
   useEffect(() => {
     const interval = setInterval(() => {
       setShiftIndex((prev) => (prev + 1) % shiftPositions.length)
-    }, 60000)
+    }, 15000)
 
     return () => clearInterval(interval)
   }, [])
@@ -482,7 +495,6 @@ function PedidoCard({ pedido }: any) {
         boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
       }}
     >
-
       <div
         style={{
           display: 'flex',
