@@ -69,6 +69,20 @@ export default function Balcao() {
 
   const [salvando, setSalvando] = useState(false)
 
+  const [mostrarLogin, setMostrarLogin] = useState(false)
+
+  const [email, setEmail] = useState('')
+
+  const [senha, setSenha] = useState('')
+
+  const [acaoPendente, setAcaoPendente] = useState<null | (() => void)>(null)
+
+  const [ultimoLoginSensivel, setUltimoLoginSensivel] = useState<number | null>(
+    null,
+  )
+
+  const TEMPO_REAUTENTICACAO = 5 * 60 * 1000
+
   const timeoutRef = useRef<any>(null)
   const itensRef = useRef<PedidoItem[]>([])
   const novosRef = useRef(0)
@@ -183,6 +197,55 @@ export default function Balcao() {
       socket.disconnect()
     }
   }, [])
+  async function login() {
+    try {
+      const res = await api.post('/auth/login', {
+        email,
+        senha,
+      })
+
+      const token = res.data.data.token
+      console.log(res.data)
+
+      sessionStorage.setItem('token', token)
+
+      api.defaults.headers.Authorization = `Bearer ${token}`
+
+      setEmail('')
+      setSenha('')
+      setMostrarLogin(false)
+
+      setUltimoLoginSensivel(Date.now())
+
+      if (acaoPendente) {
+        const acao = acaoPendente
+
+        setAcaoPendente(null)
+
+        Promise.resolve().then(() => {
+          acao()
+        })
+      }
+    } catch {
+      alert('Credenciais inválidas')
+    }
+  }
+  function exigirReautenticacao(callback: () => void) {
+    const agora = Date.now()
+
+    if (
+      ultimoLoginSensivel &&
+      agora - ultimoLoginSensivel < TEMPO_REAUTENTICACAO
+    ) {
+      callback()
+
+      return
+    }
+
+    setAcaoPendente(() => callback)
+
+    setMostrarLogin(true)
+  }
 
   function resetarTimeout() {
     clearTimeout(timeoutRef.current)
@@ -252,41 +315,36 @@ export default function Balcao() {
     }
   }
   async function cancelarPedido(id: string) {
-    const confirmar = confirm('Deseja realmente cancelar este pedido?')
+    exigirReautenticacao(async () => {
+      const confirmar = confirm('Deseja realmente cancelar este pedido?')
 
-    if (!confirmar) return
+      if (!confirmar) return
 
-    try {
-      const token = sessionStorage.getItem('token')
+      try {
+        const token = sessionStorage.getItem('token')
 
-      if (!token) {
-        alert('Faça login administrativo')
-
-        return
-      }
-
-      await api.patch(
-        `/balcao/${id}/cancelar`,
-        {},
-
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        await api.patch(
+          `/balcao/${id}/cancelar`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        },
-      )
+        )
 
-      carregarPendentes()
-      carregarPainelCozinha()
+        carregarPendentes()
 
-      alert('Pedido cancelado')
-    } catch (err) {
-      console.error(err)
+        carregarPainelCozinha()
 
-      alert('Erro ao cancelar pedido')
-    }
+        alert('Pedido cancelado')
+      } catch (err) {
+        console.error(err)
+
+        alert('Erro ao cancelar pedido')
+      }
+    })
   }
-
   function removerItem(uid: string) {
     const confirmar = confirm('Remover item do pedido?')
 
@@ -693,6 +751,44 @@ export default function Balcao() {
           </div>
         </div>
       </div>
+      {mostrarLogin && (
+        <div style={overlay}>
+          <div style={modal}>
+            <h2>🔐 Login Admin</h2>
+
+            <input
+              type="email"
+              placeholder="Digite seu email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={input}
+            />
+
+            <input
+              type="password"
+              placeholder="Digite sua senha"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              style={input}
+            />
+
+            <button onClick={login} style={btnVoltar}>
+              Entrar
+            </button>
+
+            <button
+              onClick={() => setMostrarLogin(false)}
+              style={{
+                ...btnVoltar,
+                background: '#b91c1c',
+                marginTop: 10,
+              }}
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
     </>
   )
 }
@@ -921,3 +1017,35 @@ const pulseStyle = `
 }
 `
 export {}
+
+const overlay: React.CSSProperties = {
+  position: 'fixed',
+
+  inset: 0,
+
+  background: 'rgba(0,0,0,0.85)',
+
+  display: 'flex',
+
+  alignItems: 'center',
+
+  justifyContent: 'center',
+
+  zIndex: 999999,
+}
+
+const modal: React.CSSProperties = {
+  width: 320,
+
+  background: '#111',
+
+  borderRadius: 18,
+
+  padding: 24,
+
+  color: '#fff',
+
+  border: '1px solid #333',
+
+  boxShadow: '0 0 24px rgba(0,0,0,.45)',
+}
