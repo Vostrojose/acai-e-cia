@@ -41,10 +41,24 @@ export default function Cozinha() {
   const [abrirBalcao, setAbrirBalcao] = useState(false)
   const [screenSaver, setScreenSaver] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const [mostrarLogin, setMostrarLogin] = useState(false)
+
+  const [email, setEmail] = useState('')
+
+  const [senha, setSenha] = useState('')
+
+  const [acaoPendente, setAcaoPendente] = useState<null | (() => void)>(null)
   useEffect(() => {
     audioRef.current = new Audio('/novo-pedido.mp3')
 
     audioRef.current.preload = 'auto'
+    const [mostrarLogin, setMostrarLogin] = useState(false)
+
+    const [email, setEmail] = useState('')
+
+    const [senha, setSenha] = useState('')
+
+    const [acaoPendente, setAcaoPendente] = useState<null | (() => void)>(null)
 
     return () => {
       if (audioRef.current) {
@@ -296,6 +310,7 @@ export default function Cozinha() {
           </div>
         </div>
       )}
+
       {screenSaver && <ScreenSaver />}
     </div>
   )
@@ -527,12 +542,26 @@ function PedidoCard({ pedido }: any) {
           <button onClick={() => atualizarStatus('ENTREGUE')}>FINALIZAR</button>
           {pedido.origem === 'BALCAO' && (
             <button
-              onClick={() => {
-                const confirmar = confirm('Cancelar este pedido do balcão?')
+              onClick={async () => {
+                const senha = prompt('Digite a senha administrativa:')
 
-                if (!confirmar) return
+                if (!senha) return
 
-                atualizarStatus('CANCELADO')
+                try {
+                  await api.post('/auth/validar-admin', {
+                    senha,
+                  })
+
+                  const confirmar = confirm(
+                    'Deseja realmente cancelar este pedido?',
+                  )
+
+                  if (!confirmar) return
+
+                  atualizarStatus('CANCELADO')
+                } catch {
+                  alert('Senha inválida')
+                }
               }}
               style={{
                 marginTop: 8,
