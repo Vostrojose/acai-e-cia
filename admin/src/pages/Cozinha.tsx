@@ -41,25 +41,10 @@ export default function Cozinha() {
   const [abrirBalcao, setAbrirBalcao] = useState(false)
   const [screenSaver, setScreenSaver] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
-  const [mostrarLogin, setMostrarLogin] = useState(false)
-
-  const [email, setEmail] = useState('')
-
-  const [senha, setSenha] = useState('')
-
-  const [acaoPendente, setAcaoPendente] = useState<null | (() => void)>(null)
   useEffect(() => {
     audioRef.current = new Audio('/novo-pedido.mp3')
 
     audioRef.current.preload = 'auto'
-    const [mostrarLogin, setMostrarLogin] = useState(false)
-
-    const [email, setEmail] = useState('')
-
-    const [senha, setSenha] = useState('')
-
-    const [acaoPendente, setAcaoPendente] = useState<null | (() => void)>(null)
-
     return () => {
       if (audioRef.current) {
         audioRef.current.pause()
