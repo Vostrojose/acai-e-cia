@@ -3,9 +3,7 @@ import prisma from '../lib/prisma'
 
 class BalcaoController {
   async criar(req: Request, res: Response) {
-    
     try {
-      
       /*const { itens, forma, clienteNome } = req.body*/ /*se a cozinha crescer usar este para fluxo completo de pedidos*/
 
       const { itens, forma, clienteNome, pularPreparo, pago } = req.body
@@ -21,7 +19,6 @@ class BalcaoController {
       if (!itens || itens.length === 0) {
         return res.status(400).json({ message: 'Itens obrigatórios' })
       }
-      
 
       if (
         (formaFinal === 'FIADO' || formaFinal === 'CREDITO') &&
@@ -31,9 +28,6 @@ class BalcaoController {
           message: 'Nome do cliente obrigatório',
         })
       }
-      
-      
-      
 
       /* ============================= */
       /* 🔥 BUSCAR OU CRIAR CLIENTE    */
@@ -50,7 +44,6 @@ class BalcaoController {
           },
         })
       }
-      
 
       /* ============================= */
       /* 🔥 CÁLCULO TOTAL              */
@@ -110,7 +103,7 @@ class BalcaoController {
           clienteId: cliente?.id,
 
           formaPagamentoBalcao: formaFinal,
-         pago: pedidoPago,
+          pago: pedidoPago,
 
           total: total,
 
@@ -169,7 +162,12 @@ class BalcaoController {
       const pedidos = await prisma.pedido.findMany({
         where: {
           origem: 'BALCAO',
+
           pago: false,
+
+          status: {
+            not: 'CANCELADO',
+          },
         },
 
         orderBy: {
@@ -199,44 +197,62 @@ class BalcaoController {
   }
 
   async cancelar(req: Request, res: Response) {
-  try {
-    const { id } = req.params
+    try {
+      const { id } = req.params
 
-    const pedido = await prisma.pedido.findUnique({
-      where: { id },
-    })
+      const pedido = await prisma.pedido.findUnique({
+        where: { id },
+      })
 
-    if (!pedido) {
-      return res.status(404).json({
-        message: 'Pedido não encontrado',
+      if (!pedido) {
+        return res.status(404).json({
+          message: 'Pedido não encontrado',
+        })
+      }
+
+      if (pedido.origem !== 'BALCAO') {
+        return res.status(400).json({
+          message: 'Somente pedidos balcão podem ser cancelados',
+        })
+      }
+
+      await prisma.pedido.update({
+        where: { id },
+
+        data: {
+          status: 'CANCELADO',
+        },
+      })
+      const pedidoAtualizado = await prisma.pedido.findUnique({
+        where: { id },
+
+        include: {
+          itens: {
+            include: {
+              adicionais: true,
+            },
+          },
+        },
+      })
+      try {
+        const { getIO } = await import('../websocket/socket')
+
+        getIO().emit('pedido_atualizado', pedidoAtualizado)
+      } catch {
+        console.warn('Socket não iniciado')
+      }
+
+      return res.json({
+        success: true,
+      })
+    } catch (err) {
+      console.error('Erro ao cancelar pedido:', err)
+
+      return res.status(500).json({
+        message: 'Erro ao cancelar pedido',
       })
     }
-
-    if (pedido.origem !== 'BALCAO') {
-      return res.status(400).json({
-        message: 'Somente pedidos balcão podem ser cancelados',
-      })
-    }
-
-    await prisma.pedido.update({
-      where: { id },
-
-      data: {
-        status: 'CANCELADO',
-      },
-    })
-
-    return res.json({
-      success: true,
-    })
-  } catch (err) {
-    console.error('Erro ao cancelar pedido:', err)
-
-    return res.status(500).json({
-      message: 'Erro ao cancelar pedido',
-    })
   }
-}
 
   async quitar(req: Request, res: Response) {
     try {

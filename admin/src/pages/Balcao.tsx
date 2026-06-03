@@ -282,7 +282,11 @@ export default function Balcao() {
     try {
       const response = await api.get('/balcao/pendentes')
 
-      setPendentes(response.data.data || [])
+      const pedidosValidos = (response.data.data || []).filter(
+        (p: any) => p.status !== 'CANCELADO',
+      )
+
+      setPendentes(pedidosValidos)
     } catch (err) {
       console.error(err)
     }
