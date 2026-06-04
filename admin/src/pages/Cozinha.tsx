@@ -40,6 +40,13 @@ export default function Cozinha() {
 
   const [abrirBalcao, setAbrirBalcao] = useState(false)
   const [screenSaver, setScreenSaver] = useState(false)
+  const [mostrarLogin, setMostrarLogin] = useState(false)
+
+  const [email, setEmail] = useState('')
+
+  const [senha, setSenha] = useState('')
+
+  const [pedidoCancelar, setPedidoCancelar] = useState<any>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   useEffect(() => {
     audioRef.current = new Audio('/novo-pedido.mp3')
@@ -224,6 +231,41 @@ export default function Cozinha() {
       (p) => p.status === 'ENTREGUE' && isHoje(p.entregueEm),
     ),
   )
+  async function validarAdmin() {
+    try {
+      await api.post('/auth/login', {
+        email,
+        senha,
+      })
+
+      if (!pedidoCancelar) return
+      const confirmar = confirm('Deseja realmente cancelar este pedido?')
+
+      if (!confirmar) {
+        setMostrarLogin(false)
+        setPedidoCancelar(null)
+        return
+      }
+
+      await api.patch(`/pedidos/${pedidoCancelar.id}/status`, {
+        status: 'CANCELADO',
+      })
+
+      const res = await api.get('/pedidos?limit=200')
+
+      setPedidos(res.data?.data || [])
+
+      setMostrarLogin(false)
+
+      setEmail('')
+
+      setSenha('')
+
+      setPedidoCancelar(null)
+    } catch {
+      alert('Email ou senha inválidos')
+    }
+  }
 
   return (
     <div
@@ -276,9 +318,32 @@ export default function Cozinha() {
       </div>
 
       <div style={colunas}>
-        <Coluna titulo="🆕 NOVOS" pedidos={novos} />
-        <Coluna titulo="👨‍🍳 PREPARO" pedidos={preparo} />
-        <Coluna titulo="✅ PRONTOS" pedidos={prontos} />
+        <Coluna
+          titulo="🆕 NOVOS"
+          pedidos={novos}
+          abrirLoginCancelamento={(pedido: any) => {
+            setPedidoCancelar(pedido)
+            setMostrarLogin(true)
+          }}
+        />
+
+        <Coluna
+          titulo="👨‍🍳 PREPARO"
+          pedidos={preparo}
+          abrirLoginCancelamento={(pedido: any) => {
+            setPedidoCancelar(pedido)
+            setMostrarLogin(true)
+          }}
+        />
+
+        <Coluna
+          titulo="✅ PRONTOS"
+          pedidos={prontos}
+          abrirLoginCancelamento={(pedido: any) => {
+            setPedidoCancelar(pedido)
+            setMostrarLogin(true)
+          }}
+        />
       </div>
 
       {mostrarEntregues && (
@@ -290,13 +355,90 @@ export default function Cozinha() {
               <p style={theme.textMuted}>Nenhum pedido entregue hoje</p>
             )}
             {entregues.map((pedido: any) => (
-              <PedidoCard key={pedido.id} pedido={pedido} />
+              <PedidoCard
+                key={pedido.id}
+                pedido={pedido}
+                abrirLoginCancelamento={(pedido: any) => {
+                  setPedidoCancelar(pedido)
+                  setMostrarLogin(true)
+                }}
+              />
             ))}
           </div>
         </div>
       )}
 
       {screenSaver && <ScreenSaver />}
+      {mostrarLogin && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.8)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              background: '#1e1e1e',
+              padding: 24,
+              borderRadius: 12,
+              width: 350,
+            }}
+          >
+            <h2 style={{ color: '#fff' }}>Login Administrativo</h2>
+
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={{
+                width: '100%',
+                marginTop: 12,
+                padding: 10,
+              }}
+            />
+
+            <input
+              type="password"
+              placeholder="Senha"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              style={{
+                width: '100%',
+                marginTop: 12,
+                padding: 10,
+              }}
+            />
+
+            <div
+              style={{
+                display: 'flex',
+                gap: 10,
+                marginTop: 20,
+              }}
+            >
+              <button onClick={validarAdmin} style={{ flex: 1 }}>
+                Entrar
+              </button>
+
+              <button
+                onClick={() => {
+                  setMostrarLogin(false)
+                  setPedidoCancelar(null)
+                }}
+                style={{ flex: 1 }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -423,7 +565,7 @@ function CardStatus({ titulo, valor, cor }: any) {
   )
 }
 
-function PedidoCard({ pedido }: any) {
+function PedidoCard({ pedido, abrirLoginCancelamento }: any) {
   async function atualizarStatus(status: string) {
     await api.patch(`/pedidos/${pedido.id}/status`, { status })
   }
@@ -527,27 +669,7 @@ function PedidoCard({ pedido }: any) {
           <button onClick={() => atualizarStatus('ENTREGUE')}>FINALIZAR</button>
           {pedido.origem === 'BALCAO' && (
             <button
-              onClick={async () => {
-                const senha = prompt('Digite a senha administrativa:')
-
-                if (!senha) return
-
-                try {
-                  await api.post('/auth/validar-admin', {
-                    senha,
-                  })
-
-                  const confirmar = confirm(
-                    'Deseja realmente cancelar este pedido?',
-                  )
-
-                  if (!confirmar) return
-
-                  atualizarStatus('CANCELADO')
-                } catch {
-                  alert('Senha inválida')
-                }
-              }}
+              onClick={() => abrirLoginCancelamento(pedido)}
               style={{
                 marginTop: 8,
                 background: '#b91c1c',
@@ -721,7 +843,7 @@ const brandingSub: React.CSSProperties = {
   color: 'rgba(255,255,255,.65)',
 }
 
-function Coluna({ titulo, pedidos }: any) {
+function Coluna({ titulo, pedidos, abrirLoginCancelamento }: any) {
   return (
     <div style={theme.column}>
       <h2 style={theme.title}>{titulo}</h2>
@@ -729,7 +851,11 @@ function Coluna({ titulo, pedidos }: any) {
       {pedidos.length === 0 && <p style={theme.textMuted}>Nenhum pedido</p>}
 
       {pedidos.map((pedido: any) => (
-        <PedidoCard key={pedido.id} pedido={pedido} />
+        <PedidoCard
+          key={pedido.id}
+          pedido={pedido}
+          abrirLoginCancelamento={abrirLoginCancelamento}
+        />
       ))}
     </div>
   )
