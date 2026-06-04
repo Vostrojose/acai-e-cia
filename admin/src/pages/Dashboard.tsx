@@ -24,7 +24,9 @@ export default function Dashboard() {
     async function carregar() {
       try {
         const resPedidos = await api.get('/pedidos')
+
         const pedidos = resPedidos.data?.data || []
+        console.log('TOTAL PEDIDOS:', pedidos.length)
         console.log(
           pedidos.map((p: any) => ({
             criadoEm: p.criadoEm,
