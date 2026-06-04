@@ -15,6 +15,9 @@ export default function Dashboard() {
   })
 
   const [fiados, setFiados] = useState<any[]>([])
+  const [vendasSemana, setVendasSemana] = useState<
+    { dia: string; total: number }[]
+  >([])
 
   useEffect(() => {
     async function carregar() {
@@ -94,6 +97,27 @@ export default function Dashboard() {
 
         const tendencia = totalHoje - totalOntem
 
+        const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+
+        const vendasPorDia = diasSemana.map((dia) => ({
+          dia,
+          total: 0,
+        }))
+
+        pedidos
+          .filter(
+            (p: any) =>
+              p.status !== 'CANCELADO' && p.statusPagamento !== 'PENDENTE',
+          )
+          .forEach((p: any) => {
+            const data = new Date(p.criadoEm)
+
+            const indice = data.getDay()
+
+            vendasPorDia[indice].total += Number(p.total || 0)
+          })
+        setVendasSemana(vendasPorDia)
+
         setDados({
           totalHoje,
           produtoTop,
@@ -145,11 +169,43 @@ export default function Dashboard() {
           valor={`${dados.tempoMedio} min`}
           cor="#9c27b0"
         />
-        <Card
-          titulo="📈 Tendência"
-          valor={`R$ ${dados.tendencia}`}
-          cor="#f44336"
-        />
+        <div
+          style={{
+            flex: 1,
+            background: 'linear-gradient(135deg, #1e1e1e, #2a2a2a)',
+            padding: 20,
+            borderRadius: 16,
+            color: '#fff',
+            border: '1px solid #f44336',
+            minWidth: 260,
+          }}
+        >
+          <div
+            style={{
+              opacity: 0.8,
+              fontSize: 14,
+              marginBottom: 10,
+            }}
+          >
+            📅 Vendas por dia
+          </div>
+
+          {vendasSemana.map((d) => (
+            <div
+              key={d.dia}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                fontSize: 13,
+                marginBottom: 4,
+              }}
+            >
+              <span>{d.dia}</span>
+
+              <strong>R$ {d.total.toFixed(2)}</strong>
+            </div>
+          ))}
+        </div>
       </div>
 
       {fiados.length > 0 && (
