@@ -15,9 +15,10 @@ export default function Dashboard() {
   })
 
   const [fiados, setFiados] = useState<any[]>([])
-  const [vendasSemana, setVendasSemana] = useState<
-    { dia: string; total: number }[]
-  >([])
+  const [semanaAtual, setSemanaAtual] = useState<any[]>([])
+  const [resumoMes, setResumoMes] = useState<any[]>([])
+  const [mediaSemanaAtual, setMediaSemanaAtual] = useState(0)
+  const [totalSemanaAtual, setTotalSemanaAtual] = useState(0)
 
   useEffect(() => {
     async function carregar() {
@@ -98,26 +99,103 @@ export default function Dashboard() {
 
         const tendencia = totalHoje - totalOntem
 
+        /* ============================= */
+        /* 📅 SEMANA ATUAL               */
+        /* ============================= */
+
         const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 
-        const vendasPorDia = diasSemana.map((dia) => ({
+        const hojeAtual = new Date()
+
+        const inicioSemana = new Date(hojeAtual)
+
+        inicioSemana.setDate(hojeAtual.getDate() - hojeAtual.getDay())
+
+        inicioSemana.setHours(0, 0, 0, 0)
+
+        const semana = diasSemana.map((dia) => ({
           dia,
           total: 0,
         }))
 
         pedidos
-          .filter(
-            (p: any) =>
-              p.status !== 'CANCELADO' && p.statusPagamento !== 'PENDENTE',
-          )
+          .filter((p: any) => {
+            return (
+              p.status === 'ENTREGUE' && new Date(p.criadoEm) >= inicioSemana
+            )
+          })
+          .forEach((p: any) => {
+            const indice = new Date(p.criadoEm).getDay()
+
+            semana[indice].total += Number(p.total || 0)
+          })
+
+        const totalSemana = semana.reduce((acc, d) => acc + d.total, 0)
+
+        const diasDecorridos = hojeAtual.getDay() + 1
+
+        const mediaSemana = totalSemana / Math.max(diasDecorridos, 1)
+
+        setSemanaAtual(semana)
+        setTotalSemanaAtual(totalSemana)
+        setMediaSemanaAtual(mediaSemana)
+
+        /* ============================= */
+        /* 📊 SEMANAS DO MÊS             */
+        /* ============================= */
+
+        const mesAtual = hojeAtual.getMonth()
+        const anoAtual = hojeAtual.getFullYear()
+
+        const semanasMes: any = {}
+
+        pedidos
+          .filter((p: any) => {
+            if (p.status !== 'ENTREGUE') return false
+
+            const data = new Date(p.criadoEm)
+
+            return (
+              data.getMonth() === mesAtual && data.getFullYear() === anoAtual
+            )
+          })
           .forEach((p: any) => {
             const data = new Date(p.criadoEm)
 
-            const indice = data.getDay()
+            const numeroSemana = Math.ceil(data.getDate() / 7)
 
-            vendasPorDia[indice].total += Number(p.total || 0)
+            if (!semanasMes[numeroSemana]) {
+              semanasMes[numeroSemana] = {
+                balcao: 0,
+                online: 0,
+                dias: new Set<number>(),
+              }
+            }
+
+            if (p.origem === 'BALCAO') {
+              semanasMes[numeroSemana].balcao += Number(p.total || 0)
+            } else {
+              semanasMes[numeroSemana].online += Number(p.total || 0)
+            }
+
+            semanasMes[numeroSemana].dias.add(data.getDate())
           })
-        setVendasSemana(vendasPorDia)
+
+        setResumoMes(
+          Object.entries(semanasMes).map(([semana, valores]: any) => {
+            const total = valores.balcao + valores.online
+
+            const media = total / Math.max(valores.dias.size, 1)
+
+            return {
+              semana,
+              balcao: valores.balcao,
+              online: valores.online,
+              total,
+              media,
+            }
+          }),
+        )
 
         setDados({
           totalHoje,
@@ -188,10 +266,10 @@ export default function Dashboard() {
               marginBottom: 10,
             }}
           >
-            📅 Vendas por dia
+            📊 RESUMO SEMANAL
           </div>
 
-          {vendasSemana.map((d) => (
+          {semanaAtual.map((d) => (
             <div
               key={d.dia}
               style={{
@@ -204,6 +282,65 @@ export default function Dashboard() {
               <span>{d.dia}</span>
 
               <strong>R$ {d.total.toFixed(2)}</strong>
+            </div>
+          ))}
+          <div
+            style={{
+              marginTop: 10,
+              fontSize: 13,
+              fontWeight: 'bold',
+            }}
+          >
+            💰 Total: R$ {totalSemanaAtual.toFixed(2)}
+          </div>
+
+          <div
+            style={{
+              fontSize: 13,
+              marginBottom: 10,
+            }}
+          >
+            📈 Média: R$ {mediaSemanaAtual.toFixed(2)}/dia
+          </div>
+
+          <hr
+            style={{
+              borderColor: '#444',
+              margin: '10px 0',
+            }}
+          />
+
+          <div
+            style={{
+              fontSize: 14,
+              fontWeight: 'bold',
+              marginBottom: 8,
+            }}
+          >
+            📊 Semanas do mês
+          </div>
+
+          {resumoMes.map((s: any) => (
+            <div
+              key={s.semana}
+              style={{
+                marginBottom: 12,
+                fontSize: 12,
+                borderBottom: '1px solid #333',
+                paddingBottom: 8,
+              }}
+            >
+              <div>
+                <strong>Semana {s.semana}</strong>
+              </div>
+
+              <div>🥤 R$ {s.balcao.toFixed(2)}</div>
+
+              <div>📱 R$ {s.online.toFixed(2)}</div>
+
+              <div>💰 R$ {s.total.toFixed(2)}</div>
+
+              <div>📈 R$ {s.media.toFixed(2)}/dia</div>
             </div>
           ))}
         </div>
@@ -279,7 +416,7 @@ function Card({ titulo, valor, cor }: any) {
   return (
     <div
       style={{
-        flex: 1,
+        flex: 1.8,
         background: 'linear-gradient(135deg, #1e1e1e, #2a2a2a)',
         padding: 20,
         borderRadius: 16,
