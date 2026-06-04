@@ -138,10 +138,16 @@ class PedidoService {
     })
   }
   async atualizarStatus(id: string, status: StatusPedido) {
+    const pedidoAtual = await prisma.pedido.findUnique({
+  where: { id },
+})
     const data: any = { status }
-    if (status === StatusPedido.ENTREGUE) {
-      data.entregueEm = new Date()
-    }
+   if (
+  status === StatusPedido.ENTREGUE &&
+  !pedidoAtual?.entregueEm
+) {
+  data.entregueEm = new Date()
+}
 
     return prisma.pedido.update({
       where: { id },
