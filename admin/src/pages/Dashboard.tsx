@@ -26,7 +26,7 @@ export default function Dashboard() {
         const resPedidos = await api.get('/pedidos/dashboard')
 
         const pedidos = resPedidos.data?.data || []
-        console.log('TOTAL PEDIDOS:', pedidos.length)
+        
 
         const resProdutos = await api.get('/produtos')
         const listaProdutos = resProdutos.data?.data || []
