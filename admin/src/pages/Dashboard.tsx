@@ -59,12 +59,14 @@ export default function Dashboard() {
 
         const contador: any = {}
 
-        pedidos.forEach((p: any) => {
-          p.itens?.forEach((item: any) => {
-            contador[item.produtoId] =
-              (contador[item.produtoId] || 0) + item.quantidade
+        pedidos
+          .filter((p: any) => p.status !== 'CANCELADO')
+          .forEach((p: any) => {
+            p.itens?.forEach((item: any) => {
+              contador[item.produtoId] =
+                (contador[item.produtoId] || 0) + item.quantidade
+            })
           })
-        })
 
         let produtoTop = '-'
         let max = 0
@@ -194,19 +196,21 @@ export default function Dashboard() {
           })
 
         setResumoMes(
-          Object.entries(semanasMes).map(([semana, valores]: any) => {
-            const total = valores.balcao + valores.online
+          Object.entries(semanasMes)
+            .sort(([a], [b]) => Number(a) - Number(b))
+            .map(([semana, valores]: any) => {
+              const total = valores.balcao + valores.online
 
-            const media = total / Math.max(valores.dias.size, 1)
+              const media = total / Math.max(valores.dias.size, 1)
 
-            return {
-              semana,
-              balcao: valores.balcao,
-              online: valores.online,
-              total,
-              media,
-            }
-          }),
+              return {
+                semana,
+                balcao: valores.balcao,
+                online: valores.online,
+                total,
+                media,
+              }
+            }),
         )
 
         setDados({
