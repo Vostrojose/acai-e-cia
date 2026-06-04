@@ -25,7 +25,13 @@ export default function Dashboard() {
       try {
         const resPedidos = await api.get('/pedidos')
         const pedidos = resPedidos.data?.data || []
-        console.log('PEDIDO EXEMPLO:', pedidos[0])
+        console.log(
+          pedidos.map((p: any) => ({
+            criadoEm: p.criadoEm,
+            status: p.status,
+            total: p.total,
+          })),
+        )
 
         const resProdutos = await api.get('/produtos')
         const listaProdutos = resProdutos.data?.data || []
