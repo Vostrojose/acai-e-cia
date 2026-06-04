@@ -19,6 +19,9 @@ export default function Dashboard() {
   const [resumoMes, setResumoMes] = useState<any[]>([])
   const [mediaSemanaAtual, setMediaSemanaAtual] = useState(0)
   const [totalSemanaAtual, setTotalSemanaAtual] = useState(0)
+  const [pedidosSemanaAtual, setPedidosSemanaAtual] = useState(0)
+
+  const [ticketMedioSemana, setTicketMedioSemana] = useState(0)
 
   useEffect(() => {
     async function carregar() {
@@ -26,7 +29,6 @@ export default function Dashboard() {
         const resPedidos = await api.get('/pedidos/dashboard')
 
         const pedidos = resPedidos.data?.data || []
-        
 
         const resProdutos = await api.get('/produtos')
         const listaProdutos = resProdutos.data?.data || []
@@ -79,7 +81,9 @@ export default function Dashboard() {
         const tempoMedio =
           entregues.reduce((acc: number, p: any) => {
             const inicio = new Date(p.criadoEm).getTime()
-            const fim = new Date(p.atualizadoEm).getTime()
+
+            const fim = new Date(p.entregueEm || p.atualizadoEm).getTime()
+
             return acc + (fim - inicio)
           }, 0) / (entregues.length || 1)
 
@@ -117,29 +121,36 @@ export default function Dashboard() {
         const semana = diasSemana.map((dia) => ({
           dia,
           total: 0,
+          pedidos: 0,
         }))
 
         pedidos
           .filter((p: any) => {
             return (
-              p.status !== 'CANCELADO' && new Date(p.criadoEm) >= inicioSemana
+              p.status === 'ENTREGUE' && new Date(p.criadoEm) >= inicioSemana
             )
           })
           .forEach((p: any) => {
             const indice = new Date(p.criadoEm).getDay()
 
             semana[indice].total += Number(p.total || 0)
+            semana[indice].pedidos += 1
           })
 
         const totalSemana = semana.reduce((acc, d) => acc + d.total, 0)
+        const totalPedidosSemana = semana.reduce((acc, d) => acc + d.pedidos, 0)
+        const ticketMedioSemana = totalSemana / Math.max(totalPedidosSemana, 1)
 
-        const diasDecorridos = hojeAtual.getDay() + 1
+        const diasComVenda = semana.filter((d) => d.total > 0).length
 
-        const mediaSemana = totalSemana / Math.max(diasDecorridos, 1)
+        const mediaSemana = totalSemana / Math.max(diasComVenda, 1)
 
         setSemanaAtual(semana)
         setTotalSemanaAtual(totalSemana)
         setMediaSemanaAtual(mediaSemana)
+        setPedidosSemanaAtual(totalPedidosSemana)
+
+        setTicketMedioSemana(ticketMedioSemana)
 
         /* ============================= */
         /* 📊 SEMANAS DO MÊS             */
@@ -152,7 +163,7 @@ export default function Dashboard() {
 
         pedidos
           .filter((p: any) => {
-            if (p.status === 'CANCELADO') return false
+            if (p.status !== 'ENTREGUE') return false
 
             const data = new Date(p.criadoEm)
 
@@ -282,7 +293,9 @@ export default function Dashboard() {
             >
               <span>{d.dia}</span>
 
-              <strong>R$ {d.total.toFixed(2)}</strong>
+              <strong>
+                R$ {d.total.toFixed(2)} ({d.pedidos})
+              </strong>
             </div>
           ))}
           <div
@@ -293,6 +306,13 @@ export default function Dashboard() {
             }}
           >
             💰 Total: R$ {totalSemanaAtual.toFixed(2)}
+            <div
+              style={{
+                fontSize: 13,
+              }}
+            >
+              🧾 Pedidos: {pedidosSemanaAtual}
+            </div>
           </div>
 
           <div
@@ -302,6 +322,13 @@ export default function Dashboard() {
             }}
           >
             📈 Média: R$ {mediaSemanaAtual.toFixed(2)}/dia
+            <div
+              style={{
+                fontSize: 13,
+              }}
+            >
+              🎟 Ticket: R$ {ticketMedioSemana.toFixed(2)}
+            </div>
           </div>
 
           <hr
