@@ -25,6 +25,10 @@ export default function Dashboard() {
       try {
         const resPedidos = await api.get('/pedidos')
 
+        console.log('URL API', api.defaults.baseURL)
+        console.log('RESPOSTA PEDIDOS', resPedidos.data)
+        console.log('QTDE', resPedidos.data?.data?.length)
+
         const pedidos = resPedidos.data?.data || []
         console.log('TOTAL PEDIDOS:', pedidos.length)
         console.log(
