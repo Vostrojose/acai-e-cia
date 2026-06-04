@@ -121,7 +121,7 @@ export default function Dashboard() {
         pedidos
           .filter((p: any) => {
             return (
-              p.status === 'ENTREGUE' && new Date(p.criadoEm) >= inicioSemana
+              p.status !== 'CANCELADO' && new Date(p.criadoEm) >= inicioSemana
             )
           })
           .forEach((p: any) => {
@@ -151,7 +151,7 @@ export default function Dashboard() {
 
         pedidos
           .filter((p: any) => {
-            if (p.status !== 'ENTREGUE') return false
+            if (p.status === 'CANCELADO') return false
 
             const data = new Date(p.criadoEm)
 
