@@ -23,21 +23,10 @@ export default function Dashboard() {
   useEffect(() => {
     async function carregar() {
       try {
-        const resPedidos = await api.get('/pedidos')
-
-        console.log('URL API', api.defaults.baseURL)
-        console.log('RESPOSTA PEDIDOS', resPedidos.data)
-        console.log('QTDE', resPedidos.data?.data?.length)
+        const resPedidos = await api.get('/pedidos/dashboard')
 
         const pedidos = resPedidos.data?.data || []
         console.log('TOTAL PEDIDOS:', pedidos.length)
-        console.log(
-          pedidos.map((p: any) => ({
-            criadoEm: p.criadoEm,
-            status: p.status,
-            total: p.total,
-          })),
-        )
 
         const resProdutos = await api.get('/produtos')
         const listaProdutos = resProdutos.data?.data || []
