@@ -1,15 +1,77 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { theme } from '../assets/styles/adminTheme'
 
 export default function AuditoriaPagamentos() {
   const navigate = useNavigate()
+  const timeoutRef = useRef<any>(null)
+  const wakeLockRef = useRef<any>(null)
 
   const [codigoPedido, setCodigoPedido] = useState('')
   const [dados, setDados] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
+
+  useEffect(() => {
+    async function ativarWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLockRef.current = await navigator.wakeLock.request('screen')
+        }
+      } catch (err) {
+        console.error('WakeLock error:', err)
+      }
+    }
+
+    ativarWakeLock()
+
+    const handleVisibility = async () => {
+      if (document.visibilityState === 'visible' && 'wakeLock' in navigator) {
+        try {
+          wakeLockRef.current = await navigator.wakeLock.request('screen')
+        } catch (err) {
+          console.error(err)
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility)
+
+      wakeLockRef.current?.release()
+    }
+  }, [])
+
+  function resetarTimeout() {
+    clearTimeout(timeoutRef.current)
+
+    timeoutRef.current = setTimeout(
+      () => {
+        navigate('/cozinha')
+      },
+      3 * 60 * 1000,
+    )
+  }
+  useEffect(() => {
+    resetarTimeout()
+
+    window.addEventListener('pointerdown', resetarTimeout)
+    window.addEventListener('keydown', resetarTimeout)
+    window.addEventListener('click', resetarTimeout)
+    window.addEventListener('touchstart', resetarTimeout)
+
+    return () => {
+      clearTimeout(timeoutRef.current)
+
+      window.removeEventListener('pointerdown', resetarTimeout)
+      window.removeEventListener('keydown', resetarTimeout)
+      window.removeEventListener('click', resetarTimeout)
+      window.removeEventListener('touchstart', resetarTimeout)
+    }
+  }, [])
 
   async function consultar() {
     try {
@@ -162,13 +224,12 @@ function CardMenu({ navigate }: any) {
     </div>
   )
 }
-
 const box: React.CSSProperties = {
   display: 'flex',
   gap: 10,
   marginBottom: 20,
+  flexWrap: 'wrap',
 }
-
 const input: React.CSSProperties = {
   flex: 1,
   padding: 12,
@@ -197,6 +258,8 @@ const resultadoBox: React.CSSProperties = {
 const linha: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
+  gap: 12,
+  flexWrap: 'wrap',
   marginBottom: 10,
 }
 
@@ -220,8 +283,10 @@ const btnMenu: React.CSSProperties = {
   background: '#333',
   color: '#fff',
   border: 'none',
-  padding: '10px 12px',
+  padding: '12px 16px',
+  minWidth: 48,
+  minHeight: 48,
   borderRadius: 6,
-  fontSize: 16,
+  fontSize: 18,
   cursor: 'pointer',
 }
