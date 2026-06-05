@@ -138,7 +138,7 @@ export default function ChangePassword() {
           }}
         >
           <button
-            onClick={() => navigate('/cozinha')}
+            onClick={() => navigate('/produtos')}
             style={{
               background: '#333',
               color: '#fff',
