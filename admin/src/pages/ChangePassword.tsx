@@ -114,6 +114,10 @@ export default function ChangePassword() {
         minHeight: '100vh',
         background: '#111',
         padding: 20,
+
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
       }}
     >
       <h2
