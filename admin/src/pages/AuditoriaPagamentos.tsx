@@ -155,12 +155,6 @@ function CardMenu({ navigate }: any) {
           📊
         </button>
 
-        <button
-          style={btnMenu}
-          onClick={() => navigate('/auditoria-pagamentos')}
-        >
-          🧾
-        </button>
         <button onClick={() => navigate('/dashboard')} style={btnMenu}>
           📋
         </button>
