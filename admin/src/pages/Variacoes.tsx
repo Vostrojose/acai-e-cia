@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { theme } from '../assets/styles/adminTheme'
@@ -13,6 +13,8 @@ type Variacao = {
 export default function Variacoes() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const timeoutRef = useRef<any>(null)
+  const wakeLockRef = useRef<any>(null)
 
   const [variacoes, setVariacoes] = useState<Variacao[]>([])
   const [nome, setNome] = useState('')
@@ -37,10 +39,71 @@ export default function Variacoes() {
       setLoading(false)
     }
   }
+  function resetarTimeout() {
+    clearTimeout(timeoutRef.current)
 
+    timeoutRef.current = setTimeout(
+      () => {
+        navigate('/cozinha')
+      },
+      3 * 60 * 1000,
+    )
+  }
   useEffect(() => {
     if (id) carregar()
   }, [id])
+  useEffect(() => {
+    async function ativarWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLockRef.current = await navigator.wakeLock.request('screen')
+        }
+      } catch (err) {
+        console.error('WakeLock error:', err)
+      }
+    }
+
+    ativarWakeLock()
+
+    const handleVisibility = async () => {
+      if (document.visibilityState === 'visible' && 'wakeLock' in navigator) {
+        try {
+          wakeLockRef.current = await navigator.wakeLock.request('screen')
+        } catch (err) {
+          console.error(err)
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility)
+
+      wakeLockRef.current?.release()
+    }
+  }, [])
+  useEffect(() => {
+    resetarTimeout()
+
+    window.addEventListener('pointerdown', resetarTimeout)
+    window.addEventListener('keydown', resetarTimeout)
+    window.addEventListener('click', resetarTimeout)
+    window.addEventListener('touchstart', resetarTimeout)
+    window.addEventListener('scroll', resetarTimeout)
+    window.addEventListener('input', resetarTimeout)
+
+    return () => {
+      clearTimeout(timeoutRef.current)
+
+      window.removeEventListener('pointerdown', resetarTimeout)
+      window.removeEventListener('keydown', resetarTimeout)
+      window.removeEventListener('click', resetarTimeout)
+      window.removeEventListener('touchstart', resetarTimeout)
+      window.removeEventListener('scroll', resetarTimeout)
+      window.removeEventListener('input', resetarTimeout)
+    }
+  }, [])
 
   async function criar() {
     try {

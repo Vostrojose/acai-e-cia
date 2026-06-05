@@ -74,6 +74,8 @@ export default function Dashboard() {
     window.addEventListener('keydown', resetarTimeout)
     window.addEventListener('click', resetarTimeout)
     window.addEventListener('touchstart', resetarTimeout)
+    window.addEventListener('scroll', resetarTimeout)
+    window.addEventListener('input', resetarTimeout)
 
     return () => {
       clearTimeout(timeoutRef.current)
@@ -82,6 +84,8 @@ export default function Dashboard() {
       window.removeEventListener('keydown', resetarTimeout)
       window.removeEventListener('click', resetarTimeout)
       window.removeEventListener('touchstart', resetarTimeout)
+      window.removeEventListener('scroll', resetarTimeout)
+      window.removeEventListener('input', resetarTimeout)
     }
   }, [])
 
