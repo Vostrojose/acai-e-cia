@@ -138,7 +138,7 @@ export default function ChangePassword() {
           }}
         >
           <button
-            onClick={() => navigate('/produtos')}
+            onClick={() => navigate('/cozinha')}
             style={{
               background: '#333',
               color: '#fff',
@@ -149,7 +149,7 @@ export default function ChangePassword() {
               cursor: 'pointer',
             }}
           >
-            ⬅️
+            ⬅️Voltar
           </button>
         </div>
 
