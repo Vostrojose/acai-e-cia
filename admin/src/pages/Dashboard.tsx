@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { theme } from '../assets/styles/adminTheme'
 
 export default function Dashboard() {
   const navigate = useNavigate()
+  const timeoutRef = useRef<any>(null)
+  const wakeLockRef = useRef<any>(null)
 
   const [dados, setDados] = useState({
     totalHoje: 0,
@@ -22,6 +24,66 @@ export default function Dashboard() {
   const [pedidosSemanaAtual, setPedidosSemanaAtual] = useState(0)
 
   const [ticketMedioSemana, setTicketMedioSemana] = useState(0)
+
+  useEffect(() => {
+    async function ativarWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLockRef.current = await navigator.wakeLock.request('screen')
+        }
+      } catch (err) {
+        console.error('WakeLock error:', err)
+      }
+    }
+
+    ativarWakeLock()
+
+    const handleVisibility = async () => {
+      if (document.visibilityState === 'visible' && 'wakeLock' in navigator) {
+        try {
+          wakeLockRef.current = await navigator.wakeLock.request('screen')
+        } catch (err) {
+          console.error(err)
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility)
+
+      wakeLockRef.current?.release()
+    }
+  }, [])
+
+  function resetarTimeout() {
+    clearTimeout(timeoutRef.current)
+
+    timeoutRef.current = setTimeout(
+      () => {
+        navigate('/cozinha')
+      },
+      3 * 60 * 1000,
+    )
+  }
+  useEffect(() => {
+    resetarTimeout()
+
+    window.addEventListener('pointerdown', resetarTimeout)
+    window.addEventListener('keydown', resetarTimeout)
+    window.addEventListener('click', resetarTimeout)
+    window.addEventListener('touchstart', resetarTimeout)
+
+    return () => {
+      clearTimeout(timeoutRef.current)
+
+      window.removeEventListener('pointerdown', resetarTimeout)
+      window.removeEventListener('keydown', resetarTimeout)
+      window.removeEventListener('click', resetarTimeout)
+      window.removeEventListener('touchstart', resetarTimeout)
+    }
+  }, [])
 
   useEffect(() => {
     async function carregar() {
