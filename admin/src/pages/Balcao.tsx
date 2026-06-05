@@ -8,6 +8,13 @@ import api from '../services/api'
 
 import { theme } from '../assets/styles/adminTheme'
 
+function normalizarTexto(texto: string) {
+  return texto
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+}
+
 type PedidoAdicional = {
   id: string
 
@@ -86,6 +93,7 @@ export default function Balcao() {
   const [email, setEmail] = useState('')
 
   const [senha, setSenha] = useState('')
+  const [mensagem, setMensagem] = useState('')
 
   const [acaoPendente, setAcaoPendente] = useState<null | (() => void)>(null)
 
@@ -99,6 +107,7 @@ export default function Balcao() {
   const itensRef = useRef<PedidoItem[]>([])
   const novosRef = useRef(0)
   const wakeLockRef = useRef<any>(null)
+  const buscaRef = useRef<HTMLInputElement>(null)
   useEffect(() => {
     async function ativarWakeLock() {
       try {
@@ -140,27 +149,27 @@ export default function Balcao() {
 
     carregarPainelCozinha()
   }, [])
+  useEffect(() => {
+    buscaRef.current?.focus()
+  }, [])
 
   useEffect(() => {
     resetarTimeout()
     window.addEventListener('pointerdown', resetarTimeout)
-
     window.addEventListener('keydown', resetarTimeout)
-
     window.addEventListener('click', resetarTimeout)
-
     window.addEventListener('touchstart', resetarTimeout)
+    window.addEventListener('scroll', resetarTimeout)
+    window.addEventListener('input', resetarTimeout)
 
     return () => {
       clearTimeout(timeoutRef.current)
-
       window.removeEventListener('pointerdown', resetarTimeout)
-
       window.removeEventListener('keydown', resetarTimeout)
-
       window.removeEventListener('click', resetarTimeout)
-
       window.removeEventListener('touchstart', resetarTimeout)
+      window.removeEventListener('scroll', resetarTimeout)
+      window.removeEventListener('input', resetarTimeout)
     }
   }, [])
   useEffect(() => {
@@ -271,6 +280,14 @@ export default function Balcao() {
       3 * 60 * 1000,
     )
   }
+  function mostrarMensagem(texto: string) {
+    setMensagem(texto)
+
+    window.clearTimeout((window as any).toastTimer)
+    ;(window as any).toastTimer = setTimeout(() => {
+      setMensagem('')
+    }, 1500)
+  }
   function carregarPedido() {
     try {
       const pedido = JSON.parse(localStorage.getItem('pedido-balcao') || '[]')
@@ -362,17 +379,18 @@ export default function Balcao() {
     })
   }
   function removerItem(uid: string) {
-    const confirmar = confirm('Remover item do pedido?')
-
-    if (!confirmar) return
-
     const atualizado = itens.filter((i) => i.uid !== uid)
 
     setItens(atualizado)
 
     localStorage.setItem('pedido-balcao', JSON.stringify(atualizado))
-  }
 
+    mostrarMensagem('🗑 Item removido')
+
+    try {
+      new Audio('/remove.mp3').play()
+    } catch {}
+  }
   function alterarQuantidade(uid: string, delta: number) {
     const atualizado = itens.map((i) => {
       if (i.uid !== uid) return i
@@ -402,6 +420,32 @@ export default function Balcao() {
       0,
     )
   }, [itens])
+  function adicionarDiretoAoPedido(produto: any) {
+    const novoItem = {
+      uid: crypto.randomUUID(),
+      produtoId: produto.id,
+      nome: produto.nome,
+      quantidade: 1,
+      precoBase: Number(produto.preco),
+      variacao: null,
+      adicionais: [],
+      observacao: '',
+      totalItem: Number(produto.preco),
+    }
+
+    const atualizado = [...itens, novoItem]
+
+    setItens(atualizado)
+
+    localStorage.setItem('pedido-balcao', JSON.stringify(atualizado))
+    mostrarMensagem(`✅ ${produto.nome} adicionado`)
+
+    setBusca('')
+
+    setTimeout(() => {
+      buscaRef.current?.focus()
+    }, 100)
+  }
 
   async function finalizarPedido() {
     try {
@@ -432,7 +476,7 @@ export default function Balcao() {
 
         pularPreparo: true,
       })
-      alert('Pedido criado')
+      setMensagem('✅ Pedido criado com sucesso')
 
       localStorage.removeItem('pedido-balcao')
 
@@ -440,6 +484,11 @@ export default function Balcao() {
 
       setClienteNome('')
       setPendentePagamento(false)
+      setBusca('')
+
+      setTimeout(() => {
+        buscaRef.current?.focus()
+      }, 100)
 
       carregarPendentes()
     } catch (err: any) {
@@ -452,16 +501,44 @@ export default function Balcao() {
       setSalvando(false)
     }
   }
+  const textoBusca = normalizarTexto(busca)
 
-  const produtosFiltrados = produtos.filter((p) =>
-    p.nome.toLowerCase().includes(busca.toLowerCase()),
-  )
+  const produtosFiltrados = produtos.filter((p) => {
+    const nome = normalizarTexto(p.nome || '')
+    const descricao = normalizarTexto(p.descricao || '')
 
+    const variacoes =
+      p.variacoes?.some((v: any) =>
+        normalizarTexto(v.nome || '').includes(textoBusca),
+      ) || false
+
+    return (
+      nome.includes(textoBusca) || descricao.includes(textoBusca) || variacoes
+    )
+  })
   return (
     <>
       <style>{pulseStyle}</style>
 
       <div style={theme.page}>
+        {mensagem && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 20,
+              right: 20,
+              background: '#16a34a',
+              color: '#fff',
+              padding: '12px 18px',
+              borderRadius: 12,
+              fontWeight: 'bold',
+              zIndex: 99999,
+              boxShadow: '0 4px 12px rgba(0,0,0,.35)',
+            }}
+          >
+            {mensagem}
+          </div>
+        )}
         <div style={headerWrapper}>
           <div style={headerTop}>
             <button
@@ -516,14 +593,36 @@ export default function Balcao() {
         >
           <div>
             <input
+              ref={buscaRef}
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
+              onFocus={(e) => e.target.select()}
               placeholder="Buscar produto"
               style={inputBusca}
+              onKeyDown={(e) => {
+                if (e.key !== 'Enter') return
+
+                if (produtosFiltrados.length === 0) return
+
+                const produto = produtosFiltrados[0]
+
+                const possuiVariacoes = produto.variacoes?.length > 0
+
+                const possuiAdicionais = produto.adicionais?.some(
+                  (a: any) => a.ativo,
+                )
+
+                if (!possuiVariacoes && !possuiAdicionais) {
+                  adicionarDiretoAoPedido(produto)
+                  return
+                }
+
+                navigate(`/balcao/produto/${produto.id}`)
+              }}
             />
 
             <div style={gridProdutos}>
-              {produtosFiltrados.map((produto) => {
+              {produtosFiltrados.map((produto, index) => {
                 const menorPreco =
                   produto.variacoes?.length > 0
                     ? Math.min(
@@ -534,8 +633,33 @@ export default function Balcao() {
                 return (
                   <div
                     key={produto.id}
-                    onClick={() => navigate(`/balcao/produto/${produto.id}`)}
-                    style={produtoCard}
+                    onClick={() => {
+                      const possuiVariacoes = produto.variacoes?.length > 0
+
+                      const possuiAdicionais = produto.adicionais?.some(
+                        (a: any) => a.ativo,
+                      )
+
+                      if (!possuiVariacoes && !possuiAdicionais) {
+                        adicionarDiretoAoPedido(produto)
+                        return
+                      }
+
+                      navigate(`/balcao/produto/${produto.id}`)
+                    }}
+                    style={{
+                      ...produtoCard,
+
+                      border:
+                        index === 0 && busca.trim()
+                          ? '2px solid #22c55e'
+                          : '1px solid #333',
+
+                      boxShadow:
+                        index === 0 && busca.trim()
+                          ? '0 0 12px rgba(34,197,94,.45)'
+                          : undefined,
+                    }}
                   >
                     <h3>{produto.nome}</h3>
 
