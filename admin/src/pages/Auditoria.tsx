@@ -185,7 +185,7 @@ function CardMenu({ navigate }: any) {
         <button onClick={() => navigate("/cozinha")} style={btnMenu}>👨‍🍳</button>
         <button onClick={() => navigate("/pedidos")} style={btnMenu}>📦</button>
         <button onClick={() => navigate("/produtos")} style={btnMenu}>🛒</button>
-        <button onClick={() => navigate("/dashboard")} style={btnMenu}>📈</button>
+        <button onClick={() => navigate("/dashboard")} style={btnMenu}> 📋</button>
       </div>
     </div>
   )

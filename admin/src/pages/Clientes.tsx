@@ -158,6 +158,9 @@ export default function Clientes() {
         <button style={btnMenu} onClick={() => navigate('/financeiro')}>
           💰
         </button>
+        <button onClick={() => navigate('/dashboard')} style={btnMenu}>
+          📋
+        </button>
       </div>
 
       <div style={boxTopo}>

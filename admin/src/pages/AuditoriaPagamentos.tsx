@@ -161,6 +161,9 @@ function CardMenu({ navigate }: any) {
         >
           🧾
         </button>
+        <button onClick={() => navigate('/dashboard')} style={btnMenu}>
+          📋
+        </button>
       </div>
     </div>
   )
