@@ -173,10 +173,6 @@ export default function Dashboard() {
 
         const tendencia = totalHoje - totalOntem
 
-        /* ============================= */
-        /* 📅 SEMANA ATUAL               */
-        /* ============================= */
-
         const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 
         const hojeAtual = new Date()
@@ -220,10 +216,6 @@ export default function Dashboard() {
         setPedidosSemanaAtual(totalPedidosSemana)
 
         setTicketMedioSemana(ticketMedioSemana)
-
-        /* ============================= */
-        /* 📊 SEMANAS DO MÊS             */
-        /* ============================= */
 
         const mesAtual = hojeAtual.getMonth()
         const anoAtual = hojeAtual.getFullYear()
@@ -308,7 +300,7 @@ export default function Dashboard() {
     <div style={theme.page}>
       <CardMenu navigate={navigate} />
 
-      <h1 style={{ ...theme.title, textAlign: 'center' }}>📊 Dashboard</h1>
+      <h1 style={{ ...theme.title, textAlign: 'center' }}>📋 Dashboard</h1>
 
       <div style={grid}>
         <Card
