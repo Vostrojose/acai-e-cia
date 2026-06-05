@@ -49,7 +49,19 @@ type PedidoItem = {
 export default function Balcao() {
   const navigate = useNavigate()
 
-  const isMobile = window.matchMedia('(max-width: 700px)').matches
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 700)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 700)
+    }
+
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
 
   const [produtos, setProdutos] = useState<any[]>([])
 
@@ -581,25 +593,36 @@ export default function Balcao() {
                   )}
 
                   <div style={acoesQtd}>
-                    <button onClick={() => alterarQuantidade(item.uid, -1)}>
+                    <button
+                      style={btnAcao}
+                      onClick={() => alterarQuantidade(item.uid, -1)}
+                    >
                       -
                     </button>
 
                     <span>{item.quantidade}</span>
 
-                    <button onClick={() => alterarQuantidade(item.uid, 1)}>
+                    <button
+                      style={btnAcao}
+                      onClick={() => alterarQuantidade(item.uid, 1)}
+                    >
                       +
                     </button>
 
                     <button
+                      style={btnAcao}
                       onClick={() => navigate(`/balcao/item/${item.uid}`)}
                     >
                       ✏️
                     </button>
 
-                    <button onClick={() => removerItem(item.uid)}>🗑</button>
+                    <button
+                      style={btnAcao}
+                      onClick={() => removerItem(item.uid)}
+                    >
+                      🗑
+                    </button>
                   </div>
-
                   <div
                     style={{
                       marginTop: 10,
@@ -796,6 +819,10 @@ export default function Balcao() {
     </>
   )
 }
+const btnAcao: React.CSSProperties = {
+  minWidth: 44,
+  minHeight: 44,
+}
 
 const header: React.CSSProperties = {
   marginBottom: 20,
@@ -834,7 +861,7 @@ const inputBusca: React.CSSProperties = {
 const gridProdutos: React.CSSProperties = {
   display: 'grid',
 
-  gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))',
+  gridTemplateColumns: 'repeat(auto-fill,minmax(180px,1fr))',
 
   gap: 18,
 }
@@ -951,12 +978,9 @@ const headerTop: React.CSSProperties = {
 }
 const statusGrid: React.CSSProperties = {
   display: 'grid',
-
-  gridTemplateColumns: 'repeat(4,1fr)',
-
-  gap: 40,
+  gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))',
+  gap: 12,
 }
-
 const btnVoltar: React.CSSProperties = {
   padding: '12px 18px',
 
@@ -1039,7 +1063,8 @@ const overlay: React.CSSProperties = {
 }
 
 const modal: React.CSSProperties = {
-  width: 320,
+  width: '90%',
+  maxWidth: 320,
 
   background: '#111',
 
