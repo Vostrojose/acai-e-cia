@@ -29,6 +29,9 @@ export default function Dashboard() {
         const resPedidos = await api.get('/pedidos/dashboard')
 
         const pedidos = resPedidos.data?.data || []
+        const pedidosValidos = pedidos.filter(
+          (p: any) => p.status !== 'CANCELADO',
+        )
 
         const resProdutos = await api.get('/produtos')
         const listaProdutos = resProdutos.data?.data || []
@@ -43,7 +46,7 @@ export default function Dashboard() {
 
         const hoje = new Date()
 
-        const pedidosHoje = pedidos.filter((p: any) => {
+        const pedidosHoje = pedidosValidos.filter((p: any) => {
           const data = new Date(p.criadoEm)
           return data.toDateString() === hoje.toDateString()
         })
@@ -53,7 +56,7 @@ export default function Dashboard() {
           0,
         )
 
-        const pedidosAbertos = pedidos.filter((p: any) =>
+        const pedidosAbertos = pedidosValidos.filter((p: any) =>
           ['RECEBIDO', 'EM_PREPARO', 'PRONTO'].includes(p.status),
         ).length
 
@@ -78,7 +81,9 @@ export default function Dashboard() {
           }
         })
 
-        const entregues = pedidos.filter((p: any) => p.status === 'ENTREGUE')
+        const entregues = pedidosValidos.filter(
+          (p: any) => p.status === 'ENTREGUE',
+        )
 
         const tempoMedio =
           entregues.reduce((acc: number, p: any) => {
@@ -94,7 +99,7 @@ export default function Dashboard() {
         const ontem = new Date()
         ontem.setDate(ontem.getDate() - 1)
 
-        const pedidosOntem = pedidos.filter((p: any) => {
+        const pedidosOntem = pedidosValidos.filter((p: any) => {
           const data = new Date(p.criadoEm)
           return data.toDateString() === ontem.toDateString()
         })
@@ -272,7 +277,7 @@ export default function Dashboard() {
             borderRadius: 16,
             color: '#fff',
             border: '1px solid #f44336',
-            minWidth: 260,
+            width: '100%',
           }}
         >
           <div
@@ -448,7 +453,7 @@ function Card({ titulo, valor, cor }: any) {
   return (
     <div
       style={{
-        flex: 1.8,
+        width: '100%',
         background: 'linear-gradient(135deg, #1e1e1e, #2a2a2a)',
         padding: 20,
         borderRadius: 16,
@@ -487,18 +492,20 @@ function Card({ titulo, valor, cor }: any) {
 }
 
 const grid: React.CSSProperties = {
-  display: 'flex',
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))',
   gap: 16,
   width: '100%',
 }
-
 const btnMenu: React.CSSProperties = {
   background: '#333',
   color: '#fff',
   border: 'none',
-  padding: '10px 12px',
+  padding: '12px 16px',
+  minWidth: 48,
+  minHeight: 48,
   borderRadius: 6,
-  fontSize: 16,
+  fontSize: 18,
   cursor: 'pointer',
 }
 
@@ -514,6 +521,8 @@ const linhaFiado: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
+  gap: 12,
+  flexWrap: 'wrap',
   marginTop: 10,
 }
 
