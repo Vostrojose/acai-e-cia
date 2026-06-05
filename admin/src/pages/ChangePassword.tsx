@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import api from '../services/api'
 
 export default function ChangePassword() {
   const [senhaAtual, setSenhaAtual] = useState('')
@@ -79,27 +79,17 @@ export default function ChangePassword() {
       return
     }
 
-    const token = localStorage.getItem('token')
-
     try {
       setLoading(true)
 
-      await axios.put(
-        'http://localhost:3000/api/auth/change-password',
-        {
-          senhaAtual,
-          novaSenha,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      )
+      await api.put('/auth/change-password', {
+        senhaAtual,
+        novaSenha,
+      })
 
       alert('Senha alterada com sucesso!')
 
-      localStorage.removeItem('token')
+      sessionStorage.removeItem('token')
       window.location.href = '/login'
     } catch (error: any) {
       alert(error.response?.data?.message || 'Erro ao alterar senha')
@@ -142,6 +132,27 @@ export default function ChangePassword() {
           border: '1px solid rgba(255,255,255,.08)',
         }}
       >
+        <div
+          style={{
+            marginBottom: 20,
+          }}
+        >
+          <button
+            onClick={() => navigate('/dashboard')}
+            style={{
+              background: '#333',
+              color: '#fff',
+              border: 'none',
+              padding: '12px 16px',
+              borderRadius: 6,
+              fontSize: 18,
+              cursor: 'pointer',
+            }}
+          >
+            ⬅️
+          </button>
+        </div>
+
         <form onSubmit={handleSubmit}>
           <input
             style={inputStyle}
