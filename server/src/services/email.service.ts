@@ -13,22 +13,6 @@ class EmailService {
       pass: process.env.SMTP_PASS,
     },
   })
-
-  async testarEmail() {
-    await this.transporter.sendMail({
-      from: process.env.SMTP_USER,
-
-      to: process.env.SMTP_USER,
-
-      subject: 'Teste SMTP Açaí & Companhia',
-
-      html: `
-        <h2>Teste SMTP</h2>
-        <p>Se você recebeu este email, o SMTP está funcionando.</p>
-      `,
-    })
-    
-  }
  async enviarRelatorio(
   assunto: string,
   arquivoPdf: string,

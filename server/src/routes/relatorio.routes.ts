@@ -318,14 +318,7 @@ router.get('/resumo', async (_req, res) => {
     })
   }
 })
-router.get('/teste-email', async (req, res) => {
-  await emailService.testarEmail()
 
-  return res.json({
-    success: true,
-    message: 'Email enviado com sucesso',
-  })
-})
 
 
 /* =========================
@@ -355,14 +348,6 @@ router.get('/:id', async (req, res) => {
       message: 'Erro ao buscar relatório',
     })
   }
-})
-router.get('/teste-email', async (req, res) => {
-  await emailService.testarEmail()
-
-  return res.json({
-    success: true,
-    message: 'Email enviado com sucesso',
-  })
 })
 
 
