@@ -24,6 +24,7 @@ export default function Dashboard() {
   const [pedidosSemanaAtual, setPedidosSemanaAtual] = useState(0)
 
   const [ticketMedioSemana, setTicketMedioSemana] = useState(0)
+  const [relatorios, setRelatorios] = useState<any>(null)
 
   useEffect(() => {
     async function ativarWakeLock() {
@@ -104,6 +105,9 @@ export default function Dashboard() {
 
         const resFiados = await api.get('/pedidos/fiados')
         setFiados(resFiados.data.data || [])
+        const resRelatorios = await api.get('/relatorios/dashboard')
+
+        setRelatorios(resRelatorios.data?.data || null)
 
         const mapaProdutos: any = {}
         listaProdutos.forEach((p: any) => {
@@ -327,6 +331,43 @@ export default function Dashboard() {
           valor={`${dados.tempoMedio} min`}
           cor="#9c27b0"
         />
+        {relatorios && (
+          <div
+            style={{
+              width: '100%',
+              background: 'linear-gradient(135deg, #1e1e1e, #2a2a2a)',
+              padding: 20,
+              borderRadius: 16,
+              color: '#fff',
+              border: '1px solid #00bcd4',
+            }}
+          >
+            <div
+              style={{
+                fontSize: 14,
+                opacity: 0.8,
+                marginBottom: 10,
+              }}
+            >
+              📄 RELATÓRIOS
+            </div>
+
+            <div>Diário: {relatorios.diario?.referencia || '-'}</div>
+
+            <div>Semanal: {relatorios.semanal?.referencia || '-'}</div>
+
+            <div>Mensal: {relatorios.mensal?.referencia || '-'}</div>
+
+            <hr
+              style={{
+                borderColor: '#333',
+                margin: '10px 0',
+              }}
+            />
+
+            <div>Execuções: {relatorios.totalExecucoes || 0}</div>
+          </div>
+        )}
         <div
           style={{
             flex: 1,
