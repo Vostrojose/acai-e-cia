@@ -2,9 +2,13 @@ import { Router } from 'express'
 import relatorioService from '../services/relatorio.service'
 import pdfService from '../services/pdf.service'
 import prisma from '../lib/prisma'
+import emailService from '../services/email.service'
+
+
 
 
 const router = Router()
+
 
 router.get('/teste', async (_req, res) => {
   try {
@@ -314,6 +318,15 @@ router.get('/resumo', async (_req, res) => {
     })
   }
 })
+router.get('/teste-email', async (req, res) => {
+  await emailService.testarEmail()
+
+  return res.json({
+    success: true,
+    message: 'Email enviado com sucesso',
+  })
+})
+
 
 /* =========================
    BUSCAR RELATÓRIO POR ID
@@ -343,5 +356,14 @@ router.get('/:id', async (req, res) => {
     })
   }
 })
+router.get('/teste-email', async (req, res) => {
+  await emailService.testarEmail()
+
+  return res.json({
+    success: true,
+    message: 'Email enviado com sucesso',
+  })
+})
+
 
 export default router

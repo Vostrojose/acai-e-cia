@@ -1,6 +1,7 @@
 import prisma from './prisma'
 import pdfService from './pdf.service'
 import { TipoRelatorio } from '@prisma/client'
+import emailService from './email.service'
 
 class RelatorioService {
   private async verificarExecucaoExistente(
@@ -16,6 +17,7 @@ class RelatorioService {
       },
     })
   }
+
   async gerarRelatorio(
     tipo: TipoRelatorio,
     referencia: string,
@@ -364,6 +366,38 @@ class RelatorioService {
         id,
       },
     })
+  }
+  async enviarRelatorioPorEmail(relatorioId: string, email: string) {
+    const relatorio = await prisma.relatorio.findUnique({
+      where: {
+        id: relatorioId,
+      },
+    })
+
+    if (!relatorio) {
+      throw new Error('Relatório não encontrado')
+    }
+
+    if (!relatorio.arquivoPdf) {
+      throw new Error('PDF não encontrado')
+    }
+
+    await emailService.enviarRelatorio(
+      `Relatório ${relatorio.tipo}`,
+      relatorio.arquivoPdf,
+    )
+
+    await prisma.relatorio.update({
+      where: {
+        id: relatorioId,
+      },
+
+      data: {
+        enviadoEmail: true,
+      },
+    })
+
+    return true
   }
 }
 
