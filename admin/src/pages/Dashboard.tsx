@@ -105,7 +105,7 @@ export default function Dashboard() {
 
         const resFiados = await api.get('/pedidos/fiados')
         setFiados(resFiados.data.data || [])
-        const resRelatorios = await api.get('/relatorios/dashboard')
+        const resRelatorios = await api.get('/relatorios/resumo')
 
         setRelatorios(resRelatorios.data?.data || null)
 
