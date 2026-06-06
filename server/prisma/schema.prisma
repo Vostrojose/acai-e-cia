@@ -213,6 +213,11 @@ enum FormaPagamentoBalcao {
   FIADO
   CREDITO
 }
+enum TipoRelatorio {
+  DIARIO
+  SEMANAL
+  MENSAL
+}
 
 model Cliente {
   id        String   @id @default(uuid())
@@ -250,4 +255,43 @@ model Configuracao {
   atualizadoEm DateTime @default(now()) @updatedAt @map("atualizado_em")
 
   @@map("configuracoes")
+}
+
+model Relatorio {
+  id             String @id @default(uuid())
+
+  tipo           TipoRelatorio
+
+  referencia     String
+
+  periodoInicio  DateTime
+  periodoFim     DateTime
+
+  dados          Json
+
+  arquivoPdf     String?
+
+  enviadoEmail   Boolean @default(false)
+
+  criadoEm       DateTime @default(now())
+
+  @@unique([tipo, referencia])
+
+  @@index([tipo])
+  @@index([referencia])
+}
+model ExecucaoRelatorio {
+  id            String @id @default(uuid())
+
+  tipo          TipoRelatorio
+
+  referencia    String
+
+  executadoEm   DateTime @default(now())
+
+  status        String
+
+  observacao    String?
+
+  @@unique([tipo, referencia])
 }

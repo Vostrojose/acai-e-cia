@@ -21,6 +21,8 @@ import balcaoRoutes from "./routes/balcao.routes";
 import clienteRoutes from "./routes/cliente.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
 import configuracoesRoutes from './routes/configuracoes'
+import relatorioRoutes from './routes/relatorio.routes'
+import relatorioScheduler from './services/relatorio.scheduler'
 
 const app = express();
 
@@ -64,6 +66,7 @@ app.use("/api/clientes", clienteRoutes);
 app.use("/api/adicionais", adicionalRoutes);
 app.use("/api/variacoes", variacaoRoutes);
 app.use("/api/auditoria", auditoriaRoutes);
+app.use('/api/relatorios', relatorioRoutes)
 
 /* =================================
    HEALTH CHECK
@@ -100,4 +103,6 @@ initSocket(server);
 
 server.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
+
+  relatorioScheduler.iniciar()
 });
