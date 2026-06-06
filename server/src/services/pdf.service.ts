@@ -1,4 +1,4 @@
-import PDFDocument from 'pdfkit'
+const PDFDocument = require('pdfkit')
 import fs from 'fs'
 import path from 'path'
 
