@@ -105,9 +105,9 @@ export default function Dashboard() {
 
         const resFiados = await api.get('/pedidos/fiados')
         setFiados(resFiados.data.data || [])
-        //const resRelatorios = await api.get('/relatorios/resumo')
+        const resRelatorios = await api.get('/relatorios/resumo')
 
-        //setRelatorios(resRelatorios.data?.data || null)
+        setRelatorios(resRelatorios.data?.data || null)
 
         const mapaProdutos: any = {}
         listaProdutos.forEach((p: any) => {
