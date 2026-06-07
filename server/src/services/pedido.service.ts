@@ -110,6 +110,49 @@ class PedidoService {
       orderBy: { criadoEm: 'desc' },
     })
   }
+  async listarPedidosPaginado(pagina = 1, limite = 50, status?: string) {
+    const where = status
+      ? {
+          status: status as StatusPedido,
+        }
+      : undefined
+
+    const [pedidos, total] = await Promise.all([
+      prisma.pedido.findMany({
+        where,
+
+        take: limite,
+
+        skip: (pagina - 1) * limite,
+
+        include: {
+          itens: {
+            include: {
+              produto: true,
+              adicionais: true,
+            },
+          },
+        },
+
+        orderBy: {
+          criadoEm: 'desc',
+        },
+      }),
+
+      prisma.pedido.count({
+        where,
+      }),
+    ])
+
+    return {
+      pedidos,
+      total,
+      pagina,
+      limite,
+
+      totalPaginas: Math.ceil(total / limite),
+    }
+  }
 
   async buscarPorId(id: string) {
     return prisma.pedido.findUnique({

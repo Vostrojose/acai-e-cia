@@ -10,7 +10,7 @@ router.get('/', async (req, res) => {
   try {
     const horas = Number(req.query.horas) || 36 // padrão 36h
     const page = Number(req.query.page) || 1
-    const limit = Number(req.query.limit) || 10
+    const limit = Math.min(Number(req.query.limit) || 10, 100)
     const skip = (page - 1) * limit
     const dataLimite = new Date()
     dataLimite.setHours(dataLimite.getHours() - horas)
@@ -66,45 +66,62 @@ router.get('/', async (req, res) => {
 router.get(
   '/fiados',
   asyncHandler(async (req, res) => {
-    const pedidos = await prisma.pedido.findMany({
-      where: {
-        pago: false,
-      },
-      orderBy: {
-        criadoEm: 'desc',
-      },
-      include: {
-        itens: {
-          include: {
-            adicionais: true,
-          },
+    const page = Number(req.query.page) || 1
+
+    const limit = Math.min(Number(req.query.limit) || 20, 100)
+
+    const skip = (page - 1) * limit
+
+    const [pedidos, total] = await Promise.all([
+      prisma.pedido.findMany({
+        where: {
+          pago: false,
         },
-        cliente: true,
-      },
-    })
+
+        orderBy: {
+          criadoEm: 'desc',
+        },
+
+        skip,
+
+        take: limit,
+
+        include: {
+          itens: {
+            include: {
+              adicionais: true,
+            },
+          },
+
+          cliente: true,
+        },
+      }),
+
+      prisma.pedido.count({
+        where: {
+          pago: false,
+        },
+      }),
+    ])
 
     return res.json({
       success: true,
+
       data: serializeDecimal(pedidos),
+
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     })
   }),
 )
 router.get('/dashboard', pedidoController.dashboard)
 router.get(
-  '/entregues/hoje/count',
-  
-  asyncHandler(async (req, res) => {
-    const agora = new Date()
-
-    const inicioHoje = new Date(
-      agora.toLocaleString('en-US', {
-        timeZone: 'America/Sao_Paulo',
-      }),
-    )
-    router.get(
   '/entregues/hoje',
   asyncHandler(async (_req, res) => {
-
     const agora = new Date()
 
     const inicioHoje = new Date(
@@ -145,6 +162,17 @@ router.get(
     })
   }),
 )
+router.get(
+  '/entregues/hoje/count',
+
+  asyncHandler(async (req, res) => {
+    const agora = new Date()
+
+    const inicioHoje = new Date(
+      agora.toLocaleString('en-US', {
+        timeZone: 'America/Sao_Paulo',
+      }),
+    )
 
     inicioHoje.setHours(0, 0, 0, 0)
 

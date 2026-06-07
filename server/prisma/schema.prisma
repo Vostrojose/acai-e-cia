@@ -273,6 +273,10 @@ model Relatorio {
 
   enviadoEmail   Boolean @default(false)
 
+  enviadoWhatsapp Boolean @default(false)
+
+  ultimoWhatsappEnviadoEm DateTime?
+
   criadoEm       DateTime @default(now())
 
   @@unique([tipo, referencia])
