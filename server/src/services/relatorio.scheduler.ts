@@ -3,21 +3,17 @@ import relatorioService from './relatorio.service'
 
 class RelatorioScheduler {
   iniciar() {
-    console.log(
-      '[RELATORIOS] Scheduler iniciado',
-    )
+    console.log('[RELATORIOS] Scheduler iniciado')
 
     // Diário - 20:00
 
     cron.schedule(
-      '0 20 * * *',
+      '0 20 * * 1-5',
       async () => {
         try {
-          console.log(
-            '[RELATORIOS] Gerando relatório diário',
-          )
+          console.log('[RELATORIOS] Gerando relatório diário')
 
-          await relatorioService.gerarRelatorioDiario()
+          await relatorioService.gerarEEnviarRelatorioDiario()
         } catch (error) {
           console.error(error)
         }
@@ -33,11 +29,9 @@ class RelatorioScheduler {
       '0 20 * * 6',
       async () => {
         try {
-          console.log(
-            '[RELATORIOS] Gerando relatório semanal',
-          )
+          console.log('[RELATORIOS] Gerando relatório semanal')
 
-          await relatorioService.gerarRelatorioSemanal()
+          await relatorioService.gerarEEnviarRelatorioSemanal()
         } catch (error) {
           console.error(error)
         }
@@ -50,14 +44,20 @@ class RelatorioScheduler {
     // Mensal - Dia 1 às 20:00
 
     cron.schedule(
-      '0 20 1 * *',
+      '0 20 28-31 * *',
       async () => {
         try {
-          console.log(
-            '[RELATORIOS] Gerando relatório mensal',
-          )
+          const hoje = new Date()
 
-          await relatorioService.gerarRelatorioMensal()
+          const amanha = new Date(hoje)
+
+          amanha.setDate(hoje.getDate() + 1)
+
+          if (amanha.getMonth() !== hoje.getMonth()) {
+            console.log('[RELATORIOS] Gerando relatório mensal')
+
+            await relatorioService.gerarEEnviarRelatorioMensal()
+          }
         } catch (error) {
           console.error(error)
         }

@@ -2,41 +2,12 @@ import { Router } from 'express'
 import relatorioService from '../services/relatorio.service'
 import pdfService from '../services/pdf.service'
 import prisma from '../lib/prisma'
-import emailService from '../services/email.service'
 
 
 
 
 const router = Router()
 
-
-router.get('/teste', async (_req, res) => {
-  try {
-    const hoje = new Date()
-
-    const inicio = new Date(hoje)
-    inicio.setHours(0, 0, 0, 0)
-
-    const resultado = await relatorioService.gerarRelatorio(
-      'DIARIO',
-      hoje.toISOString().split('T')[0],
-      inicio,
-      hoje,
-    )
-
-    return res.json({
-      success: true,
-      data: resultado,
-    })
-  } catch (error) {
-    console.error(error)
-
-    return res.status(500).json({
-      success: false,
-      message: 'Erro ao gerar relatório',
-    })
-  }
-})
 
 /* =========================
    LISTAR RELATÓRIOS
@@ -119,23 +90,6 @@ router.get('/mensal', async (_req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Erro ao gerar relatório mensal',
-    })
-  }
-})
-router.get('/pdf-teste', async (_req, res) => {
-  try {
-    const arquivo = await pdfService.gerarPdfTeste()
-
-    return res.json({
-      success: true,
-      arquivo,
-    })
-  } catch (error) {
-    console.error(error)
-
-    return res.status(500).json({
-      success: false,
-      message: 'Erro ao gerar PDF',
     })
   }
 })
@@ -319,6 +273,27 @@ router.get('/resumo', async (_req, res) => {
   }
 })
 
+router.post('/:id/enviar-email', async (req, res) => {
+  try {
+    await relatorioService.enviarRelatorioPorEmail(
+      req.params.id,
+    )
+
+    return res.json({
+      success: true,
+      message: 'Relatório enviado',
+    })
+  } catch (error) {
+    console.error(error)
+
+    return res.status(500).json({
+      success: false,
+      message: error instanceof Error
+        ? error.message
+        : 'Erro ao enviar email',
+    })
+  }
+})
 
 
 /* =========================

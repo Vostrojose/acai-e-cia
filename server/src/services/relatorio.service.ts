@@ -290,6 +290,8 @@ class RelatorioService {
 
     fim.setHours(20, 0, 0, 0)
 
+    fim.setHours(20, 0, 0, 0)
+
     if (brasilia < fim) {
       fim.setDate(fim.getDate() - 1)
     }
@@ -326,6 +328,8 @@ class RelatorioService {
 
     inicio.setDate(inicio.getDate() - 7)
 
+    inicio.setHours(0, 0, 0, 0)
+
     const referencia = fim.toISOString().split('T')[0]
 
     return this.gerarRelatorio(TipoRelatorio.SEMANAL, referencia, inicio, fim)
@@ -344,7 +348,7 @@ class RelatorioService {
 
     const mes = brasilia.getMonth()
 
-    const inicio = new Date(ano, mes, 1, 20, 0, 0, 0)
+    const inicio = new Date(ano, mes, 1, 0, 0, 0, 0)
 
     const fim = new Date(brasilia)
 
@@ -367,7 +371,7 @@ class RelatorioService {
       },
     })
   }
-  async enviarRelatorioPorEmail(relatorioId: string, email: string) {
+  async enviarRelatorioPorEmail(relatorioId: string) {
     const relatorio = await prisma.relatorio.findUnique({
       where: {
         id: relatorioId,
@@ -382,11 +386,26 @@ class RelatorioService {
       throw new Error('PDF não encontrado')
     }
 
-    await emailService.enviarRelatorio(
-      `Relatório ${relatorio.tipo}`,
-      relatorio.arquivoPdf,
-    )
+    try {
+      console.log(
+        `[EMAIL] Enviando relatório ${relatorio.tipo} (${relatorio.id})`,
+      )
 
+      await emailService.enviarRelatorio(
+        `Relatório ${relatorio.tipo}`,
+        relatorio.arquivoPdf,
+      )
+
+      console.log(`[EMAIL] Relatório ${relatorio.tipo} enviado com sucesso`)
+    } catch (error) {
+      console.error(
+        `[EMAIL] Falha ao enviar relatório ${relatorio.tipo}`,
+        error,
+      )
+
+      throw error
+    }
+    console.log(`[EMAIL] Relatório ${relatorio.tipo} enviado com sucesso`)
     await prisma.relatorio.update({
       where: {
         id: relatorioId,
@@ -398,6 +417,29 @@ class RelatorioService {
     })
 
     return true
+  }
+  async gerarEEnviarRelatorioDiario() {
+    const relatorio = await this.gerarRelatorioDiario()
+
+    await this.enviarRelatorioPorEmail(relatorio.id)
+
+    return relatorio
+  }
+
+  async gerarEEnviarRelatorioSemanal() {
+    const relatorio = await this.gerarRelatorioSemanal()
+
+    await this.enviarRelatorioPorEmail(relatorio.id)
+
+    return relatorio
+  }
+
+  async gerarEEnviarRelatorioMensal() {
+    const relatorio = await this.gerarRelatorioMensal()
+
+    await this.enviarRelatorioPorEmail(relatorio.id)
+
+    return relatorio
   }
 }
 
