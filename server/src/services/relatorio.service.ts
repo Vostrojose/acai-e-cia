@@ -43,7 +43,21 @@ class RelatorioService {
       })
 
       if (relatorioExistente) {
-        return relatorioExistente
+        if (relatorioExistente.arquivoPdf) {
+          const existe = await pdfService.existeArquivo(
+            relatorioExistente.arquivoPdf,
+          )
+
+          if (!existe) {
+            console.log('[RELATORIOS] PDF não encontrado, regenerando...')
+          } else {
+            return relatorioExistente
+          }
+        } else {
+          console.log(
+            '[RELATORIOS] Relatório encontrado sem PDF, regenerando...',
+          )
+        }
       }
     }
     await securityLogService.registrar({
@@ -310,7 +324,6 @@ class RelatorioService {
     )
 
     const fim = new Date(brasilia)
-
 
     fim.setHours(20, 0, 0, 0)
 
