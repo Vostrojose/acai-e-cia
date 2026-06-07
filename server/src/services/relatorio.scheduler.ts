@@ -26,7 +26,7 @@ class RelatorioScheduler {
     // Semanal - Sábado 20:00
 
     cron.schedule(
-      '0 14 * * 0',
+      '10 14 * * 0',
       async () => {
         try {
           console.log('[RELATORIOS] Gerando relatório semanal')
