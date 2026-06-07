@@ -311,7 +311,6 @@ class RelatorioService {
 
     const fim = new Date(brasilia)
 
-    fim.setHours(20, 0, 0, 0)
 
     fim.setHours(20, 0, 0, 0)
 
