@@ -2,6 +2,7 @@ import prisma from './prisma'
 import pdfService from './pdf.service'
 import { TipoRelatorio } from '@prisma/client'
 import emailService from './email.service'
+import securityLogService from './securityLog.service'
 
 class RelatorioService {
   private async verificarExecucaoExistente(
@@ -45,6 +46,16 @@ class RelatorioService {
         return relatorioExistente
       }
     }
+    await securityLogService.registrar({
+      tipo: 'RELATORIO',
+      acao: `GERAR_${tipo}`,
+
+      detalhes: {
+        referencia,
+        periodoInicio,
+        periodoFim,
+      },
+    })
     const pedidos = await prisma.pedido.findMany({
       where: {
         criadoEm: {
@@ -266,14 +277,26 @@ class RelatorioService {
     await prisma.execucaoRelatorio.create({
       data: {
         tipo,
-
         referencia,
-
         status: 'SUCESSO',
-
         observacao: 'Relatório gerado automaticamente',
       },
     })
+
+    await securityLogService.registrar({
+      tipo: 'RELATORIO',
+      acao: `GERADO_${tipo}`,
+
+      entidade: 'RELATORIO',
+      entidadeId: relatorio.id,
+
+      detalhes: {
+        referencia,
+        movimentacaoTotal,
+        pedidos: pedidos.length,
+      },
+    })
+
     return relatorio
   }
 
@@ -371,6 +394,7 @@ class RelatorioService {
       },
     })
   }
+
   async enviarRelatorioPorEmail(relatorioId: string) {
     const relatorio = await prisma.relatorio.findUnique({
       where: {
