@@ -3,11 +3,7 @@ import relatorioService from '../services/relatorio.service'
 import pdfService from '../services/pdf.service'
 import prisma from '../lib/prisma'
 
-
-
-
 const router = Router()
-
 
 /* =========================
    LISTAR RELATÓRIOS
@@ -156,11 +152,17 @@ router.get('/execucoes', async (_req, res) => {
     const resumo = {
       total: execucoes.length,
 
-      diarios: execucoes.filter((e) => e.tipo === 'DIARIO').length,
+      diarios: execucoes.filter(
+        (e: (typeof execucoes)[number]) => e.tipo === 'DIARIO',
+      ).length,
 
-      semanais: execucoes.filter((e) => e.tipo === 'SEMANAL').length,
+      semanais: execucoes.filter(
+        (e: (typeof execucoes)[number]) => e.tipo === 'SEMANAL',
+      ).length,
 
-      mensais: execucoes.filter((e) => e.tipo === 'MENSAL').length,
+      mensais: execucoes.filter(
+        (e: (typeof execucoes)[number]) => e.tipo === 'MENSAL',
+      ).length,
     }
     return res.json({
       success: true,
@@ -275,9 +277,7 @@ router.get('/resumo', async (_req, res) => {
 
 router.post('/:id/enviar-email', async (req, res) => {
   try {
-    await relatorioService.enviarRelatorioPorEmail(
-      req.params.id,
-    )
+    await relatorioService.enviarRelatorioPorEmail(req.params.id)
 
     return res.json({
       success: true,
@@ -288,13 +288,10 @@ router.post('/:id/enviar-email', async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: error instanceof Error
-        ? error.message
-        : 'Erro ao enviar email',
+      message: error instanceof Error ? error.message : 'Erro ao enviar email',
     })
   }
 })
-
 
 /* =========================
    BUSCAR RELATÓRIO POR ID
@@ -324,6 +321,5 @@ router.get('/:id', async (req, res) => {
     })
   }
 })
-
 
 export default router

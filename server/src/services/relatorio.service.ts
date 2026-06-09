@@ -72,6 +72,10 @@ class RelatorioService {
     })
     const pedidos = await prisma.pedido.findMany({
       where: {
+        origem: 'BALCAO',
+
+        status: 'ENTREGUE',
+
         criadoEm: {
           gte: periodoInicio,
           lte: periodoFim,
@@ -83,7 +87,6 @@ class RelatorioService {
           select: {
             nomeProduto: true,
             quantidade: true,
-
             produto: {
               select: {
                 nome: true,
@@ -111,20 +114,9 @@ class RelatorioService {
 
     for (const pedido of pedidos) {
       const valor = Number(pedido.total)
-      if (pedido.status === 'CANCELADO') {
-        cancelados += valor
-        continue
-      }
 
-      if (pedido.origem === 'BALCAO') {
-        pedidosBalcao++
-        vendasBalcao += valor
-      }
-
-      if (pedido.origem === 'APP' || pedido.origem === 'QR_CODE') {
-        pedidosOnline++
-        vendasOnline += valor
-      }
+      pedidosBalcao++
+      vendasBalcao += valor
 
       movimentacaoTotal += valor
 
@@ -133,22 +125,12 @@ class RelatorioService {
         continue
       }
 
-      if (pedido.status === 'AGUARDANDO_PAGAMENTO') {
-        aguardandoPagamento += valor
-        continue
-      }
+      recebido += valor
 
-      if (
-        pedido.statusPagamento === 'APROVADO' ||
-        pedido.formaPagamentoBalcao === 'PAGO'
-      ) {
-        recebido += valor
-
-        if (pedido.pagamentoId) {
-          totalPix += valor
-        } else {
-          totalDinheiro += valor
-        }
+      if (pedido.pagamentoId) {
+        totalPix += valor
+      } else {
+        totalDinheiro += valor
       }
     }
 
@@ -288,8 +270,21 @@ class RelatorioService {
       },
     })
 
-    await prisma.execucaoRelatorio.create({
-      data: {
+    await prisma.execucaoRelatorio.upsert({
+      where: {
+        tipo_referencia: {
+          tipo,
+          referencia,
+        },
+      },
+
+      update: {
+        status: 'SUCESSO',
+        observacao: 'Relatório atualizado',
+        executadoEm: new Date(),
+      },
+
+      create: {
         tipo,
         referencia,
         status: 'SUCESSO',
@@ -323,19 +318,17 @@ class RelatorioService {
       }),
     )
 
+    const inicio = new Date(brasilia)
+
+    inicio.setHours(0, 0, 0, 0)
+
     const fim = new Date(brasilia)
 
-    fim.setHours(20, 0, 0, 0)
+    fim.setHours(23, 59, 59, 999)
 
-    if (brasilia < fim) {
-      fim.setDate(fim.getDate() - 1)
-    }
-
-    const inicio = new Date(fim)
-
-    inicio.setDate(inicio.getDate() - 1)
-
-    const referencia = fim.toISOString().split('T')[0]
+    const referencia = `${brasilia.getFullYear()}-${String(
+      brasilia.getMonth() + 1,
+    ).padStart(2, '0')}-${String(brasilia.getDate()).padStart(2, '0')}`
 
     return this.gerarRelatorio(TipoRelatorio.DIARIO, referencia, inicio, fim)
   }
