@@ -23,6 +23,8 @@ import dashboardRoutes from './routes/dashboard.routes'
 import configuracoesRoutes from './routes/configuracoes'
 import relatorioRoutes from './routes/relatorio.routes'
 import relatorioScheduler from './services/relatorio.scheduler'
+import propagandaRoutes from './routes/propaganda.routes'
+import path from 'path'
 
 const app = express()
 
@@ -51,6 +53,8 @@ app.options('*', cors(corsOptions))
 app.use(express.json({ limit: '1mb' }))
 app.use(httpLogger)
 
+app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')))
+
 /* =================================
    ROTAS PRINCIPAIS
 ================================= */
@@ -68,6 +72,7 @@ app.use('/api/adicionais', adicionalRoutes)
 app.use('/api/variacoes', variacaoRoutes)
 app.use('/api/auditoria', auditoriaRoutes)
 app.use('/api/relatorios', relatorioRoutes)
+app.use('/api/propagandas', propagandaRoutes)
 
 /* =================================
    HEALTH CHECK

@@ -299,3 +299,60 @@ model ExecucaoRelatorio {
 
   @@unique([tipo, referencia])
 }
+
+model Propaganda {
+  id        String   @id @default(uuid())
+
+  nome      String
+
+  tipo      String
+
+  arquivo   String
+
+  duracao   Int?
+
+  ativo     Boolean  @default(true)
+
+  criadoEm  DateTime @default(now())
+
+  playlists PlaylistItem[]
+}
+
+model Playlist {
+  id        String   @id @default(uuid())
+
+  nome      String
+
+  ativa     Boolean  @default(false)
+
+  criadoEm  DateTime @default(now())
+
+  itens     PlaylistItem[]
+}
+model PlaylistItem {
+  id String @id @default(uuid())
+
+  ordem Int
+
+  playlistId String
+  propagandaId String
+
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  propaganda Propaganda @relation(fields: [propagandaId], references: [id])
+
+  @@index([playlistId])
+}
+model TV {
+  id         String   @id @default(uuid())
+
+  nome       String
+
+  codigo     String   @unique
+
+  ativa      Boolean  @default(true)
+
+  ultimaSync DateTime?
+
+  criadoEm   DateTime @default(now())
+}
