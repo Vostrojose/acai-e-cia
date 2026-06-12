@@ -1,4 +1,5 @@
-import multer from 'multer'
+/* eslint-disable @typescript-eslint/no-var-requires */
+const multer = require('multer')
 import { Request } from 'express'
 import path from 'path'
 import fs from 'fs'
