@@ -342,6 +342,8 @@ model PlaylistItem {
   propaganda Propaganda @relation(fields: [propagandaId], references: [id])
 
   @@index([playlistId])
+
+  @@unique([playlistId, propagandaId])
 }
 model TV {
   id         String   @id @default(uuid())
