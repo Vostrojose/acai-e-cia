@@ -328,6 +328,8 @@ model Playlist {
   criadoEm  DateTime @default(now())
 
   itens     PlaylistItem[]
+
+  tvs       TV[]
 }
 model PlaylistItem {
   id String @id @default(uuid())
@@ -354,7 +356,13 @@ model TV {
 
   ativa      Boolean  @default(true)
 
+  playlistId String?
+
+  playlist   Playlist? @relation(fields: [playlistId], references: [id])
+
   ultimaSync DateTime?
 
   criadoEm   DateTime @default(now())
+
+  @@index([playlistId])
 }

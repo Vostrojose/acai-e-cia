@@ -26,6 +26,8 @@ import relatorioScheduler from './services/relatorio.scheduler'
 import propagandaRoutes from './routes/propaganda.routes'
 import playlistRoutes from './routes/playlist.routes'
 import playlistItemRoutes from './routes/playlist-item.routes'
+import tvRoutes from './routes/tv.routes'
+import playerRoutes from './routes/player.routes'
 import path from 'path'
 
 const app = express()
@@ -76,7 +78,10 @@ app.use('/api/auditoria', auditoriaRoutes)
 app.use('/api/relatorios', relatorioRoutes)
 app.use('/api/propagandas', propagandaRoutes)
 app.use('/api/playlists', playlistRoutes)
+app.use('/api/tvs', tvRoutes)
+app.use('/api/tv/player', playerRoutes)
 app.use('/api/playlists', playlistItemRoutes)
+
 
 /* =================================
    HEALTH CHECK
