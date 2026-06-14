@@ -706,20 +706,75 @@ function CardMenu({ navigate, onBalcao }: any) {
           flexWrap: 'wrap',
         }}
       >
+        <div
+          style={{
+            width: '100%',
+            color: '#888',
+            fontSize: 12,
+            fontWeight: 'bold',
+          }}
+        >
+          OPERAÇÃO
+        </div>
+
         <button onClick={() => navigate('/pedidos')} style={btnMenu}>
-          📦
+          📦 Pedidos
         </button>
+
         <button onClick={() => navigate('/produtos')} style={btnMenu}>
-          🛒
+          🛒 Produtos
         </button>
-        <button onClick={() => navigate('/dashboard')} style={btnMenu}>
-          📋
-        </button>
-        <button onClick={() => navigate('/auditoria')} style={btnMenu}>
-          📊
-        </button>
+
         <button onClick={onBalcao} style={btnMenu}>
-          🧾 Vendas Balcão
+          🧾 Balcão
+        </button>
+
+        <div
+          style={{
+            width: '100%',
+            color: '#888',
+            fontSize: 12,
+            fontWeight: 'bold',
+            marginTop: 10,
+          }}
+        >
+          GESTÃO
+        </div>
+
+        <button onClick={() => navigate('/dashboard')} style={btnMenu}>
+          📋 Dashboard
+        </button>
+
+        <button onClick={() => navigate('/auditoria')} style={btnMenu}>
+          📊 Auditoria
+        </button>
+
+        <div
+          style={{
+            width: '100%',
+            color: '#888',
+            fontSize: 12,
+            fontWeight: 'bold',
+            marginTop: 10,
+          }}
+        >
+          MÍDIA INDOOR
+        </div>
+
+        <button onClick={() => navigate('/propagandas')} style={btnMenu}>
+          🎬 Propagandas
+        </button>
+
+        <button onClick={() => navigate('/playlists')} style={btnMenu}>
+          📋 Playlists
+        </button>
+
+        <button onClick={() => navigate('/tvs')} style={btnMenu}>
+          📺 TVs
+        </button>
+
+        <button onClick={() => navigate('/monitoramento-tv')} style={btnMenu}>
+          📡 Monitoramento
         </button>
       </div>
     </div>

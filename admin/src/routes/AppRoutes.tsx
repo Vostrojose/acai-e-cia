@@ -16,6 +16,12 @@ import AuditoriaPagamentos from '../pages/AuditoriaPagamentos'
 import BannerAcompanhamento from '../pages/BannerAcompanhamento'
 import ProdutoBalcao from '../pages/ProdutoBalcao'
 import Balcao from '../pages/Balcao'
+import TVPlayer from '../pages/TVPlayer'
+import Propagandas from '../pages/Propagandas'
+import Playlists from '../pages/Playlists'
+import PlaylistDetalhe from '../pages/PlaylistDetalhe'
+import TVs from '../pages/TVs'
+import MonitoramentoTV from '../pages/MonitoramentoTV'
 
 export default function AppRoutes() {
   return (
@@ -153,6 +159,41 @@ export default function AppRoutes() {
           </PrivateRoute>
         }
       />
+      <Route
+        path="/propagandas"
+        element={
+          <PrivateRoute>
+            <Propagandas />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/playlists"
+        element={
+          <PrivateRoute>
+            <Playlists />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/playlists/:id"
+        element={
+          <PrivateRoute>
+            <PlaylistDetalhe />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/tvs"
+        element={
+          <PrivateRoute>
+            <TVs />
+          </PrivateRoute>
+        }
+      />
+      <Route path="/monitoramento-tv" element={<MonitoramentoTV />} />
+
+      <Route path="/tv/:codigo" element={<TVPlayer />} />
 
       <Route path="/change-password" element={<ChangePassword />} />
     </Routes>
