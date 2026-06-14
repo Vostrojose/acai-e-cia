@@ -4,7 +4,10 @@ import tvController from '../controllers/tv.controller'
 const router = Router()
 
 router.get('/', tvController.listar)
+
 router.get('/status', tvController.status)
+
+router.post('/heartbeat', tvController.heartbeat)
 
 router.get('/:id', tvController.buscarPorId)
 

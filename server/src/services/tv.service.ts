@@ -1,6 +1,16 @@
 import prisma from '../lib/prisma'
 
 class TVService {
+async heartbeat(codigo: string) {
+  return prisma.tV.update({
+    where: {
+      codigo,
+    },
+    data: {
+      ultimaSync: new Date(),
+    },
+  })
+}
   async listar() {
     return prisma.tV.findMany({
       include: {

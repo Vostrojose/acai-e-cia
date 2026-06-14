@@ -22,34 +22,32 @@ export default function Propagandas() {
   const [arquivo, setArquivo] = useState<File | null>(null)
 
   async function carregar() {
-    const response = await axios.get(
-      `${API_URL}/api/propagandas`,
-    )
+    const response = await axios.get(`${API_URL}/api/propagandas`)
 
     setPropagandas(response.data.data)
   }
 
   async function remover(id: string) {
-    const confirmar = confirm(
-      'Deseja realmente excluir esta propaganda?',
-    )
+    const confirmar = confirm('Deseja realmente excluir esta propaganda?')
 
     if (!confirmar) {
       return
     }
 
     try {
-      await axios.delete(
-        `${API_URL}/api/propagandas/${id}`,
-      )
+      await axios.delete(`${API_URL}/api/propagandas/${id}`)
 
       await carregar()
 
       alert('Propaganda removida')
-    } catch (error) {
+    } catch (error: any) {
       console.error(error)
 
-      alert('Erro ao remover propaganda')
+      alert(
+        error?.response?.data?.message ??
+          error?.message ??
+          'Erro ao remover propaganda',
+      )
     }
   }
 
@@ -74,15 +72,12 @@ export default function Propagandas() {
         formData,
       )
 
-      await axios.post(
-        `${API_URL}/api/propagandas`,
-        {
-          nome,
-          tipo,
-          duracao,
-          arquivo: upload.data.arquivo,
-        },
-      )
+      await axios.post(`${API_URL}/api/propagandas`, {
+        nome,
+        tipo,
+        duracao,
+        arquivo: upload.data.arquivo,
+      })
 
       setNome('')
       setTipo('IMAGEM')
@@ -126,17 +121,10 @@ export default function Propagandas() {
         <br />
         <br />
 
-        <select
-          value={tipo}
-          onChange={(e) => setTipo(e.target.value)}
-        >
-          <option value="IMAGEM">
-            IMAGEM
-          </option>
+        <select value={tipo} onChange={(e) => setTipo(e.target.value)}>
+          <option value="IMAGEM">IMAGEM</option>
 
-          <option value="VIDEO">
-            VIDEO
-          </option>
+          <option value="VIDEO">VIDEO</option>
         </select>
 
         <br />
@@ -145,11 +133,7 @@ export default function Propagandas() {
         <input
           type="number"
           value={duracao}
-          onChange={(e) =>
-            setDuracao(
-              Number(e.target.value),
-            )
-          }
+          onChange={(e) => setDuracao(Number(e.target.value))}
         />
 
         <br />
@@ -157,11 +141,7 @@ export default function Propagandas() {
 
         <input
           type="file"
-          onChange={(e) =>
-            setArquivo(
-              e.target.files?.[0] ?? null,
-            )
-          }
+          onChange={(e) => setArquivo(e.target.files?.[0] ?? null)}
         />
 
         {arquivo && (
@@ -170,19 +150,14 @@ export default function Propagandas() {
             <br />
 
             <p>
-              Arquivo selecionado:{' '}
-              <strong>
-                {arquivo.name}
-              </strong>
+              Arquivo selecionado: <strong>{arquivo.name}</strong>
             </p>
           </>
         )}
 
         <br />
 
-        <button onClick={salvar}>
-          Salvar
-        </button>
+        <button onClick={salvar}>Salvar</button>
       </div>
 
       <h2>Lista</h2>
@@ -209,8 +184,7 @@ export default function Propagandas() {
             <tr key={item.id}>
               <td
                 style={{
-                  borderBottom:
-                    '1px solid #eee',
+                  borderBottom: '1px solid #eee',
                   padding: 10,
                 }}
               >
@@ -219,8 +193,7 @@ export default function Propagandas() {
 
               <td
                 style={{
-                  borderBottom:
-                    '1px solid #eee',
+                  borderBottom: '1px solid #eee',
                   padding: 10,
                 }}
               >
@@ -229,13 +202,11 @@ export default function Propagandas() {
 
               <td
                 style={{
-                  borderBottom:
-                    '1px solid #eee',
+                  borderBottom: '1px solid #eee',
                   padding: 10,
                 }}
               >
-                {item.tipo ===
-                'IMAGEM' ? (
+                {item.tipo === 'IMAGEM' ? (
                   <img
                     src={`${API_URL}/uploads/propagandas/${item.arquivo}`}
                     alt={item.nome}
@@ -258,8 +229,7 @@ export default function Propagandas() {
 
               <td
                 style={{
-                  borderBottom:
-                    '1px solid #eee',
+                  borderBottom: '1px solid #eee',
                   padding: 10,
                 }}
               >
@@ -268,30 +238,20 @@ export default function Propagandas() {
 
               <td
                 style={{
-                  borderBottom:
-                    '1px solid #eee',
+                  borderBottom: '1px solid #eee',
                   padding: 10,
                 }}
               >
-                {item.ativo
-                  ? '🟢 Ativa'
-                  : '🔴 Inativa'}
+                {item.ativo ? '🟢 Ativa' : '🔴 Inativa'}
               </td>
 
               <td
                 style={{
-                  borderBottom:
-                    '1px solid #eee',
+                  borderBottom: '1px solid #eee',
                   padding: 10,
                 }}
               >
-                <button
-                  onClick={() =>
-                    remover(item.id)
-                  }
-                >
-                  Excluir
-                </button>
+                <button onClick={() => remover(item.id)}>Excluir</button>
               </td>
             </tr>
           ))}

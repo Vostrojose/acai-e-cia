@@ -43,6 +43,17 @@ class PropagandaService {
   }
 
   async remover(id: string) {
+    const totalUso = await prisma.playlistItem.count({
+      where: {
+        propagandaId: id,
+      },
+    })
+
+    if (totalUso > 0) {
+      throw new Error(
+        'Não é possível excluir esta propaganda porque ela está vinculada a uma playlist.',
+      )
+    }
     const propaganda = await prisma.propaganda.findUnique({
       where: { id },
     })

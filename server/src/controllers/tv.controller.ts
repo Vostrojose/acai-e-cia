@@ -2,6 +2,25 @@ import { Request, Response } from 'express'
 import tvService from '../services/tv.service'
 
 class TVController {
+  async heartbeat(req: Request, res: Response) {
+    try {
+      const { codigo } = req.body
+
+      const resultado = await tvService.heartbeat(codigo)
+
+      return res.json({
+        success: true,
+        data: resultado,
+      })
+    } catch (error) {
+      console.error(error)
+
+      return res.status(500).json({
+        success: false,
+        message: 'Erro ao registrar heartbeat',
+      })
+    }
+  }
   async listar(_req: Request, res: Response) {
     try {
       const tvs = await tvService.listar()
@@ -22,9 +41,7 @@ class TVController {
 
   async buscarPorId(req: Request, res: Response) {
     try {
-      const tv = await tvService.buscarPorId(
-        req.params.id,
-      )
+      const tv = await tvService.buscarPorId(req.params.id)
 
       if (!tv) {
         return res.status(404).json({
@@ -49,17 +66,9 @@ class TVController {
 
   async criar(req: Request, res: Response) {
     try {
-      const {
-        nome,
-        codigo,
-        playlistId,
-      } = req.body
+      const { nome, codigo, playlistId } = req.body
 
-      const tv = await tvService.criar(
-        nome,
-        codigo,
-        playlistId,
-      )
+      const tv = await tvService.criar(nome, codigo, playlistId)
 
       return res.status(201).json({
         success: true,
@@ -77,11 +86,7 @@ class TVController {
 
   async atualizar(req: Request, res: Response) {
     try {
-      const {
-        nome,
-        codigo,
-        playlistId,
-      } = req.body
+      const { nome, codigo, playlistId } = req.body
 
       const tv = await tvService.atualizar(
         req.params.id,
@@ -122,22 +127,22 @@ class TVController {
     }
   }
   async status(_req: Request, res: Response) {
-  try {
-    const dados = await tvService.status()
+    try {
+      const dados = await tvService.status()
 
-    return res.json({
-      success: true,
-      data: dados,
-    })
-  } catch (error) {
-    console.error(error)
+      return res.json({
+        success: true,
+        data: dados,
+      })
+    } catch (error) {
+      console.error(error)
 
-    return res.status(500).json({
-      success: false,
-      message: 'Erro ao obter status das TVs',
-    })
+      return res.status(500).json({
+        success: false,
+        message: 'Erro ao obter status das TVs',
+      })
+    }
   }
-}
 }
 
 export default new TVController()
