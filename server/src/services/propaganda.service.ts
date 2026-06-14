@@ -43,6 +43,14 @@ class PropagandaService {
   }
 
   async remover(id: string) {
+    const propaganda = await prisma.propaganda.findUnique({
+      where: { id },
+    })
+
+    if (!propaganda) {
+      throw new Error('Propaganda não encontrada')
+    }
+
     return prisma.propaganda.delete({
       where: { id },
     })
