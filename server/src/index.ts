@@ -31,6 +31,11 @@ import playerRoutes from './routes/player.routes'
 import path from 'path'
 
 const app = express()
+app.get('/', (req, res) => {
+  return res.json({
+    message: 'API Açaí & Cia funcionando corretamente! 🚀',
+  })
+})
 
 /* =================================
    MIDDLEWARES GLOBAIS
