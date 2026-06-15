@@ -31,6 +31,13 @@ import playerRoutes from './routes/player.routes'
 import path from 'path'
 
 const app = express()
+app.get('/teste-tv', (req, res) => {
+  console.log('TV ACESSOU TESTE')
+
+  return res.json({
+    ok: true,
+  })
+})
 
 /* =================================
    MIDDLEWARES GLOBAIS
