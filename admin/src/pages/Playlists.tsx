@@ -6,7 +6,10 @@ interface Playlist {
   id: string
   nome: string
   ativa: boolean
-  itens: any[]
+
+  itens?: {
+    id: string
+  }[]
 }
 
 const API_URL = 'https://api.acaiecompanhia.com.br'

@@ -4,167 +4,291 @@ import axios from 'axios'
 
 const API_URL = 'https://api.acaiecompanhia.com.br'
 
+interface Playlist {
+id: string
+nome: string
+}
+
+interface Propaganda {
+id: string
+nome: string
+tipo: string
+arquivo: string
+duracao: number
+ativo: boolean
+}
+
+interface PlaylistItem {
+id: string
+ordem: number
+
+propaganda: {
+id: string
+nome: string
+tipo: string
+arquivo: string
+duracao: number
+}
+}
+
 export default function PlaylistDetalhe() {
-  const { id } = useParams()
+const { id } = useParams()
 
-  const [playlist, setPlaylist] = useState<any>(null)
+const [playlist, setPlaylist] =
+useState<Playlist | null>(null)
 
-  const [propagandas, setPropagandas] = useState<any[]>([])
+const [propagandas, setPropagandas] =
+useState<Propaganda[]>([])
 
-  const [itens, setItens] = useState<any[]>([])
+const [itens, setItens] =
+useState<PlaylistItem[]>([])
 
-  async function carregar() {
-    const [playlistRes, propagandaRes, itensRes] = await Promise.all([
-      axios.get(`${API_URL}/api/playlists/${id}`),
+async function carregar() {
+try {
+const [
+playlistRes,
+propagandaRes,
+itensRes,
+] = await Promise.all([
+axios.get(
+`${API_URL}/api/playlists/${id}`,
+),
+    axios.get(
+      `${API_URL}/api/propagandas`,
+    ),
 
-      axios.get(`${API_URL}/api/propagandas`),
+    axios.get(
+      `${API_URL}/api/playlists/${id}/itens`,
+    ),
+  ])
 
-      axios.get(`${API_URL}/api/playlists/${id}/itens`),
-    ])
+  setPlaylist(playlistRes.data.data)
 
-    setPlaylist(playlistRes.data.data)
+  setPropagandas(propagandaRes.data.data)
 
-    setPropagandas(propagandaRes.data.data)
+  setItens(itensRes.data.data)
+} catch (error) {
+  console.error(error)
+}
 
-    setItens(itensRes.data.data)
-  }
+}
 
-  useEffect(() => {
-    carregar()
-  }, [])
+useEffect(() => {
+carregar()
+}, [])
 
-  async function adicionar(propagandaId: string) {
-    await axios.post(`${API_URL}/api/playlists/${id}/itens`, {
-      propagandaId,
-    })
+async function adicionar(
+propagandaId: string,
+) {
+try {
+await axios.post(
+`${API_URL}/api/playlists/${id}/itens`,
+{
+propagandaId,
+},
+)
+  await carregar()
+} catch (error) {
+  console.error(error)
+  alert('Erro ao adicionar propaganda')
+}
 
-    carregar()
-  }
+}
 
-  async function remover(itemId: string) {
-    await axios.delete(
-      `${API_URL}/api/playlists/${id}/itens/${itemId}`,
-    )
+async function remover(itemId: string) {
+try {
+await axios.delete(
+`${API_URL}/api/playlists/${id}/itens/${itemId}`,
+)
+  await carregar()
+} catch (error) {
+  console.error(error)
+  alert('Erro ao remover item')
+}
 
-    carregar()
-  }
+}
 
-  async function mover(
-    index: number,
-    direcao: 'up' | 'down',
-  ) {
-    const novosItens = [...itens]
+async function mover(
+index: number,
+direcao: 'up' | 'down',
+) {
+const novosItens = [...itens]
+const novoIndex =
+  direcao === 'up'
+    ? index - 1
+    : index + 1
 
-    const novoIndex =
-      direcao === 'up'
-        ? index - 1
-        : index + 1
+if (
+  novoIndex < 0 ||
+  novoIndex >= novosItens.length
+) {
+  return
+}
 
-    if (
-      novoIndex < 0 ||
-      novoIndex >= novosItens.length
-    ) {
-      return
-    }
+;[
+  novosItens[index],
+  novosItens[novoIndex],
+] = [
+  novosItens[novoIndex],
+  novosItens[index],
+]
 
-    ;[
-      novosItens[index],
-      novosItens[novoIndex],
-    ] = [
-      novosItens[novoIndex],
-      novosItens[index],
-    ]
+const payload = novosItens.map(
+  (item, idx) => ({
+    id: item.id,
+    ordem: idx + 1,
+  }),
+)
 
-    const payload = novosItens.map(
-      (item, idx) => ({
-        id: item.id,
-        ordem: idx + 1,
-      }),
-    )
+try {
+  await axios.put(
+    `${API_URL}/api/playlists/${id}/reordenar`,
+    {
+      itens: payload,
+    },
+  )
 
-    await axios.put(
-      `${API_URL}/api/playlists/${id}/reordenar`,
-      {
-        itens: payload,
-      },
-    )
+  await carregar()
+} catch (error) {
+  console.error(error)
+  alert('Erro ao reordenar playlist')
+}
 
-    carregar()
-  }
+}
 
-  return (
-    <div style={{ padding: 20 }}>
-      <h1>Playlist: {playlist?.nome}</h1>
+return (
+<div
+style={{
+minHeight: '100vh',
+background: '#111',
+color: '#fff',
+padding: 20,
+}}
+>
+<div
+style={{
+marginBottom: 25,
+}}
+>
+<h1
+style={{
+margin: 0,
+fontSize: 30,
+}}
+>
+Playlist </h1>
+    <p
+      style={{
+        margin: 0,
+        opacity: 0.8,
+      }}
+    >
+      {playlist?.nome}
+    </p>
+  </div>
 
-      <hr />
+  <div
+    style={{
+      display: 'grid',
+      gridTemplateColumns:
+        '1fr 1fr',
+      gap: 20,
+    }}
+  >
+    <div
+      style={{
+        background:
+          'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
+        borderRadius: 16,
+        padding: 20,
+      }}
+    >
+      <h2>
+        Propagandas Disponíveis
+      </h2>
 
-      <h2>Propagandas Disponíveis</h2>
-
-      {propagandas.map((propaganda) => (
-        <div
-          key={propaganda.id}
-          style={{
-            border: '1px solid #ddd',
-            padding: 10,
-            marginBottom: 10,
-            borderRadius: 8,
-          }}
-        >
-          <strong>{propaganda.nome}</strong>
-
-          <br />
-
-          <button
-            onClick={() =>
-              adicionar(propaganda.id)
-            }
-          >
-            Adicionar
-          </button>
-        </div>
-      ))}
-
-      <hr />
-
-      <h2>Itens da Playlist</h2>
-
-      {itens.map((item, index) => (
-        <div
-          key={item.id}
-          style={{
-            border: '1px solid #ddd',
-            padding: 15,
-            marginBottom: 10,
-            borderRadius: 8,
-          }}
-        >
+      {propagandas.map(
+        (propaganda) => (
           <div
+            key={propaganda.id}
             style={{
-              display: 'flex',
-              justifyContent:
-                'space-between',
-              alignItems: 'center',
+              background: '#111',
+              borderRadius: 12,
+              padding: 15,
+              marginBottom: 10,
             }}
           >
-            <div>
-              <strong>
-                {item.propaganda.nome}
-              </strong>
+            <strong>
+              {propaganda.nome}
+            </strong>
 
-              <div>
-                Ordem: {item.ordem}
-              </div>
-            </div>
+            <p>
+              {propaganda.tipo}
+            </p>
+
+            <button
+              onClick={() =>
+                adicionar(
+                  propaganda.id,
+                )
+              }
+              style={botaoPrincipal}
+            >
+              Adicionar
+            </button>
+          </div>
+        ),
+      )}
+    </div>
+
+    <div
+      style={{
+        background:
+          'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
+        borderRadius: 16,
+        padding: 20,
+      }}
+    >
+      <h2>Itens da Playlist</h2>
+
+      {itens.map(
+        (item, index) => (
+          <div
+            key={item.id}
+            style={{
+              background: '#111',
+              borderRadius: 12,
+              padding: 15,
+              marginBottom: 10,
+            }}
+          >
+            <strong>
+              {
+                item.propaganda
+                  .nome
+              }
+            </strong>
+
+            <p>
+              Ordem: {item.ordem}
+            </p>
 
             <div
               style={{
                 display: 'flex',
                 gap: 10,
+                flexWrap: 'wrap',
               }}
             >
               <button
                 onClick={() =>
-                  mover(index, 'up')
+                  mover(
+                    index,
+                    'up',
+                  )
+                }
+                style={
+                  botaoSecundario
                 }
               >
                 ⬆
@@ -172,7 +296,13 @@ export default function PlaylistDetalhe() {
 
               <button
                 onClick={() =>
-                  mover(index, 'down')
+                  mover(
+                    index,
+                    'down',
+                  )
+                }
+                style={
+                  botaoSecundario
                 }
               >
                 ⬇
@@ -182,13 +312,37 @@ export default function PlaylistDetalhe() {
                 onClick={() =>
                   remover(item.id)
                 }
+                style={{
+                  ...botaoSecundario,
+                  borderColor:
+                    '#e53935',
+                }}
               >
-                🗑 Remover
+                Remover
               </button>
             </div>
           </div>
-        </div>
-      ))}
+        ),
+      )}
     </div>
-  )
+  </div>
+</div>
+
+)
+}
+
+const botaoPrincipal = {
+padding: '10px 16px',
+borderRadius: 10,
+border: 'none',
+cursor: 'pointer',
+}
+
+const botaoSecundario = {
+padding: '10px 16px',
+borderRadius: 10,
+background: 'transparent',
+color: '#fff',
+border: '1px solid #555',
+cursor: 'pointer',
 }
