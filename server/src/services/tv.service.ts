@@ -68,6 +68,34 @@ async heartbeat(codigo: string) {
       where: { id },
     })
   }
+
+  async registrar() {
+  let codigo = ''
+
+  let existe = true
+
+  while (existe) {
+    codigo = `TV-${Math.floor(
+      100000 + Math.random() * 900000,
+    )}`
+
+    const tvExistente = await prisma.tV.findUnique({
+      where: {
+        codigo,
+      },
+    })
+
+    existe = Boolean(tvExistente)
+  }
+
+  return prisma.tV.create({
+    data: {
+      nome: 'TV Não Configurada',
+      codigo,
+      ativa: true,
+    },
+  })
+}
   async status() {
     const tvs = await prisma.tV.findMany({
       include: {

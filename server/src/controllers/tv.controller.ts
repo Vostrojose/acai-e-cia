@@ -143,6 +143,27 @@ class TVController {
       })
     }
   }
+
+  async registrar(_req: Request, res: Response) {
+    try {
+      const tv = await tvService.registrar()
+
+      return res.status(201).json({
+        success: true,
+        data: {
+          codigo: tv.codigo,
+        },
+      })
+    } catch (error) {
+      console.error(error)
+
+      return res.status(500).json({
+        success: false,
+        message: 'Erro ao registrar TV',
+      })
+    }
+  }
 }
+
 
 export default new TVController()
