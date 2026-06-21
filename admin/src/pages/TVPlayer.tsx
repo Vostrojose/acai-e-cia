@@ -3,14 +3,16 @@ import { useParams } from 'react-router-dom'
 import axios from 'axios'
 import splashLogo from '../assets/img/splash-acai-company.png'
 
-interface Propaganda {
+const API_URL = 'https://api.acaiecompanhia.com.br'
+
+interface PropagandaItem {
   id: string
   ordem: number
 
   propaganda: {
     id: string
     nome: string
-    tipo: string
+    tipo: 'IMAGEM' | 'VIDEO'
     arquivo: string
     duracao: number
   }
@@ -19,23 +21,31 @@ interface Propaganda {
 export default function TVPlayer() {
   const { codigo } = useParams()
 
-  const [itens, setItens] = useState<Propaganda[]>([])
+  const [itens, setItens] = useState<PropagandaItem[]>([])
   const [indiceAtual, setIndiceAtual] = useState(0)
   const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState('')
 
   async function carregarPlaylist() {
     try {
       const response = await axios.get(
-        `https://api.acaiecompanhia.com.br/api/tv/player/${codigo}`,
+        `${API_URL}/api/tv/player/${codigo}`,
       )
 
-      setItens(response.data.data.itens)
+      const novosItens =
+        response.data?.data?.itens ?? []
+
+      setItens(novosItens)
+
+      setErro('')
     } catch (error) {
       console.error(error)
+
+      setErro(
+        'Não foi possível carregar a playlist.',
+      )
     } finally {
-      setTimeout(() => {
-        setCarregando(false)
-      }, 3000)
+      setCarregando(false)
     }
   }
 
@@ -44,18 +54,45 @@ export default function TVPlayer() {
   }, [codigo])
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      carregarPlaylist()
+    }, 30000)
+
+    return () => clearInterval(interval)
+  }, [codigo])
+
+  useEffect(() => {
+    if (
+      itens.length > 0 &&
+      indiceAtual >= itens.length
+    ) {
+      setIndiceAtual(0)
+    }
+  }, [itens, indiceAtual])
+
+  useEffect(() => {
     if (!itens.length) return
 
     const item = itens[indiceAtual]
 
-    const tempo = (item.propaganda.duracao || 10) * 1000
+    if (item.propaganda.tipo !== 'IMAGEM') {
+      return
+    }
+
+    const tempo =
+      (item.propaganda.duracao || 10) * 1000
 
     const timer = setTimeout(() => {
-      setIndiceAtual((atual) => (atual + 1 >= itens.length ? 0 : atual + 1))
+      setIndiceAtual((atual) =>
+        atual + 1 >= itens.length
+          ? 0
+          : atual + 1,
+      )
     }, tempo)
 
     return () => clearTimeout(timer)
   }, [indiceAtual, itens])
+
   if (carregando) {
     return (
       <div
@@ -74,8 +111,8 @@ export default function TVPlayer() {
           src={splashLogo}
           alt="Açaí & Company"
           style={{
-            maxWidth: '1000px',
             width: '80%',
+            maxWidth: 1000,
             marginBottom: 30,
           }}
         />
@@ -88,6 +125,25 @@ export default function TVPlayer() {
         >
           Carregando conteúdo...
         </p>
+      </div>
+    )
+  }
+
+  if (erro) {
+    return (
+      <div
+        style={{
+          width: '100vw',
+          height: '100vh',
+          background: '#111',
+          color: '#fff',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          fontSize: 28,
+        }}
+      >
+        {erro}
       </div>
     )
   }
@@ -113,7 +169,8 @@ export default function TVPlayer() {
 
   const item = itens[indiceAtual]
 
-  const arquivoUrl = `https://api.acaiecompanhia.com.br/uploads/propagandas/${item.propaganda.arquivo}`
+  const arquivoUrl =
+    `${API_URL}/uploads/propagandas/${item.propaganda.arquivo}`
 
   return (
     <div
@@ -126,10 +183,18 @@ export default function TVPlayer() {
     >
       {item.propaganda.tipo === 'VIDEO' ? (
         <video
+          key={arquivoUrl}
           src={arquivoUrl}
           autoPlay
           muted
           playsInline
+          onEnded={() =>
+            setIndiceAtual((atual) =>
+              atual + 1 >= itens.length
+                ? 0
+                : atual + 1,
+            )
+          }
           style={{
             width: '100%',
             height: '100%',
