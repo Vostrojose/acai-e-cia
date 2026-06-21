@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import logo from '../assets/img/logo.png'
+
 
 const API_URL = 'https://api.acaiecompanhia.com.br'
 
@@ -169,16 +169,6 @@ export default function TVs() {
           marginBottom: 25,
         }}
       >
-        <img
-          src={logo}
-          alt="Açaí & Company"
-          style={{
-            width: 80,
-            height: 80,
-            borderRadius: '50%',
-          }}
-        />
-
         <div>
           <h1
             style={{
