@@ -94,32 +94,80 @@ padding: 20,
 }}
 >
 <div
-style={{
-display: 'flex',
-alignItems: 'center',
-gap: 20,
-marginBottom: 25,
-}}
-> <div>
-<h1
-style={{
-margin: 0,
-fontSize: 30,
-}}
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: 20,
+    marginBottom: 25,
+  }}
 >
-Açaí & Company </h1>
+  <div>
+    <h1
+      style={{
+        margin: 0,
+        fontSize: 30,
+      }}
+    >
+      Açaí & Company
+    </h1>
 
-
-      <p
-        style={{
-          margin: 0,
-          opacity: 0.8,
-        }}
+    <div
+      style={{
+        display: 'flex',
+        gap: 10,
+        flexWrap: 'wrap',
+        marginBottom: 25,
+      }}
+    >
+      <button
+        style={menuButton}
+        onClick={() => navigate('/cozinha')}
       >
-        Gerenciamento de Playlists
-      </p>
+        👨‍🍳 Cozinha
+      </button>
+
+      <button
+        style={menuButton}
+        onClick={() => navigate('/tvs')}
+      >
+        📺 TVs
+      </button>
+
+      <button
+        style={{
+          ...menuButton,
+          background: '#43a047',
+        }}
+        onClick={() => navigate('/playlists')}
+      >
+        🎞️ Playlists
+      </button>
+
+      <button
+        style={menuButton}
+        onClick={() => navigate('/propagandas')}
+      >
+        📢 Propagandas
+      </button>
+
+      <button
+        style={menuButton}
+        onClick={() => navigate('/monitoramento-tv')}
+      >
+        📡 Monitoramento
+      </button>
     </div>
+
+    <p
+      style={{
+        margin: 0,
+        opacity: 0.8,
+      }}
+    >
+      Gerenciamento de Playlists
+    </p>
   </div>
+</div>
 
   <div
     style={{
@@ -290,4 +338,12 @@ padding: '10px 16px',
 borderRadius: 10,
 border: 'none',
 cursor: 'pointer',
+}
+const menuButton = {
+  padding: '10px 16px',
+  borderRadius: 10,
+  border: '1px solid #555',
+  background: '#1c1c1c',
+  color: '#fff',
+  cursor: 'pointer',
 }
