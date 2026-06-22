@@ -74,6 +74,9 @@ export default function MonitoramentoTV() {
               marginBottom: 25,
             }}
           >
+             <button style={menuButton} onClick={() => navigate('/cozinha')}>
+              👨‍🍳 Cozinha
+            </button>
             <button style={menuButton} onClick={() => navigate('/tvs')}>
               📺 TVs
             </button>
