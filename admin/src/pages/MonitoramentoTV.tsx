@@ -88,7 +88,7 @@ export default function MonitoramentoTV() {
             <button style={menuButton} onClick={() => navigate('/propagandas')}>
               📢 Propagandas
             </button>
-            <button style={menuButton} onClick={() => navigate('/playlistDetalhe')}>
+            <button style={menuButton} onClick={() => navigate('/playlistdetalhe')}>
               playlistDetalhe
             </button>
 
