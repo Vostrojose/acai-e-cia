@@ -19,6 +19,7 @@ import Balcao from '../pages/Balcao'
 import TVPlayer from '../pages/TVPlayer'
 import Propagandas from '../pages/Propagandas'
 import Playlists from '../pages/Playlists'
+import PlaylistDetalhe from '../pages/PlaylistDetalhe'
 import TVs from '../pages/TVs'
 import MonitoramentoTV from '../pages/MonitoramentoTV'
 
@@ -171,6 +172,14 @@ export default function AppRoutes() {
         element={
           <PrivateRoute>
             <Playlists />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/playlists/:id"
+        element={
+          <PrivateRoute>
+            <PlaylistDetalhe />
           </PrivateRoute>
         }
       />
