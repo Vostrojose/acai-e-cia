@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
 interface Propaganda {
@@ -10,21 +11,18 @@ duracao: number
 ativo: boolean
 }
 
-const API_URL =
-'https://api.acaiecompanhia.com.br'
+const API_URL = 'https://api.acaiecompanhia.com.br'
 
 export default function Propagandas() {
-const [propagandas, setPropagandas] =
-useState<Propaganda[]>([])
+const navigate = useNavigate()
+
+const [propagandas, setPropagandas] = useState<Propaganda[]>([])
 
 const [nome, setNome] = useState('')
-const [tipo, setTipo] =
-useState('IMAGEM')
-const [duracao, setDuracao] =
-useState(15)
+const [tipo, setTipo] = useState('IMAGEM')
+const [duracao, setDuracao] = useState(15)
 
-const [arquivo, setArquivo] =
-useState<File | null>(null)
+const [arquivo, setArquivo] = useState<File | null>(null)
 
 async function carregar() {
 try {
@@ -32,23 +30,16 @@ const response = await axios.get(
 `${API_URL}/api/propagandas`,
 )
 
-
-  setPropagandas(
-    response.data.data,
-  )
+  setPropagandas(response.data.data)
 } catch (error) {
   console.error(error)
-  alert(
-    'Erro ao carregar propagandas',
-  )
+  alert('Erro ao carregar propagandas')
 }
 
 
 }
 
-async function remover(
-id: string,
-) {
+async function remover(id: string) {
 const confirmar = confirm(
 'Deseja realmente excluir esta propaganda?',
 )
@@ -65,53 +56,40 @@ try {
 
   await carregar()
 
-  alert(
-    'Propaganda removida',
-  )
+  alert('Propaganda removida')
 } catch (error: any) {
   console.error(error)
 
   alert(
-    error?.response?.data
-      ?.message ??
+    error?.response?.data?.message ??
       error?.message ??
       'Erro ao remover propaganda',
   )
 }
-
 
 }
 
 async function salvar() {
 try {
 if (!nome.trim()) {
-alert(
-'Informe o nome da propaganda',
-)
+alert('Informe o nome da propaganda')
 return
 }
 
 
   if (!arquivo) {
-    alert(
-      'Selecione um arquivo',
-    )
+    alert('Selecione um arquivo')
     return
   }
 
-  const formData =
-    new FormData()
+  const formData = new FormData()
 
-  formData.append(
-    'arquivo',
-    arquivo,
+  formData.append('arquivo', arquivo)
+
+  const upload = await axios.post(
+    `${API_URL}/api/propagandas/upload`,
+    formData,
   )
-
-  const upload =
-    await axios.post(
-      `${API_URL}/api/propagandas/upload`,
-      formData,
-    )
 
   await axios.post(
     `${API_URL}/api/propagandas`,
@@ -119,8 +97,7 @@ return
       nome,
       tipo,
       duracao,
-      arquivo:
-        upload.data.arquivo,
+      arquivo: upload.data.arquivo,
     },
   )
 
@@ -131,15 +108,11 @@ return
 
   await carregar()
 
-  alert(
-    'Propaganda cadastrada com sucesso',
-  )
+  alert('Propaganda cadastrada com sucesso')
 } catch (error) {
   console.error(error)
 
-  alert(
-    'Erro ao cadastrar propaganda',
-  )
+  alert('Erro ao cadastrar propaganda')
 }
 
 
@@ -149,16 +122,12 @@ useEffect(() => {
 carregar()
 }, [])
 
-const imagens =
-propagandas.filter(
-(p) =>
-p.tipo === 'IMAGEM',
+const imagens = propagandas.filter(
+(p) => p.tipo === 'IMAGEM',
 ).length
 
-const videos =
-propagandas.filter(
-(p) =>
-p.tipo === 'VIDEO',
+const videos = propagandas.filter(
+(p) => p.tipo === 'VIDEO',
 ).length
 
 return (
@@ -187,14 +156,62 @@ fontSize: 30,
 Açaí & Company </h1>
 
 
+      <div
+        style={{
+          display: 'flex',
+          gap: 10,
+          flexWrap: 'wrap',
+          marginBottom: 25,
+        }}
+      >
+        <button
+          style={menuButton}
+          onClick={() => navigate('/cozinha')}
+        >
+          👨‍🍳 Cozinha
+        </button>
+
+        <button
+          style={menuButton}
+          onClick={() => navigate('/tvs')}
+        >
+          📺 TVs
+        </button>
+
+        <button
+          style={menuButton}
+          onClick={() => navigate('/playlists')}
+        >
+          🎞️ Playlists
+        </button>
+
+        <button
+          style={{
+            ...menuButton,
+            background: '#43a047',
+          }}
+          onClick={() => navigate('/propagandas')}
+        >
+          📢 Propagandas
+        </button>
+
+        <button
+          style={menuButton}
+          onClick={() =>
+            navigate('/monitoramento-tv')
+          }
+        >
+          📡 Monitoramento
+        </button>
+      </div>
+
       <p
         style={{
           margin: 0,
           opacity: 0.8,
         }}
       >
-        Gerenciamento de
-        Propagandas
+        Gerenciamento de Propagandas
       </p>
     </div>
   </div>
@@ -208,9 +225,7 @@ Açaí & Company </h1>
   >
     <CardResumo
       titulo="📢 Propagandas"
-      valor={
-        propagandas.length
-      }
+      valor={propagandas.length}
     />
 
     <CardResumo
@@ -235,17 +250,13 @@ Açaí & Company </h1>
         '1px solid rgba(255,255,255,.08)',
     }}
   >
-    <h2>
-      Nova Propaganda
-    </h2>
+    <h2>Nova Propaganda</h2>
 
     <input
       placeholder="Nome da propaganda"
       value={nome}
       onChange={(e) =>
-        setNome(
-          e.target.value,
-        )
+        setNome(e.target.value)
       }
       style={inputStyle}
     />
@@ -253,9 +264,7 @@ Açaí & Company </h1>
     <select
       value={tipo}
       onChange={(e) =>
-        setTipo(
-          e.target.value,
-        )
+        setTipo(e.target.value)
       }
       style={inputStyle}
     >
@@ -273,9 +282,7 @@ Açaí & Company </h1>
       value={duracao}
       onChange={(e) =>
         setDuracao(
-          Number(
-            e.target.value,
-          ),
+          Number(e.target.value),
         )
       }
       style={inputStyle}
@@ -285,8 +292,7 @@ Açaí & Company </h1>
       type="file"
       onChange={(e) =>
         setArquivo(
-          e.target.files?.[0] ??
-            null,
+          e.target.files?.[0] ?? null,
         )
       }
       style={{
@@ -297,8 +303,7 @@ Açaí & Company </h1>
 
     {arquivo && (
       <p>
-        Arquivo
-        selecionado:{' '}
+        Arquivo selecionado:{' '}
         <strong>
           {arquivo.name}
         </strong>
@@ -321,114 +326,93 @@ Açaí & Company </h1>
       gap: 20,
     }}
   >
-    {propagandas.map(
-      (item) => (
+    {propagandas.map((item) => (
+      <div
+        key={item.id}
+        style={{
+          background:
+            'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
+          borderRadius: 16,
+          padding: 20,
+          border:
+            '1px solid rgba(255,255,255,.08)',
+        }}
+      >
+        <h3>{item.nome}</h3>
+
         <div
-          key={item.id}
           style={{
-            background:
-              'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
-            borderRadius: 16,
-            padding: 20,
-            border:
-              '1px solid rgba(255,255,255,.08)',
+            marginBottom: 15,
           }}
         >
-          <h3>
-            {item.nome}
-          </h3>
-
-          <div
-            style={{
-              marginBottom: 15,
-            }}
-          >
-            {item.tipo ===
-            'IMAGEM' ? (
-              <img
-                src={`${API_URL}/uploads/propagandas/${item.arquivo}`}
-                alt={
-                  item.nome
-                }
-                style={{
-                  width:
-                    '100%',
-                  height: 180,
-                  objectFit:
-                    'cover',
-                  borderRadius: 10,
-                }}
-              />
-            ) : (
-              <video
-                src={`${API_URL}/uploads/propagandas/${item.arquivo}`}
-                style={{
-                  width:
-                    '100%',
-                  height: 180,
-                  objectFit:
-                    'cover',
-                  borderRadius: 10,
-                }}
-                muted
-              />
-            )}
-          </div>
-
-          <p>
-            <strong>
-              Tipo:
-            </strong>{' '}
-            {item.tipo}
-          </p>
-
-          <p>
-            <strong>
-              Duração:
-            </strong>{' '}
-            {item.duracao}s
-          </p>
-
-          <div
-            style={{
-              display:
-                'inline-block',
-              padding:
-                '8px 12px',
-              borderRadius: 10,
-              background:
-                item.ativo
-                  ? '#1b5e20'
-                  : '#b71c1c',
-              fontWeight:
-                'bold',
-              marginBottom: 15,
-            }}
-          >
-            {item.ativo
-              ? '🟢 ATIVA'
-              : '🔴 INATIVA'}
-          </div>
-
-          <div>
-            <button
-              onClick={() =>
-                remover(
-                  item.id,
-                )
-              }
+          {item.tipo ===
+          'IMAGEM' ? (
+            <img
+              src={`${API_URL}/uploads/propagandas/${item.arquivo}`}
+              alt={item.nome}
               style={{
-                ...botaoSecundario,
-                borderColor:
-                  '#e53935',
+                width: '100%',
+                height: 180,
+                objectFit: 'cover',
+                borderRadius: 10,
               }}
-            >
-              Excluir
-            </button>
-          </div>
+            />
+          ) : (
+            <video
+              src={`${API_URL}/uploads/propagandas/${item.arquivo}`}
+              style={{
+                width: '100%',
+                height: 180,
+                objectFit: 'cover',
+                borderRadius: 10,
+              }}
+              muted
+            />
+          )}
         </div>
-      ),
-    )}
+
+        <p>
+          <strong>Tipo:</strong>{' '}
+          {item.tipo}
+        </p>
+
+        <p>
+          <strong>Duração:</strong>{' '}
+          {item.duracao}s
+        </p>
+
+        <div
+          style={{
+            display: 'inline-block',
+            padding: '8px 12px',
+            borderRadius: 10,
+            background: item.ativo
+              ? '#1b5e20'
+              : '#b71c1c',
+            fontWeight: 'bold',
+            marginBottom: 15,
+          }}
+        >
+          {item.ativo
+            ? '🟢 ATIVA'
+            : '🔴 INATIVA'}
+        </div>
+
+        <div>
+          <button
+            onClick={() =>
+              remover(item.id)
+            }
+            style={{
+              ...botaoSecundario,
+              borderColor: '#e53935',
+            }}
+          >
+            Excluir
+          </button>
+        </div>
+      </div>
+    ))}
   </div>
 </div>
 
@@ -486,5 +470,14 @@ borderRadius: 10,
 background: 'transparent',
 color: '#fff',
 border: '1px solid #555',
+cursor: 'pointer',
+}
+
+const menuButton = {
+padding: '10px 16px',
+borderRadius: 10,
+border: '1px solid #555',
+background: '#1c1c1c',
+color: '#fff',
 cursor: 'pointer',
 }
