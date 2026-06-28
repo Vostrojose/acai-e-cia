@@ -15,6 +15,7 @@
     "prisma:push": "prisma db push"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1075.0",
     "@prisma/client": "^6.19.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/express": "^4.17.25",

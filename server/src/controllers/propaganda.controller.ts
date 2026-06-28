@@ -1,5 +1,7 @@
-import { Request, Response, Express } from 'express'
+import { Request, Response } from 'express'
 import propagandaService from '../services/propaganda.service'
+import r2Service from '../services/r2.service'
+import path from 'path'
 
 class PropagandaController {
   async listar(_req: Request, res: Response) {
@@ -102,34 +104,50 @@ class PropagandaController {
       })
     }
   }
-  async upload(
-    req: Request & {
-      file?: any
-    },
-    res: Response,
-  ) {
-    try {
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          message: 'Nenhum arquivo enviado',
-        })
-      }
-
-      return res.json({
-        success: true,
-        arquivo: req.file.filename,
-        caminho: req.file.path,
-      })
-    } catch (error) {
-      console.error(error)
-
-      return res.status(500).json({
+async upload(
+  req: Request & {
+    file?: any
+  },
+  res: Response,
+) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
         success: false,
-        message: 'Erro ao fazer upload',
+        message: 'Nenhum arquivo enviado',
       })
     }
+
+    const extensao = path.extname(
+      req.file.originalname,
+    )
+
+    const nomeArquivo =
+      `${Date.now()}${extensao}`
+
+    const key =
+      `propagandas/${nomeArquivo}`
+
+    await r2Service.upload(
+      req.file.path,
+      key,
+      req.file.mimetype,
+    )
+
+    return res.json({
+      success: true,
+      arquivo: nomeArquivo,
+      key,
+    })
+  } catch (error) {
+    console.error(error)
+
+    return res.status(500).json({
+      success: false,
+      message: 'Erro ao fazer upload',
+    })
   }
+}
 }
 
 export default new PropagandaController()

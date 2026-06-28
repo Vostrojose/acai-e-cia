@@ -1,12 +1,18 @@
 import prisma from '../lib/prisma'
+import r2Service from './r2.service'
 
 class PropagandaService {
   async listar() {
-    return prisma.propaganda.findMany({
+    const propagandas = await prisma.propaganda.findMany({
       orderBy: {
         criadoEm: 'desc',
       },
     })
+
+    return propagandas.map((propaganda) => ({
+      ...propaganda,
+      url: r2Service.url(propaganda.arquivo),
+    }))
   }
 
   async buscarPorId(id: string) {
@@ -21,6 +27,15 @@ class PropagandaService {
     arquivo: string
     duracao?: number
   }) {
+
+
+    console.log('==========================')
+    console.log('CRIANDO PROPAGANDA')
+    console.log(data)
+    console.log('==========================')
+
+
+    
     return prisma.propaganda.create({
       data,
     })
