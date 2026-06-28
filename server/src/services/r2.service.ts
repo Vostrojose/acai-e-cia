@@ -45,9 +45,11 @@ class R2Service {
   }
 
   url(key: string) {
-    const base = process.env.R2_PUBLIC_URL ?? process.env.R2_ENDPOINT
+    if (process.env.R2_PUBLIC_URL) {
+      return `${process.env.R2_PUBLIC_URL}/${key}`
+    }
 
-    return `${base}/${process.env.R2_BUCKET_NAME}/${key}`
+    return `${process.env.R2_ENDPOINT}/${process.env.R2_BUCKET_NAME}/${key}`
   }
 }
 
