@@ -104,50 +104,41 @@ class PropagandaController {
       })
     }
   }
-async upload(
-  req: Request & {
-    file?: any
-  },
-  res: Response,
-) {
-  try {
-    if (!req.file) {
-      return res.status(400).json({
+  async upload(
+    req: Request & {
+      file?: any
+    },
+    res: Response,
+  ) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: 'Nenhum arquivo enviado',
+        })
+      }
+
+      const extensao = path.extname(req.file.originalname)
+
+      const nomeArquivo = `${Date.now()}${extensao}`
+
+      const key = `propagandas/${nomeArquivo}`
+
+      await r2Service.upload(req.file.path, key, req.file.mimetype)
+
+      return res.json({
+        success: true,
+        arquivo: key,
+      })
+    } catch (error) {
+      console.error(error)
+
+      return res.status(500).json({
         success: false,
-        message: 'Nenhum arquivo enviado',
+        message: 'Erro ao fazer upload',
       })
     }
-
-    const extensao = path.extname(
-      req.file.originalname,
-    )
-
-    const nomeArquivo =
-      `${Date.now()}${extensao}`
-
-    const key =
-      `propagandas/${nomeArquivo}`
-
-    await r2Service.upload(
-      req.file.path,
-      key,
-      req.file.mimetype,
-    )
-
-    return res.json({
-      success: true,
-      arquivo: nomeArquivo,
-      key,
-    })
-  } catch (error) {
-    console.error(error)
-
-    return res.status(500).json({
-      success: false,
-      message: 'Erro ao fazer upload',
-    })
   }
-}
 }
 
 export default new PropagandaController()

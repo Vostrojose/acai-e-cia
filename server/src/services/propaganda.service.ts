@@ -27,15 +27,11 @@ class PropagandaService {
     arquivo: string
     duracao?: number
   }) {
-
-
     console.log('==========================')
     console.log('CRIANDO PROPAGANDA')
     console.log(data)
     console.log('==========================')
 
-
-    
     return prisma.propaganda.create({
       data,
     })
@@ -76,6 +72,7 @@ class PropagandaService {
     if (!propaganda) {
       throw new Error('Propaganda não encontrada')
     }
+    await r2Service.remover(propaganda.arquivo)
 
     return prisma.propaganda.delete({
       where: { id },
