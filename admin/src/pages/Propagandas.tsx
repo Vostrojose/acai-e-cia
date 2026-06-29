@@ -85,7 +85,7 @@ export default function Propagandas() {
         nome,
         tipo,
         duracao,
-        arquivo: upload.data.key,
+        arquivo: upload.data.arquivo,
       })
 
       setNome('')
