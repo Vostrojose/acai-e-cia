@@ -44,9 +44,9 @@ class R2Service {
     )
   }
 
-  url(key: string) {
-    return `${process.env.R2_PUBLIC_URL}/${key}`
-  }
+ url(key: string) {
+  return `https://midia.acaiecompanhia.com.br/${key}`
+}
 }
 
 export default new R2Service()
