@@ -20,7 +20,12 @@ const client = new S3Client({
 class R2Service {
   async upload(caminhoArquivo: string, key: string, contentType: string) {
     const body = fs.readFileSync(caminhoArquivo)
-
+    console.log('========================')
+    console.log('R2_BUCKET_NAME:', process.env.R2_BUCKET_NAME)
+    console.log('R2_ENDPOINT:', process.env.R2_ENDPOINT)
+    console.log('KEY:', key)
+    console.log('CONTENT TYPE:', contentType)
+    console.log('========================')
     await client.send(
       new PutObjectCommand({
         Bucket: process.env.R2_BUCKET_NAME,
@@ -29,7 +34,7 @@ class R2Service {
         ContentType: contentType,
       }),
     )
-
+    console.log('✅ UPLOAD REALIZADO COM SUCESSO')
     fs.unlinkSync(caminhoArquivo)
 
     return key
@@ -44,9 +49,9 @@ class R2Service {
     )
   }
 
- url(key: string) {
-  return `https://midia.acaiecompanhia.com.br/${key}`
-}
+  url(key: string) {
+    return `https://midia.acaiecompanhia.com.br/${key}`
+  }
 }
 
 export default new R2Service()
