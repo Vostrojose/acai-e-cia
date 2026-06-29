@@ -45,11 +45,7 @@ class R2Service {
   }
 
   url(key: string) {
-    if (process.env.R2_PUBLIC_URL) {
-      return `${process.env.R2_PUBLIC_URL}/${key}`
-    }
-
-    return `${process.env.R2_ENDPOINT}/${process.env.R2_BUCKET_NAME}/${key}`
+    return `${process.env.R2_PUBLIC_URL}/${key}`
   }
 }
 
