@@ -54,17 +54,13 @@ class PropagandaService {
   }
 
   async remover(id: string) {
-    const totalUso = await prisma.playlistItem.count({
+    // Remove a propaganda de todas as playlists
+    await prisma.playlistItem.deleteMany({
       where: {
         propagandaId: id,
       },
     })
 
-    if (totalUso > 0) {
-      throw new Error(
-        'Não é possível excluir esta propaganda porque ela está vinculada a uma playlist.',
-      )
-    }
     const propaganda = await prisma.propaganda.findUnique({
       where: { id },
     })
@@ -72,8 +68,11 @@ class PropagandaService {
     if (!propaganda) {
       throw new Error('Propaganda não encontrada')
     }
+
+    // Remove o arquivo do R2
     await r2Service.remover(propaganda.arquivo)
 
+    // Remove do banco
     return prisma.propaganda.delete({
       where: { id },
     })
