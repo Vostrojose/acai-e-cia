@@ -12,12 +12,17 @@ class TVController {
         success: true,
         data: resultado,
       })
-    } catch (error) {
+    } catch (error: any) {
+      console.error('======================')
+      console.error('ERRO HEARTBEAT')
       console.error(error)
+      console.error(error?.message)
+      console.error(error?.stack)
+      console.error('======================')
 
       return res.status(500).json({
         success: false,
-        message: 'Erro ao registrar heartbeat',
+        error: error?.message,
       })
     }
   }
@@ -164,6 +169,5 @@ class TVController {
     }
   }
 }
-
 
 export default new TVController()
