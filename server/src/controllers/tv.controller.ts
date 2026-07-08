@@ -3,8 +3,22 @@ import tvService from '../services/tv.service'
 
 class TVController {
   async heartbeat(req: Request, res: Response) {
+    console.log('=================================')
+    console.log('HEARTBEAT RECEBIDO')
+    console.log('Headers:', req.headers)
+    console.log('Body:', req.body)
+    console.log('Body JSON:', JSON.stringify(req.body))
+    console.log('=================================')
+
     try {
       const { codigo } = req.body
+
+      if (!codigo) {
+        return res.status(400).json({
+          success: false,
+          message: 'Código não recebido',
+        })
+      }
 
       const resultado = await tvService.heartbeat(codigo)
 
@@ -12,17 +26,12 @@ class TVController {
         success: true,
         data: resultado,
       })
-    } catch (error: any) {
-      console.error('======================')
-      console.error('ERRO HEARTBEAT')
+    } catch (error) {
       console.error(error)
-      console.error(error?.message)
-      console.error(error?.stack)
-      console.error('======================')
 
       return res.status(500).json({
         success: false,
-        error: error?.message,
+        message: 'Erro ao registrar heartbeat',
       })
     }
   }
