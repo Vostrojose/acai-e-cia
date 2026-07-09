@@ -1,4 +1,5 @@
 import prisma from '../lib/prisma'
+import r2Service from './r2.service'
 
 class PlayerService {
   async obterPlaylistDaTV(codigo: string) {
@@ -54,7 +55,15 @@ class PlayerService {
         nome: tv.playlist.nome,
       },
 
-      itens: tv.playlist.itens,
+      itens: tv.playlist.itens.map((item) => ({
+        ...item,
+
+        propaganda: {
+          ...item.propaganda,
+
+          url: r2Service.url(item.propaganda.arquivo),
+        },
+      })),
     }
   }
 }
