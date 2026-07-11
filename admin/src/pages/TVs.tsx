@@ -402,18 +402,69 @@ export default function TVs() {
                 {tv.nome}
               </h3>
 
+              {!tv.playlist && (
+                <div
+                  style={{
+                    marginBottom: 15,
+                    padding: 10,
+                    borderRadius: 10,
+                    background: '#ff9800',
+                    color: '#000',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  ⚠ TV aguardando configuração. Selecione uma playlist e clique
+                  em Editar.
+                </div>
+              )}
+
               <p>
                 <strong>Código:</strong> {tv.codigo}
               </p>
 
-              <p>
-                <strong>Playlist:</strong> {tv.playlist?.nome ?? 'Sem playlist'}
-              </p>
+              <div
+                style={{
+                  marginBottom: 15,
+                }}
+              >
+                <strong>Playlist:</strong>
 
-              <p>
-                <strong>Status:</strong>{' '}
-                {tv.online ? '🟢 Online' : '🔴 Offline'}
-              </p>
+                <div
+                  style={{
+                    display: 'inline-block',
+                    marginLeft: 8,
+                    padding: '6px 12px',
+                    borderRadius: 8,
+                    fontWeight: 'bold',
+                    background: tv.playlist ? '#1b5e20' : '#ef6c00',
+                    color: '#fff',
+                  }}
+                >
+                  {tv.playlist?.nome ?? 'Sem Playlist'}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  marginBottom: 15,
+                }}
+              >
+                <strong>Status:</strong>
+
+                <div
+                  style={{
+                    display: 'inline-block',
+                    marginLeft: 8,
+                    padding: '6px 12px',
+                    borderRadius: 8,
+                    fontWeight: 'bold',
+                    background: tv.online ? '#2e7d32' : '#c62828',
+                    color: '#fff',
+                  }}
+                >
+                  {tv.online ? 'ONLINE' : 'OFFLINE'}
+                </div>
+              </div>
 
               <p>
                 <strong>Última sincronização:</strong>{' '}
