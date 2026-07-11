@@ -497,12 +497,36 @@ export default function TVs() {
                 </div>
               </div>
 
-              <p>
-                <strong>Última sincronização:</strong>{' '}
-                {tv.ultimaSync
-                  ? new Date(tv.ultimaSync).toLocaleString('pt-BR')
-                  : '-'}
-              </p>
+              <div
+                style={{
+                  background: '#181818',
+                  border: '1px solid #333',
+                  borderRadius: 10,
+                  padding: 12,
+                  marginBottom: 15,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 12,
+                    opacity: 0.7,
+                    marginBottom: 6,
+                  }}
+                >
+                  Última sincronização
+                </div>
+
+                <div
+                  style={{
+                    fontWeight: 'bold',
+                    color: '#fff',
+                  }}
+                >
+                  {tv.ultimaSync
+                    ? new Date(tv.ultimaSync).toLocaleString('pt-BR')
+                    : 'Nunca sincronizou'}
+                </div>
+              </div>
 
               <div
                 style={{
