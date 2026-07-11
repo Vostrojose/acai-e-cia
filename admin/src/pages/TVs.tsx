@@ -389,10 +389,26 @@ export default function TVs() {
               <h3
                 style={{
                   marginTop: 0,
-                  marginBottom: 15,
+                  marginBottom: 8,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
                 }}
               >
-                {tv.nome}
+                <span>📺 {tv.nome}</span>
+
+                <span
+                  style={{
+                    fontSize: 12,
+                    padding: '6px 10px',
+                    borderRadius: 20,
+                    background: tv.online ? '#2e7d32' : '#c62828',
+                    color: '#fff',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {tv.online ? 'ONLINE' : 'OFFLINE'}
+                </span>
               </h3>
 
               {!tv.playlist && (
@@ -434,28 +450,6 @@ export default function TVs() {
                   }}
                 >
                   {tv.playlist?.nome ?? 'Sem Playlist'}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  marginBottom: 15,
-                }}
-              >
-                <strong>Status:</strong>
-
-                <div
-                  style={{
-                    display: 'inline-block',
-                    marginLeft: 8,
-                    padding: '6px 12px',
-                    borderRadius: 8,
-                    fontWeight: 'bold',
-                    background: tv.online ? '#2e7d32' : '#c62828',
-                    color: '#fff',
-                  }}
-                >
-                  {tv.online ? 'ONLINE' : 'OFFLINE'}
                 </div>
               </div>
 
