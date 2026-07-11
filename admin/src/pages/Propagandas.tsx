@@ -409,75 +409,148 @@ export default function Propagandas() {
               style={{
                 background: '#181818',
                 border: '1px solid #333',
-                borderRadius: 14,
-                padding: 20,
-                marginBottom: 20,
+                borderRadius: 18,
+                padding: 24,
+                marginBottom: 24,
               }}
             >
-              <h3
-                style={{
-                  marginTop: 0,
-                  color: '#43a047',
-                }}
-              >
-                ✔ Arquivo Selecionado
-              </h3>
-
               <div
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: '120px 1fr',
-                  rowGap: 10,
+                  textAlign: 'center',
+                  marginBottom: 25,
                 }}
               >
-                <strong>Nome</strong>
-                <span>{arquivo.name}</span>
+                <h3
+                  style={{
+                    margin: 0,
+                    color: '#43a047',
+                  }}
+                >
+                  Preview
+                </h3>
 
-                <strong>Tipo</strong>
-                <span>
-                  {arquivo.type.startsWith('video') ? '🎬 Vídeo' : '🖼 Imagem'}
-                </span>
-                <strong>Tamanho</strong>
-                <span>{(arquivo.size / 1024 / 1024).toFixed(2)} MB</span>
+                <p
+                  style={{
+                    opacity: 0.7,
+                    marginTop: 8,
+                  }}
+                >
+                  Confira a mídia antes de publicar
+                </p>
+
+                <div
+                  style={{
+                    marginTop: 20,
+                  }}
+                >
+                  {arquivo.type.startsWith('image') ? (
+                    <img
+                      src={URL.createObjectURL(arquivo)}
+                      alt="Preview"
+                      style={{
+                        width: '100%',
+                        maxHeight: 380,
+                        objectFit: 'contain',
+                        borderRadius: 14,
+                        background: '#000',
+                      }}
+                    />
+                  ) : (
+                    <video
+                      src={URL.createObjectURL(arquivo)}
+                      controls
+                      style={{
+                        width: '100%',
+                        maxHeight: 380,
+                        borderRadius: 14,
+                        background: '#000',
+                      }}
+                    />
+                  )}
+                </div>
               </div>
 
               <hr
                 style={{
                   border: 'none',
                   borderTop: '1px solid #333',
-                  margin: '20px 0',
+                  margin: '24px 0',
                 }}
               />
 
-              <h3
+              <div
                 style={{
-                  marginTop: 0,
+                  display: 'grid',
+                  gridTemplateColumns: '150px 1fr',
+                  rowGap: 12,
                 }}
               >
-                Preview
-              </h3>
+                <strong>Nome</strong>
+                <span>{nome}</span>
 
-              {arquivo.type.startsWith('image') ? (
-                <img
-                  src={URL.createObjectURL(arquivo)}
-                  alt="Preview"
+                <strong>Arquivo</strong>
+                <span>{arquivo.name}</span>
+
+                <strong>Tipo</strong>
+                <span>
+                  {arquivo.type.startsWith('video') ? '🎬 Vídeo' : '🖼 Imagem'}
+                </span>
+
+                <strong>Tamanho</strong>
+                <span>{(arquivo.size / 1024 / 1024).toFixed(2)} MB</span>
+
+                {tipo === 'IMAGEM' && (
+                  <>
+                    <strong>Duração</strong>
+                    <span>{duracao} segundos</span>
+                  </>
+                )}
+              </div>
+
+              {publicando && (
+                <div
                   style={{
-                    width: '100%',
-                    maxHeight: 350,
-                    objectFit: 'contain',
-                    borderRadius: 12,
+                    marginTop: 25,
                   }}
-                />
-              ) : (
-                <video
-                  src={URL.createObjectURL(arquivo)}
-                  controls
-                  style={{
-                    width: '100%',
-                    maxHeight: 350,
-                    borderRadius: 12,
-                  }}
-                />
+                >
+                  <div
+                    style={{
+                      marginBottom: 8,
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Enviando mídia...
+                  </div>
+
+                  <div
+                    style={{
+                      width: '100%',
+                      height: 12,
+                      background: '#333',
+                      borderRadius: 30,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${progressoUpload}%`,
+                        height: '100%',
+                        background: 'linear-gradient(90deg,#43a047,#66bb6a)',
+                        transition: '.2s',
+                      }}
+                    />
+                  </div>
+
+                  <div
+                    style={{
+                      textAlign: 'right',
+                      marginTop: 6,
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {progressoUpload}%
+                  </div>
+                </div>
               )}
             </div>
           )}
