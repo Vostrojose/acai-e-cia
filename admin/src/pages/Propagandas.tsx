@@ -439,90 +439,92 @@ export default function Propagandas() {
         </div>
       )}
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill,minmax(350px,1fr))',
-          gap: 20,
-        }}
-      >
-        {propagandas.map((item) => (
-          <div
-            key={item.id}
-            style={{
-              background: 'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
-              borderRadius: 16,
-              padding: 20,
-              border: '1px solid rgba(255,255,255,.08)',
-            }}
-          >
-            <h3>{item.nome}</h3>
-
+      {!mostrarFormulario && (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill,minmax(350px,1fr))',
+            gap: 20,
+          }}
+        >
+          {propagandas.map((item) => (
             <div
+              key={item.id}
               style={{
-                marginBottom: 15,
+                background: 'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
+                borderRadius: 16,
+                padding: 20,
+                border: '1px solid rgba(255,255,255,.08)',
               }}
             >
-              {item.tipo === 'IMAGEM' ? (
-                <img
-                  src={item.url}
-                  alt={item.nome}
-                  style={{
-                    width: '100%',
-                    height: 180,
-                    objectFit: 'cover',
-                    borderRadius: 10,
-                  }}
-                />
-              ) : (
-                <video
-                  src={item.url}
-                  style={{
-                    width: '100%',
-                    height: 180,
-                    objectFit: 'cover',
-                    borderRadius: 10,
-                  }}
-                  muted
-                />
-              )}
-            </div>
+              <h3>{item.nome}</h3>
 
-            <p>
-              <strong>Tipo:</strong> {item.tipo}
-            </p>
-
-            <p>
-              <strong>Duração:</strong> {item.duracao}s
-            </p>
-
-            <div
-              style={{
-                display: 'inline-block',
-                padding: '8px 12px',
-                borderRadius: 10,
-                background: item.ativo ? '#1b5e20' : '#b71c1c',
-                fontWeight: 'bold',
-                marginBottom: 15,
-              }}
-            >
-              {item.ativo ? '🟢 ATIVA' : '🔴 INATIVA'}
-            </div>
-
-            <div>
-              <button
-                onClick={() => remover(item.id)}
+              <div
                 style={{
-                  ...botaoSecundario,
-                  borderColor: '#e53935',
+                  marginBottom: 15,
                 }}
               >
-                Excluir
-              </button>
+                {item.tipo === 'IMAGEM' ? (
+                  <img
+                    src={item.url}
+                    alt={item.nome}
+                    style={{
+                      width: '100%',
+                      height: 180,
+                      objectFit: 'cover',
+                      borderRadius: 10,
+                    }}
+                  />
+                ) : (
+                  <video
+                    src={item.url}
+                    style={{
+                      width: '100%',
+                      height: 180,
+                      objectFit: 'cover',
+                      borderRadius: 10,
+                    }}
+                    muted
+                  />
+                )}
+              </div>
+
+              <p>
+                <strong>Tipo:</strong> {item.tipo}
+              </p>
+
+              <p>
+                <strong>Duração:</strong> {item.duracao}s
+              </p>
+
+              <div
+                style={{
+                  display: 'inline-block',
+                  padding: '8px 12px',
+                  borderRadius: 10,
+                  background: item.ativo ? '#1b5e20' : '#b71c1c',
+                  fontWeight: 'bold',
+                  marginBottom: 15,
+                }}
+              >
+                {item.ativo ? '🟢 ATIVA' : '🔴 INATIVA'}
+              </div>
+
+              <div>
+                <button
+                  onClick={() => remover(item.id)}
+                  style={{
+                    ...botaoSecundario,
+                    borderColor: '#e53935',
+                  }}
+                >
+                  Excluir
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
