@@ -26,6 +26,10 @@ export default function Propagandas() {
   const [arquivo, setArquivo] = useState<File | null>(null)
 
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
+  const [mensagem, setMensagem] = useState('')
+  const [tipoMensagem, setTipoMensagem] = useState<'sucesso' | 'erro'>(
+    'sucesso',
+  )
 
   async function carregar() {
     try {
@@ -94,14 +98,15 @@ export default function Propagandas() {
       setTipo('IMAGEM')
       setDuracao(15)
       setArquivo(null)
+      setMostrarFormulario(false)
 
       await carregar()
 
-      alert('Propaganda cadastrada com sucesso')
+      mostrarMensagem('Propaganda publicada com sucesso.', 'sucesso')
     } catch (error) {
       console.error(error)
 
-      alert('Erro ao cadastrar propaganda')
+      mostrarMensagem('Erro ao publicar propaganda.', 'erro')
     }
   }
 
@@ -113,6 +118,15 @@ export default function Propagandas() {
 
   const videos = propagandas.filter((p) => p.tipo === 'VIDEO').length
 
+  function mostrarMensagem(texto: string, tipo: 'sucesso' | 'erro') {
+    setMensagem(texto)
+    setTipoMensagem(tipo)
+
+    setTimeout(() => {
+      setMensagem('')
+    }, 3000)
+  }
+
   return (
     <div
       style={{
@@ -122,6 +136,26 @@ export default function Propagandas() {
         padding: 20,
       }}
     >
+      {mensagem && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 20,
+            right: 20,
+            zIndex: 9999,
+            background: tipoMensagem === 'sucesso' ? '#2e7d32' : '#c62828',
+            color: '#fff',
+            padding: '18px 24px',
+            borderRadius: 12,
+            boxShadow: '0 10px 30px rgba(0,0,0,.35)',
+            fontWeight: 'bold',
+            minWidth: 300,
+            animation: 'fadeIn .2s',
+          }}
+        >
+          {mensagem}
+        </div>
+      )}
       <div
         style={{
           display: 'flex',
@@ -265,28 +299,42 @@ export default function Propagandas() {
             style={inputStyle}
           />
 
-          <select
-            value={tipo}
-            onChange={(e) => setTipo(e.target.value)}
-            style={inputStyle}
-          >
-            <option value="IMAGEM">IMAGEM</option>
-
-            <option value="VIDEO">VIDEO</option>
-          </select>
-
-          <input
-            type="number"
-            value={duracao}
-            onChange={(e) => setDuracao(Number(e.target.value))}
-            style={inputStyle}
-          />
+          {tipo === 'IMAGEM' && (
+            <input
+              type="number"
+              value={duracao}
+              onChange={(e) => setDuracao(Number(e.target.value))}
+              style={inputStyle}
+              placeholder="Tempo da imagem (segundos)"
+            />
+          )}
 
           <input
             id="arquivoPropaganda"
             type="file"
             accept="image/*,video/mp4"
-            onChange={(e) => setArquivo(e.target.files?.[0] ?? null)}
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+
+              if (!file) return
+
+              setArquivo(file)
+
+              if (file.type.startsWith('video')) {
+                setTipo('VIDEO')
+              } else {
+                setTipo('IMAGEM')
+              }
+
+              if (!nome.trim()) {
+                const nomeArquivo = file.name
+                  .replace(/\.[^/.]+$/, '')
+                  .replace(/[-_]/g, ' ')
+                  .replace(/\b\w/g, (l) => l.toUpperCase())
+
+                setNome(nomeArquivo)
+              }
+            }}
             style={{
               display: 'none',
             }}
@@ -350,48 +398,6 @@ export default function Propagandas() {
                 marginBottom: 20,
               }}
             >
-              {arquivo && (
-                <div
-                  style={{
-                    background: '#181818',
-                    border: '1px solid #333',
-                    borderRadius: 14,
-                    padding: 20,
-                    marginBottom: 20,
-                  }}
-                >
-                  <h3
-                    style={{
-                      marginTop: 0,
-                    }}
-                  >
-                    Preview
-                  </h3>
-
-                  {arquivo.type.startsWith('image') ? (
-                    <img
-                      src={URL.createObjectURL(arquivo)}
-                      alt="Preview"
-                      style={{
-                        width: '100%',
-                        maxHeight: 350,
-                        objectFit: 'contain',
-                        borderRadius: 12,
-                      }}
-                    />
-                  ) : (
-                    <video
-                      src={URL.createObjectURL(arquivo)}
-                      controls
-                      style={{
-                        width: '100%',
-                        maxHeight: 350,
-                        borderRadius: 12,
-                      }}
-                    />
-                  )}
-                </div>
-              )}
               <h3
                 style={{
                   marginTop: 0,
@@ -418,6 +424,44 @@ export default function Propagandas() {
 
                 <strong>Tamanho</strong>
                 <span>{(arquivo.size / 1024 / 1024).toFixed(2)} MB</span>
+                <hr
+                  style={{
+                    border: 'none',
+                    borderTop: '1px solid #333',
+                    margin: '20px 0',
+                  }}
+                />
+
+                <h3
+                  style={{
+                    marginTop: 0,
+                  }}
+                >
+                  Preview
+                </h3>
+
+                {arquivo.type.startsWith('image') ? (
+                  <img
+                    src={URL.createObjectURL(arquivo)}
+                    alt="Preview"
+                    style={{
+                      width: '100%',
+                      maxHeight: 350,
+                      objectFit: 'contain',
+                      borderRadius: 12,
+                    }}
+                  />
+                ) : (
+                  <video
+                    src={URL.createObjectURL(arquivo)}
+                    controls
+                    style={{
+                      width: '100%',
+                      maxHeight: 350,
+                      borderRadius: 12,
+                    }}
+                  />
+                )}
               </div>
             </div>
           )}
