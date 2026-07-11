@@ -337,6 +337,48 @@ export default function Propagandas() {
                 marginBottom: 20,
               }}
             >
+              {arquivo && (
+                <div
+                  style={{
+                    background: '#181818',
+                    border: '1px solid #333',
+                    borderRadius: 14,
+                    padding: 20,
+                    marginBottom: 20,
+                  }}
+                >
+                  <h3
+                    style={{
+                      marginTop: 0,
+                    }}
+                  >
+                    Preview
+                  </h3>
+
+                  {arquivo.type.startsWith('image') ? (
+                    <img
+                      src={URL.createObjectURL(arquivo)}
+                      alt="Preview"
+                      style={{
+                        width: '100%',
+                        maxHeight: 350,
+                        objectFit: 'contain',
+                        borderRadius: 12,
+                      }}
+                    />
+                  ) : (
+                    <video
+                      src={URL.createObjectURL(arquivo)}
+                      controls
+                      style={{
+                        width: '100%',
+                        maxHeight: 350,
+                        borderRadius: 12,
+                      }}
+                    />
+                  )}
+                </div>
+              )}
               <h3
                 style={{
                   marginTop: 0,
