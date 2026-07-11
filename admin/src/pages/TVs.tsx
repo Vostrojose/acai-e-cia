@@ -303,6 +303,158 @@ export default function TVs() {
           marginBottom: 25,
         }}
       />
+
+      {aba === 'cadastro' && (
+        <div
+          style={{
+            background: 'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
+            padding: 24,
+            borderRadius: 16,
+            marginBottom: 25,
+            border: '1px solid rgba(255,255,255,.08)',
+          }}
+        >
+          <h2
+            style={{
+              marginTop: 0,
+            }}
+          >
+            {id ? 'Editar TV' : 'Nova TV'}
+          </h2>
+
+          <input
+            placeholder="Nome da TV"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            style={inputStyle}
+          />
+
+          <input
+            placeholder="Código da TV"
+            value={codigo}
+            onChange={(e) => setCodigo(e.target.value)}
+            style={inputStyle}
+            disabled={!!id}
+          />
+
+          <select
+            value={playlistId}
+            onChange={(e) => setPlaylistId(e.target.value)}
+            style={inputStyle}
+          >
+            <option value="">Selecione uma playlist</option>
+
+            {playlists.map((playlist) => (
+              <option key={playlist.id} value={playlist.id}>
+                {playlist.nome}
+              </option>
+            ))}
+          </select>
+
+          <div
+            style={{
+              display: 'flex',
+              gap: 10,
+            }}
+          >
+            <button
+              onClick={salvar}
+              style={{
+                ...botaoPrincipal,
+                background: '#43a047',
+                color: '#fff',
+              }}
+            >
+              Salvar
+            </button>
+
+            <button onClick={limpar} style={botaoSecundario}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+      {aba === 'cadastro' && (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill,minmax(340px,1fr))',
+            gap: 20,
+            marginTop: 20,
+          }}
+        >
+          {tvsFiltradas.map((tv) => (
+            <div
+              key={tv.id}
+              style={{
+                background: 'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
+                borderRadius: 16,
+                padding: 20,
+                border: '1px solid rgba(255,255,255,.08)',
+              }}
+            >
+              <h3
+                style={{
+                  marginTop: 0,
+                  marginBottom: 15,
+                }}
+              >
+                {tv.nome}
+              </h3>
+
+              <p>
+                <strong>Código:</strong> {tv.codigo}
+              </p>
+
+              <p>
+                <strong>Playlist:</strong> {tv.playlist?.nome ?? 'Sem playlist'}
+              </p>
+
+              <p>
+                <strong>Status:</strong>{' '}
+                {tv.online ? '🟢 Online' : '🔴 Offline'}
+              </p>
+
+              <p>
+                <strong>Última sincronização:</strong>{' '}
+                {tv.ultimaSync
+                  ? new Date(tv.ultimaSync).toLocaleString('pt-BR')
+                  : '-'}
+              </p>
+
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 10,
+                  marginTop: 15,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <button
+                  onClick={() => editar(tv)}
+                  style={{
+                    ...botaoPrincipal,
+                    background: '#1976d2',
+                    color: '#fff',
+                  }}
+                >
+                  Editar
+                </button>
+
+                <button
+                  onClick={() => remover(tv.id)}
+                  style={{
+                    ...botaoSecundario,
+                    borderColor: '#e53935',
+                  }}
+                >
+                  Excluir
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
