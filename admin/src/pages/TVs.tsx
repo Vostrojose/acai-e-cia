@@ -427,29 +427,73 @@ export default function TVs() {
                 </div>
               )}
 
-              <p>
-                <strong>Código:</strong> {tv.codigo}
-              </p>
-
               <div
                 style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 12,
                   marginBottom: 15,
                 }}
               >
-                <strong>Playlist:</strong>
+                <div
+                  style={{
+                    background: '#181818',
+                    border: '1px solid #333',
+                    borderRadius: 10,
+                    padding: 12,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 12,
+                      opacity: 0.7,
+                      marginBottom: 6,
+                    }}
+                  >
+                    Código
+                  </div>
+
+                  <div
+                    style={{
+                      fontWeight: 'bold',
+                      fontSize: 18,
+                      color: '#90caf9',
+                    }}
+                  >
+                    {tv.codigo}
+                  </div>
+                </div>
 
                 <div
                   style={{
-                    display: 'inline-block',
-                    marginLeft: 8,
-                    padding: '6px 12px',
-                    borderRadius: 8,
-                    fontWeight: 'bold',
-                    background: tv.playlist ? '#1b5e20' : '#ef6c00',
-                    color: '#fff',
+                    background: '#181818',
+                    border: '1px solid #333',
+                    borderRadius: 10,
+                    padding: 12,
                   }}
                 >
-                  {tv.playlist?.nome ?? 'Sem Playlist'}
+                  <div
+                    style={{
+                      fontSize: 12,
+                      opacity: 0.7,
+                      marginBottom: 6,
+                    }}
+                  >
+                    Playlist
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'inline-block',
+                      padding: '6px 12px',
+                      borderRadius: 20,
+                      background: tv.playlist ? '#2e7d32' : '#ef6c00',
+                      color: '#fff',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {tv.playlist?.nome ?? 'Sem Playlist'}
+                  </div>
                 </div>
               </div>
 
@@ -521,9 +565,36 @@ export default function TVs() {
                 📺 {tv.nome}
               </h3>
 
-              <p>
-                <strong>Código:</strong> {tv.codigo}
-              </p>
+              <div
+                style={{
+                  background: '#181818',
+                  border: '1px solid #333',
+                  borderRadius: 10,
+                  padding: 12,
+                  marginBottom: 12,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 12,
+                    opacity: 0.7,
+                    marginBottom: 4,
+                  }}
+                >
+                  Código
+                </div>
+
+                <div
+                  style={{
+                    fontWeight: 'bold',
+                    fontSize: 18,
+                    letterSpacing: 1,
+                    color: '#90caf9',
+                  }}
+                >
+                  {tv.codigo}
+                </div>
+              </div>
 
               <p>
                 <strong>Playlist:</strong> {tv.playlist?.nome ?? 'Sem Playlist'}
