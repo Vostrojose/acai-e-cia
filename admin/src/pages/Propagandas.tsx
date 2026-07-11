@@ -472,6 +472,7 @@ export default function Propagandas() {
 
           <button
             onClick={salvar}
+            disabled={publicando}
             style={{
               ...botaoPrincipal,
               background: 'linear-gradient(135deg,#43a047,#2e7d32)',
@@ -482,6 +483,8 @@ export default function Propagandas() {
               fontWeight: 'bold',
               borderRadius: 12,
               boxShadow: '0 8px 20px rgba(0,0,0,.35)',
+              opacity: publicando ? 0.7 : 1,
+              cursor: publicando ? 'not-allowed' : 'pointer',
             }}
           >
             {publicando ? '⏳ Publicando...' : '🚀 Publicar Mídia'}
