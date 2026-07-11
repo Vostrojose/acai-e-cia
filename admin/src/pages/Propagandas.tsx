@@ -30,6 +30,7 @@ export default function Propagandas() {
   const [tipoMensagem, setTipoMensagem] = useState<'sucesso' | 'erro'>(
     'sucesso',
   )
+  const [progressoUpload, setProgressoUpload] = useState(0)
   const [publicando, setPublicando] = useState(false)
 
   async function carregar() {
@@ -70,6 +71,7 @@ export default function Propagandas() {
   async function salvar() {
     try {
       setPublicando(true)
+      setProgressoUpload(0)
       if (!nome.trim()) {
         alert('Informe o nome da propaganda')
         return
@@ -87,6 +89,15 @@ export default function Propagandas() {
       const upload = await axios.post(
         `${API_URL}/api/propagandas/upload`,
         formData,
+        {
+          onUploadProgress: (evento) => {
+            if (!evento.total) return
+
+            const progresso = Math.round((evento.loaded * 100) / evento.total)
+
+            setProgressoUpload(progresso)
+          },
+        },
       )
 
       await axios.post(`${API_URL}/api/propagandas`, {
@@ -111,6 +122,7 @@ export default function Propagandas() {
       mostrarMensagem('Erro ao publicar propaganda.', 'erro')
     } finally {
       setPublicando(false)
+      setProgressoUpload(0)
     }
   }
 
@@ -425,48 +437,48 @@ export default function Propagandas() {
                 <span>
                   {arquivo.type.startsWith('video') ? '🎬 Vídeo' : '🖼 Imagem'}
                 </span>
-
                 <strong>Tamanho</strong>
                 <span>{(arquivo.size / 1024 / 1024).toFixed(2)} MB</span>
-                <hr
+              </div>
+
+              <hr
+                style={{
+                  border: 'none',
+                  borderTop: '1px solid #333',
+                  margin: '20px 0',
+                }}
+              />
+
+              <h3
+                style={{
+                  marginTop: 0,
+                }}
+              >
+                Preview
+              </h3>
+
+              {arquivo.type.startsWith('image') ? (
+                <img
+                  src={URL.createObjectURL(arquivo)}
+                  alt="Preview"
                   style={{
-                    border: 'none',
-                    borderTop: '1px solid #333',
-                    margin: '20px 0',
+                    width: '100%',
+                    maxHeight: 350,
+                    objectFit: 'contain',
+                    borderRadius: 12,
                   }}
                 />
-
-                <h3
+              ) : (
+                <video
+                  src={URL.createObjectURL(arquivo)}
+                  controls
                   style={{
-                    marginTop: 0,
+                    width: '100%',
+                    maxHeight: 350,
+                    borderRadius: 12,
                   }}
-                >
-                  Preview
-                </h3>
-
-                {arquivo.type.startsWith('image') ? (
-                  <img
-                    src={URL.createObjectURL(arquivo)}
-                    alt="Preview"
-                    style={{
-                      width: '100%',
-                      maxHeight: 350,
-                      objectFit: 'contain',
-                      borderRadius: 12,
-                    }}
-                  />
-                ) : (
-                  <video
-                    src={URL.createObjectURL(arquivo)}
-                    controls
-                    style={{
-                      width: '100%',
-                      maxHeight: 350,
-                      borderRadius: 12,
-                    }}
-                  />
-                )}
-              </div>
+                />
+              )}
             </div>
           )}
 
