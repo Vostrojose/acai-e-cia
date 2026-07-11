@@ -238,13 +238,62 @@ export default function Propagandas() {
         />
 
         <input
+          id="arquivoPropaganda"
           type="file"
+          accept="image/*,video/mp4"
           onChange={(e) => setArquivo(e.target.files?.[0] ?? null)}
           style={{
-            ...inputStyle,
-            padding: 8,
+            display: 'none',
           }}
         />
+
+        <label
+          htmlFor="arquivoPropaganda"
+          style={{
+            display: 'block',
+            border: '2px dashed #555',
+            borderRadius: 16,
+            padding: 40,
+            textAlign: 'center',
+            cursor: 'pointer',
+            marginBottom: 20,
+            transition: '.2s',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 50,
+              marginBottom: 10,
+            }}
+          >
+            ⬆
+          </div>
+
+          <h3
+            style={{
+              margin: 0,
+            }}
+          >
+            Clique para selecionar
+          </h3>
+
+          <p
+            style={{
+              opacity: 0.7,
+              marginTop: 10,
+            }}
+          >
+            PNG • JPG • WEBP • MP4
+          </p>
+
+          <small
+            style={{
+              opacity: 0.6,
+            }}
+          >
+            Máximo recomendado: 300 MB
+          </small>
+        </label>
 
         {arquivo && (
           <p>
