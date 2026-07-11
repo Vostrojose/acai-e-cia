@@ -328,9 +328,43 @@ export default function Propagandas() {
           </label>
 
           {arquivo && (
-            <p>
-              Arquivo selecionado: <strong>{arquivo.name}</strong>
-            </p>
+            <div
+              style={{
+                background: '#181818',
+                border: '1px solid #333',
+                borderRadius: 14,
+                padding: 20,
+                marginBottom: 20,
+              }}
+            >
+              <h3
+                style={{
+                  marginTop: 0,
+                  color: '#43a047',
+                }}
+              >
+                ✔ Arquivo Selecionado
+              </h3>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '120px 1fr',
+                  rowGap: 10,
+                }}
+              >
+                <strong>Nome</strong>
+                <span>{arquivo.name}</span>
+
+                <strong>Tipo</strong>
+                <span>
+                  {arquivo.type.startsWith('video') ? '🎬 Vídeo' : '🖼 Imagem'}
+                </span>
+
+                <strong>Tamanho</strong>
+                <span>{(arquivo.size / 1024 / 1024).toFixed(2)} MB</span>
+              </div>
+            </div>
           )}
 
           <button
