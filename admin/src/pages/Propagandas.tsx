@@ -12,12 +12,18 @@ interface Propaganda {
   ativo: boolean
 }
 
+interface Playlist {
+  id: string
+  nome: string
+}
 const API_URL = 'https://api.acaiecompanhia.com.br'
 
 export default function Propagandas() {
   const navigate = useNavigate()
 
   const [propagandas, setPropagandas] = useState<Propaganda[]>([])
+
+  const [playlists, setPlaylists] = useState<Playlist[]>([])
 
   const [nome, setNome] = useState('')
   const [tipo, setTipo] = useState('IMAGEM')
@@ -33,11 +39,23 @@ export default function Propagandas() {
   const [progressoUpload, setProgressoUpload] = useState(0)
   const [publicando, setPublicando] = useState(false)
 
+  const [mostrarPublicacao, setMostrarPublicacao] = useState(false)
+
+  const [playlistSelecionada, setPlaylistSelecionada] = useState('')
+
+  const [propagandaSelecionada, setPropagandaSelecionada] =
+    useState<Propaganda | null>(null)
+
   async function carregar() {
     try {
-      const response = await axios.get(`${API_URL}/api/propagandas`)
+      const [propagandasRes, playlistsRes] = await Promise.all([
+        axios.get(`${API_URL}/api/propagandas`),
+        axios.get(`${API_URL}/api/playlists`),
+      ])
 
-      setPropagandas(response.data.data)
+      setPropagandas(propagandasRes.data.data)
+
+      setPlaylists(playlistsRes.data.data)
     } catch (error) {
       console.error(error)
       alert('Erro ao carregar propagandas')
@@ -649,15 +667,39 @@ export default function Propagandas() {
               </div>
 
               <div>
-                <button
-                  onClick={() => remover(item.id)}
+                <div
                   style={{
-                    ...botaoSecundario,
-                    borderColor: '#e53935',
+                    display: 'flex',
+                    gap: 10,
+                    marginTop: 15,
                   }}
                 >
-                  Excluir
-                </button>
+                  <button
+                    onClick={() => {
+                      setPropagandaSelecionada(item)
+                      setPlaylistSelecionada('')
+                      setMostrarPublicacao(true)
+                    }}
+                    style={{
+                      ...botaoPrincipal,
+                      background: '#1976d2',
+                      color: '#fff',
+                      flex: 1,
+                    }}
+                  >
+                    📤 Publicar
+                  </button>
+
+                  <button
+                    onClick={() => remover(item.id)}
+                    style={{
+                      ...botaoSecundario,
+                      borderColor: '#e53935',
+                    }}
+                  >
+                    🗑 Excluir
+                  </button>
+                </div>
               </div>
             </div>
           ))}
