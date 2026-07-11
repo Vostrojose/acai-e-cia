@@ -212,13 +212,26 @@ export default function Propagandas() {
           marginBottom: 20,
         }}
       >
-        <h2
-          style={{
-            margin: 0,
-          }}
-        >
-          Biblioteca de Propagandas
-        </h2>
+        <div>
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 26,
+            }}
+          >
+            🎬 Biblioteca de Mídia
+          </h2>
+
+          <p
+            style={{
+              marginTop: 6,
+              opacity: 0.7,
+              fontSize: 14,
+            }}
+          >
+            Gerencie vídeos e imagens que serão exibidos nas TVs.
+          </p>
+        </div>
 
         <button
           onClick={() => setMostrarFormulario(!mostrarFormulario)}
@@ -229,7 +242,7 @@ export default function Propagandas() {
             fontWeight: 'bold',
           }}
         >
-          {mostrarFormulario ? 'Fechar' : '+ Nova Propaganda'}
+          {mostrarFormulario ? '✖ Fechar' : '⬆ Nova Mídia'}
         </button>
       </div>
 
