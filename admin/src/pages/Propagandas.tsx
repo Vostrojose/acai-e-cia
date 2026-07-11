@@ -25,6 +25,8 @@ export default function Propagandas() {
 
   const [arquivo, setArquivo] = useState<File | null>(null)
 
+  const [mostrarFormulario, setMostrarFormulario] = useState(false)
+
   async function carregar() {
     try {
       const response = await axios.get(`${API_URL}/api/propagandas`)
@@ -204,107 +206,149 @@ export default function Propagandas() {
 
       <div
         style={{
-          background: 'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
-          padding: 24,
-          borderRadius: 16,
-          marginBottom: 25,
-          border: '1px solid rgba(255,255,255,.08)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 20,
         }}
       >
-        <h2>Nova Propaganda</h2>
-
-        <input
-          placeholder="Nome da propaganda"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-          style={inputStyle}
-        />
-
-        <select
-          value={tipo}
-          onChange={(e) => setTipo(e.target.value)}
-          style={inputStyle}
-        >
-          <option value="IMAGEM">IMAGEM</option>
-
-          <option value="VIDEO">VIDEO</option>
-        </select>
-
-        <input
-          type="number"
-          value={duracao}
-          onChange={(e) => setDuracao(Number(e.target.value))}
-          style={inputStyle}
-        />
-
-        <input
-          id="arquivoPropaganda"
-          type="file"
-          accept="image/*,video/mp4"
-          onChange={(e) => setArquivo(e.target.files?.[0] ?? null)}
+        <h2
           style={{
-            display: 'none',
-          }}
-        />
-
-        <label
-          htmlFor="arquivoPropaganda"
-          style={{
-            display: 'block',
-            border: '2px dashed #555',
-            borderRadius: 16,
-            padding: 40,
-            textAlign: 'center',
-            cursor: 'pointer',
-            marginBottom: 20,
-            transition: '.2s',
+            margin: 0,
           }}
         >
-          <div
-            style={{
-              fontSize: 50,
-              marginBottom: 10,
-            }}
-          >
-            ⬆
-          </div>
+          Biblioteca de Propagandas
+        </h2>
 
-          <h3
-            style={{
-              margin: 0,
-            }}
-          >
-            Clique para selecionar
-          </h3>
-
-          <p
-            style={{
-              opacity: 0.7,
-              marginTop: 10,
-            }}
-          >
-            PNG • JPG • WEBP • MP4
-          </p>
-
-          <small
-            style={{
-              opacity: 0.6,
-            }}
-          >
-            Máximo recomendado: 300 MB
-          </small>
-        </label>
-
-        {arquivo && (
-          <p>
-            Arquivo selecionado: <strong>{arquivo.name}</strong>
-          </p>
-        )}
-
-        <button onClick={salvar} style={botaoPrincipal}>
-          Salvar Propaganda
+        <button
+          onClick={() => setMostrarFormulario(!mostrarFormulario)}
+          style={{
+            ...botaoPrincipal,
+            background: '#43a047',
+            color: '#fff',
+            fontWeight: 'bold',
+          }}
+        >
+          {mostrarFormulario ? 'Fechar' : '+ Nova Propaganda'}
         </button>
       </div>
+
+      {mostrarFormulario && (
+        <div
+          style={{
+            background: 'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
+            padding: 24,
+            borderRadius: 16,
+            marginBottom: 25,
+            border: '1px solid rgba(255,255,255,.08)',
+          }}
+        >
+          <h2>Nova Propaganda</h2>
+
+          <input
+            placeholder="Nome da propaganda"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            style={inputStyle}
+          />
+
+          <select
+            value={tipo}
+            onChange={(e) => setTipo(e.target.value)}
+            style={inputStyle}
+          >
+            <option value="IMAGEM">IMAGEM</option>
+
+            <option value="VIDEO">VIDEO</option>
+          </select>
+
+          <input
+            type="number"
+            value={duracao}
+            onChange={(e) => setDuracao(Number(e.target.value))}
+            style={inputStyle}
+          />
+
+          <input
+            id="arquivoPropaganda"
+            type="file"
+            accept="image/*,video/mp4"
+            onChange={(e) => setArquivo(e.target.files?.[0] ?? null)}
+            style={{
+              display: 'none',
+            }}
+          />
+
+          <label
+            htmlFor="arquivoPropaganda"
+            style={{
+              display: 'block',
+              border: '2px dashed #555',
+              borderRadius: 16,
+              padding: 40,
+              textAlign: 'center',
+              cursor: 'pointer',
+              marginBottom: 20,
+              transition: '.2s',
+            }}
+          >
+            <div
+              style={{
+                fontSize: 50,
+                marginBottom: 10,
+              }}
+            >
+              ⬆
+            </div>
+
+            <h3
+              style={{
+                margin: 0,
+              }}
+            >
+              Clique para selecionar
+            </h3>
+
+            <p
+              style={{
+                opacity: 0.7,
+                marginTop: 10,
+              }}
+            >
+              PNG • JPG • WEBP • MP4
+            </p>
+
+            <small
+              style={{
+                opacity: 0.6,
+              }}
+            >
+              Máximo recomendado: 300 MB
+            </small>
+          </label>
+
+          {arquivo && (
+            <p>
+              Arquivo selecionado: <strong>{arquivo.name}</strong>
+            </p>
+          )}
+
+          <button
+            onClick={salvar}
+            style={{
+              ...botaoPrincipal,
+              background: '#43a047',
+              color: '#fff',
+              width: '100%',
+              padding: 16,
+              fontSize: 18,
+              fontWeight: 'bold',
+            }}
+          >
+            💾 Salvar Propaganda
+          </button>
+        </div>
+      )}
 
       <div
         style={{
