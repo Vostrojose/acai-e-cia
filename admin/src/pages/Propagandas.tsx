@@ -30,6 +30,7 @@ export default function Propagandas() {
   const [tipoMensagem, setTipoMensagem] = useState<'sucesso' | 'erro'>(
     'sucesso',
   )
+  const [publicando, setPublicando] = useState(false)
 
   async function carregar() {
     try {
@@ -68,6 +69,7 @@ export default function Propagandas() {
 
   async function salvar() {
     try {
+      setPublicando(true)
       if (!nome.trim()) {
         alert('Informe o nome da propaganda')
         return
@@ -107,6 +109,8 @@ export default function Propagandas() {
       console.error(error)
 
       mostrarMensagem('Erro ao publicar propaganda.', 'erro')
+    } finally {
+      setPublicando(false)
     }
   }
 
@@ -470,15 +474,17 @@ export default function Propagandas() {
             onClick={salvar}
             style={{
               ...botaoPrincipal,
-              background: '#43a047',
+              background: 'linear-gradient(135deg,#43a047,#2e7d32)',
               color: '#fff',
               width: '100%',
-              padding: 16,
+              padding: 18,
               fontSize: 18,
               fontWeight: 'bold',
+              borderRadius: 12,
+              boxShadow: '0 8px 20px rgba(0,0,0,.35)',
             }}
           >
-            💾 Salvar Propaganda
+            {publicando ? '⏳ Publicando...' : '🚀 Publicar Mídia'}
           </button>
         </div>
       )}
