@@ -230,13 +230,6 @@ export default function TVs() {
             <button style={menuButton} onClick={() => navigate('/propagandas')}>
               📢 Propagandas
             </button>
-
-            <button
-              style={menuButton}
-              onClick={() => navigate('/monitoramento-tv')}
-            >
-              📡 Monitoramento
-            </button>
           </div>
 
           <p
@@ -501,6 +494,72 @@ export default function TVs() {
                 >
                   Excluir
                 </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {aba === 'monitoramento' && (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill,minmax(340px,1fr))',
+            gap: 20,
+            marginTop: 20,
+          }}
+        >
+          {tvsFiltradas.map((tv) => (
+            <div
+              key={tv.id}
+              style={{
+                background: 'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
+                borderRadius: 16,
+                padding: 20,
+                border: '1px solid rgba(255,255,255,.08)',
+              }}
+            >
+              <h3
+                style={{
+                  marginTop: 0,
+                  marginBottom: 15,
+                }}
+              >
+                📺 {tv.nome}
+              </h3>
+
+              <p>
+                <strong>Código:</strong> {tv.codigo}
+              </p>
+
+              <p>
+                <strong>Playlist:</strong> {tv.playlist?.nome ?? 'Sem Playlist'}
+              </p>
+
+              <p>
+                <strong>Status:</strong>{' '}
+                {tv.online ? '🟢 Online' : '🔴 Offline'}
+              </p>
+
+              <p>
+                <strong>Última sincronização:</strong>
+                <br />
+                {tv.ultimaSync
+                  ? new Date(tv.ultimaSync).toLocaleString('pt-BR')
+                  : '-'}
+              </p>
+
+              <div
+                style={{
+                  marginTop: 15,
+                  padding: 10,
+                  borderRadius: 10,
+                  background: tv.online ? '#2e7d32' : '#c62828',
+                  color: '#fff',
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                }}
+              >
+                {tv.online ? '🟢 ANDROID CONECTADO' : '🔴 ANDROID DESCONECTADO'}
               </div>
             </div>
           ))}
