@@ -42,6 +42,14 @@ class TVService {
     })
   }
 
+  async buscarPorCodigo(codigo: string) {
+    return prisma.tV.findUnique({
+      where: {
+        codigo,
+      },
+    })
+  }
+
   async criar(nome: string, codigo: string, playlistId?: string) {
     return prisma.tV.create({
       data: {

@@ -97,7 +97,26 @@ class TVController {
       })
     }
   }
+  async buscarPorCodigo(req: Request, res: Response) {
+    try {
+      const { codigo } = req.params
 
+      const tv = await tvService.buscarPorCodigo(codigo)
+
+      return res.json({
+        success: true,
+        existe: Boolean(tv),
+        data: tv,
+      })
+    } catch (error) {
+      console.error(error)
+
+      return res.status(500).json({
+        success: false,
+        message: 'Erro ao verificar TV',
+      })
+    }
+  }
   async atualizar(req: Request, res: Response) {
     try {
       const { nome, codigo, playlistId } = req.body

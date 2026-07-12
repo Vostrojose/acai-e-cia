@@ -11,6 +11,8 @@ router.post('/heartbeat', tvController.heartbeat)
 
 router.post('/registrar', tvController.registrar)
 
+router.get('/codigo/:codigo', tvController.buscarPorCodigo)
+
 router.get('/:id', tvController.buscarPorId)
 
 router.post('/', tvController.criar)
