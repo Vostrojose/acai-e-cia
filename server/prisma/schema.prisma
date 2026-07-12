@@ -319,17 +319,19 @@ model Propaganda {
 }
 
 model Playlist {
-  id        String   @id @default(uuid())
+  id        String @id @default(uuid())
 
   nome      String
 
-  ativa     Boolean  @default(false)
+  ativa     Boolean @default(true)
 
-  criadoEm  DateTime @default(now())
+  padrao    Boolean @default(false)
 
   itens     PlaylistItem[]
 
   tvs       TV[]
+
+  criadoEm  DateTime @default(now())
 }
 model PlaylistItem {
   id String @id @default(uuid())

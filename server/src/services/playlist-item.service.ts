@@ -15,10 +15,17 @@ class PlaylistItemService {
     })
   }
 
-  async adicionar(
-    playlistId: string,
-    propagandaId: string,
-  ) {
+  async adicionar(playlistId: string, propagandaId: string) {
+    const existente = await prisma.playlistItem.findFirst({
+      where: {
+        playlistId,
+        propagandaId,
+      },
+    })
+
+    if (existente) {
+      throw new Error('Esta propaganda já está na playlist.')
+    }
     const ultimoItem = await prisma.playlistItem.findFirst({
       where: {
         playlistId,

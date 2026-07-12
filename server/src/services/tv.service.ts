@@ -97,11 +97,23 @@ class TVService {
       existe = Boolean(tvExistente)
     }
 
+    // Procurar playlist padrão
+    const playlistPadrao = await prisma.playlist.findFirst({
+      where: {
+        padrao: true,
+        ativa: true,
+      },
+    })
+
     return prisma.tV.create({
       data: {
         nome: 'TV Não Configurada',
         codigo,
         ativa: true,
+        playlistId: playlistPadrao?.id ?? null,
+      },
+      include: {
+        playlist: true,
       },
     })
   }
