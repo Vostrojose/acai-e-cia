@@ -118,8 +118,11 @@ class TVService {
     const agora = Date.now()
 
     return tvs.map((tv) => {
+      const LIMITE_ONLINE = 90 * 1000 // 90 segundos
+
       const online =
-        tv.ultimaSync && agora - new Date(tv.ultimaSync).getTime() <= 60000
+        tv.ultimaSync &&
+        agora - new Date(tv.ultimaSync).getTime() <= LIMITE_ONLINE
 
       return {
         id: tv.id,
