@@ -161,6 +161,36 @@ export default function Propagandas() {
     }, 3000)
   }
 
+  async function publicarNaPlaylist() {
+    if (!propagandaSelecionada) {
+      return
+    }
+
+    if (!playlistSelecionada) {
+      mostrarMensagem('Selecione uma playlist.', 'erro')
+      return
+    }
+
+    try {
+      await axios.post(
+        `${API_URL}/api/playlists/${playlistSelecionada}/itens`,
+        {
+          propagandaId: propagandaSelecionada.id,
+        },
+      )
+
+      mostrarMensagem('Propaganda adicionada à playlist.', 'sucesso')
+
+      setMostrarPublicacao(false)
+      setPlaylistSelecionada('')
+      setPropagandaSelecionada(null)
+    } catch (error) {
+      console.error(error)
+
+      mostrarMensagem('Erro ao publicar na playlist.', 'erro')
+    }
+  }
+
   return (
     <div
       style={{
@@ -703,6 +733,100 @@ export default function Propagandas() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {mostrarPublicacao && propagandaSelecionada && (
+        <div
+          style={{
+            position: 'fixed',
+
+            inset: 0,
+
+            background: 'rgba(0,0,0,.75)',
+
+            display: 'flex',
+
+            justifyContent: 'center',
+
+            alignItems: 'center',
+
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              width: 500,
+
+              background: '#1b1b1b',
+
+              borderRadius: 18,
+
+              padding: 30,
+
+              border: '1px solid #333',
+            }}
+          >
+            <h2
+              style={{
+                marginTop: 0,
+              }}
+            >
+              📤 Publicar Propaganda
+            </h2>
+
+            <p>
+              <strong>Mídia:</strong> {propagandaSelecionada.nome}
+            </p>
+
+            <select
+              value={playlistSelecionada}
+              onChange={(e) => setPlaylistSelecionada(e.target.value)}
+              style={inputStyle}
+            >
+              <option value="">Selecione uma playlist</option>
+
+              {playlists.map((playlist) => (
+                <option key={playlist.id} value={playlist.id}>
+                  {playlist.nome}
+                </option>
+              ))}
+            </select>
+
+            <div
+              style={{
+                display: 'flex',
+
+                justifyContent: 'flex-end',
+
+                gap: 10,
+
+                marginTop: 20,
+              }}
+            >
+              <button
+                style={botaoSecundario}
+                onClick={() => {
+                  setMostrarPublicacao(false)
+                }}
+              >
+                Cancelar
+              </button>
+
+              <button
+                style={{
+                  ...botaoPrincipal,
+
+                  background: '#43a047',
+
+                  color: '#fff',
+                }}
+                onClick={publicarNaPlaylist}
+              >
+                Publicar
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
