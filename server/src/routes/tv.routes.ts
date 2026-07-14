@@ -7,18 +7,10 @@ router.get('/', tvController.listar)
 
 router.get('/status', tvController.status)
 
-router.post('/heartbeat', tvController.heartbeat)
+router.get('/codigo/:codigo', tvController.buscarPorCodigo)
 
 router.post('/registrar', tvController.registrar)
 
-router.get('/codigo/:codigo', tvController.buscarPorCodigo)
-
-router.get('/:id', tvController.buscarPorId)
-
-router.post('/', tvController.criar)
-
-router.put('/:id', tvController.atualizar)
-
-router.delete('/:id', tvController.remover)
+router.post('/heartbeat', tvController.heartbeat)
 
 export default router
