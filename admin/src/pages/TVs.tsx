@@ -39,7 +39,9 @@ export default function TVs() {
 
   const [pesquisa, setPesquisa] = useState('')
 
-  const [aba, setAba] = useState<'cadastro' | 'monitoramento'>('cadastro')
+  const [aba, setAba] = useState<'Configuração' | 'monitoramento'>(
+    'Configuração',
+  )
 
   async function carregar() {
     try {
@@ -78,49 +80,6 @@ export default function TVs() {
     return () => clearInterval(interval)
   }, [])
 
-  async function salvar() {
-    try {
-      if (!nome.trim()) {
-        alert('Informe o nome da TV')
-        return
-      }
-
-      if (!codigo.trim()) {
-        alert('Informe o código da TV')
-        return
-      }
-
-      if (!playlistId) {
-        alert('Selecione uma playlist')
-        return
-      }
-
-      const payload = {
-        nome,
-        codigo,
-        playlistId,
-      }
-
-      if (id) {
-        await axios.put(`${API_URL}/api/tvs/${id}`, payload)
-
-        alert('TV atualizada com sucesso')
-      } else {
-        await axios.post(`${API_URL}/api/tvs`, payload)
-
-        alert('TV cadastrada com sucesso')
-      }
-
-      limpar()
-
-      await carregar()
-    } catch (error) {
-      console.error(error)
-
-      alert('Erro ao salvar TV')
-    }
-  }
-
   function editar(tv: TV) {
     setId(tv.id)
     setNome(tv.nome)
@@ -133,24 +92,24 @@ export default function TVs() {
     })
   }
 
-  async function remover(id: string) {
-    const confirmar = confirm('Deseja realmente excluir esta TV?')
-
-    if (!confirmar) return
-
+  async function salvar() {
     try {
-      await axios.delete(`${API_URL}/api/tvs/${id}`)
+      if (!id) return
 
-      await carregar()
+      await axios.put(`${API_URL}/api/tvs/${id}`, {
+        nome,
+        codigo,
+        playlistId: playlistId || null,
+      })
 
-      alert('TV removida')
+      limpar()
+
+      carregar()
     } catch (error) {
       console.error(error)
-
-      alert('Erro ao remover TV')
+      alert('Erro ao salvar TV.')
     }
   }
-
   function limpar() {
     setId('')
     setNome('')
@@ -269,11 +228,11 @@ export default function TVs() {
         <button
           style={{
             ...menuButton,
-            background: aba === 'cadastro' ? '#43a047' : '#1c1c1c',
+            background: aba === 'Configuração' ? '#43a047' : '#1c1c1c',
           }}
-          onClick={() => setAba('cadastro')}
+          onClick={() => setAba('Configuração')}
         >
-          Cadastro
+          Configuração
         </button>
 
         <button
@@ -297,7 +256,7 @@ export default function TVs() {
         }}
       />
 
-      {aba === 'cadastro' && (
+      {aba === 'Configuração' && (
         <div
           style={{
             background: 'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
@@ -307,13 +266,7 @@ export default function TVs() {
             border: '1px solid rgba(255,255,255,.08)',
           }}
         >
-          <h2
-            style={{
-              marginTop: 0,
-            }}
-          >
-            {id ? 'Editar TV' : 'Nova TV'}
-          </h2>
+          <h2>Configuração da TV</h2>
 
           <input
             placeholder="Nome da TV"
@@ -367,7 +320,7 @@ export default function TVs() {
           </div>
         </div>
       )}
-      {aba === 'cadastro' && (
+      {aba === 'Configuração' && (
         <div
           style={{
             display: 'grid',
@@ -545,16 +498,6 @@ export default function TVs() {
                   }}
                 >
                   Editar
-                </button>
-
-                <button
-                  onClick={() => remover(tv.id)}
-                  style={{
-                    ...botaoSecundario,
-                    borderColor: '#e53935',
-                  }}
-                >
-                  Excluir
                 </button>
               </div>
             </div>
