@@ -84,6 +84,29 @@ class TVService {
     })
   }
 
+  async atualizar(
+    id: string,
+    dados: {
+      nome: string
+      codigo: string
+      playlistId: string | null
+    },
+  ) {
+    return prisma.tV.update({
+      where: {
+        id,
+      },
+      data: {
+        nome: dados.nome,
+        codigo: dados.codigo,
+        playlistId: dados.playlistId,
+      },
+      include: {
+        playlist: true,
+      },
+    })
+  }
+
   async status() {
     const agora = Date.now()
 
@@ -103,9 +126,7 @@ class TVService {
       playlistId: tv.playlistId,
       playlist: tv.playlist?.nome ?? null,
       ultimaSync: tv.ultimaSync,
-      online:
-        !!tv.ultimaSync &&
-        agora - tv.ultimaSync.getTime() <= 90_000,
+      online: !!tv.ultimaSync && agora - tv.ultimaSync.getTime() <= 90_000,
     }))
   }
 }

@@ -95,6 +95,32 @@ class TVController {
     }
   }
 
+  async atualizar(req: Request, res: Response) {
+    try {
+      const { id } = req.params
+
+      const { nome, codigo, playlistId } = req.body
+
+      const tv = await tvService.atualizar(id, {
+        nome,
+        codigo,
+        playlistId,
+      })
+
+      return res.json({
+        success: true,
+        data: tv,
+      })
+    } catch (error) {
+      console.error(error)
+
+      return res.status(500).json({
+        success: false,
+        message: 'Erro ao atualizar TV',
+      })
+    }
+  }
+
   async status(_req: Request, res: Response) {
     try {
       const dados = await tvService.status()
