@@ -118,16 +118,27 @@ class TVService {
         criadoEm: 'asc',
       },
     })
+    console.log('AGORA:', new Date())
 
-    return tvs.map((tv) => ({
-      id: tv.id,
-      nome: tv.nome,
-      codigo: tv.codigo,
-      playlistId: tv.playlistId,
-      playlist: tv.playlist?.nome ?? null,
-      ultimaSync: tv.ultimaSync,
-      online: !!tv.ultimaSync && agora - tv.ultimaSync.getTime() <= 90_000,
-    }))
+    return tvs.map((tv) => {
+      console.log('--------------------------------')
+      console.log('TV:', tv.codigo)
+      console.log('ULTIMA:', tv.ultimaSync)
+      console.log(
+        'DIFERENÇA(ms):',
+        tv.ultimaSync ? Date.now() - tv.ultimaSync.getTime() : null,
+      )
+
+      return {
+        id: tv.id,
+        nome: tv.nome,
+        codigo: tv.codigo,
+        playlistId: tv.playlistId,
+        playlist: tv.playlist?.nome ?? null,
+        ultimaSync: tv.ultimaSync,
+        online: !!tv.ultimaSync && agora - tv.ultimaSync.getTime() <= 90_000,
+      }
+    })
   }
 }
 
