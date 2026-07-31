@@ -2,141 +2,132 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-
 model Produto {
-  id            String       @id @default(uuid())
-  nome          String
-  descricao     String?
+  id        String  @id @default(uuid())
+  nome      String
+  descricao String?
 
-  preco         Decimal      @db.Decimal(10, 2)
-  ativo         Boolean      @default(true)
+  preco Decimal @db.Decimal(10, 2)
+  ativo Boolean @default(true)
 
-  destaque      Boolean      @default(false)
+  destaque Boolean @default(false)
 
-  disponivelSeg Boolean      @default(true)
-  disponivelTer Boolean      @default(true)
-  disponivelQua Boolean      @default(true)
-  disponivelQui Boolean      @default(true)
-  disponivelSex Boolean      @default(true)
-  disponivelSab Boolean      @default(true)
-  disponivelDom Boolean      @default(true)
+  disponivelSeg Boolean @default(true)
+  disponivelTer Boolean @default(true)
+  disponivelQua Boolean @default(true)
+  disponivelQui Boolean @default(true)
+  disponivelSex Boolean @default(true)
+  disponivelSab Boolean @default(true)
+  disponivelDom Boolean @default(true)
 
-  criadoEm      DateTime     @default(now())
-  atualizadoEm  DateTime     @updatedAt
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
 
-  itensPedido   ItemPedido[]
-  adicionais    Adicional[]
-  variacoes     VariacaoProduto[]
+  itensPedido ItemPedido[]
+  adicionais  Adicional[]
+  variacoes   VariacaoProduto[]
 }
 
-
 model Pedido {
-  id                String           @id @default(uuid())
+  id String @id @default(uuid())
 
-  codigo            Int?             @unique
+  codigo Int? @unique
 
-  status            StatusPedido     @default(AGUARDANDO_PAGAMENTO)
-  total             Decimal          @db.Decimal(10, 2)
+  status StatusPedido @default(AGUARDANDO_PAGAMENTO)
+  total  Decimal      @db.Decimal(10, 2)
 
-  telefone          String?
-  endereco          String?
-  tipo              TipoPedido       @default(ONLINE)
+  telefone String?
+  endereco String?
+  tipo     TipoPedido @default(ONLINE)
 
   pagamentoId       String?          @unique
   externalReference String?          @unique
   statusPagamento   StatusPagamento?
 
-  origem            OrigemPedido?
+  origem OrigemPedido?
 
   //  FIADO / CRÉDITO
-  clienteNome       String?
+  clienteNome          String?
   formaPagamentoBalcao FormaPagamentoBalcao?
-  pago              Boolean          @default(true)
+  pago                 Boolean               @default(true)
 
   //  RELAÇÃO COM CLIENTE (CORRETO)
-  clienteId         String?
-  cliente           Cliente? @relation(fields: [clienteId], references: [id])
+  clienteId String?
+  cliente   Cliente? @relation(fields: [clienteId], references: [id])
 
-  criadoEm          DateTime         @default(now())
-  atualizadoEm      DateTime         @updatedAt
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
 
   entregueEm DateTime?
 
-  itens             ItemPedido[]
+  itens ItemPedido[]
 
-  auditoriaId       String?
-  auditoria         AuditoriaMensal? @relation(fields: [auditoriaId], references: [id])
+  auditoriaId String?
+  auditoria   AuditoriaMensal? @relation(fields: [auditoriaId], references: [id])
 
   @@index([status])
   @@index([criadoEm])
 }
 
 model ItemPedido {
-  id         String  @id @default(uuid())
-  quantidade Int
-  precoUnit  Decimal @db.Decimal(10, 2)
-  nomeProduto String?
+  id               String  @id @default(uuid())
+  quantidade       Int
+  precoUnit        Decimal @db.Decimal(10, 2)
+  nomeProduto      String?
   descricaoProduto String?
 
-  pedidoId   String
-  produtoId  String
+  pedidoId  String
+  produtoId String
 
-  pedido     Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
-  produto    Produto @relation(fields: [produtoId], references: [id])
+  pedido  Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  produto Produto @relation(fields: [produtoId], references: [id])
 
   adicionais ItemPedidoAdicional[]
 }
 
-
-
 model Adicional {
-  id        String  @id @default(uuid())
-  nome      String
-  preco     Decimal @db.Decimal(10, 2)
-  ativo     Boolean @default(true)
+  id    String  @id @default(uuid())
+  nome  String
+  preco Decimal @db.Decimal(10, 2)
+  ativo Boolean @default(true)
 
   produtoId String
   produto   Produto @relation(fields: [produtoId], references: [id])
 
-  criadoEm  DateTime @default(now())
+  criadoEm DateTime @default(now())
 }
 
 model VariacaoProduto {
-  id        String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  nome      String
-  preco     Decimal  @db.Decimal(10, 2)
+  nome  String
+  preco Decimal @db.Decimal(10, 2)
 
-  ativo     Boolean  @default(true)
+  ativo Boolean @default(true)
 
   produtoId String
   produto   Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
 
-  criadoEm  DateTime @default(now())
+  criadoEm DateTime @default(now())
 
   @@index([produtoId])
 }
 
-
-
 model ItemPedidoAdicional {
-  id            String  @id @default(uuid())
-  nome          String
-  preco         Decimal @db.Decimal(10, 2)
+  id    String  @id @default(uuid())
+  nome  String
+  preco Decimal @db.Decimal(10, 2)
 
-  quantidade    Int      @default(1) //  NOVO
+  quantidade Int @default(1) //  NOVO
 
-  itemPedidoId  String
-  itemPedido    ItemPedido @relation(fields: [itemPedidoId], references: [id], onDelete: Cascade)
+  itemPedidoId String
+  itemPedido   ItemPedido @relation(fields: [itemPedidoId], references: [id], onDelete: Cascade)
 }
-
-
 
 model Usuario {
   id       String   @id @default(uuid())
@@ -147,8 +138,6 @@ model Usuario {
   criadoEm DateTime @default(now())
 }
 
-
-
 model AuditoriaMensal {
   id          String   @id @default(uuid())
   mes         Int
@@ -157,12 +146,10 @@ model AuditoriaMensal {
   produtos    Json
   criadoEm    DateTime @default(now())
 
-  pedidos     Pedido[]
+  pedidos Pedido[]
 
   @@unique([mes, ano])
 }
-
-
 
 enum StatusPedido {
   RECEBIDO
@@ -173,8 +160,6 @@ enum StatusPedido {
   AGUARDANDO_PAGAMENTO
 }
 
-
-
 enum StatusPagamento {
   PENDENTE
   APROVADO
@@ -182,13 +167,9 @@ enum StatusPagamento {
   CANCELADO
 }
 
-
-
 enum Role {
   ADMIN
 }
-
-
 
 enum TipoPedido {
   MESA
@@ -197,8 +178,6 @@ enum TipoPedido {
   ONLINE
 }
 
-
-
 enum OrigemPedido {
   QR_CODE
   APP
@@ -206,13 +185,12 @@ enum OrigemPedido {
   BALCAO
 }
 
-
-
 enum FormaPagamentoBalcao {
   PAGO
   FIADO
   CREDITO
 }
+
 enum TipoRelatorio {
   DIARIO
   SEMANAL
@@ -220,35 +198,36 @@ enum TipoRelatorio {
 }
 
 model Cliente {
-  id        String   @id @default(uuid())
-  nome      String   @unique
-  credito   Decimal  @db.Decimal(10, 2) @default(0)
+  id      String  @id @default(uuid())
+  nome    String  @unique
+  credito Decimal @default(0) @db.Decimal(10, 2)
 
-  criadoEm  DateTime @default(now())
+  criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 
-  pedidos   Pedido[]
+  pedidos Pedido[]
 }
 
 model SecurityLog {
-  id          String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  tipo        String
-  acao        String
+  tipo String
+  acao String
 
-  usuario     String?
+  usuario String?
 
-  entidade    String?
-  entidadeId  String?
+  entidade   String?
+  entidadeId String?
 
-  detalhes    Json?
+  detalhes Json?
 
-  criadoEm    DateTime @default(now())
+  criadoEm DateTime @default(now())
 
   @@index([tipo])
   @@index([acao])
   @@index([criadoEm])
 }
+
 model Configuracao {
   chave        String   @id
   valor        Json
@@ -258,113 +237,180 @@ model Configuracao {
 }
 
 model Relatorio {
-  id             String @id @default(uuid())
+  id String @id @default(uuid())
 
-  tipo           TipoRelatorio
+  tipo TipoRelatorio
 
-  referencia     String
+  referencia String
 
-  periodoInicio  DateTime
-  periodoFim     DateTime
+  periodoInicio DateTime
+  periodoFim    DateTime
 
-  dados          Json
+  dados Json
 
-  arquivoPdf     String?
+  arquivoPdf String?
 
-  enviadoEmail   Boolean @default(false)
+  enviadoEmail Boolean @default(false)
 
   enviadoWhatsapp Boolean @default(false)
 
   ultimoWhatsappEnviadoEm DateTime?
 
-  criadoEm       DateTime @default(now())
+  criadoEm DateTime @default(now())
 
   @@unique([tipo, referencia])
-
   @@index([tipo])
   @@index([referencia])
 }
+
 model ExecucaoRelatorio {
-  id            String @id @default(uuid())
+  id String @id @default(uuid())
 
-  tipo          TipoRelatorio
+  tipo TipoRelatorio
 
-  referencia    String
+  referencia String
 
-  executadoEm   DateTime @default(now())
+  executadoEm DateTime @default(now())
 
-  status        String
+  status String
 
-  observacao    String?
+  observacao String?
 
   @@unique([tipo, referencia])
 }
 
 model Propaganda {
-  id        String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  nome      String
+  nome String
 
-  tipo      String
+  tipo String
 
-  arquivo   String
+  arquivo String
 
-  duracao   Int?
+  duracao Int?
 
-  ativo     Boolean  @default(true)
+  ativo Boolean @default(true)
 
-  criadoEm  DateTime @default(now())
+  criadoEm DateTime @default(now())
 
   playlists PlaylistItem[]
 }
 
 model Playlist {
-  id        String @id @default(uuid())
+  id String @id @default(uuid())
 
-  nome      String
+  nome String
 
-  ativa     Boolean @default(true)
+  ativa Boolean @default(true)
 
-  padrao    Boolean @default(false)
+  padrao Boolean @default(false)
 
-  itens     PlaylistItem[]
+  itens PlaylistItem[]
 
-  tvs       TV[]
+  tvs TV[]
 
-  criadoEm  DateTime @default(now())
+  criadoEm DateTime @default(now())
 }
+
 model PlaylistItem {
   id String @id @default(uuid())
 
   ordem Int
 
-  playlistId String
+  playlistId   String
   propagandaId String
 
   playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
 
   propaganda Propaganda @relation(fields: [propagandaId], references: [id])
 
-  @@index([playlistId])
-
   @@unique([playlistId, propagandaId])
+  @@index([playlistId])
 }
+
 model TV {
-  id         String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  nome       String
+  nome String
 
-  codigo     String   @unique
+  codigo String @unique
 
-  ativa      Boolean  @default(true)
+  tipo TipoDispositivo @default(TV_BOX)
+
+  versaoApp String?
+
+  ultimaVersaoDisponivel String?
+
+  modelo String?
+
+  ultimoHeartbeat DateTime?
+
+  versaoAndroid String?
+
+  fabricante String?
+
+  ativa Boolean @default(true)
 
   playlistId String?
 
-  playlist   Playlist? @relation(fields: [playlistId], references: [id])
+  playlist Playlist? @relation(fields: [playlistId], references: [id])
 
   ultimaSync DateTime?
 
-  criadoEm   DateTime @default(now())
+  criadoEm DateTime @default(now())
+
+  commands TVCommand[]
 
   @@index([playlistId])
+}
+
+model TVCommand {
+  id String @id @default(uuid())
+
+  tvId String
+  tv   TV     @relation(fields: [tvId], references: [id], onDelete: Cascade)
+
+  tipo TVCommandType
+
+  payload Json?
+
+  status TVCommandStatus @default(PENDENTE)
+
+  tentativas Int @default(0)
+
+  criadoEm DateTime @default(now())
+
+  lidoEm DateTime?
+
+  executadoEm DateTime?
+
+  resposta Json?
+
+  @@index([tvId])
+  @@index([status])
+  @@index([tipo])
+  @@index([criadoEm])
+}
+
+enum TVCommandType {
+  ATUALIZAR_PLAYLIST
+  REINICIAR_PLAYER
+  REINICIAR_APP
+  LIMPAR_CACHE
+  ATUALIZAR_APK
+  EXIBIR_MENSAGEM
+}
+
+enum TVCommandStatus {
+  PENDENTE
+  EXECUTANDO
+  CONCLUIDO
+  ERRO
+}
+
+enum TipoDispositivo {
+  TV_BOX
+  ANDROID_TV
+  TABLET
 }
