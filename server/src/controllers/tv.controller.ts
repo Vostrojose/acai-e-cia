@@ -62,6 +62,9 @@ class TVController {
   }
 
 async heartbeat(req: Request, res: Response) {
+
+  console.log("===== HEARTBEAT =====")
+console.log(req.body)
   try {
     const dados = req.body
 
