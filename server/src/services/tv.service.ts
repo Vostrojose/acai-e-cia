@@ -1,5 +1,7 @@
 import prisma from '../lib/prisma'
 
+import { HeartbeatDTO } from '../dtos/HeartbeatDTO'
+
 class TVService {
   async registrar() {
     let codigo = ''
@@ -35,32 +37,40 @@ class TVService {
     })
   }
 
-  async heartbeat(codigo: string) {
-    const tv = await prisma.tV.findUnique({
-      where: {
-        codigo,
-      },
-      include: {
-        playlist: true,
-      },
-    })
+ async heartbeat(dados: HeartbeatDTO) {
+  const { codigo } = dados
 
-    if (!tv) {
-      return null
-    }
+  const tv = await prisma.tV.findUnique({
+    where: {
+      codigo,
+    },
+    include: {
+      playlist: true,
+    },
+  })
 
-    return prisma.tV.update({
-      where: {
-        codigo,
-      },
-      data: {
-        ultimaSync: new Date(),
-      },
-      include: {
-        playlist: true,
-      },
-    })
+  if (!tv) {
+    return null
   }
+
+  return prisma.tV.update({
+    where: {
+      codigo,
+    },
+    data: {
+      ultimoHeartbeat: new Date(),
+
+      tipo: dados.tipo ?? tv.tipo,
+      versaoApp: dados.versaoApp ?? tv.versaoApp,
+      versaoAndroid: dados.versaoAndroid ?? tv.versaoAndroid,
+      fabricante: dados.fabricante ?? tv.fabricante,
+      modelo: dados.modelo ?? tv.modelo,
+    },
+    include: {
+      playlist: true,
+    },
+  })
+}
 
   async buscarPorCodigo(codigo: string) {
     return prisma.tV.findUnique({

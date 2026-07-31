@@ -61,40 +61,39 @@ class TVController {
     }
   }
 
-  async heartbeat(req: Request, res: Response) {
-    try {
-      const { codigo } = req.body
+async heartbeat(req: Request, res: Response) {
+  try {
+    const dados = req.body
 
-      if (!codigo) {
-        return res.status(400).json({
-          success: false,
-          message: 'Código não informado',
-        })
-      }
-
-      const tv = await tvService.heartbeat(codigo)
-
-      if (!tv) {
-        return res.status(404).json({
-          success: false,
-          message: 'TV não encontrada',
-        })
-      }
-
-      return res.json({
-        success: true,
-        data: tv,
-      })
-    } catch (error) {
-      console.error(error)
-
-      return res.status(500).json({
+    if (!dados.codigo) {
+      return res.status(400).json({
         success: false,
-        message: 'Erro ao registrar heartbeat',
+        message: 'Código não informado',
       })
     }
-  }
 
+    const tv = await tvService.heartbeat(dados)
+
+    if (!tv) {
+      return res.status(404).json({
+        success: false,
+        message: 'TV não encontrada',
+      })
+    }
+
+    return res.json({
+      success: true,
+      data: tv,
+    })
+  } catch (error) {
+    console.error(error)
+
+    return res.status(500).json({
+      success: false,
+      message: 'Erro ao registrar heartbeat',
+    })
+  }
+}
   async atualizar(req: Request, res: Response) {
     try {
       const { id } = req.params
