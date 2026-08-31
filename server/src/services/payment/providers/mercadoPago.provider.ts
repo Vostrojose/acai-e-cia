@@ -76,51 +76,58 @@ export class MercadoPagoProvider {
       /* 🔥 ITENS CORRIGIDOS           */
       /* ============================= */
 
-      const itensFormatados = pedido.itens.map((item: any) => {
-        const precoProduto = Number(item.produto?.preco || item.preco || 0)
+    const itensFormatados = pedido.itens.map((item: any) => {
+  /*
+   * O pedido já possui o preço unitário final registrado
+   * no banco em ItemPedido.precoUnit.
+   *
+   * Esse valor já considera:
+   * - preço do produto ou variação
+   * - adicionais
+   * - quantidade dos adicionais
+   *
+   * Portanto, NÃO devemos recalcular o preço aqui.
+   */
+  const precoFinal = Number(Number(item.precoUnit).toFixed(2))
 
-        const adicionais = item.adicionais || []
+  const quantidade = Number(item.quantidade)
 
-        const totalAdicionais = adicionais.reduce(
-          (soma: number, add: any) => soma + Number(add.preco),
-          0,
-        )
+  if (!precoFinal || precoFinal <= 0 || isNaN(precoFinal)) {
+    throw new Error(`Preço inválido no item ${item.produtoId}`)
+  }
 
-        const precoFinal = Number((precoProduto + totalAdicionais).toFixed(2))
-        const quantidade = Number(item.quantidade)
+  if (!quantidade || quantidade <= 0 || isNaN(quantidade)) {
+    throw new Error(`Quantidade inválida no item ${item.produtoId}`)
+  }
 
-        if (!precoFinal || precoFinal <= 0 || isNaN(precoFinal)) {
-          throw new Error(`Preço inválido no item ${item.produtoId}`)
-        }
+  console.log('💰 ITEM PAGAMENTO:', {
+    produto: item.produto?.nome,
+    precoUnit: item.precoUnit,
+    precoFinal,
+    quantidade,
+  })
 
-        if (!quantidade || quantidade <= 0 || isNaN(quantidade)) {
-          throw new Error(`Quantidade inválida no item ${item.produtoId}`)
-        }
+  return {
+    title: String(
+      item.produto?.nome ||
+        item.nome ||
+        `Produto ${item.produtoId || 'sem-id'}`,
+    ),
 
-        console.log('🔥 ITEM CORRIGIDO:', {
-          produto: item.produto?.nome,
-          precoProduto,
-          adicionais: totalAdicionais,
-          precoFinal,
-        })
+    description: String(
+      item.produto?.descricao ||
+        item.descricao ||
+        item.produto?.nome ||
+        'Produto Açaí & Companhia',
+    ),
 
-        return {
-          title: String(
-            item.produto?.nome ||
-              item.nome ||
-              `Produto ${item.produtoId || 'sem-id'}`,
-          ),
-          description: String(
-            item.produto?.descricao ||
-              item.descricao ||
-              item.produto?.nome ||
-              'Produto Açaí & Companhia',
-          ),
-          quantity: quantidade,
-          unit_price: precoFinal,
-          currency_id: 'BRL',
-        }
-      })
+    quantity: quantidade,
+
+    unit_price: precoFinal,
+
+    currency_id: 'BRL',
+  }
+})
 
       /* ============================= */
       /* VALIDAÇÃO SEGURA              */
