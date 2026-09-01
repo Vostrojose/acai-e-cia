@@ -4,7 +4,11 @@ import path from 'path'
 
 class PdfService {
   async gerarPdfTeste() {
-    const pastaRelatorios = path.resolve(process.cwd(), 'uploads', 'relatorios')
+    const pastaRelatorios = path.resolve(
+      process.cwd(),
+      'uploads',
+      'relatorios',
+    )
 
     if (!fs.existsSync(pastaRelatorios)) {
       fs.mkdirSync(pastaRelatorios, {
@@ -44,8 +48,16 @@ class PdfService {
     })
   }
 
-  async gerarPdfRelatorio(nomeArquivo: string, dados: any) {
-    const pastaRelatorios = path.resolve(process.cwd(), 'uploads', 'relatorios')
+  async gerarPdfRelatorio(
+    nomeArquivo: string,
+    dados: any,
+    emailsEnviados: string[] = [],
+  ) {
+    const pastaRelatorios = path.resolve(
+      process.cwd(),
+      'uploads',
+      'relatorios',
+    )
 
     if (!fs.existsSync(pastaRelatorios)) {
       fs.mkdirSync(pastaRelatorios, {
@@ -68,6 +80,7 @@ class PdfService {
 
     doc.fontSize(16)
     doc.text(`RELATÓRIO ${dados.tipo}`)
+
     const moeda = (valor: number) =>
       valor.toLocaleString('pt-BR', {
         style: 'currency',
@@ -89,13 +102,17 @@ class PdfService {
 
     doc.fontSize(12)
 
-    doc.text(`Movimentação Total: ${moeda(dados.movimentacaoTotal)}`)
+    doc.text(
+      `Movimentação Total: ${moeda(dados.movimentacaoTotal)}`,
+    )
 
     doc.text(`Recebido: ${moeda(dados.recebido)}`)
 
     doc.text(`Fiados: ${moeda(dados.fiados)}`)
 
-    doc.text(`Aguardando Pagamento: ${moeda(dados.aguardandoPagamento)}`)
+    doc.text(
+      `Aguardando Pagamento: ${moeda(dados.aguardandoPagamento)}`,
+    )
 
     doc.text(`Cancelados: ${moeda(dados.cancelados)}`)
 
@@ -114,7 +131,10 @@ class PdfService {
 
     doc.text(`Produto Mais Vendido: ${dados.produtoTop}`)
 
-    doc.text(`Quantidade Vendida: ${dados.quantidadeProdutoTop}`)
+    doc.text(
+      `Quantidade Vendida: ${dados.quantidadeProdutoTop}`,
+    )
+
     doc.moveDown()
 
     doc.fontSize(14)
@@ -125,10 +145,15 @@ class PdfService {
     doc.fontSize(12)
 
     if (dados.top5Produtos && dados.top5Produtos.length > 0) {
-      dados.top5Produtos.forEach((produto: any, index: number) => {
-        doc.text(`${index + 1}º - ${produto.nome} (${produto.quantidade})`)
-      })
+      dados.top5Produtos.forEach(
+        (produto: any, index: number) => {
+          doc.text(
+            `${index + 1}º - ${produto.nome} (${produto.quantidade})`,
+          )
+        },
+      )
     }
+
     doc.moveDown()
 
     doc.fontSize(14)
@@ -140,13 +165,34 @@ class PdfService {
 
     doc.text(`Pedidos Balcão: ${dados.pedidosBalcao}`)
 
-    doc.text(`Faturamento Balcão: ${moeda(dados.vendasBalcao)}`)
+    doc.text(
+      `Faturamento Balcão: ${moeda(dados.vendasBalcao)}`,
+    )
 
     doc.moveDown(0.5)
 
     doc.text(`Pedidos Online: ${dados.pedidosOnline}`)
 
-    doc.text(`Faturamento Online: ${moeda(dados.vendasOnline)}`)
+    doc.text(
+      `Faturamento Online: ${moeda(dados.vendasOnline)}`,
+    )
+
+    // NOVO: destinatários do relatório
+    if (emailsEnviados.length > 0) {
+      doc.moveDown()
+
+      doc.fontSize(14)
+      doc.text('ENVIO DO RELATÓRIO')
+
+      doc.moveDown(0.5)
+
+      doc.fontSize(12)
+      doc.text('Relatório enviado para:')
+
+      emailsEnviados.forEach((email) => {
+        doc.text(`• ${email}`)
+      })
+    }
 
     doc.end()
 
@@ -158,6 +204,7 @@ class PdfService {
       stream.on('error', reject)
     })
   }
+
   async existeArquivo(caminho: string) {
     return fs.existsSync(caminho)
   }

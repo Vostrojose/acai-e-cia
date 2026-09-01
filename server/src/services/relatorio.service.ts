@@ -199,6 +199,12 @@ class RelatorioService {
       quantidadeProdutoTop,
       top5Produtos,
     }
+
+    const emailsEnviados = [
+  process.env.RELATORIO_EMAIL_PRINCIPAL,
+  process.env.RELATORIO_EMAIL_COPIA,
+  process.env.RELATORIO_EMAIL_COPIA2,
+].filter((email): email is string => Boolean(email))
     const nomeArquivo = `relatorio-${tipo.toLowerCase()}-${referencia}.pdf`
 
     const arquivoPdf = await pdfService.gerarPdfRelatorio(nomeArquivo, {
@@ -235,7 +241,9 @@ class RelatorioService {
 
       quantidadeProdutoTop,
       top5Produtos,
-    })
+    },
+  emailsEnviados,
+)
 
     const relatorio = await prisma.relatorio.upsert({
       where: {
@@ -245,29 +253,33 @@ class RelatorioService {
         },
       },
 
-      update: {
-        dados,
+     update: {
+  dados,
 
-        periodoInicio,
+  periodoInicio,
 
-        periodoFim,
+  periodoFim,
 
-        arquivoPdf,
-      },
+  arquivoPdf,
 
-      create: {
-        tipo,
+  emailsEnviados,
+},
 
-        referencia,
+    create: {
+  tipo,
 
-        periodoInicio,
+  referencia,
 
-        periodoFim,
+  periodoInicio,
 
-        dados,
+  periodoFim,
 
-        arquivoPdf,
-      },
+  dados,
+
+  arquivoPdf,
+
+  emailsEnviados,
+},
     })
 
     await prisma.execucaoRelatorio.upsert({

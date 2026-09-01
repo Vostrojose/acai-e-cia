@@ -252,6 +252,8 @@ model Relatorio {
 
   enviadoEmail Boolean @default(false)
 
+  emailsEnviados Json?
+
   enviadoWhatsapp Boolean @default(false)
 
   ultimoWhatsappEnviadoEm DateTime?
