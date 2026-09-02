@@ -82,3 +82,19 @@ button:focus-visible {
 .card-status-novo-alerta {
   animation: piscarNovoPedido 1s infinite;
 }
+@keyframes piscarPedidoNovo {
+  0%,
+  100% {
+    border-color: #333;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  50% {
+    border-color: #ff0000;
+    box-shadow: 0 0 28px rgba(255, 0, 0, 0.95);
+  }
+}
+
+.pedido-novo-alerta {
+  animation: piscarPedidoNovo 1s infinite;
+}

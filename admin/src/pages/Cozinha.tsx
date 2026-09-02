@@ -61,7 +61,7 @@ export default function Cozinha() {
     }
   }, [])
 
-    // Verifica automaticamente se existe uma nova versão do Admin publicada.
+  // Verifica automaticamente se existe uma nova versão do Admin publicada.
   // Se detectar uma versão diferente, recarrega a tela sem intervenção manual.
   useEffect(() => {
     let verificando = false
@@ -99,11 +99,7 @@ export default function Cozinha() {
         const versaoAtual = scriptsAtuais.join('|')
         const versaoPublicada = scriptsPublicados.join('|')
 
-        if (
-          versaoAtual &&
-          versaoPublicada &&
-          versaoAtual !== versaoPublicada
-        ) {
+        if (versaoAtual && versaoPublicada && versaoAtual !== versaoPublicada) {
           console.log('Nova versão do Admin detectada. Atualizando tela...')
           window.location.reload()
         }
@@ -114,10 +110,7 @@ export default function Cozinha() {
       }
     }
 
-    const intervaloVersao = window.setInterval(
-      verificarNovaVersao,
-      60 * 1000,
-    )
+    const intervaloVersao = window.setInterval(verificarNovaVersao, 60 * 1000)
 
     return () => {
       window.clearInterval(intervaloVersao)
@@ -664,6 +657,7 @@ function PedidoCard({ pedido, setPedidos, abrirLoginCancelamento }: any) {
 
   return (
     <div
+      className={pedido.status === 'RECEBIDO' ? 'pedido-novo-alerta' : ''}
       style={{
         ...theme.card,
         background: 'linear-gradient(135deg, #1e1e1e, #2a2a2a)',
