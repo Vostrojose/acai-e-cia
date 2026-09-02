@@ -5,72 +5,10 @@ import emailService from './email.service'
 import securityLogService from './securityLog.service'
 
 class RelatorioService {
-  private async verificarExecucaoExistente(
-    tipo: TipoRelatorio,
-    referencia: string,
-  ) {
-    return prisma.execucaoRelatorio.findUnique({
-      where: {
-        tipo_referencia: {
-          tipo,
-          referencia,
-        },
-      },
-    })
-  }
-
-  async gerarRelatorio(
-    tipo: TipoRelatorio,
-    referencia: string,
+  private async calcularDadosPeriodo(
     periodoInicio: Date,
     periodoFim: Date,
   ) {
-    const execucaoExistente = await this.verificarExecucaoExistente(
-      tipo,
-      referencia,
-    )
-
-    if (execucaoExistente) {
-      console.log(`[RELATORIOS] ${tipo} já foi gerado`)
-
-      const relatorioExistente = await prisma.relatorio.findUnique({
-        where: {
-          tipo_referencia: {
-            tipo,
-            referencia,
-          },
-        },
-      })
-
-      if (relatorioExistente) {
-        if (relatorioExistente.arquivoPdf) {
-          const existe = await pdfService.existeArquivo(
-            relatorioExistente.arquivoPdf,
-          )
-
-          if (!existe) {
-            console.log('[RELATORIOS] PDF não encontrado, regenerando...')
-          } else {
-            return relatorioExistente
-          }
-        } else {
-          console.log(
-            '[RELATORIOS] Relatório encontrado sem PDF, regenerando...',
-          )
-        }
-      }
-    }
-
-    await securityLogService.registrar({
-      tipo: 'RELATORIO',
-      acao: `GERAR_${tipo}`,
-      detalhes: {
-        referencia,
-        periodoInicio,
-        periodoFim,
-      },
-    })
-
     const pedidos = await prisma.pedido.findMany({
       where: {
         status: 'ENTREGUE',
@@ -79,7 +17,6 @@ class RelatorioService {
           lte: periodoFim,
         },
       },
-
       include: {
         itens: {
           select: {
@@ -109,6 +46,7 @@ class RelatorioService {
 
     let vendasBalcao = 0
     let vendasOnline = 0
+
     const produtosMap = new Map<string, number>()
 
     for (const pedido of pedidos) {
@@ -139,11 +77,12 @@ class RelatorioService {
       } else {
         totalDinheiro += valor
       }
-    }
 
-    for (const pedido of pedidos) {
       for (const item of pedido.itens) {
-        const nome = item.nomeProduto || item.produto?.nome || 'Produto'
+        const nome =
+          item.nomeProduto ||
+          item.produto?.nome ||
+          'Produto'
 
         produtosMap.set(
           nome,
@@ -155,11 +94,6 @@ class RelatorioService {
     let produtoTop = 'Nenhum'
     let quantidadeProdutoTop = 0
 
-    let top5Produtos: {
-      nome: string
-      quantidade: number
-    }[] = []
-
     for (const [nome, quantidade] of produtosMap.entries()) {
       if (quantidade > quantidadeProdutoTop) {
         produtoTop = nome
@@ -167,7 +101,7 @@ class RelatorioService {
       }
     }
 
-    top5Produtos = [...produtosMap.entries()]
+    const top5Produtos = [...produtosMap.entries()]
       .map(([nome, quantidade]) => ({
         nome,
         quantidade,
@@ -176,9 +110,11 @@ class RelatorioService {
       .slice(0, 5)
 
     const ticketMedio =
-      pedidos.length > 0 ? movimentacaoTotal / pedidos.length : 0
+      pedidos.length > 0
+        ? movimentacaoTotal / pedidos.length
+        : 0
 
-    const dados = {
+    return {
       movimentacaoTotal,
       recebido,
       fiados,
@@ -197,66 +133,159 @@ class RelatorioService {
       quantidadeProdutoTop,
       top5Produtos,
     }
+  }
 
-    const emailsEnviados = [
-      process.env.RELATORIO_EMAIL_PRINCIPAL,
-      process.env.RELATORIO_EMAIL_COPIA,
-      process.env.RELATORIO_EMAIL_COPIA2,
-    ].filter((email): email is string => Boolean(email))
-
-    const nomeArquivo = `relatorio-${tipo.toLowerCase()}-${referencia}.pdf`
-
-    const arquivoPdf = await pdfService.gerarPdfRelatorio(
-      nomeArquivo,
-      {
-        tipo,
-        movimentacaoTotal,
-        recebido,
-        fiados,
-        aguardandoPagamento,
-        cancelados,
-        totalPix,
-        totalDinheiro,
-        totalCredito,
-        pedidos: pedidos.length,
-        pedidosBalcao,
-        pedidosOnline,
-        vendasBalcao,
-        vendasOnline,
-        ticketMedio,
-        produtoTop,
-        quantidadeProdutoTop,
-        top5Produtos,
-      },
-      emailsEnviados,
-    )
-
-    const relatorio = await prisma.relatorio.upsert({
+  private async verificarExecucaoExistente(
+    tipo: TipoRelatorio,
+    referencia: string,
+  ) {
+    return prisma.execucaoRelatorio.findUnique({
       where: {
         tipo_referencia: {
           tipo,
           referencia,
         },
       },
+    })
+  }
 
-      update: {
-        dados,
-        periodoInicio,
-        periodoFim,
-        arquivoPdf,
-        emailsEnviados,
-      },
-
-      create: {
+ async gerarRelatorio(
+  tipo: TipoRelatorio,
+  referencia: string,
+  periodoInicio: Date,
+  periodoFim: Date,
+  complementos?: {
+    resumoUltimoDia?: {
+      titulo: string
+      periodoInicio: Date
+      periodoFim: Date
+      dados: any
+    }
+    resumoUltimaSemana?: {
+      titulo: string
+      periodoInicio: Date
+      periodoFim: Date
+      dados: any
+    }
+  },
+) {
+    const execucaoExistente =
+      await this.verificarExecucaoExistente(
         tipo,
+        referencia,
+      )
+
+    if (execucaoExistente) {
+      console.log(`[RELATORIOS] ${tipo} já foi gerado`)
+
+      const relatorioExistente =
+        await prisma.relatorio.findUnique({
+          where: {
+            tipo_referencia: {
+              tipo,
+              referencia,
+            },
+          },
+        })
+
+      if (relatorioExistente) {
+        if (relatorioExistente.arquivoPdf) {
+          const existe =
+            await pdfService.existeArquivo(
+              relatorioExistente.arquivoPdf,
+            )
+
+          if (!existe) {
+            console.log(
+              '[RELATORIOS] PDF não encontrado, regenerando...',
+            )
+          } else {
+            return relatorioExistente
+          }
+        } else {
+          console.log(
+            '[RELATORIOS] Relatório encontrado sem PDF, regenerando...',
+          )
+        }
+      }
+    }
+
+    await securityLogService.registrar({
+      tipo: 'RELATORIO',
+      acao: `GERAR_${tipo}`,
+      detalhes: {
         referencia,
         periodoInicio,
         periodoFim,
-        dados,
-        arquivoPdf,
-        emailsEnviados,
       },
     })
+
+    /*
+     * A partir daqui usamos o cálculo centralizado.
+     *
+     * Isso evita manter duas implementações diferentes
+     * para calcular os dados dos relatórios.
+     */
+    const dadosPeriodo =
+      await this.calcularDadosPeriodo(
+        periodoInicio,
+        periodoFim,
+      )
+
+ const dados = {
+  ...dadosPeriodo,
+  resumoUltimoDia: complementos?.resumoUltimoDia,
+  resumoUltimaSemana: complementos?.resumoUltimaSemana,
+}
+    const emailsEnviados = [
+      process.env.RELATORIO_EMAIL_PRINCIPAL,
+      process.env.RELATORIO_EMAIL_COPIA,
+      process.env.RELATORIO_EMAIL_COPIA2,
+    ].filter(
+      (email): email is string => Boolean(email),
+    )
+
+    const nomeArquivo = `relatorio-${tipo.toLowerCase()}-${referencia}.pdf`
+
+   const arquivoPdf =
+  await pdfService.gerarPdfRelatorio(
+    nomeArquivo,
+    {
+      tipo,
+      ...dadosPeriodo,
+      resumoUltimoDia: complementos?.resumoUltimoDia,
+      resumoUltimaSemana: complementos?.resumoUltimaSemana,
+    },
+    emailsEnviados,
+  )
+
+    const relatorio =
+      await prisma.relatorio.upsert({
+        where: {
+          tipo_referencia: {
+            tipo,
+            referencia,
+          },
+        },
+
+        update: {
+          dados,
+          periodoInicio,
+          periodoFim,
+          arquivoPdf,
+          emailsEnviados,
+        },
+
+        create: {
+          tipo,
+          referencia,
+          periodoInicio,
+          periodoFim,
+          dados,
+          arquivoPdf,
+          emailsEnviados,
+        },
+      })
 
     await prisma.execucaoRelatorio.upsert({
       where: {
@@ -287,8 +316,9 @@ class RelatorioService {
       entidadeId: relatorio.id,
       detalhes: {
         referencia,
-        movimentacaoTotal,
-        pedidos: pedidos.length,
+        movimentacaoTotal:
+          dadosPeriodo.movimentacaoTotal,
+        pedidos: dadosPeriodo.pedidos,
       },
     })
 
@@ -314,7 +344,9 @@ class RelatorioService {
 
     const referencia = `${brasilia.getFullYear()}-${String(
       brasilia.getMonth() + 1,
-    ).padStart(2, '0')}-${String(brasilia.getDate()).padStart(2, '0')}`
+    ).padStart(2, '0')}-${String(
+      brasilia.getDate(),
+    ).padStart(2, '0')}`
 
     return this.gerarRelatorio(
       TipoRelatorio.DIARIO,
@@ -324,68 +356,175 @@ class RelatorioService {
     )
   }
 
-  async gerarRelatorioSemanal() {
-    const hoje = new Date()
+async gerarRelatorioSemanal() {
+  const hoje = new Date()
 
-    const brasilia = new Date(
-      hoje.toLocaleString('en-US', {
-        timeZone: 'America/Sao_Paulo',
-      }),
+  const brasilia = new Date(
+    hoje.toLocaleString('en-US', {
+      timeZone: 'America/Sao_Paulo',
+    }),
+  )
+
+  const fim = new Date(brasilia)
+
+  fim.setHours(20, 0, 0, 0)
+
+  const diaSemana = fim.getDay()
+
+  const diasDesdeSabado =
+    diaSemana === 6 ? 0 : diaSemana + 1
+
+  fim.setDate(
+    fim.getDate() - diasDesdeSabado,
+  )
+
+  const inicio = new Date(fim)
+
+  inicio.setDate(inicio.getDate() - 7)
+  inicio.setHours(0, 0, 0, 0)
+
+  /*
+   * Resumo do último dia da semana.
+   *
+   * O fechamento semanal acontece no sábado às 20:00.
+   */
+  const inicioUltimoDia = new Date(fim)
+  inicioUltimoDia.setHours(0, 0, 0, 0)
+
+  const fimUltimoDia = new Date(fim)
+
+  const dadosUltimoDia =
+    await this.calcularDadosPeriodo(
+      inicioUltimoDia,
+      fimUltimoDia,
     )
 
-    const fim = new Date(brasilia)
+  const referencia =
+    fim.toISOString().split('T')[0]
 
-    fim.setHours(20, 0, 0, 0)
+  return this.gerarRelatorio(
+    TipoRelatorio.SEMANAL,
+    referencia,
+    inicio,
+    fim,
+    {
+      resumoUltimoDia: {
+        titulo: 'RESUMO DO ÚLTIMO DIA DA SEMANA',
+        periodoInicio: inicioUltimoDia,
+        periodoFim: fimUltimoDia,
+        dados: dadosUltimoDia,
+      },
+    },
+  )
+}
+async gerarRelatorioMensal() {
+  const hoje = new Date()
 
-    const diaSemana = fim.getDay()
+  const brasilia = new Date(
+    hoje.toLocaleString('en-US', {
+      timeZone: 'America/Sao_Paulo',
+    }),
+  )
 
-    const diasDesdeSabado = diaSemana === 6 ? 0 : diaSemana + 1
+  const ano = brasilia.getFullYear()
+  const mes = brasilia.getMonth()
 
-    fim.setDate(fim.getDate() - diasDesdeSabado)
+  const inicio = new Date(
+    ano,
+    mes,
+    1,
+    0,
+    0,
+    0,
+    0,
+  )
 
-    const inicio = new Date(fim)
+  const fim = new Date(brasilia)
 
-    inicio.setDate(inicio.getDate() - 7)
+  /*
+   * Resumo do último dia do mês.
+   *
+   * Quando executado automaticamente, o scheduler
+   * chama este relatório às 20:00 do último dia.
+   */
+  const inicioUltimoDia = new Date(fim)
+  inicioUltimoDia.setHours(0, 0, 0, 0)
 
-    inicio.setHours(0, 0, 0, 0)
+  const fimUltimoDia = new Date(fim)
 
-    const referencia = fim.toISOString().split('T')[0]
-
-    return this.gerarRelatorio(
-      TipoRelatorio.SEMANAL,
-      referencia,
-      inicio,
-      fim,
+  const dadosUltimoDia =
+    await this.calcularDadosPeriodo(
+      inicioUltimoDia,
+      fimUltimoDia,
     )
+
+  const complementos: {
+    resumoUltimoDia?: {
+      titulo: string
+      periodoInicio: Date
+      periodoFim: Date
+      dados: any
+    }
+    resumoUltimaSemana?: {
+      titulo: string
+      periodoInicio: Date
+      periodoFim: Date
+      dados: any
+    }
+  } = {
+    resumoUltimoDia: {
+      titulo: 'RESUMO DO ÚLTIMO DIA DO MÊS',
+      periodoInicio: inicioUltimoDia,
+      periodoFim: fimUltimoDia,
+      dados: dadosUltimoDia,
+    },
   }
 
-  async gerarRelatorioMensal() {
-    const hoje = new Date()
+  /*
+   * Sábado é o fechamento da semana no sistema.
+   *
+   * Portanto, se o último dia do mês cair no sábado,
+   * também acrescentamos o resumo da última semana.
+   */
+  if (fim.getDay() === 6) {
+    const fimUltimaSemana = new Date(fim)
+    fimUltimaSemana.setHours(20, 0, 0, 0)
 
-    const brasilia = new Date(
-      hoje.toLocaleString('en-US', {
-        timeZone: 'America/Sao_Paulo',
-      }),
+    const inicioUltimaSemana =
+      new Date(fimUltimaSemana)
+
+    inicioUltimaSemana.setDate(
+      inicioUltimaSemana.getDate() - 7,
     )
 
-    const ano = brasilia.getFullYear()
+    inicioUltimaSemana.setHours(0, 0, 0, 0)
 
-    const mes = brasilia.getMonth()
+    const dadosUltimaSemana =
+      await this.calcularDadosPeriodo(
+        inicioUltimaSemana,
+        fimUltimaSemana,
+      )
 
-    const inicio = new Date(ano, mes, 1, 0, 0, 0, 0)
-
-    const fim = new Date(brasilia)
-
-    const referencia = `${ano}-${String(mes + 1).padStart(2, '0')}`
-
-    return this.gerarRelatorio(
-      TipoRelatorio.MENSAL,
-      referencia,
-      inicio,
-      fim,
-    )
+    complementos.resumoUltimaSemana = {
+      titulo: 'RESUMO DA ÚLTIMA SEMANA',
+      periodoInicio: inicioUltimaSemana,
+      periodoFim: fimUltimaSemana,
+      dados: dadosUltimaSemana,
+    }
   }
 
+  const referencia = `${ano}-${String(
+    mes + 1,
+  ).padStart(2, '0')}`
+
+  return this.gerarRelatorio(
+    TipoRelatorio.MENSAL,
+    referencia,
+    inicio,
+    fim,
+    complementos,
+  )
+}
   async listarRelatorios() {
     return prisma.relatorio.findMany({
       orderBy: {
@@ -402,12 +541,15 @@ class RelatorioService {
     })
   }
 
-  async enviarRelatorioPorEmail(relatorioId: string) {
-    const relatorio = await prisma.relatorio.findUnique({
-      where: {
-        id: relatorioId,
-      },
-    })
+  async enviarRelatorioPorEmail(
+    relatorioId: string,
+  ) {
+    const relatorio =
+      await prisma.relatorio.findUnique({
+        where: {
+          id: relatorioId,
+        },
+      })
 
     if (!relatorio) {
       throw new Error('Relatório não encontrado')
@@ -457,25 +599,34 @@ class RelatorioService {
   }
 
   async gerarEEnviarRelatorioDiario() {
-    const relatorio = await this.gerarRelatorioDiario()
+    const relatorio =
+      await this.gerarRelatorioDiario()
 
-    await this.enviarRelatorioPorEmail(relatorio.id)
+    await this.enviarRelatorioPorEmail(
+      relatorio.id,
+    )
 
     return relatorio
   }
 
   async gerarEEnviarRelatorioSemanal() {
-    const relatorio = await this.gerarRelatorioSemanal()
+    const relatorio =
+      await this.gerarRelatorioSemanal()
 
-    await this.enviarRelatorioPorEmail(relatorio.id)
+    await this.enviarRelatorioPorEmail(
+      relatorio.id,
+    )
 
     return relatorio
   }
 
   async gerarEEnviarRelatorioMensal() {
-    const relatorio = await this.gerarRelatorioMensal()
+    const relatorio =
+      await this.gerarRelatorioMensal()
 
-    await this.enviarRelatorioPorEmail(relatorio.id)
+    await this.enviarRelatorioPorEmail(
+      relatorio.id,
+    )
 
     return relatorio
   }
