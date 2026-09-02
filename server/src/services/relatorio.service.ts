@@ -31,7 +31,7 @@ class RelatorioService {
     )
 
     if (execucaoExistente) {
-      console.log(`[RELATORIOS] ${tipo} ${referencia} já foi gerado`)
+      console.log(`[RELATORIOS] ${tipo} já foi gerado`)
 
       const relatorioExistente = await prisma.relatorio.findUnique({
         where: {
@@ -60,22 +60,20 @@ class RelatorioService {
         }
       }
     }
+
     await securityLogService.registrar({
       tipo: 'RELATORIO',
       acao: `GERAR_${tipo}`,
-
       detalhes: {
         referencia,
         periodoInicio,
         periodoFim,
       },
     })
+
     const pedidos = await prisma.pedido.findMany({
       where: {
-        origem: 'BALCAO',
-
         status: 'ENTREGUE',
-
         criadoEm: {
           gte: periodoInicio,
           lte: periodoFim,
@@ -96,6 +94,7 @@ class RelatorioService {
         },
       },
     })
+
     let movimentacaoTotal = 0
     let recebido = 0
     let fiados = 0
@@ -115,10 +114,18 @@ class RelatorioService {
     for (const pedido of pedidos) {
       const valor = Number(pedido.total)
 
-      pedidosBalcao++
-      vendasBalcao += valor
-
       movimentacaoTotal += valor
+
+      if (pedido.origem === 'BALCAO') {
+        pedidosBalcao++
+        vendasBalcao += valor
+      } else if (
+        pedido.origem === 'APP' ||
+        pedido.origem === 'QR_CODE'
+      ) {
+        pedidosOnline++
+        vendasOnline += valor
+      }
 
       if (pedido.formaPagamentoBalcao === 'FIADO') {
         fiados += valor
@@ -138,12 +145,16 @@ class RelatorioService {
       for (const item of pedido.itens) {
         const nome = item.nomeProduto || item.produto?.nome || 'Produto'
 
-        produtosMap.set(nome, (produtosMap.get(nome) || 0) + item.quantidade)
+        produtosMap.set(
+          nome,
+          (produtosMap.get(nome) || 0) + item.quantidade,
+        )
       }
     }
 
     let produtoTop = 'Nenhum'
     let quantidadeProdutoTop = 0
+
     let top5Produtos: {
       nome: string
       quantidade: number
@@ -166,84 +177,59 @@ class RelatorioService {
 
     const ticketMedio =
       pedidos.length > 0 ? movimentacaoTotal / pedidos.length : 0
+
     const dados = {
       movimentacaoTotal,
-
       recebido,
-
       fiados,
-
       aguardandoPagamento,
-
       cancelados,
       totalPix,
-
       totalDinheiro,
-
       totalCredito,
-
       pedidos: pedidos.length,
-
       pedidosBalcao,
-
       pedidosOnline,
-
       vendasBalcao,
-
       vendasOnline,
-
       ticketMedio,
-
       produtoTop,
-
       quantidadeProdutoTop,
       top5Produtos,
     }
 
     const emailsEnviados = [
-  process.env.RELATORIO_EMAIL_PRINCIPAL,
-  process.env.RELATORIO_EMAIL_COPIA,
-  process.env.RELATORIO_EMAIL_COPIA2,
-].filter((email): email is string => Boolean(email))
+      process.env.RELATORIO_EMAIL_PRINCIPAL,
+      process.env.RELATORIO_EMAIL_COPIA,
+      process.env.RELATORIO_EMAIL_COPIA2,
+    ].filter((email): email is string => Boolean(email))
+
     const nomeArquivo = `relatorio-${tipo.toLowerCase()}-${referencia}.pdf`
 
-    const arquivoPdf = await pdfService.gerarPdfRelatorio(nomeArquivo, {
-      tipo,
-
-      movimentacaoTotal,
-
-      recebido,
-
-      fiados,
-
-      aguardandoPagamento,
-
-      cancelados,
-      totalPix,
-
-      totalDinheiro,
-
-      totalCredito,
-
-      pedidos: pedidos.length,
-
-      pedidosBalcao,
-
-      pedidosOnline,
-
-      vendasBalcao,
-
-      vendasOnline,
-
-      ticketMedio,
-
-      produtoTop,
-
-      quantidadeProdutoTop,
-      top5Produtos,
-    },
-  emailsEnviados,
-)
+    const arquivoPdf = await pdfService.gerarPdfRelatorio(
+      nomeArquivo,
+      {
+        tipo,
+        movimentacaoTotal,
+        recebido,
+        fiados,
+        aguardandoPagamento,
+        cancelados,
+        totalPix,
+        totalDinheiro,
+        totalCredito,
+        pedidos: pedidos.length,
+        pedidosBalcao,
+        pedidosOnline,
+        vendasBalcao,
+        vendasOnline,
+        ticketMedio,
+        produtoTop,
+        quantidadeProdutoTop,
+        top5Produtos,
+      },
+      emailsEnviados,
+    )
 
     const relatorio = await prisma.relatorio.upsert({
       where: {
@@ -253,33 +239,23 @@ class RelatorioService {
         },
       },
 
-     update: {
-  dados,
+      update: {
+        dados,
+        periodoInicio,
+        periodoFim,
+        arquivoPdf,
+        emailsEnviados,
+      },
 
-  periodoInicio,
-
-  periodoFim,
-
-  arquivoPdf,
-
-  emailsEnviados,
-},
-
-    create: {
-  tipo,
-
-  referencia,
-
-  periodoInicio,
-
-  periodoFim,
-
-  dados,
-
-  arquivoPdf,
-
-  emailsEnviados,
-},
+      create: {
+        tipo,
+        referencia,
+        periodoInicio,
+        periodoFim,
+        dados,
+        arquivoPdf,
+        emailsEnviados,
+      },
     })
 
     await prisma.execucaoRelatorio.upsert({
@@ -307,10 +283,8 @@ class RelatorioService {
     await securityLogService.registrar({
       tipo: 'RELATORIO',
       acao: `GERADO_${tipo}`,
-
       entidade: 'RELATORIO',
       entidadeId: relatorio.id,
-
       detalhes: {
         referencia,
         movimentacaoTotal,
@@ -342,7 +316,12 @@ class RelatorioService {
       brasilia.getMonth() + 1,
     ).padStart(2, '0')}-${String(brasilia.getDate()).padStart(2, '0')}`
 
-    return this.gerarRelatorio(TipoRelatorio.DIARIO, referencia, inicio, fim)
+    return this.gerarRelatorio(
+      TipoRelatorio.DIARIO,
+      referencia,
+      inicio,
+      fim,
+    )
   }
 
   async gerarRelatorioSemanal() {
@@ -372,7 +351,12 @@ class RelatorioService {
 
     const referencia = fim.toISOString().split('T')[0]
 
-    return this.gerarRelatorio(TipoRelatorio.SEMANAL, referencia, inicio, fim)
+    return this.gerarRelatorio(
+      TipoRelatorio.SEMANAL,
+      referencia,
+      inicio,
+      fim,
+    )
   }
 
   async gerarRelatorioMensal() {
@@ -394,8 +378,14 @@ class RelatorioService {
 
     const referencia = `${ano}-${String(mes + 1).padStart(2, '0')}`
 
-    return this.gerarRelatorio(TipoRelatorio.MENSAL, referencia, inicio, fim)
+    return this.gerarRelatorio(
+      TipoRelatorio.MENSAL,
+      referencia,
+      inicio,
+      fim,
+    )
   }
+
   async listarRelatorios() {
     return prisma.relatorio.findMany({
       orderBy: {
@@ -437,7 +427,9 @@ class RelatorioService {
         relatorio.arquivoPdf,
       )
 
-      console.log(`[EMAIL] Relatório ${relatorio.tipo} enviado com sucesso`)
+      console.log(
+        `[EMAIL] Relatório ${relatorio.tipo} enviado com sucesso`,
+      )
     } catch (error) {
       console.error(
         `[EMAIL] Falha ao enviar relatório ${relatorio.tipo}`,
@@ -446,7 +438,11 @@ class RelatorioService {
 
       throw error
     }
-    console.log(`[EMAIL] Relatório ${relatorio.tipo} enviado com sucesso`)
+
+    console.log(
+      `[EMAIL] Relatório ${relatorio.tipo} enviado com sucesso`,
+    )
+
     await prisma.relatorio.update({
       where: {
         id: relatorioId,
@@ -459,6 +455,7 @@ class RelatorioService {
 
     return true
   }
+
   async gerarEEnviarRelatorioDiario() {
     const relatorio = await this.gerarRelatorioDiario()
 
