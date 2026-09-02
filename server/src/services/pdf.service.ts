@@ -25,7 +25,7 @@ class PdfService {
     doc.pipe(stream)
 
     doc.fontSize(20)
-    doc.text('AÇAÍ & COMPANHIA')
+    doc.text('AÇAÍ & COMPANY')
 
     doc.moveDown()
 
@@ -73,13 +73,24 @@ class PdfService {
 
     doc.pipe(stream)
 
-    doc.fontSize(20)
-    doc.text('AÇAÍ & COMPANHIA')
+   doc.fontSize(20)
+doc.text('AÇAÍ & COMPANY')
 
-    doc.moveDown()
+doc.moveDown()
 
-    doc.fontSize(16)
-    doc.text(`RELATÓRIO ${dados.tipo}`)
+doc.fontSize(16)
+doc.text(`RELATÓRIO ${dados.tipo}`)
+doc.moveDown(0.5)
+
+if (emailsEnviados.length > 0) {
+  doc.fontSize(12)
+  doc.text('Enviado para:')
+
+  emailsEnviados.forEach((email) => {
+    doc.text(`• ${email}`)
+  })
+}
+
 
     const moeda = (valor: number) =>
       valor.toLocaleString('pt-BR', {
@@ -177,22 +188,6 @@ class PdfService {
       `Faturamento Online: ${moeda(dados.vendasOnline)}`,
     )
 
-    // NOVO: destinatários do relatório
-    if (emailsEnviados.length > 0) {
-      doc.moveDown()
-
-      doc.fontSize(14)
-      doc.text('ENVIO DO RELATÓRIO')
-
-      doc.moveDown(0.5)
-
-      doc.fontSize(12)
-      doc.text('Relatório enviado para:')
-
-      emailsEnviados.forEach((email) => {
-        doc.text(`• ${email}`)
-      })
-    }
 
     doc.end()
 
