@@ -61,6 +61,69 @@ export default function Cozinha() {
     }
   }, [])
 
+    // Verifica automaticamente se existe uma nova versão do Admin publicada.
+  // Se detectar uma versão diferente, recarrega a tela sem intervenção manual.
+  useEffect(() => {
+    let verificando = false
+
+    async function verificarNovaVersao() {
+      if (verificando || document.visibilityState !== 'visible') return
+
+      verificando = true
+
+      try {
+        const resposta = await fetch(`/?version_check=${Date.now()}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
+        })
+
+        if (!resposta.ok) return
+
+        const htmlAtual = await resposta.text()
+
+        const scriptsAtuais = Array.from(
+          document.querySelectorAll<HTMLScriptElement>('script[src]'),
+        )
+          .map((script) => script.src)
+          .filter((src) => src.includes('/assets/'))
+
+        const scriptsPublicados = Array.from(
+          htmlAtual.matchAll(/<script[^>]+src="([^"]+)"/g),
+        )
+          .map((match) => match[1])
+          .filter((src) => src.includes('/assets/'))
+          .map((src) => new URL(src, window.location.origin).href)
+
+        const versaoAtual = scriptsAtuais.join('|')
+        const versaoPublicada = scriptsPublicados.join('|')
+
+        if (
+          versaoAtual &&
+          versaoPublicada &&
+          versaoAtual !== versaoPublicada
+        ) {
+          console.log('Nova versão do Admin detectada. Atualizando tela...')
+          window.location.reload()
+        }
+      } catch (err) {
+        console.warn('Não foi possível verificar nova versão:', err)
+      } finally {
+        verificando = false
+      }
+    }
+
+    const intervaloVersao = window.setInterval(
+      verificarNovaVersao,
+      60 * 1000,
+    )
+
+    return () => {
+      window.clearInterval(intervaloVersao)
+    }
+  }, [])
+
   useEffect(() => {
     let timeout: any
 
