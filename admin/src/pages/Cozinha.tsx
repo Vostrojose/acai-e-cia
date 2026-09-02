@@ -298,7 +298,12 @@ export default function Cozinha() {
       <div style={headerGrid}>
         <CardRelogio />
         <CardClima />
-        <CardStatus titulo="🆕 Novos" valor={novos.length} cor="#e53935" />
+        <CardStatus
+          titulo="🆕 Novos"
+          valor={novos.length}
+          cor="#e53935"
+          piscar={novos.length > 0}
+        />
         <CardStatus titulo="👨‍🍳 Preparo" valor={preparo.length} cor="#fb8c00" />
         <CardStatus titulo="✅ Prontos" valor={prontos.length} cor="#43a047" />
 
@@ -321,6 +326,7 @@ export default function Cozinha() {
         <Coluna
           titulo="🆕 NOVOS"
           pedidos={novos}
+          setPedidos={setPedidos}
           abrirLoginCancelamento={(pedido: any) => {
             setPedidoCancelar(pedido)
             setMostrarLogin(true)
@@ -330,6 +336,7 @@ export default function Cozinha() {
         <Coluna
           titulo="👨‍🍳 PREPARO"
           pedidos={preparo}
+          setPedidos={setPedidos}
           abrirLoginCancelamento={(pedido: any) => {
             setPedidoCancelar(pedido)
             setMostrarLogin(true)
@@ -339,6 +346,7 @@ export default function Cozinha() {
         <Coluna
           titulo="✅ PRONTOS"
           pedidos={prontos}
+          setPedidos={setPedidos}
           abrirLoginCancelamento={(pedido: any) => {
             setPedidoCancelar(pedido)
             setMostrarLogin(true)
@@ -519,9 +527,10 @@ function CardClima() {
     </div>
   )
 }
-function CardStatus({ titulo, valor, cor }: any) {
+function CardStatus({ titulo, valor, cor, piscar = false }: any) {
   return (
     <div
+      className={piscar ? 'card-status-novo-alerta' : ''}
       style={{
         flex: 1,
         background: 'linear-gradient(135deg, #1e1e1e, #2a2a2a)',
@@ -565,9 +574,17 @@ function CardStatus({ titulo, valor, cor }: any) {
   )
 }
 
-function PedidoCard({ pedido, abrirLoginCancelamento }: any) {
+function PedidoCard({ pedido, setPedidos, abrirLoginCancelamento }: any) {
   async function atualizarStatus(status: string) {
-    await api.patch(`/pedidos/${pedido.id}/status`, { status })
+    try {
+      await api.patch(`/pedidos/${pedido.id}/status`, { status })
+
+      setPedidos((atual: any[]) =>
+        atual.map((p) => (p.id === pedido.id ? { ...p, status } : p)),
+      )
+    } catch (err) {
+      console.error('Erro ao atualizar status:', err)
+    }
   }
 
   function enviarWhatsApp() {
@@ -898,7 +915,7 @@ const brandingSub: React.CSSProperties = {
   color: 'rgba(255,255,255,.65)',
 }
 
-function Coluna({ titulo, pedidos, abrirLoginCancelamento }: any) {
+function Coluna({ titulo, pedidos, setPedidos, abrirLoginCancelamento }: any) {
   return (
     <div style={theme.column}>
       <h2 style={theme.title}>{titulo}</h2>
@@ -909,6 +926,7 @@ function Coluna({ titulo, pedidos, abrirLoginCancelamento }: any) {
         <PedidoCard
           key={pedido.id}
           pedido={pedido}
+          setPedidos={setPedidos}
           abrirLoginCancelamento={abrirLoginCancelamento}
         />
       ))}

@@ -66,3 +66,19 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+@keyframes piscarNovoPedido {
+  0%,
+  100% {
+    border-color: #e53935;
+    box-shadow: 0 0 8px rgba(229, 57, 53, 0.4);
+  }
+
+  50% {
+    border-color: #ff0000;
+    box-shadow: 0 0 28px rgba(255, 0, 0, 0.95);
+  }
+}
+
+.card-status-novo-alerta {
+  animation: piscarNovoPedido 1s infinite;
+}
