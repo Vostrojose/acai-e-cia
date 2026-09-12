@@ -12,6 +12,9 @@ model Produto {
   nome      String
   descricao String?
 
+  categoria String?
+  imagem    String?
+
   preco Decimal @db.Decimal(10, 2)
   ativo Boolean @default(true)
 

@@ -8,6 +8,8 @@ interface Produto {
   id: string
   nome: string
   descricao?: string
+  categoria?: string
+  imagem?: string
   preco: number
   ativo: boolean
 
@@ -354,7 +356,25 @@ export default function Home() {
 
             return (
               <div key={produto.id} className="produto-card">
+                {produto.imagem && (
+                  <div className="produto-imagem-container">
+                    <img
+                      src={produto.imagem}
+                      alt={produto.nome}
+                      className="produto-imagem"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none'
+                      }}
+                    />
+                  </div>
+                )}
+
                 <div className="produto-info">
+                  {produto.categoria && (
+                    <div className="produto-categoria">{produto.categoria}</div>
+                  )}
+
                   <div className="produto-header">
                     <div className="produto-nome">{produto.nome}</div>
 
@@ -404,139 +424,136 @@ export default function Home() {
           <div
             className="popup-adicionais"
             onClick={(e) => e.stopPropagation()}
-            
           >
             <h3>{produtoSelecionado.nome}</h3>
             <div className="popup-conteudo">
-            {produtoSelecionado.variacoes &&
-              produtoSelecionado.variacoes.length > 0 && (
-                <div style={{ marginBottom: 20 }}>
-                  <h4>Selecione sua opção:</h4>
-                  
+              {produtoSelecionado.variacoes &&
+                produtoSelecionado.variacoes.length > 0 && (
+                  <div style={{ marginBottom: 20 }}>
+                    <h4>Selecione sua opção:</h4>
 
-                  {produtoSelecionado.variacoes
-                    .filter((v) => v.ativo)
-                    .map((v) => (
-                      <label
-                        key={v.id}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 8,
-                          marginBottom: 10,
-                        }}
-                      >
-                        <input
-                          type="radio"
-                          name="variacao"
-                          checked={variacaoSelecionada?.id === v.id}
-                          onChange={() => setVariacaoSelecionada(v)}
-                        />
-
-                        <span>
-                          {v.nome} (+R$ {Number(v.preco).toFixed(2)})
-                        </span>
-                      </label>
-                    ))}
-                </div>
-              )}
-              
-
-            {produtoSelecionado.adicionais
-              ?.filter((a) => a.ativo)
-              .map((add) => {
-                const selecionado = adicionaisSelecionados.find(
-                  (a) => a.id === add.id,
-                )
-
-                const quantidade = selecionado?.quantidade || 0
-                const gratis = Number(add.preco) === 0
-
-                return (
-                  <div
-                    key={add.id}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: 12,
-                      gap: 12,
-                    }}
-                  >
-                    <div>
-                      <strong>{add.nome}</strong>
-                      <div>+R$ {Number(add.preco).toFixed(2)}</div>
-                    </div>
-
-                    {gratis ? (
-                      <label
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 8,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={quantidade > 0}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              alterarQuantidadeAdicional(add, 1)
-                            } else {
-                              alterarQuantidadeAdicional(add, -1)
-                            }
+                    {produtoSelecionado.variacoes
+                      .filter((v) => v.ativo)
+                      .map((v) => (
+                        <label
+                          key={v.id}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 8,
+                            marginBottom: 10,
                           }}
-                        />
-                        Grátis
-                      </label>
-                    ) : (
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 10,
-                        }}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => alterarQuantidadeAdicional(add, -1)}
                         >
-                          -
-                        </button>
+                          <input
+                            type="radio"
+                            name="variacao"
+                            checked={variacaoSelecionada?.id === v.id}
+                            onChange={() => setVariacaoSelecionada(v)}
+                          />
 
-                        <span>{quantidade}</span>
-
-                        <button
-                          type="button"
-                          onClick={() => alterarQuantidadeAdicional(add, 1)}
-                        >
-                          +
-                        </button>
-                      </div>
-                    )}
+                          <span>
+                            {v.nome} (+R$ {Number(v.preco).toFixed(2)})
+                          </span>
+                        </label>
+                      ))}
                   </div>
-                )
-              })}
-            <div
-              style={{
-                marginTop: 20,
-                marginBottom: 20,
-                fontSize: 20,
-                fontWeight: 700,
-              }}
-            >
-              Total: R${' '}
-              {(
-                (variacaoSelecionada
-                  ? Number(variacaoSelecionada.preco)
-                  : produtoSelecionado.preco) +
-                adicionaisSelecionados.reduce(
-                  (soma, add) => soma + Number(add.preco) * add.quantidade,
-                  0,
-                )
-              ).toFixed(2)}
-            </div>
+                )}
+
+              {produtoSelecionado.adicionais
+                ?.filter((a) => a.ativo)
+                .map((add) => {
+                  const selecionado = adicionaisSelecionados.find(
+                    (a) => a.id === add.id,
+                  )
+
+                  const quantidade = selecionado?.quantidade || 0
+                  const gratis = Number(add.preco) === 0
+
+                  return (
+                    <div
+                      key={add.id}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: 12,
+                        gap: 12,
+                      }}
+                    >
+                      <div>
+                        <strong>{add.nome}</strong>
+                        <div>+R$ {Number(add.preco).toFixed(2)}</div>
+                      </div>
+
+                      {gratis ? (
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 8,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={quantidade > 0}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                alterarQuantidadeAdicional(add, 1)
+                              } else {
+                                alterarQuantidadeAdicional(add, -1)
+                              }
+                            }}
+                          />
+                          Grátis
+                        </label>
+                      ) : (
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10,
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => alterarQuantidadeAdicional(add, -1)}
+                          >
+                            -
+                          </button>
+
+                          <span>{quantidade}</span>
+
+                          <button
+                            type="button"
+                            onClick={() => alterarQuantidadeAdicional(add, 1)}
+                          >
+                            +
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              <div
+                style={{
+                  marginTop: 20,
+                  marginBottom: 20,
+                  fontSize: 20,
+                  fontWeight: 700,
+                }}
+              >
+                Total: R${' '}
+                {(
+                  (variacaoSelecionada
+                    ? Number(variacaoSelecionada.preco)
+                    : produtoSelecionado.preco) +
+                  adicionaisSelecionados.reduce(
+                    (soma, add) => soma + Number(add.preco) * add.quantidade,
+                    0,
+                  )
+                ).toFixed(2)}
+              </div>
             </div>
             <button
               onClick={confirmarProduto}

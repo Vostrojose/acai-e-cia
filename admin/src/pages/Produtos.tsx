@@ -32,6 +32,9 @@ export default function Produtos() {
   const [busca, setBusca] = useState('')
   const [editando, setEditando] = useState<string | null>(null)
   const [novoPreco, setNovoPreco] = useState(0)
+  const [editandoInfo, setEditandoInfo] = useState<string | null>(null)
+  const [categoriaEdicao, setCategoriaEdicao] = useState('')
+  const [imagemEdicao, setImagemEdicao] = useState('')
   const [diasEdicao, setDiasEdicao] = useState({
     disponivelDom: false,
     disponivelSeg: false,
@@ -248,6 +251,13 @@ export default function Produtos() {
       })
     })
   }
+  function iniciarEdicaoInfo(p: Produto) {
+    exigirReautenticacao(() => {
+      setEditandoInfo(p.id)
+      setCategoriaEdicao(p.categoria || '')
+      setImagemEdicao(p.imagem || '')
+    })
+  }
 
   async function salvarPreco(id: string) {
     exigirReautenticacao(async () => {
@@ -258,6 +268,31 @@ export default function Produtos() {
       })
       setEditando(null)
       carregarProdutos()
+    })
+  }
+
+  async function salvarInfo(id: string) {
+    exigirReautenticacao(async () => {
+      try {
+        await api.put(`/produtos/${id}`, {
+          categoria: categoriaEdicao.trim() || null,
+          imagem: imagemEdicao.trim() || null,
+        })
+
+        setEditandoInfo(null)
+        setCategoriaEdicao('')
+        setImagemEdicao('')
+        setMensagemSucesso('Imagem e categoria atualizadas com sucesso')
+
+        setTimeout(() => {
+          setMensagemSucesso('')
+        }, 2500)
+
+        carregarProdutos()
+      } catch (error) {
+        console.error('Erro ao salvar imagem e categoria:', error)
+        alert('Erro ao salvar imagem e categoria')
+      }
     })
   }
 
@@ -491,6 +526,88 @@ export default function Produtos() {
               <p>💰 R$ {p.preco.toFixed(2)}</p>
             )}
 
+            {editandoInfo === p.id && (
+              <div
+                style={{
+                  marginTop: 12,
+                  padding: 12,
+                  borderRadius: 8,
+                  background: 'rgba(255,255,255,0.06)',
+                }}
+              >
+                <strong
+                  style={{
+                    display: 'block',
+                    marginBottom: 10,
+                  }}
+                >
+                  🖼️ Imagem e categoria
+                </strong>
+
+                <input
+                  type="text"
+                  placeholder="Categoria — exemplo: Bebidas"
+                  value={categoriaEdicao}
+                  onChange={(e) => setCategoriaEdicao(e.target.value)}
+                  style={input}
+                />
+
+                <input
+                  type="url"
+                  placeholder="URL pública da imagem"
+                  value={imagemEdicao}
+                  onChange={(e) => setImagemEdicao(e.target.value)}
+                  style={input}
+                />
+
+                {imagemEdicao && (
+                  <img
+                    src={imagemEdicao}
+                    alt="Pré-visualização"
+                    style={{
+                      width: '100%',
+                      height: 140,
+                      objectFit: 'cover',
+                      borderRadius: 8,
+                      marginBottom: 10,
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none'
+                    }}
+                  />
+                )}
+
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: 8,
+                  }}
+                >
+                  <button
+                    onClick={() => salvarInfo(p.id)}
+                    style={{
+                      ...theme.button,
+                      ...theme.buttonSuccess,
+                    }}
+                  >
+                    💾 Salvar
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setEditandoInfo(null)
+                      setCategoriaEdicao('')
+                      setImagemEdicao('')
+                    }}
+                    style={btnDanger}
+                  >
+                    ❌ Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div style={acoes}>
               {editando !== p.id && (
                 <button onClick={() => iniciarEdicao(p)} style={btn}>
@@ -511,6 +628,18 @@ export default function Produtos() {
                   background: '#7c3aed',
                 }}
               >
+                              <button
+                disabled={editando === p.id || editandoInfo === p.id}
+                onClick={() => iniciarEdicaoInfo(p)}
+                style={{
+                  ...btn,
+                  opacity:
+                    editando === p.id || editandoInfo === p.id ? 0.5 : 1,
+                  background: '#9333ea',
+                }}
+              >
+                🖼️ Imagem e categoria
+              </button>
                 ➕ Adicionais
               </button>
               <button

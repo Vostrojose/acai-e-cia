@@ -672,3 +672,31 @@
 
   min-height: 0;
 }
+
+.produto-imagem-container {
+  width: 100%;
+  margin-bottom: 14px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f3f3f3;
+}
+
+.produto-imagem {
+  display: block;
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+}
+
+.produto-categoria {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(126, 87, 194, 0.12);
+  color: #7e57c2;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}

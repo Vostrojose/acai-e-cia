@@ -3,6 +3,8 @@ import prisma from '../lib/prisma'
 interface CriarProdutoDTO {
   nome: string
   descricao?: string
+  categoria?: string
+  imagem?: string
   preco: number
   ativo?: boolean
 
@@ -21,6 +23,8 @@ class ProdutoService {
       data: {
         nome: data.nome,
         descricao: data.descricao,
+        categoria: data.categoria,
+        imagem: data.imagem,
         preco: data.preco,
         ativo: data.ativo ?? true,
 

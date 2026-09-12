@@ -5,6 +5,10 @@ export const criarProdutoSchema = z.object({
 
   descricao: z.string().optional(),
 
+  categoria: z.string().optional(),
+
+  imagem: z.string().optional(),
+
   preco: z.number(),
 
   ativo: z.boolean().optional(),
