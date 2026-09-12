@@ -1,0 +1,73 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+import multer from 'multer'
+
+import { Request } from 'express'
+import path from 'path'
+import fs from 'fs'
+
+const pastaUploads = path.resolve(
+  process.cwd(),
+  'uploads',
+  'produtos'
+)
+
+if (!fs.existsSync(pastaUploads)) {
+  fs.mkdirSync(pastaUploads, {
+    recursive: true,
+  })
+}
+
+const storage = multer.diskStorage({
+  destination: (
+    _req: Request,
+    _file: any,
+    cb: any
+  ) => {
+    cb(null, pastaUploads)
+  },
+
+  filename: (
+    _req: Request,
+    file: any,
+    cb: any
+  ) => {
+    const nomeLimpo = file.originalname
+      .replace(/\s+/g, '-')
+      .replace(/[^\w.-]/g, '')
+
+    cb(
+      null,
+      `${Date.now()}-${nomeLimpo}`
+    )
+  },
+})
+
+const fileFilter = (
+  _req: Request,
+  file: any,
+  cb: any
+) => {
+  console.log('MIME imagem produto:', file.mimetype)
+
+  const permitido =
+    file.mimetype.startsWith('image/')
+
+  if (!permitido) {
+    return cb(
+      new Error(
+        'Somente imagens são permitidas para produtos.'
+      )
+    )
+  }
+
+  cb(null, true)
+}
+
+export const uploadProduto = multer({
+  storage,
+  fileFilter,
+
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
+})

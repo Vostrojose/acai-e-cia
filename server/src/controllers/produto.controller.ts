@@ -10,16 +10,38 @@ class ProdutoController {
   /* ============================= */
   /* CRIAR                         */
   /* ============================= */
-  criar = asyncHandler(async (req: Request, res: Response) => {
-    const data = criarProdutoSchema.parse(req.body)
+criar = asyncHandler(async (req: Request, res: Response) => {
+  const arquivo = req.file;
 
-    const produto = await produtoService.criarProduto(data)
+  const imagemUpload = arquivo
+    ? `${req.protocol}://${req.get("host")}/uploads/produtos/${arquivo.filename}`
+    : undefined;
 
-    return res.status(201).json({
-      success: true,
-      data: serializeDecimal(produto),
-    })
-  })
+  const body = {
+    ...req.body,
+    preco: Number(req.body.preco),
+    ativo: req.body.ativo === "true",
+
+    disponivelDom: req.body.disponivelDom === "true",
+    disponivelSeg: req.body.disponivelSeg === "true",
+    disponivelTer: req.body.disponivelTer === "true",
+    disponivelQua: req.body.disponivelQua === "true",
+    disponivelQui: req.body.disponivelQui === "true",
+    disponivelSex: req.body.disponivelSex === "true",
+    disponivelSab: req.body.disponivelSab === "true",
+
+    imagem: imagemUpload || req.body.imagem || undefined,
+  };
+
+  const data = criarProdutoSchema.parse(body);
+
+  const produto = await produtoService.criarProduto(data);
+
+  return res.status(201).json({
+    success: true,
+    data: serializeDecimal(produto),
+  });
+});
 
   /* ============================= */
   /* LISTAR                        */

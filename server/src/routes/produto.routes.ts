@@ -1,9 +1,10 @@
-import { Router } from "express";
-import produtoController from "../controllers/produto.controller";
-import { ensureAuthenticated } from "../middlewares/auth.middleware";
-import { ensureAdmin } from "../middlewares/ensureAdmin";
+import { Router } from 'express'
+import produtoController from '../controllers/produto.controller'
+import { ensureAuthenticated } from '../middlewares/auth.middleware'
+import { ensureAdmin } from '../middlewares/ensureAdmin'
+import { uploadProduto } from '../middlewares/uploadProduto.middleware'
 
-const router = Router();
+const router = Router()
 
 /*
 =================================
@@ -12,10 +13,10 @@ ROTAS PÚBLICAS (CLIENTES)
 */
 
 // Listar produtos
-router.get("/", produtoController.listar);
+router.get('/', produtoController.listar)
 
 // Buscar produto por ID
-router.get("/:id", produtoController.buscarPorId);
+router.get('/:id', produtoController.buscarPorId)
 
 /*
 =================================
@@ -25,34 +26,35 @@ ROTAS PROTEGIDAS (ADMIN)
 
 // Criar produto
 router.post(
-  "/",
+  '/',
   ensureAuthenticated,
   ensureAdmin,
-  produtoController.criar
-);
+  uploadProduto.single('arquivoImagem'),
+  produtoController.criar,
+)
 
 // Atualizar produto
 router.put(
-  "/:id",
+  '/:id',
   ensureAuthenticated,
   ensureAdmin,
-  produtoController.atualizar
-);
+  produtoController.atualizar,
+)
 
 // Alterar status
 router.patch(
-  "/:id/status",
+  '/:id/status',
   ensureAuthenticated,
   ensureAdmin,
-  produtoController.alterarStatus
-);
+  produtoController.alterarStatus,
+)
 
 // Deletar produto
 router.delete(
-  "/:id",
+  '/:id',
   ensureAuthenticated,
   ensureAdmin,
-  produtoController.deletar
-);
+  produtoController.deletar,
+)
 
-export default router;
+export default router
