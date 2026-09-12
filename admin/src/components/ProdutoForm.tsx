@@ -4,6 +4,8 @@ import api from "../services/api";
 export default function ProdutoForm({ onCreated, exigirLogin }: any) {
   const [nome, setNome] = useState("");
   const [descricao, setDescricao] = useState("");
+  const [categoria, setCategoria] = useState("");
+  const [imagem, setImagem] = useState("");
   const [preco, setPreco] = useState(0);
 
   const [dias, setDias] = useState({
@@ -21,28 +23,32 @@ export default function ProdutoForm({ onCreated, exigirLogin }: any) {
   }
 
   async function salvar(e: any) {
-  e.preventDefault();
+    e.preventDefault();
 
-  exigirLogin(async () => {
-    const payload = {
-      nome,
-      descricao,
-      preco,
-      ...dias,
-      ativo: true
-    };
+    exigirLogin(async () => {
+      const payload = {
+        nome,
+        descricao,
+        categoria,
+        imagem,
+        preco,
+        ...dias,
+        ativo: true
+      };
 
-    console.log("📦 PAYLOAD ENVIADO:", payload);
+      console.log("📦 PAYLOAD ENVIADO:", payload);
 
-    await api.post("/produtos", payload);
+      await api.post("/produtos", payload);
 
-    setNome("");
-    setDescricao("");
-    setPreco(0);
+      setNome("");
+      setDescricao("");
+      setCategoria("");
+      setImagem("");
+      setPreco(0);
 
-    onCreated();
-  });
-}
+      onCreated();
+    });
+  }
 
   return (
     <form onSubmit={salvar} style={{ marginTop: 20 }}>
@@ -60,6 +66,23 @@ export default function ProdutoForm({ onCreated, exigirLogin }: any) {
         placeholder="Descrição"
         value={descricao}
         onChange={(e) => setDescricao(e.target.value)}
+      />
+
+      <br />
+
+      <input
+        placeholder="Categoria — exemplo: Bebidas"
+        value={categoria}
+        onChange={(e) => setCategoria(e.target.value)}
+      />
+
+      <br />
+
+      <input
+        type="url"
+        placeholder="URL da imagem"
+        value={imagem}
+        onChange={(e) => setImagem(e.target.value)}
       />
 
       <br />
@@ -85,6 +108,7 @@ export default function ProdutoForm({ onCreated, exigirLogin }: any) {
       ))}
 
       <br />
+
       <button type="submit">Salvar</button>
     </form>
   );
