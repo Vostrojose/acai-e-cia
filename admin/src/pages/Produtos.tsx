@@ -616,32 +616,50 @@ export default function Produtos() {
               )}
 
               <button
-                disabled={editando === p.id}
-                onClick={() =>
-                  exigirReautenticacao(() =>
-                    navigate(`/produtos/${p.id}/adicionais`),
-                  )
-                }
-                style={{
-                  ...btn,
-                  opacity: editando === p.id ? 0.5 : 1,
-                  background: '#7c3aed',
-                }}
-              >
-                              <button
-                disabled={editando === p.id || editandoInfo === p.id}
-                onClick={() => iniciarEdicaoInfo(p)}
-                style={{
-                  ...btn,
-                  opacity:
-                    editando === p.id || editandoInfo === p.id ? 0.5 : 1,
-                  background: '#9333ea',
-                }}
-              >
-                🖼️ Imagem e categoria
-              </button>
-                ➕ Adicionais
-              </button>
+  type="button"
+  disabled={editando === p.id || editandoInfo === p.id}
+  onClick={() =>
+    exigirReautenticacao(() =>
+      navigate(`/produtos/${p.id}/adicionais`),
+    )
+  }
+  style={{
+    ...btn,
+    opacity:
+      editando === p.id || editandoInfo === p.id ? 0.5 : 1,
+    background: '#7c3aed',
+  }}
+>
+  ➕ Adicionais
+</button>
+
+<button
+  type="button"
+  disabled={editando === p.id || editandoInfo === p.id}
+  onClick={() => iniciarEdicaoInfo(p)}
+  style={{
+    ...btn,
+    opacity:
+      editando === p.id || editandoInfo === p.id ? 0.5 : 1,
+    background: '#9333ea',
+  }}
+>
+  🖼️ Imagem e categoria
+</button>
+
+<button
+  type="button"
+  disabled={editando === p.id || editandoInfo === p.id}
+  onClick={() => navigate(`/produtos/${p.id}/adicionais`)}
+  style={{
+    ...btn,
+    opacity:
+      editando === p.id || editandoInfo === p.id ? 0.5 : 1,
+    background: '#9333ea',
+  }}
+>
+  ➕ Adicionais
+</button>
               <button
                 disabled={editando === p.id}
                 onClick={() =>
