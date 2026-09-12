@@ -674,9 +674,11 @@
 }
 
 .produto-imagem-container {
-  width: 100%;
-  margin-bottom: 14px;
-  border-radius: 16px;
+  width: 95px;
+  height: 95px;
+  flex: 0 0 95px;
+  margin: 0;
+  border-radius: 12px;
   overflow: hidden;
   background: #f3f3f3;
 }
@@ -684,7 +686,7 @@
 .produto-imagem {
   display: block;
   width: 100%;
-  height: 190px;
+  height: 100%;
   object-fit: cover;
 }
 
