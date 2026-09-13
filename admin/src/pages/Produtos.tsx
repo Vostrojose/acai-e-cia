@@ -27,7 +27,9 @@ export default function Produtos() {
   const navigate = useNavigate()
   const timeoutRef = useRef<any>(null)
   const wakeLockRef = useRef<any>(null)
-
+  const [arquivoImagemEdicao, setArquivoImagemEdicao] = useState<File | null>(
+    null,
+  )
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [busca, setBusca] = useState('')
   const [editando, setEditando] = useState<string | null>(null)
@@ -256,6 +258,7 @@ export default function Produtos() {
       setEditandoInfo(p.id)
       setCategoriaEdicao(p.categoria || '')
       setImagemEdicao(p.imagem || '')
+      setArquivoImagemEdicao(null)
     })
   }
 
@@ -274,14 +277,21 @@ export default function Produtos() {
   async function salvarInfo(id: string) {
     exigirReautenticacao(async () => {
       try {
-        await api.put(`/produtos/${id}`, {
-          categoria: categoriaEdicao.trim() || null,
-          imagem: imagemEdicao.trim() || null,
-        })
+        const formData = new FormData()
+
+        formData.append('categoria', categoriaEdicao.trim())
+
+        if (arquivoImagemEdicao) {
+          formData.append('arquivoImagem', arquivoImagemEdicao)
+        }
+
+        await api.put(`/produtos/${id}`, formData)
 
         setEditandoInfo(null)
         setCategoriaEdicao('')
         setImagemEdicao('')
+        setArquivoImagemEdicao(null)
+
         setMensagemSucesso('Imagem e categoria atualizadas com sucesso')
 
         setTimeout(() => {
@@ -553,17 +563,19 @@ export default function Produtos() {
                 />
 
                 <input
-                  type="url"
-                  placeholder="URL pública da imagem"
-                  value={imagemEdicao}
-                  onChange={(e) => setImagemEdicao(e.target.value)}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const arquivo = e.target.files?.[0] || null
+                    setArquivoImagemEdicao(arquivo)
+                  }}
                   style={input}
                 />
 
                 {imagemEdicao && (
                   <img
                     src={imagemEdicao}
-                    alt="Pré-visualização"
+                    alt="Pré-visualização da imagem atual"
                     style={{
                       width: '100%',
                       height: 140,
@@ -599,6 +611,7 @@ export default function Produtos() {
                       setEditandoInfo(null)
                       setCategoriaEdicao('')
                       setImagemEdicao('')
+                      setArquivoImagemEdicao(null)
                     }}
                     style={btnDanger}
                   >
@@ -616,50 +629,47 @@ export default function Produtos() {
               )}
 
               <button
-  type="button"
-  disabled={editando === p.id || editandoInfo === p.id}
-  onClick={() =>
-    exigirReautenticacao(() =>
-      navigate(`/produtos/${p.id}/adicionais`),
-    )
-  }
-  style={{
-    ...btn,
-    opacity:
-      editando === p.id || editandoInfo === p.id ? 0.5 : 1,
-    background: '#7c3aed',
-  }}
->
-  ➕ Adicionais
-</button>
+                type="button"
+                disabled={editando === p.id || editandoInfo === p.id}
+                onClick={() =>
+                  exigirReautenticacao(() =>
+                    navigate(`/produtos/${p.id}/adicionais`),
+                  )
+                }
+                style={{
+                  ...btn,
+                  opacity: editando === p.id || editandoInfo === p.id ? 0.5 : 1,
+                  background: '#7c3aed',
+                }}
+              >
+                ➕ Adicionais
+              </button>
 
-<button
-  type="button"
-  disabled={editando === p.id || editandoInfo === p.id}
-  onClick={() => iniciarEdicaoInfo(p)}
-  style={{
-    ...btn,
-    opacity:
-      editando === p.id || editandoInfo === p.id ? 0.5 : 1,
-    background: '#9333ea',
-  }}
->
-  🖼️ Imagem e categoria
-</button>
+              <button
+                type="button"
+                disabled={editando === p.id || editandoInfo === p.id}
+                onClick={() => iniciarEdicaoInfo(p)}
+                style={{
+                  ...btn,
+                  opacity: editando === p.id || editandoInfo === p.id ? 0.5 : 1,
+                  background: '#9333ea',
+                }}
+              >
+                🖼️ Imagem e categoria
+              </button>
 
-<button
-  type="button"
-  disabled={editando === p.id || editandoInfo === p.id}
-  onClick={() => navigate(`/produtos/${p.id}/adicionais`)}
-  style={{
-    ...btn,
-    opacity:
-      editando === p.id || editandoInfo === p.id ? 0.5 : 1,
-    background: '#9333ea',
-  }}
->
-  ➕ Adicionais
-</button>
+              <button
+                type="button"
+                disabled={editando === p.id || editandoInfo === p.id}
+                onClick={() => navigate(`/produtos/${p.id}/adicionais`)}
+                style={{
+                  ...btn,
+                  opacity: editando === p.id || editandoInfo === p.id ? 0.5 : 1,
+                  background: '#9333ea',
+                }}
+              >
+                ➕ Adicionais
+              </button>
               <button
                 disabled={editando === p.id}
                 onClick={() =>

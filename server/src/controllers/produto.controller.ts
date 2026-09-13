@@ -116,19 +116,74 @@ criar = asyncHandler(async (req: Request, res: Response) => {
   /* ============================= */
   /* ATUALIZAR                     */
   /* ============================= */
-  atualizar = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params
+/* ============================= */
+/* ATUALIZAR                     */
+/* ============================= */
+atualizar = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params
 
-    const produto = await prisma.produto.update({
-      where: { id },
-      data: req.body,
-    })
+  const arquivo = req.file
 
-    return res.json({
-      success: true,
-      data: serializeDecimal(produto),
-    })
+  const dadosAtualizacao: Record<string, unknown> = {
+    ...req.body,
+  }
+
+  // Se um novo arquivo foi enviado, atualiza a imagem.
+  // Caso contrário, preserva a imagem já existente.
+  if (arquivo) {
+    dadosAtualizacao.imagem = `${req.protocol}://${req.get(
+      'host',
+    )}/uploads/produtos/${arquivo.filename}`
+  }
+
+  // Quando a requisição vier como multipart/form-data,
+  // valores booleanos chegam como texto.
+  const camposBooleanos = [
+    'ativo',
+    'disponivelDom',
+    'disponivelSeg',
+    'disponivelTer',
+    'disponivelQua',
+    'disponivelQui',
+    'disponivelSex',
+    'disponivelSab',
+  ]
+
+  for (const campo of camposBooleanos) {
+    if (campo in dadosAtualizacao) {
+      const valor = dadosAtualizacao[campo]
+
+      if (valor === 'true' || valor === true) {
+        dadosAtualizacao[campo] = true
+      } else if (valor === 'false' || valor === false) {
+        dadosAtualizacao[campo] = false
+      }
+    }
+  }
+
+  if ('preco' in dadosAtualizacao) {
+    dadosAtualizacao.preco = Number(dadosAtualizacao.preco)
+  }
+
+  // Não permite que um campo vazio apague a imagem existente.
+  if (
+    'imagem' in dadosAtualizacao &&
+    typeof dadosAtualizacao.imagem === 'string' &&
+    dadosAtualizacao.imagem.trim() === ''
+  ) {
+    delete dadosAtualizacao.imagem
+  }
+
+  const produto = await prisma.produto.update({
+    where: { id },
+    data: dadosAtualizacao,
   })
+
+  return res.json({
+    success: true,
+    data: serializeDecimal(produto),
+  })
+})
 
   /* ============================= */
   /* DELETAR                       */

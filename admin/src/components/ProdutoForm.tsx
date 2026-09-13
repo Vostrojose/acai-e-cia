@@ -5,7 +5,6 @@ export default function ProdutoForm({ onCreated, exigirLogin }: any) {
   const [nome, setNome] = useState("");
   const [descricao, setDescricao] = useState("");
   const [categoria, setCategoria] = useState("");
-  const [imagem, setImagem] = useState("");
   const [arquivoImagem, setArquivoImagem] = useState<File | null>(null);
   const [preco, setPreco] = useState(0);
   const [salvando, setSalvando] = useState(false);
@@ -39,9 +38,7 @@ export default function ProdutoForm({ onCreated, exigirLogin }: any) {
         formData.append("nome", nome);
         formData.append("descricao", descricao);
         formData.append("categoria", categoria);
-        formData.append("imagem", imagem);
         formData.append("preco", String(preco));
-
         formData.append("ativo", "true");
 
         Object.entries(dias).forEach(([dia, disponivel]) => {
@@ -59,7 +56,6 @@ export default function ProdutoForm({ onCreated, exigirLogin }: any) {
         setNome("");
         setDescricao("");
         setCategoria("");
-        setImagem("");
         setArquivoImagem(null);
         setPreco(0);
 
@@ -112,18 +108,10 @@ export default function ProdutoForm({ onCreated, exigirLogin }: any) {
 
       <br />
 
-      <input
-        type="url"
-        placeholder="URL externa da imagem — opcional"
-        value={imagem}
-        onChange={(e) => setImagem(e.target.value)}
-      />
-
-      <br />
-
       <label>
         Imagem do produto:
         <br />
+
         <input
           type="file"
           accept="image/*"
@@ -161,6 +149,7 @@ export default function ProdutoForm({ onCreated, exigirLogin }: any) {
             checked={dias[dia as keyof typeof dias]}
             onChange={() => toggleDia(dia)}
           />
+
           {dia.replace("disponivel", "")}
         </label>
       ))}
