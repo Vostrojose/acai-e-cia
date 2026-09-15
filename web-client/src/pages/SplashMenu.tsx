@@ -33,11 +33,11 @@ export default function SplashMenu() {
         <button onClick={() => navigate('/m/1')}>
            Fazer pedido
         </button>
-
+{/*
         <button onClick={() => navigate('/cardapio-semana/1')}>
           Cardápio da semana
         </button>
-
+*/}
         <button onClick={irParaAcompanhamento}>
            Acompanhar pedido
         </button>
