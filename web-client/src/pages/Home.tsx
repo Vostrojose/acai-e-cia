@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import api from '../services/api'
 import { useCart } from '../context/CartContext'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -48,6 +48,12 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
 
   const { adicionarItem, itens } = useCart()
+
+  const sugestaoExibidaRef = useRef(false)
+
+  const [sugestaoBebidaAberta, setSugestaoBebidaAberta] = useState(false)
+
+  const [bebidasSugeridas, setBebidasSugeridas] = useState<Produto[]>([])
 
   const totalItens = itens.reduce((total, item) => total + item.quantidade, 0)
 
@@ -137,6 +143,67 @@ export default function Home() {
     )
   }
 
+  function normalizarTexto(texto: string) {
+    return texto
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim()
+  }
+
+  function ehBebida(produto: Produto) {
+    const categoria = normalizarTexto(produto.categoria || '')
+
+    return categoria === 'bebidas geladas' || categoria === 'bebidas quentes'
+  }
+
+  function ehProdutoQueSugereBebida(produto: Produto) {
+    const categoria = normalizarTexto(produto.categoria || '')
+
+    return (
+      categoria === 'lanches' ||
+      categoria === 'bolos e doces' ||
+      categoria === 'caldos' ||
+      categoria === 'caldos e sobremesas' ||
+      categoria === 'sorvetes'
+    )
+  }
+
+  function abrirSugestaoBebida(produto: Produto) {
+    if (sugestaoExibidaRef.current) return
+
+    if (!ehProdutoQueSugereBebida(produto)) return
+
+    const jaTemBebida = itens.some((item) => {
+      const nome = normalizarTexto(item.nome)
+
+      return (
+        nome.includes('agua') ||
+        nome.includes('coca') ||
+        nome.includes('refrigerante') ||
+        nome.includes('suco') ||
+        nome.includes('cha') ||
+        nome.includes('cafe') ||
+        nome.includes('cappuccino') ||
+        nome.includes('chocolate quente') ||
+        nome.includes('milkshake') ||
+        nome.includes('coco gelado')
+      )
+    })
+
+    if (jaTemBebida) return
+
+    const bebidasDisponiveis = produtosDisponiveis.filter(ehBebida)
+
+    if (bebidasDisponiveis.length === 0) return
+
+    sugestaoExibidaRef.current = true
+
+    setBebidasSugeridas(bebidasDisponiveis)
+
+    setSugestaoBebidaAberta(true)
+  }
+
   function adicionarDireto(produto: Produto) {
     const idUnico = gerarIdItem(produto, [])
 
@@ -147,8 +214,9 @@ export default function Home() {
       preco: produto.preco,
       adicionais: [],
     })
-  }
 
+    abrirSugestaoBebida(produto)
+  }
   /* ============================= */
   /*  CORREÇÃO DEFINITIVA REAL   */
   /* ============================= */
@@ -191,6 +259,8 @@ export default function Home() {
     setAdicionaisSelecionados([])
 
     fecharPopup()
+
+    abrirSugestaoBebida(produtoSelecionado)
   }
 
   useEffect(() => {
@@ -465,8 +535,72 @@ export default function Home() {
                           </span>
                         </label>
                       ))}
+                            {sugestaoBebidaAberta && (
+        <div
+          className="popup-overlay"
+          onClick={() => setSugestaoBebidaAberta(false)}
+        >
+          <div
+            className="popup-adicionais"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3>🥤 Que tal uma bebida?</h3>
+
+            <p style={{ marginBottom: 20 }}>
+              Escolha uma bebida para acompanhar seu pedido ou continue sem
+              adicionar nada.
+            </p>
+
+            <div className="popup-conteudo">
+              {bebidasSugeridas.map((bebida) => (
+                <div
+                  key={bebida.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 12,
+                    marginBottom: 14,
+                    paddingBottom: 12,
+                    borderBottom: '1px solid rgba(255,255,255,0.1)',
+                  }}
+                >
+                  <div>
+                    <strong>{bebida.nome}</strong>
+                    <div>
+                      R$ {Number(bebida.preco).toFixed(2)}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      adicionarDireto(bebida)
+                      setSugestaoBebidaAberta(false)
+                    }}
+                  >
+                    Adicionar
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setSugestaoBebidaAberta(false)}
+              style={{
+                marginTop: 12,
+                width: '100%',
+              }}
+            >
+              Agora não
+            </button>
+          </div>
+        </div>
+      )}
                   </div>
                 )}
+                
 
               {produtoSelecionado.adicionais
                 ?.filter((a) => a.ativo)
