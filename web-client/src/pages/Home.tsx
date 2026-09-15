@@ -288,7 +288,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-
+        {/*
         <button
           className="btn-semana"
           onClick={() => navigate(`/cardapio-semana/${origem || '1'}`)}
@@ -296,6 +296,7 @@ export default function Home() {
         >
           📅
         </button>
+        */}
         <button
           className="btn-home"
           onClick={() => navigate('/')}
