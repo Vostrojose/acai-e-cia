@@ -1,55 +1,51 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Açaí & Company - Galeria Futuro, Francisco Rocha</title>
-  <link rel="stylesheet" href="styles.css" />
-</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Açaí & Company - Galeria Futuro, Francisco Rocha</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
 
-<body>
+  <body>
+    <div class="container">
+      <h1>Açaí & Co</h1>
+      <h2>Energia Natural Para o Seu Dia</h2>
 
-  <div class="container">
+      <p class="subtitle">Escolha como deseja acessar</p>
 
-    <h1>Açaí & Co</h1> 
-    <h2>Energia Natural Para o Seu Dia</h2>
+      <div class="buttons">
+        <!-- 🛒 PEDIDO -->
+        <a href="https://pedido.acaiecompanhia.com.br/m/1" class="btn primary">
+          🛒 Fazer Pedido Agora
+        </a>
 
-    <p class="subtitle">
-      Escolha como deseja acessar
-    </p>
+        <!-- 📖 CARDÁPIO -->
+        <!-- 📖 CARDÁPIO -->
+        <a
+          href="#"
+          class="btn secondary"
+          onclick="
+            alert('Esta opção está sendo preparada para você.')
+            return false
+          "
+        >
+          📖 Cardápio da Semana
+        </a>
 
-    <div class="buttons">
+        <!-- 📲 PWA INSTALL -->
+        <!-- 🔥 NÃO começa hidden (melhor UX) -->
+        <button id="appButton" class="btn download">
+          📲 Adicionar à tela inicial
+        </button>
+      </div>
 
-      <!-- 🛒 PEDIDO -->
-      <a href="https://pedido.acaiecompanhia.com.br/m/1" class="btn primary">
-        🛒 Fazer Pedido Agora
-      </a>
-
-      <!-- 📖 CARDÁPIO -->
-      <a href="https://pedido.acaiecompanhia.com.br/cardapio" class="btn secondary">
-        📖 Cardápio da Semana
-      </a>
-
-      <!-- 📲 PWA INSTALL -->
-      <!-- 🔥 NÃO começa hidden (melhor UX) -->
-      <button id="appButton" class="btn download">
-        📲 Adicionar à tela inicial
-      </button>
-
+      <p class="footer">Pagamento via Pix, Crédito ou Débito</p>
     </div>
 
-    <p class="footer">
-      Pagamento via Pix, Crédito ou Débito
-    </p>
+    <div class="developer-info">Açaí and Company 1.0.5 — PJP 2028</div>
 
-  </div>
-
-  <div class="developer-info">
-    Açaí and Company 1.0.5 — PJP 2028
-  </div>
-
-  <!-- 🔥 Script no final para garantir DOM carregado -->
-  <script src="script.js"></script>
-
-</body>
+    <!-- 🔥 Script no final para garantir DOM carregado -->
+    <script src="script.js"></script>
+  </body>
 </html>
