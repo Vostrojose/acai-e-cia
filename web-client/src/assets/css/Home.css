@@ -863,3 +863,16 @@
     padding: 8px 10px;
   }
 }
+/* Remove o logo do topo */
+.header-logo {
+  display: none;
+}
+
+/* Centraliza novamente o título e o status */
+.header-branding {
+  grid-template-columns: 1fr;
+}
+
+.header-texts {
+  grid-column: 1;
+}
