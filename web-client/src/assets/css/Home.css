@@ -605,28 +605,26 @@
 }
 .btn-home {
   position: fixed;
-
   top: 84px;
   right: 20px;
 
-  width: 54px;
-  height: 54px;
+  width: 48px;
+  height: 64px;
 
-  border-radius: 18px;
-
+  border-radius: 16px;
   border: none;
 
   background: linear-gradient(
     145deg,
-    rgba(255, 255, 255, 0.12),
-    rgba(255, 255, 255, 0.04)
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0.05)
   );
 
   backdrop-filter: blur(12px);
 
   color: #fff;
-
-  font-size: 22px;
+  font-size: 30px;
+  font-weight: 700;
 
   display: flex;
   align-items: center;
@@ -637,9 +635,7 @@
     inset 0 1px 1px rgba(255, 255, 255, 0.08);
 
   cursor: pointer;
-
   z-index: 9999;
-
   transition: all 0.2s ease;
 }
 
