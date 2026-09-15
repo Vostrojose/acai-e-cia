@@ -535,69 +535,7 @@ export default function Home() {
                           </span>
                         </label>
                       ))}
-                            {sugestaoBebidaAberta && (
-        <div
-          className="popup-overlay"
-          onClick={() => setSugestaoBebidaAberta(false)}
-        >
-          <div
-            className="popup-adicionais"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3>🥤 Que tal uma bebida?</h3>
-
-            <p style={{ marginBottom: 20 }}>
-              Escolha uma bebida para acompanhar seu pedido ou continue sem
-              adicionar nada.
-            </p>
-
-            <div className="popup-conteudo">
-              {bebidasSugeridas.map((bebida) => (
-                <div
-                  key={bebida.id}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    gap: 12,
-                    marginBottom: 14,
-                    paddingBottom: 12,
-                    borderBottom: '1px solid rgba(255,255,255,0.1)',
-                  }}
-                >
-                  <div>
-                    <strong>{bebida.nome}</strong>
-                    <div>
-                      R$ {Number(bebida.preco).toFixed(2)}
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      adicionarDireto(bebida)
-                      setSugestaoBebidaAberta(false)
-                    }}
-                  >
-                    Adicionar
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setSugestaoBebidaAberta(false)}
-              style={{
-                marginTop: 12,
-                width: '100%',
-              }}
-            >
-              Agora não
-            </button>
-          </div>
-        </div>
-      )}
+                           
                   </div>
                 )}
                 
@@ -713,6 +651,69 @@ export default function Home() {
               }}
             >
               Confirmar
+            </button>
+          </div>
+        </div>
+      )}
+       {sugestaoBebidaAberta && (
+        <div
+          className="popup-overlay"
+          onClick={() => setSugestaoBebidaAberta(false)}
+        >
+          <div
+            className="popup-adicionais"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3>🥤 Que tal uma bebida?</h3>
+
+            <p style={{ marginBottom: 20 }}>
+              Escolha uma bebida para acompanhar seu pedido ou continue sem
+              adicionar nada.
+            </p>
+
+            <div className="popup-conteudo">
+              {bebidasSugeridas.map((bebida) => (
+                <div
+                  key={bebida.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 12,
+                    marginBottom: 14,
+                    paddingBottom: 12,
+                    borderBottom: '1px solid rgba(255,255,255,0.1)',
+                  }}
+                >
+                  <div>
+                    <strong>{bebida.nome}</strong>
+                    <div>
+                      R$ {Number(bebida.preco).toFixed(2)}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      adicionarDireto(bebida)
+                      setSugestaoBebidaAberta(false)
+                    }}
+                  >
+                    Adicionar
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setSugestaoBebidaAberta(false)}
+              style={{
+                marginTop: 12,
+                width: '100%',
+              }}
+            >
+              Agora não
             </button>
           </div>
         </div>
