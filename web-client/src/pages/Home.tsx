@@ -373,11 +373,13 @@ export default function Home() {
 
                 <div className="produto-conteudo">
                   <div className="produto-info">
+                    {/*
                     {produto.categoria && (
                       <div className="produto-categoria">
                         {produto.categoria}
                       </div>
                     )}
+                      */}
 
                     <div className="produto-header">
                       <div className="produto-nome">{produto.nome}</div>
