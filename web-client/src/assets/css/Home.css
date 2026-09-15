@@ -66,7 +66,7 @@
 
 @media (min-width: 768px) {
   .cardapio-list {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
 }
 
@@ -74,78 +74,129 @@
 /* CARD PRODUTO              */
 /* ========================= */
 
+/* ========================= */
+/* CARD PRODUTO              */
+/* ========================= */
+
+/* ========================= */
+/* CARD PRODUTO              */
+/* ========================= */
+
 .produto-card {
   width: 100%;
-
   box-sizing: border-box;
-
-  background: linear-gradient(135deg, #1a0026, #2a0040);
-
-  border-radius: 16px;
-
-  padding: 14px;
-
-  margin-bottom: 12px;
-
-  border: 1px solid rgba(170, 0, 255, 0.2);
-
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-
-  transition: all 0.2s ease;
-  backdrop-filter: blur(10px);
 
   background: linear-gradient(
     135deg,
     rgba(26, 0, 38, 0.78),
     rgba(42, 0, 64, 0.72)
   );
+
+  border-radius: 16px;
+  padding: 14px;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  border: 1px solid rgba(170, 0, 255, 0.2);
+
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.5);
+
+  backdrop-filter: blur(10px);
+
+  transition: all 0.2s ease;
 }
+
+.produto-card:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.4),
+    0 0 6px rgba(170, 0, 255, 0.18);
+}
+
+/* ========================= */
+/* IMAGEM DO PRODUTO         */
+/* ========================= */
+
+
+.produto-imagem {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+/* ========================= */
+/* CONTEÚDO DO PRODUTO       */
+/* ========================= */
+
+.produto-conteudo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  flex: 1;
+  min-width: 0;
+
+  gap: 12px;
+}
+
 .produto-info {
   display: flex;
   flex-direction: column;
-  flex: 1;
-}
-
-/*  NOVO */
-.produto-header {
-  display: grid;
-
-  grid-template-columns: 1fr 180px;
-
-  align-items: start;
-
-  gap: 12px;
-
-  width: 100%;
-}
-.produto-nome {
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-
-  white-space: nowrap;
 
   min-width: 0;
 }
-.produto-descricao {
-  color: #bbb;
-  font-size: 13px;
+
+
+.produto-header {
+  display: flex;
+  flex-direction: column;
+
+  align-items: flex-start;
+  justify-content: center;
+
+  gap: 4px;
+
+  width: 100%;
+}
+
+.produto-nome {
+  width: 100%;
+
+  color: #fff;
+
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+
+  overflow-wrap: break-word;
 }
 
 .produto-preco {
-  width: 160px;
-
-  text-align: right;
-
   color: #d1d5db !important;
 
+  font-size: 15px;
   font-weight: 700;
 
   white-space: nowrap;
 }
-/* ========================= */
-/* BOTÕES                    */
-/* ========================= */
+
+.produto-descricao {
+  color: #bbb;
+
+  font-size: 13px;
+  line-height: 1.4;
+
+  margin-top: 4px;
+
+  overflow-wrap: break-word;
+}
 
 .add-btn {
   background: linear-gradient(135deg, #7c3aed, #5b21b6);
@@ -423,11 +474,7 @@
 
   transition: all 0.2s ease;
 }
-.produto-card:hover {
-  box-shadow:
-    0 10px 22px rgba(0, 0, 0, 0.4),
-    0 0 6px rgba(170, 0, 255, 0.18);
-}
+
 
 .header {
   position: relative;
@@ -451,23 +498,35 @@
 }
 
 @media (max-width: 768px) {
-  .produto-header {
-    flex-direction: column;
-
-    gap: 4px;
+  .produto-card {
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
   }
 
-  .produto-preco {
-    align-self: flex-end;
+  .produto-imagem-container {
+    width: 90px;
+    height: 90px;
 
-    font-size: 14px;
+    flex: 0 0 90px;
+  }
 
-    opacity: 0.92;
+  .produto-conteudo {
+    gap: 10px;
   }
 
   .produto-nome {
-    white-space: normal;
+    font-size: 15px;
   }
+
+  .produto-preco {
+    font-size: 14px;
+  }
+
+  .produto-descricao {
+    font-size: 12px;
+  }
+
 }
 .header-branding {
   width: 100%;
@@ -673,22 +732,7 @@
   min-height: 0;
 }
 
-.produto-imagem-container {
-  width: 95px;
-  height: 95px;
-  flex: 0 0 95px;
-  margin: 0;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #f3f3f3;
-}
 
-.produto-imagem {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
 
 .produto-categoria {
   display: inline-block;
@@ -701,4 +745,22 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.4px;
+}
+
+.produto-conteudo .add-btn,
+.produto-conteudo .add-btn-added {
+  align-self: flex-start;
+
+  width: fit-content;
+
+  min-width: 110px;
+
+  padding: 8px 12px;
+
+  border-radius: 10px;
+
+  font-size: 13px;
+  font-weight: bold;
+
+  cursor: pointer;
 }

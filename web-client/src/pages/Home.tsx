@@ -370,49 +370,55 @@ export default function Home() {
                   </div>
                 )}
 
-                <div className="produto-info">
-                  {produto.categoria && (
-                    <div className="produto-categoria">{produto.categoria}</div>
-                  )}
+                <div className="produto-conteudo">
+                  <div className="produto-info">
+                    {produto.categoria && (
+                      <div className="produto-categoria">
+                        {produto.categoria}
+                      </div>
+                    )}
 
-                  <div className="produto-header">
-                    <div className="produto-nome">{produto.nome}</div>
+                    <div className="produto-header">
+                      <div className="produto-nome">{produto.nome}</div>
 
-                    <div className="produto-preco">
-                      {produto.temVariacoes
-                        ? `A partir de R$ ${Math.min(
-                            ...(produto.variacoes || []).map((v) =>
-                              Number(v.preco),
-                            ),
-                          ).toFixed(2)}`
-                        : `R$ ${produto.preco.toFixed(2)}`}
+                      <div className="produto-preco">
+                        {produto.temVariacoes
+                          ? `A partir de R$ ${Math.min(
+                              ...(produto.variacoes || []).map((v) =>
+                                Number(v.preco),
+                              ),
+                            ).toFixed(2)}`
+                          : `R$ ${produto.preco.toFixed(2)}`}
+                      </div>
                     </div>
+
+                    {produto.descricao && (
+                      <div className="produto-descricao">
+                        {produto.descricao}
+                      </div>
+                    )}
                   </div>
 
-                  {produto.descricao && (
-                    <div className="produto-descricao">{produto.descricao}</div>
-                  )}
+                  <button
+                    disabled={pedidosEncerrados}
+                    className={quantidade ? 'add-btn-added' : 'add-btn'}
+                    style={{
+                      opacity: pedidosEncerrados ? 0.5 : 1,
+                      cursor: pedidosEncerrados ? 'not-allowed' : 'pointer',
+                    }}
+                    onClick={() => {
+                      if (pedidosEncerrados) return
+
+                      if (produto.temAdicionais || produto.temVariacoes) {
+                        abrirPopup(produto)
+                      } else {
+                        adicionarDireto(produto)
+                      }
+                    }}
+                  >
+                    {quantidade ? `✔ ${quantidade} no carrinho` : 'Adicionar'}
+                  </button>
                 </div>
-
-                <button
-                  disabled={pedidosEncerrados}
-                  className={quantidade ? 'add-btn-added' : 'add-btn'}
-                  style={{
-                    opacity: pedidosEncerrados ? 0.5 : 1,
-                    cursor: pedidosEncerrados ? 'not-allowed' : 'pointer',
-                  }}
-                  onClick={() => {
-                    if (pedidosEncerrados) return
-
-                    if (produto.temAdicionais || produto.temVariacoes) {
-                      abrirPopup(produto)
-                    } else {
-                      adicionarDireto(produto)
-                    }
-                  }}
-                >
-                  {quantidade ? `✔ ${quantidade} no carrinho` : 'Adicionar'}
-                </button>
               </div>
             )
           })}
