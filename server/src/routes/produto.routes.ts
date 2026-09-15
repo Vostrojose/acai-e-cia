@@ -34,10 +34,12 @@ router.post(
 )
 
 // Atualizar produto
+// Atualizar produto
 router.put(
   '/:id',
   ensureAuthenticated,
   ensureAdmin,
+  uploadProduto.single('arquivoImagem'),
   produtoController.atualizar,
 )
 
