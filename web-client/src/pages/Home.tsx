@@ -382,7 +382,7 @@ export default function Home() {
         >
           ≡
         </button>
-
+        {/*
         {existePedidoEmAndamento && (
           <button
             className="btn-acompanhar-pedido"
@@ -392,6 +392,7 @@ export default function Home() {
             📡
           </button>
         )}
+          */}
       </div>
       {antesDaAbertura && (
         <div
