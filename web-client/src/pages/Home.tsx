@@ -57,6 +57,14 @@ export default function Home() {
 
   const totalItens = itens.reduce((total, item) => total + item.quantidade, 0)
 
+  const pedidoIdSalvo = localStorage.getItem('pedidoId')
+  const pedidoStatusSalvo = localStorage.getItem('pedidoStatus')
+
+  const existePedidoEmAndamento =
+    Boolean(pedidoIdSalvo) &&
+    pedidoStatusSalvo !== 'ENTREGUE' &&
+    pedidoStatusSalvo !== 'CANCELADO'
+
   const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(
     null,
   )
@@ -374,6 +382,16 @@ export default function Home() {
         >
           ≡
         </button>
+
+        {existePedidoEmAndamento && (
+          <button
+            className="btn-acompanhar-pedido"
+            onClick={() => navigate(`/acompanhamento/${pedidoIdSalvo}`)}
+            title="Acompanhar meu pedido"
+          >
+            📡
+          </button>
+        )}
       </div>
       {antesDaAbertura && (
         <div
@@ -535,10 +553,8 @@ export default function Home() {
                           </span>
                         </label>
                       ))}
-                           
                   </div>
                 )}
-                
 
               {produtoSelecionado.adicionais
                 ?.filter((a) => a.ativo)
@@ -655,7 +671,7 @@ export default function Home() {
           </div>
         </div>
       )}
-       {sugestaoBebidaAberta && (
+      {sugestaoBebidaAberta && (
         <div
           className="popup-overlay"
           onClick={() => setSugestaoBebidaAberta(false)}
@@ -687,9 +703,7 @@ export default function Home() {
                 >
                   <div>
                     <strong>{bebida.nome}</strong>
-                    <div>
-                      R$ {Number(bebida.preco).toFixed(2)}
-                    </div>
+                    <div>R$ {Number(bebida.preco).toFixed(2)}</div>
                   </div>
 
                   <button

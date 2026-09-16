@@ -129,8 +129,11 @@ export default function Acompanhamento() {
     try {
       window.close()
     } catch {}
-    {
-    }
+
+    window.location.href = '/m/1'
+  }
+
+  function voltarAoCardapio() {
     window.location.href = '/m/1'
   }
 
@@ -240,6 +243,18 @@ export default function Acompanhamento() {
             🚪 Finalizar / Sair
           </button>
         )}
+
+        <button
+          className="acompanhamento-btn-cardapio"
+          onClick={voltarAoCardapio}
+        >
+          🍓 Voltar ao cardápio
+        </button>
+
+        <p className="acompanhamento-ajuda">
+          Você pode voltar ao cardápio. Seu pedido continuará salvo para
+          acompanhamento.
+        </p>
       </div>
 
       <div className="acompanhamento-banner">

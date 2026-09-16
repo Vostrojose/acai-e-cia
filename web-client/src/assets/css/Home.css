@@ -872,3 +872,24 @@
 .header-texts {
   grid-column: 1;
 }
+
+.btn-acompanhar-pedido {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  margin-right: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.btn-acompanhar-pedido:hover {
+  background: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
+}
