@@ -4,12 +4,7 @@ import { useEffect, useState } from 'react'
 import api from '../services/api'
 import '../assets/css/Sucesso.css'
 
-type StatusPagamento =
-  | 'APROVADO'
-  | 'PENDENTE'
-  | 'RECUSADO'
-  | string
-  | null
+type StatusPagamento = 'APROVADO' | 'PENDENTE' | 'RECUSADO' | string | null
 
 export default function Sucesso() {
   const { id } = useParams()
@@ -17,8 +12,7 @@ export default function Sucesso() {
   const { limparCarrinho } = useCart()
 
   const [codigo, setCodigo] = useState<number | null>(null)
-  const [statusPagamento, setStatusPagamento] =
-    useState<StatusPagamento>(null)
+  const [statusPagamento, setStatusPagamento] = useState<StatusPagamento>(null)
 
   const [carregando, setCarregando] = useState(true)
   const [tentativas, setTentativas] = useState(0)
@@ -83,12 +77,9 @@ export default function Sucesso() {
           status === 'AGUARDANDO_PAGAMENTO'
         ) {
           if (tentativas < MAX_TENTATIVAS) {
-            setTentativas(prev => prev + 1)
+            setTentativas((prev) => prev + 1)
 
-            timer = setTimeout(
-              carregarPedido,
-              INTERVALO,
-            )
+            timer = setTimeout(carregarPedido, INTERVALO)
 
             return
           }
@@ -96,10 +87,7 @@ export default function Sucesso() {
 
         setCarregando(false)
       } catch (err) {
-        console.error(
-          'Erro ao consultar pagamento:',
-          err,
-        )
+        console.error('Erro ao consultar pagamento:', err)
 
         if (cancelado) return
 
@@ -108,12 +96,9 @@ export default function Sucesso() {
          * continuamos tentando.
          */
         if (tentativas < MAX_TENTATIVAS) {
-          setTentativas(prev => prev + 1)
+          setTentativas((prev) => prev + 1)
 
-          timer = setTimeout(
-            carregarPedido,
-            INTERVALO,
-          )
+          timer = setTimeout(carregarPedido, INTERVALO)
 
           return
         }
@@ -142,19 +127,13 @@ export default function Sucesso() {
     return (
       <div className="sucesso-page">
         <div className="sucesso-card">
-
-          <h1 className="sucesso-title">
-            ⏳ Confirmando pagamento...
-          </h1>
+          <h1 className="sucesso-title">⏳ Confirmando pagamento...</h1>
 
           <p className="sucesso-subtitle">
             Estamos aguardando a confirmação do Mercado Pago.
           </p>
 
-          <p className="sucesso-label">
-            Aguarde alguns instantes.
-          </p>
-
+          <p className="sucesso-label">Aguarde alguns instantes.</p>
         </div>
       </div>
     )
@@ -168,10 +147,7 @@ export default function Sucesso() {
     return (
       <div className="sucesso-page">
         <div className="sucesso-card">
-
-          <h1 className="sucesso-title">
-            ⚠️ Não foi possível confirmar
-          </h1>
+          <h1 className="sucesso-title">⚠️ Não foi possível confirmar</h1>
 
           <p className="sucesso-subtitle">
             Não conseguimos confirmar o pagamento neste momento.
@@ -179,9 +155,7 @@ export default function Sucesso() {
 
           {codigo && (
             <>
-              <p className="sucesso-label">
-                Número do pedido
-              </p>
+              <p className="sucesso-label">Número do pedido</p>
 
               <div className="sucesso-codigo">
                 #{codigo.toString().padStart(4, '0')}
@@ -190,27 +164,19 @@ export default function Sucesso() {
           )}
 
           <div className="sucesso-actions">
-
             {id && (
               <button
-                onClick={() =>
-                  navigate(`/acompanhamento/${id}`)
-                }
+                onClick={() => navigate(`/acompanhamento/${id}`)}
                 className="sucesso-btn"
               >
                 📡 Acompanhar pedido
               </button>
             )}
 
-            <button
-              onClick={() => navigate('/m/1')}
-              className="sucesso-btn"
-            >
+            <button onClick={() => navigate('/m/1')} className="sucesso-btn">
               ◫ Cardápio do dia
             </button>
-
           </div>
-
         </div>
       </div>
     )
@@ -224,18 +190,11 @@ export default function Sucesso() {
     return (
       <div className="sucesso-page">
         <div className="sucesso-card">
+          <h1 className="sucesso-title">Pedido confirmado!</h1>
 
-          <h1 className="sucesso-title">
-            Pedido confirmado!
-          </h1>
+          <p className="sucesso-subtitle">Obrigado pela sua compra 💜</p>
 
-          <p className="sucesso-subtitle">
-            Obrigado pela sua compra 💜
-          </p>
-
-          <p className="sucesso-label">
-            Número do pedido
-          </p>
+          <p className="sucesso-label">Número do pedido</p>
 
           <div className="sucesso-codigo">
             {codigo
@@ -244,23 +203,17 @@ export default function Sucesso() {
           </div>
 
           <div className="sucesso-actions">
-
             <button
-              onClick={() =>
-                navigate(`/acompanhamento/${id}`)
-              }
+              onClick={() => navigate(`/acompanhamento/${id}`)}
               className="sucesso-btn"
             >
               📡 Acompanhar pedido
             </button>
 
-            <button
-              onClick={() => navigate('/m/1')}
-              className="sucesso-btn"
-            >
+            <button onClick={() => navigate('/m/1')} className="sucesso-btn">
               ◫ Cardápio do dia
             </button>
-
+            {/*
             <button
               onClick={() =>
                 navigate('/cardapio-semana/1')
@@ -269,9 +222,8 @@ export default function Sucesso() {
             >
               📅 Cardápio da semana
             </button>
-
+*/}
           </div>
-
         </div>
       </div>
     )
@@ -284,47 +236,32 @@ export default function Sucesso() {
   return (
     <div className="sucesso-page">
       <div className="sucesso-card">
-
-        <h1 className="sucesso-title">
-          ⏳ Pagamento ainda não confirmado
-        </h1>
+        <h1 className="sucesso-title">⏳ Pagamento ainda não confirmado</h1>
 
         <p className="sucesso-subtitle">
           O Mercado Pago ainda não confirmou o pagamento.
         </p>
 
-        <p className="sucesso-label">
-          Número do pedido
-        </p>
+        <p className="sucesso-label">Número do pedido</p>
 
         <div className="sucesso-codigo">
-          {codigo
-            ? `#${codigo.toString().padStart(4, '0')}`
-            : 'Carregando...'}
+          {codigo ? `#${codigo.toString().padStart(4, '0')}` : 'Carregando...'}
         </div>
 
         <div className="sucesso-actions">
-
           {id && (
             <button
-              onClick={() =>
-                navigate(`/acompanhamento/${id}`)
-              }
+              onClick={() => navigate(`/acompanhamento/${id}`)}
               className="sucesso-btn"
             >
               📡 Acompanhar pedido
             </button>
           )}
 
-          <button
-            onClick={() => navigate('/m/1')}
-            className="sucesso-btn"
-          >
+          <button onClick={() => navigate('/m/1')} className="sucesso-btn">
             ◫ Cardápio do dia
           </button>
-
         </div>
-
       </div>
     </div>
   )
