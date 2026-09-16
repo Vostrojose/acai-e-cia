@@ -13,10 +13,6 @@ export class MercadoPagoProvider {
     this.payment = new Payment(client)
   }
 
-  /* ============================= */
-  /* PIX                           */
-  /* ============================= */
-
   async criarPagamentoPix(pedido: any) {
     const valor = Number(Number(pedido.total).toFixed(2))
 
@@ -44,24 +40,10 @@ export class MercadoPagoProvider {
         qr_code_base64:
           response.point_of_interaction?.transaction_data?.qr_code_base64,
       }
-    } catch (error: any) {
-      console.error('❌ [MP PIX] ERRO COMPLETO:')
-      console.error(error)
-
-      if (error?.response?.data) {
-        console.error(
-          'MP RESPONSE:',
-          JSON.stringify(error.response.data, null, 2),
-        )
-      }
-
+    } catch (error) {
       throw error
     }
   }
-
-  /* ============================= */
-  /* CHECKOUT                      */
-  /* ============================= */
 
   async criarCheckout(pedido: any) {
     if (!pedido) throw new Error('Pedido inválido')
@@ -72,66 +54,40 @@ export class MercadoPagoProvider {
     if (!process.env.BASE_URL) throw new Error('BASE_URL não configurado')
 
     try {
-      /* ============================= */
-      /* 🔥 ITENS CORRIGIDOS           */
-      /* ============================= */
+      const itensFormatados = pedido.itens.map((item: any) => {
+        const precoFinal = Number(Number(item.precoUnit).toFixed(2))
 
-    const itensFormatados = pedido.itens.map((item: any) => {
-  /*
-   * O pedido já possui o preço unitário final registrado
-   * no banco em ItemPedido.precoUnit.
-   *
-   * Esse valor já considera:
-   * - preço do produto ou variação
-   * - adicionais
-   * - quantidade dos adicionais
-   *
-   * Portanto, NÃO devemos recalcular o preço aqui.
-   */
-  const precoFinal = Number(Number(item.precoUnit).toFixed(2))
+        const quantidade = Number(item.quantidade)
 
-  const quantidade = Number(item.quantidade)
+        if (!precoFinal || precoFinal <= 0 || isNaN(precoFinal)) {
+          throw new Error(`Preço inválido no item ${item.produtoId}`)
+        }
 
-  if (!precoFinal || precoFinal <= 0 || isNaN(precoFinal)) {
-    throw new Error(`Preço inválido no item ${item.produtoId}`)
-  }
+        if (!quantidade || quantidade <= 0 || isNaN(quantidade)) {
+          throw new Error(`Quantidade inválida no item ${item.produtoId}`)
+        }
 
-  if (!quantidade || quantidade <= 0 || isNaN(quantidade)) {
-    throw new Error(`Quantidade inválida no item ${item.produtoId}`)
-  }
+        return {
+          title: String(
+            item.produto?.nome ||
+              item.nome ||
+              `Produto ${item.produtoId || 'sem-id'}`,
+          ),
 
-  console.log('💰 ITEM PAGAMENTO:', {
-    produto: item.produto?.nome,
-    precoUnit: item.precoUnit,
-    precoFinal,
-    quantidade,
-  })
+          description: String(
+            item.produto?.descricao ||
+              item.descricao ||
+              item.produto?.nome ||
+              'Produto Açaí & Companhia',
+          ),
 
-  return {
-    title: String(
-      item.produto?.nome ||
-        item.nome ||
-        `Produto ${item.produtoId || 'sem-id'}`,
-    ),
+          quantity: quantidade,
 
-    description: String(
-      item.produto?.descricao ||
-        item.descricao ||
-        item.produto?.nome ||
-        'Produto Açaí & Companhia',
-    ),
+          unit_price: precoFinal,
 
-    quantity: quantidade,
-
-    unit_price: precoFinal,
-
-    currency_id: 'BRL',
-  }
-})
-
-      /* ============================= */
-      /* VALIDAÇÃO SEGURA              */
-      /* ============================= */
+          currency_id: 'BRL',
+        }
+      })
 
       const totalCalculado = itensFormatados.reduce(
         (acc: number, item: any) =>
@@ -143,18 +99,14 @@ export class MercadoPagoProvider {
       const totalCalc = Number(totalCalculado.toFixed(2))
 
       if (totalPedido !== totalCalc) {
-        console.error('🚨 Divergência de valores detectada', {
+        console.error('[Pagamento] Divergência de valor no pedido', {
+          pedidoId: pedido.id,
           totalPedido,
-          totalCalc,
-          itens: itensFormatados,
+          totalCalculado: totalCalc,
         })
 
         throw new Error('Divergência de valor no pedido')
       }
-
-      /* ============================= */
-      /* PAYLOAD MP                    */
-      /* ============================= */
 
       const payload = {
         statement_descriptor: 'ACAIECIA',
@@ -180,8 +132,6 @@ export class MercadoPagoProvider {
         },
       }
 
-      console.log('📦 PAYLOAD MP:', JSON.stringify(payload, null, 2))
-
       const response = await this.preference.create({
         body: payload,
       })
@@ -194,32 +144,10 @@ export class MercadoPagoProvider {
         id: response.id,
         init_point: response.init_point,
       }
-    } catch (error: any) {
-      console.error('❌ [MP CHECKOUT] ERRO COMPLETO:')
-      console.error(error)
-
-      if (error?.cause) {
-        console.error('CAUSE:', error.cause)
-      }
-
-      if (error?.response?.data) {
-        console.error(
-          'MP RESPONSE:',
-          JSON.stringify(error.response.data, null, 2),
-        )
-      }
-
+    } catch (error) {
       throw error
     }
   }
-
-  /* ============================= */
-  /* BUSCAR PAGAMENTO              */
-  /* ============================= */
-
-  /* ============================= */
-  /* BUSCAR PAGAMENTO              */
-  /* ============================= */
 
   async buscarPagamento(paymentId: string) {
     if (!paymentId) {
@@ -230,12 +158,6 @@ export class MercadoPagoProvider {
       const response: any = await this.payment.get({
         id: paymentId,
       })
-
-      console.log('📦 [MP] RESPOSTA BRUTA:', JSON.stringify(response, null, 2))
-
-      /* ============================= */
-      /* 🔥 COMPATIBILIDADE SDK        */
-      /* ============================= */
 
       const body = response?.body || response
 
@@ -251,28 +173,11 @@ export class MercadoPagoProvider {
         transaction_amount: Number(body?.transaction_amount || 0),
         external_reference: externalReference,
 
-        /* 🔥 RETROCOMPATIBILIDADE */
         externalReference: externalReference,
       }
 
-      console.log('✅ [MP] PAGAMENTO NORMALIZADO:', pagamento)
-
       return pagamento
-    } catch (error: any) {
-      console.error('❌ [MP BUSCAR PAGAMENTO] ERRO COMPLETO:')
-      console.error(error)
-
-      if (error?.cause) {
-        console.error('CAUSE:', error.cause)
-      }
-
-      if (error?.response?.data) {
-        console.error(
-          'MP RESPONSE:',
-          JSON.stringify(error.response.data, null, 2),
-        )
-      }
-
+    } catch (error) {
       throw error
     }
   }
