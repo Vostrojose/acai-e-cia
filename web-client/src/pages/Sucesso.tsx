@@ -32,7 +32,13 @@ export default function Sucesso() {
     let cancelado = false
     let timer: ReturnType<typeof setTimeout> | null = null
 
-    const MAX_TENTATIVAS = 15
+    /*
+     * Mantemos uma janela maior para dar tempo ao webhook
+     * do Mercado Pago confirmar o pagamento.
+     *
+     * 30 tentativas x 2 segundos = aproximadamente 60 segundos.
+     */
+    const MAX_TENTATIVAS = 30
     const INTERVALO = 2000
 
     async function carregarPedido() {
@@ -69,7 +75,7 @@ export default function Sucesso() {
 
         /*
          * Enquanto o webhook do Mercado Pago ainda não
-         * atualizou o pedido, aguardamos alguns segundos.
+         * atualizou o pedido, continuamos consultando.
          */
         if (
           status === 'PENDENTE' ||
@@ -120,20 +126,24 @@ export default function Sucesso() {
   }, [id, tentativas, limparCarrinho])
 
   /* ===================================================== */
-  /* TELA                                                   */
+  /* CONFIRMANDO PAGAMENTO                                  */
   /* ===================================================== */
 
   if (carregando) {
     return (
       <div className="sucesso-page">
         <div className="sucesso-card">
-          <h1 className="sucesso-title">⏳ Confirmando pagamento...</h1>
+          <h1 className="sucesso-title">
+            ⏳ Aguardando confirmação do pagamento...
+          </h1>
 
           <p className="sucesso-subtitle">
             Estamos aguardando a confirmação do Mercado Pago.
           </p>
 
-          <p className="sucesso-label">Aguarde alguns instantes.</p>
+          <p className="sucesso-label">
+            Não feche esta página. A confirmação aparecerá automaticamente.
+          </p>
         </div>
       </div>
     )
@@ -190,9 +200,11 @@ export default function Sucesso() {
     return (
       <div className="sucesso-page">
         <div className="sucesso-card">
-          <h1 className="sucesso-title">Pedido confirmado!</h1>
+          <h1 className="sucesso-title">✅ Pagamento confirmado!</h1>
 
-          <p className="sucesso-subtitle">Obrigado pela sua compra 💜</p>
+          <p className="sucesso-subtitle">
+            Seu pedido foi recebido e já foi enviado para preparo. 💜
+          </p>
 
           <p className="sucesso-label">Número do pedido</p>
 
@@ -207,12 +219,13 @@ export default function Sucesso() {
               onClick={() => navigate(`/acompanhamento/${id}`)}
               className="sucesso-btn"
             >
-              📡 Acompanhar pedido
+              📡 Acompanhar meu pedido
             </button>
 
             <button onClick={() => navigate('/m/1')} className="sucesso-btn">
               ◫ Cardápio do dia
             </button>
+
             {/*
             <button
               onClick={() =>
@@ -222,7 +235,7 @@ export default function Sucesso() {
             >
               📅 Cardápio da semana
             </button>
-*/}
+            */}
           </div>
         </div>
       </div>
