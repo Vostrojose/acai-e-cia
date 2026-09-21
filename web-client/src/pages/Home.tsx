@@ -476,14 +476,42 @@ export default function Home() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         flexDirection: 'column',
-                        gap: 8,
+                        gap: 6,
                         textAlign: 'center',
-                        fontSize: 14,
-                        opacity: 0.7,
+                        background:
+                          'linear-gradient(135deg, #24152f 0%, #3a2050 50%, #24152f 100%)',
+                        borderRadius: 12,
+                        color: '#ffffff',
+                        padding: 16,
+                        boxSizing: 'border-box',
                       }}
                     >
-                      <span style={{ fontSize: 36 }}>🍇</span>
-                      <span>Imagem indisponível</span>
+                      <span
+                        style={{
+                          fontSize: 34,
+                          lineHeight: 1,
+                        }}
+                      >
+                        🍇
+                      </span>
+
+                      <strong
+                        style={{
+                          fontSize: 16,
+                          fontWeight: 700,
+                        }}
+                      >
+                        Açaí & Company
+                      </strong>
+
+                      <span
+                        style={{
+                          fontSize: 13,
+                          opacity: 0.8,
+                        }}
+                      >
+                        Imagem do produto
+                      </span>
                     </div>
                   </div>
                 )}
