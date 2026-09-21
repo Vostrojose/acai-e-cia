@@ -452,11 +452,39 @@ export default function Home() {
                       src={produto.imagem}
                       alt={produto.nome}
                       className="produto-imagem"
-                      loading="lazy"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none'
+
+                        const fallback =
+                          e.currentTarget.parentElement?.querySelector(
+                            '.produto-imagem-fallback',
+                          ) as HTMLElement | null
+
+                        if (fallback) {
+                          fallback.style.display = 'flex'
+                        }
                       }}
                     />
+
+                    <div
+                      className="produto-imagem-fallback"
+                      style={{
+                        display: 'none',
+                        width: '100%',
+                        height: '100%',
+                        minHeight: 140,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexDirection: 'column',
+                        gap: 8,
+                        textAlign: 'center',
+                        fontSize: 14,
+                        opacity: 0.7,
+                      }}
+                    >
+                      <span style={{ fontSize: 36 }}>🍇</span>
+                      <span>Imagem indisponível</span>
+                    </div>
                   </div>
                 )}
 
