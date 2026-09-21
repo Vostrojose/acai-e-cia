@@ -281,17 +281,8 @@ export default function Checkout() {
 
         <div className="checkout-card">
           <label>Tipo de pedido</label>
-          <select
-            value={tipoPedido}
-            onChange={(e) =>
-              setTipoPedido(e.target.value as 'retirada' | 'entrega')
-            }
-            className="checkout-select"
-          >
+          <select value="retirada" className="checkout-select" disabled>
             <option value="retirada">Retirada no local</option>
-            <option value="entrega" disabled={foraDaArea}>
-              Entrega
-            </option>
           </select>
         </div>
 
