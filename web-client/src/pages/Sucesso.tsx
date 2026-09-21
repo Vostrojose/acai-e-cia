@@ -4,7 +4,13 @@ import { useEffect, useState } from 'react'
 import api from '../services/api'
 import '../assets/css/Sucesso.css'
 
-type StatusPagamento = 'APROVADO' | 'PENDENTE' | 'RECUSADO' | string | null
+type StatusPagamento =
+  | 'APROVADO'
+  | 'PENDENTE'
+  | 'RECUSADO'
+  | 'AGUARDANDO_PAGAMENTO'
+  | string
+  | null
 
 export default function Sucesso() {
   const { id } = useParams()
@@ -15,7 +21,6 @@ export default function Sucesso() {
   const [statusPagamento, setStatusPagamento] = useState<StatusPagamento>(null)
 
   const [carregando, setCarregando] = useState(true)
-  const [tentativas, setTentativas] = useState(0)
   const [erro, setErro] = useState(false)
 
   /* ===================================================== */
@@ -33,15 +38,18 @@ export default function Sucesso() {
     let timer: ReturnType<typeof setTimeout> | null = null
 
     /*
-     * Mantemos uma janela maior para dar tempo ao webhook
-     * do Mercado Pago confirmar o pagamento.
-     *
-     * 30 tentativas x 2 segundos = aproximadamente 60 segundos.
+     * Mantemos uma janela de aproximadamente 60 segundos
+     * para dar tempo ao webhook do Mercado Pago confirmar
+     * o pagamento.
      */
     const MAX_TENTATIVAS = 30
     const INTERVALO = 2000
 
+    let tentativasAtuais = 0
+
     async function carregarPedido() {
+      if (cancelado) return
+
       try {
         const res = await api.get(`/pedidos/${id}`)
 
@@ -82,30 +90,32 @@ export default function Sucesso() {
           status === null ||
           status === 'AGUARDANDO_PAGAMENTO'
         ) {
-          if (tentativas < MAX_TENTATIVAS) {
-            setTentativas((prev) => prev + 1)
+          tentativasAtuais += 1
 
+          if (tentativasAtuais < MAX_TENTATIVAS) {
             timer = setTimeout(carregarPedido, INTERVALO)
-
             return
           }
         }
 
+        /*
+         * Depois da janela de consulta, mostramos uma mensagem
+         * informando que a confirmação ainda não chegou.
+         */
         setCarregando(false)
       } catch (err) {
         console.error('Erro ao consultar pagamento:', err)
 
         if (cancelado) return
 
+        tentativasAtuais += 1
+
         /*
-         * Se ainda houver tentativas disponíveis,
-         * continuamos tentando.
+         * Mesmo que uma consulta falhe temporariamente,
+         * continuamos tentando dentro da janela definida.
          */
-        if (tentativas < MAX_TENTATIVAS) {
-          setTentativas((prev) => prev + 1)
-
+        if (tentativasAtuais < MAX_TENTATIVAS) {
           timer = setTimeout(carregarPedido, INTERVALO)
-
           return
         }
 
@@ -123,7 +133,7 @@ export default function Sucesso() {
         clearTimeout(timer)
       }
     }
-  }, [id, tentativas, limparCarrinho])
+  }, [id, limparCarrinho])
 
   /* ===================================================== */
   /* CONFIRMANDO PAGAMENTO                                  */
@@ -133,12 +143,10 @@ export default function Sucesso() {
     return (
       <div className="sucesso-page">
         <div className="sucesso-card">
-          <h1 className="sucesso-title">
-            ⏳ Aguardando confirmação do pagamento...
-          </h1>
+          <h1 className="sucesso-title">⏳ Confirmando seu pagamento...</h1>
 
           <p className="sucesso-subtitle">
-            Estamos aguardando a confirmação do Mercado Pago.
+            Estamos verificando automaticamente a confirmação do Mercado Pago.
           </p>
 
           <p className="sucesso-label">
@@ -160,7 +168,7 @@ export default function Sucesso() {
           <h1 className="sucesso-title">⚠️ Não foi possível confirmar</h1>
 
           <p className="sucesso-subtitle">
-            Não conseguimos confirmar o pagamento neste momento.
+            Não conseguimos consultar o status do pagamento neste momento.
           </p>
 
           {codigo && (
@@ -225,17 +233,6 @@ export default function Sucesso() {
             <button onClick={() => navigate('/m/1')} className="sucesso-btn">
               ◫ Cardápio do dia
             </button>
-
-            {/*
-            <button
-              onClick={() =>
-                navigate('/cardapio-semana/1')
-              }
-              className="sucesso-btn"
-            >
-              📅 Cardápio da semana
-            </button>
-            */}
           </div>
         </div>
       </div>
@@ -243,16 +240,21 @@ export default function Sucesso() {
   }
 
   /* ===================================================== */
-  /* PAGAMENTO NÃO CONFIRMADO                              */
+  /* PAGAMENTO AINDA NÃO CONFIRMADO                        */
   /* ===================================================== */
 
   return (
     <div className="sucesso-page">
       <div className="sucesso-card">
-        <h1 className="sucesso-title">⏳ Pagamento ainda não confirmado</h1>
+        <h1 className="sucesso-title">⏳ Ainda aguardando confirmação</h1>
 
         <p className="sucesso-subtitle">
-          O Mercado Pago ainda não confirmou o pagamento.
+          O pagamento ainda não foi confirmado pelo Mercado Pago.
+        </p>
+
+        <p className="sucesso-label">
+          Isso pode levar alguns instantes. Você pode continuar acompanhando o
+          pedido.
         </p>
 
         <p className="sucesso-label">Número do pedido</p>
