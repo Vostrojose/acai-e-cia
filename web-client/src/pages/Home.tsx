@@ -486,19 +486,11 @@ export default function Home() {
                         boxSizing: 'border-box',
                       }}
                     >
-                      <span
-                        style={{
-                          fontSize: 34,
-                          lineHeight: 1,
-                        }}
-                      >
-                        🍇
-                      </span>
-
                       <strong
                         style={{
-                          fontSize: 16,
-                          fontWeight: 700,
+                          fontSize: 20,
+                          fontWeight: 800,
+                          letterSpacing: 0.5,
                         }}
                       >
                         Açaí & Company
