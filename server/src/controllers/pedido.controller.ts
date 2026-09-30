@@ -39,6 +39,63 @@ function calcularDistancia(
 
 class PedidoController {
   criar: RequestHandler = asyncHandler(async (req, res) => {
+    const agora = new Date()
+
+    const partes = new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      weekday: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).formatToParts(agora)
+
+    const diaTexto = partes.find((p) => p.type === 'weekday')?.value
+    const hora = Number(partes.find((p) => p.type === 'hour')?.value ?? 0)
+    const minuto = Number(partes.find((p) => p.type === 'minute')?.value ?? 0)
+
+    const diasSemana: Record<string, number> = {
+      dom: 0,
+      seg: 1,
+      ter: 2,
+      qua: 3,
+      qui: 4,
+      sex: 5,
+      sáb: 6,
+      sab: 6,
+    }
+
+    const diaSemana = diasSemana[diaTexto ?? ''] ?? 0
+    const horaAtual = hora * 60 + minuto
+
+    let abertura = 0
+
+    if (diaSemana >= 1 && diaSemana <= 5) {
+      // Segunda a sexta: 08:00
+      abertura = 8 * 60
+    } else if (diaSemana === 6) {
+      // Sábado: 10:00
+      abertura = 10 * 60
+    }
+
+    const fechamento = 18 * 60 + 30 // 18:30
+
+    const lojaFechada =
+      diaSemana === 0 || horaAtual < abertura || horaAtual >= fechamento
+
+    if (lojaFechada) {
+      return res.status(403).json({
+        success: false,
+        message:
+          diaSemana === 0
+            ? 'Pedidos não são aceitos aos domingos.'
+            : diaSemana === 6 && horaAtual < abertura
+              ? 'Os pedidos de sábado são aceitos a partir das 10:00.'
+              : horaAtual < abertura
+                ? 'Os pedidos são aceitos a partir das 08:00.'
+                : 'Os pedidos foram encerrados por hoje. Retornaremos no próximo horário de funcionamento.',
+      })
+    }
+
     const parsed = criarPedidoSchema.parse(req.body)
 
     /* ============================= */
@@ -73,13 +130,10 @@ class PedidoController {
       endereco: parsed.endereco ?? '',
     })
 
-    // ❌ continua sem socket (correto)
-    // pedido ainda aguarda pagamento
-
     return res.status(201).json({
       success: true,
       data: serializeDecimal(pedidoCompleto),
-      foraDaArea, // 🔥 NOVO (não quebra nada existente)
+      foraDaArea,
     })
   })
 

@@ -76,15 +76,24 @@ export default function Home() {
   )
   const agora = new Date()
 
+  const diaSemana = agora.getDay()
   const horaAtual = agora.getHours() * 60 + agora.getMinutes()
 
-  const abertura = 7 * 60 + 30 // 07:30
-  const fechamentoPedidos = 24 * 60 // 19:00
-  //const fechamentoPedidos = 19 * 60 // original
+  let abertura = 0
+  const fechamentoPedidos = 18 * 60 + 30 // 18:30
 
-  const antesDaAbertura = horaAtual < abertura
+  if (diaSemana >= 1 && diaSemana <= 5) {
+    // Segunda a sexta
+    abertura = 8 * 60 // 08:00
+  } else if (diaSemana === 6) {
+    // Sábado
+    abertura = 10 * 60 // 10:00
+  }
 
-  const pedidosEncerrados = horaAtual >= fechamentoPedidos
+  const domingo = diaSemana === 0
+  const antesDaAbertura = !domingo && horaAtual < abertura
+
+  const pedidosEncerrados = domingo || horaAtual >= fechamentoPedidos
 
   function abrirPopup(produto: Produto) {
     setProdutoSelecionado(produto)
