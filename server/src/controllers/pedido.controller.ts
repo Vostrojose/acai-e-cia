@@ -1,5 +1,6 @@
 import { RequestHandler } from 'express'
 import { StatusPedido } from '@prisma/client'
+import prisma from '../lib/prisma'
 import pedidoService from '../services/pedido.service'
 import { asyncHandler } from '../utils/asyncHandler'
 import { atualizarStatusSchema } from '../validators/pedido-status.schema'
@@ -39,6 +40,23 @@ function calcularDistancia(
 
 class PedidoController {
   criar: RequestHandler = asyncHandler(async (req, res) => {
+    const configuracaoPedidosOnline = await prisma.configuracao.findUnique({
+      where: {
+        chave: 'PEDIDOS_ONLINE_ATIVOS',
+      },
+    })
+
+    const pedidosOnlineAtivos =
+      configuracaoPedidosOnline?.valor !== undefined
+        ? configuracaoPedidosOnline.valor === true
+        : true
+
+    if (!pedidosOnlineAtivos) {
+      return res.status(403).json({
+        success: false,
+        message: 'Os pedidos online estão temporariamente suspensos.',
+      })
+    }
     const agora = new Date()
 
     const partes = new Intl.DateTimeFormat('pt-BR', {

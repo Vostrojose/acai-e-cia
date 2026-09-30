@@ -14,6 +14,11 @@ export default function Cozinha() {
   const [mostrarEntregues, setMostrarEntregues] = useState(false)
 
   const [totalEntreguesHoje, setTotalEntreguesHoje] = useState(0)
+  const [pedidosOnlineAtivos, setPedidosOnlineAtivos] = useState(true)
+  const [mostrarModalPedidosOnline, setMostrarModalPedidosOnline] =
+    useState(false)
+  const [novoStatusPedidosOnline, setNovoStatusPedidosOnline] = useState(true)
+  const [alterandoPedidosOnline, setAlterandoPedidosOnline] = useState(false)
 
   async function carregarResumo() {
     try {
@@ -25,6 +30,42 @@ export default function Cozinha() {
   }
 
   const navigate = useNavigate()
+
+  async function carregarStatusPedidosOnline() {
+    try {
+      const res = await api.get('/configuracoes/pedidos-online')
+
+      setPedidosOnlineAtivos(res.data?.ativo !== false)
+    } catch (err) {
+      console.error('Erro ao carregar status dos pedidos online:', err)
+    }
+  }
+
+  function solicitarAlteracaoPedidosOnline() {
+    const novoStatus = !pedidosOnlineAtivos
+
+    setNovoStatusPedidosOnline(novoStatus)
+    setMostrarModalPedidosOnline(true)
+  }
+
+  async function confirmarAlteracaoPedidosOnline() {
+    try {
+      setAlterandoPedidosOnline(true)
+
+      const res = await api.put('/configuracoes/pedidos-online', {
+        ativo: novoStatusPedidosOnline,
+      })
+
+      setPedidosOnlineAtivos(res.data?.ativo === true)
+      setMostrarModalPedidosOnline(false)
+    } catch (err) {
+      console.error('Erro ao atualizar pedidos online:', err)
+
+      alert('Não foi possível alterar o status dos pedidos online.')
+    } finally {
+      setAlterandoPedidosOnline(false)
+    }
+  }
 
   function tocarSom() {
     try {
@@ -215,6 +256,7 @@ export default function Cozinha() {
     async function inicializar() {
       await carregarPedidos()
       await carregarResumo()
+      await carregarStatusPedidosOnline()
     }
 
     inicializar()
@@ -239,6 +281,7 @@ export default function Cozinha() {
     const intervalo = setInterval(() => {
       carregarPedidos()
       carregarResumo()
+      carregarStatusPedidosOnline()
     }, 10000)
 
     return () => {
@@ -349,7 +392,12 @@ export default function Cozinha() {
           <div style={brandingSub}>Painel Operacional • Cozinha</div>
         </div>
       </div>
-      <CardMenu navigate={navigate} onBalcao={() => navigate('/balcao')} />
+      <CardMenu
+        navigate={navigate}
+        onBalcao={() => navigate('/balcao')}
+        pedidosOnlineAtivos={pedidosOnlineAtivos}
+        onAlterarPedidosOnline={solicitarAlteracaoPedidosOnline}
+      />
 
       <div style={headerGrid}>
         <CardRelogio />
@@ -433,6 +481,98 @@ export default function Cozinha() {
       )}
 
       {screenSaver && <ScreenSaver />}
+      {mostrarModalPedidosOnline && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.8)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 10000,
+          }}
+        >
+          <div
+            style={{
+              background: '#1e1e1e',
+              padding: 28,
+              borderRadius: 16,
+              width: 420,
+              maxWidth: '90%',
+              color: '#fff',
+              border: novoStatusPedidosOnline
+                ? '1px solid #43a047'
+                : '1px solid #e53935',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+            }}
+          >
+            <h2 style={{ marginTop: 0 }}>
+              {novoStatusPedidosOnline
+                ? '🟢 Liberar pedidos online?'
+                : '⚠️ Suspender pedidos online?'}
+            </h2>
+
+            <p
+              style={{
+                color: '#ccc',
+                lineHeight: 1.5,
+                fontSize: 16,
+              }}
+            >
+              {novoStatusPedidosOnline
+                ? 'Os clientes poderão voltar a realizar pedidos pelo site.'
+                : 'Novos pedidos feitos pelo site deixarão de ser aceitos até que sejam liberados novamente.'}
+            </p>
+
+            <div
+              style={{
+                display: 'flex',
+                gap: 12,
+                marginTop: 24,
+              }}
+            >
+              <button
+                onClick={() => setMostrarModalPedidosOnline(false)}
+                disabled={alterandoPedidosOnline}
+                style={{
+                  flex: 1,
+                  padding: '12px 16px',
+                  borderRadius: 8,
+                  border: 'none',
+                  background: '#444',
+                  color: '#fff',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                }}
+              >
+                CANCELAR
+              </button>
+
+              <button
+                onClick={confirmarAlteracaoPedidosOnline}
+                disabled={alterandoPedidosOnline}
+                style={{
+                  flex: 1,
+                  padding: '12px 16px',
+                  borderRadius: 8,
+                  border: 'none',
+                  background: novoStatusPedidosOnline ? '#2e7d32' : '#c62828',
+                  color: '#fff',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                }}
+              >
+                {alterandoPedidosOnline
+                  ? 'AGUARDE...'
+                  : novoStatusPedidosOnline
+                    ? 'LIBERAR'
+                    : 'BLOQUEAR'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {mostrarLogin && (
         <div
           style={{
@@ -765,7 +905,12 @@ function PedidoCard({ pedido, setPedidos, abrirLoginCancelamento }: any) {
   )
 }
 
-function CardMenu({ navigate, onBalcao }: any) {
+function CardMenu({
+  navigate,
+  onBalcao,
+  pedidosOnlineAtivos,
+  onAlterarPedidosOnline,
+}: any) {
   return (
     <div
       style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}
@@ -801,6 +946,22 @@ function CardMenu({ navigate, onBalcao }: any) {
 
         <button onClick={onBalcao} style={btnMenu}>
           🧾 Balcão
+        </button>
+
+        <button
+          onClick={onAlterarPedidosOnline}
+          style={{
+            ...btnMenu,
+            background: pedidosOnlineAtivos ? '#1b5e20' : '#b71c1c',
+            border: pedidosOnlineAtivos
+              ? '1px solid #43a047'
+              : '1px solid #e53935',
+            fontWeight: 'bold',
+          }}
+        >
+          {pedidosOnlineAtivos
+            ? '🟢 Pedidos Online: ATIVOS'
+            : '🔴 Pedidos Online: SUSPENSOS'}
         </button>
 
         <div
