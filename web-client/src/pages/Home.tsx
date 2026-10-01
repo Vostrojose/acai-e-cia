@@ -46,8 +46,18 @@ export default function Home() {
 
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [loading, setLoading] = useState(true)
+  const [pedidosOnlineAtivos, setPedidosOnlineAtivos] = useState(true)
 
   const { adicionarItem, itens } = useCart()
+  async function carregarStatusPedidosOnline() {
+    try {
+      const response = await api.get('/configuracoes/pedidos-online')
+
+      setPedidosOnlineAtivos(response.data?.ativo !== false)
+    } catch (error) {
+      console.error('Erro ao carregar status dos pedidos online:', error)
+    }
+  }
 
   const sugestaoExibidaRef = useRef(false)
 
@@ -94,6 +104,7 @@ export default function Home() {
   const antesDaAbertura = !domingo && horaAtual < abertura
 
   const pedidosEncerrados = domingo || horaAtual >= fechamentoPedidos
+  const pedidosBloqueados = !pedidosOnlineAtivos || pedidosEncerrados
 
   function abrirPopup(produto: Produto) {
     setProdutoSelecionado(produto)
@@ -222,6 +233,8 @@ export default function Home() {
   }
 
   function adicionarDireto(produto: Produto) {
+    if (!pedidosOnlineAtivos || pedidosEncerrados) return
+
     const idUnico = gerarIdItem(produto, [])
 
     adicionarItem({
@@ -239,6 +252,7 @@ export default function Home() {
   /* ============================= */
   function confirmarProduto() {
     if (!produtoSelecionado) return
+    if (!pedidosOnlineAtivos || pedidosEncerrados) return
     if (produtoSelecionado.temVariacoes && !variacaoSelecionada) {
       alert('Selecione um tamanho')
       return
@@ -305,6 +319,17 @@ export default function Home() {
 
     loadProdutos()
   }, [])
+  useEffect(() => {
+    carregarStatusPedidosOnline()
+
+    const intervalo = window.setInterval(() => {
+      carregarStatusPedidosOnline()
+    }, 10000)
+
+    return () => {
+      window.clearInterval(intervalo)
+    }
+  }, [])
 
   useEffect(() => {
     if (origem) localStorage.setItem('origemPedido', origem)
@@ -345,13 +370,13 @@ export default function Home() {
       <div
         className="cart-floating"
         onClick={() => {
-          if (pedidosEncerrados) return
+          if (pedidosBloqueados) return
 
           navigate('/carrinho')
         }}
         style={{
-          cursor: pedidosEncerrados ? 'not-allowed' : 'pointer',
-          opacity: totalItens > 0 ? 1 : 0.6,
+          cursor: pedidosBloqueados ? 'not-allowed' : 'pointer',
+          opacity: pedidosBloqueados ? 0.4 : totalItens > 0 ? 1 : 0.6,
         }}
       >
         🛒
@@ -369,9 +394,21 @@ export default function Home() {
 
             <p className="subtitle">Pedidos em tempo real</p>
 
-            <div className="online-status">
-              <span className="status-dot" />
-              Online agora
+            <div
+              className="online-status"
+              style={{
+                color: pedidosBloqueados ? '#ef5350' : '#66bb6a',
+              }}
+            >
+              <span
+                className="status-dot"
+                style={{
+                  background: pedidosBloqueados ? '#ef5350' : '#22c55e',
+                }}
+              />
+              {pedidosBloqueados
+                ? 'Pedidos em tempo real OFFLINE'
+                : 'Pedidos em tempo real ONLINE'}
             </div>
           </div>
         </div>
@@ -421,7 +458,7 @@ export default function Home() {
             textAlign: 'center',
           }}
         >
-          ⚠️ Pedidos realizados agora serão preparados após as 07:30.
+          ⚠️ Pedidos realizados agora serão preparados após as 08:00.
         </div>
       )}
       {pedidosEncerrados && (
@@ -442,7 +479,27 @@ export default function Home() {
             textAlign: 'center',
           }}
         >
-          🔒 Pedidos encerrados por hoje. Retornaremos amanhã às 07:30.
+          🔒 Pedidos encerrados por hoje. Retornaremos no próximo horário de
+          funcionamento.
+        </div>
+      )}
+
+      {!pedidosOnlineAtivos && !pedidosEncerrados && (
+        <div
+          style={{
+            background: 'rgba(244,67,54,0.12)',
+            border: '1px solid rgba(244,67,54,0.35)',
+            color: '#ef5350',
+            padding: 16,
+            borderRadius: 14,
+            marginBottom: 18,
+            fontWeight: 700,
+            textAlign: 'center',
+          }}
+        >
+          🔴 Pedidos em tempo real estão temporariamente offline.
+          <br />
+          No momento não estamos aceitando novos pedidos.
         </div>
       )}
 
@@ -549,14 +606,14 @@ export default function Home() {
                   </div>
 
                   <button
-                    disabled={pedidosEncerrados}
+                    disabled={pedidosBloqueados}
                     className={quantidade ? 'add-btn-added' : 'add-btn'}
                     style={{
-                      opacity: pedidosEncerrados ? 0.5 : 1,
-                      cursor: pedidosEncerrados ? 'not-allowed' : 'pointer',
+                      opacity: pedidosBloqueados ? 0.5 : 1,
+                      cursor: pedidosBloqueados ? 'not-allowed' : 'pointer',
                     }}
                     onClick={() => {
-                      if (pedidosEncerrados) return
+                      if (pedidosBloqueados) return
 
                       if (produto.temAdicionais || produto.temVariacoes) {
                         abrirPopup(produto)
@@ -712,7 +769,10 @@ export default function Home() {
             </div>
             <button
               onClick={confirmarProduto}
-              disabled={produtoSelecionado.temVariacoes && !variacaoSelecionada}
+              disabled={
+                pedidosBloqueados ||
+                (produtoSelecionado.temVariacoes && !variacaoSelecionada)
+              }
               style={{
                 opacity:
                   produtoSelecionado.temVariacoes && !variacaoSelecionada
