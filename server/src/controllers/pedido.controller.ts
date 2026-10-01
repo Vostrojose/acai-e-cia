@@ -67,7 +67,9 @@ class PedidoController {
       hour12: false,
     }).formatToParts(agora)
 
-    const diaTexto = partes.find((p) => p.type === 'weekday')?.value
+    const diaTexto = partes
+      .find((p) => p.type === 'weekday')
+      ?.value.replace(/\./g, '')
     const hora = Number(partes.find((p) => p.type === 'hour')?.value ?? 0)
     const minuto = Number(partes.find((p) => p.type === 'minute')?.value ?? 0)
 
