@@ -58,7 +58,7 @@ class PedidoService {
 
             produtoId: produto.id,
 
-            nomeProduto: produto.nome,
+            nomeProduto: item.nome || produto.nome,
 
             quantidade: item.quantidade,
 
