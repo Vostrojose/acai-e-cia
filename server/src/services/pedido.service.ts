@@ -194,54 +194,77 @@ class PedidoService {
       data,
     })
   }
+
   async atualizarPagamento(
     id: string,
     statusPagamento: string,
     pagamentoId?: string,
   ) {
-    let pagamentoEnum: StatusPagamento
-    let statusPedido: StatusPedido
+    const statusRecebido = statusPagamento?.toLowerCase()
 
-    switch (statusPagamento?.toLowerCase()) {
+    let pagamentoEnum: StatusPagamento
+    let statusPedido: StatusPedido | undefined
+
+    switch (statusRecebido) {
       case 'approved':
       case 'aprovado':
         pagamentoEnum = StatusPagamento.APROVADO
         statusPedido = StatusPedido.RECEBIDO
         break
+
+      case 'rejected':
+      case 'recusado':
+      case 'recusada':
+        pagamentoEnum = StatusPagamento.RECUSADO
+        break
+
       case 'pending':
+      case 'pendente':
         pagamentoEnum = StatusPagamento.PENDENTE
         statusPedido = StatusPedido.AGUARDANDO_PAGAMENTO
         break
+
       default:
-        pagamentoEnum = StatusPagamento.PENDENTE
-        statusPedido = StatusPedido.AGUARDANDO_PAGAMENTO
+        throw new Error(
+          `Status de pagamento não reconhecido: ${statusPagamento}`,
+        )
     }
+
     const pedidoAtual = await prisma.pedido.findUnique({
       where: { id },
     })
-    let podeAlterarStatus = true
 
-    if (
-      pedidoAtual?.status === StatusPedido.EM_PREPARO ||
-      pedidoAtual?.status === StatusPedido.PRONTO ||
-      pedidoAtual?.status === StatusPedido.ENTREGUE
-    ) {
-      podeAlterarStatus = false
+    if (!pedidoAtual) {
+      throw new Error(`Pedido não encontrado: ${id}`)
     }
+
+    // Não permitir que uma notificação antiga desfaça uma aprovação.
+    const pagamentoJaAprovado =
+      pedidoAtual.statusPagamento === StatusPagamento.APROVADO
+
+    if (pagamentoJaAprovado && pagamentoEnum !== StatusPagamento.APROVADO) {
+      return pedidoAtual
+    }
+
+    const statusOperacionalProtegido =
+      pedidoAtual.status === StatusPedido.EM_PREPARO ||
+      pedidoAtual.status === StatusPedido.PRONTO ||
+      pedidoAtual.status === StatusPedido.ENTREGUE ||
+      pedidoAtual.status === StatusPedido.CANCELADO
+
+    const podeAlterarStatus =
+      !statusOperacionalProtegido && statusPedido !== undefined
 
     return prisma.pedido.update({
       where: { id },
-
       data: {
         statusPagamento: pagamentoEnum,
-        pagamentoId,
-
-        ...(podeAlterarStatus && {
-          status: statusPedido,
-        }),
+        ...(pagamentoId ? { pagamentoId } : {}),
+        ...(podeAlterarStatus ? { status: statusPedido } : {}),
       },
     })
   }
+
   async removerPedido(id: string) {
     return prisma.pedido.delete({ where: { id } })
   }

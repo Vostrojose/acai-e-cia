@@ -46,18 +46,33 @@ export class WebhookController {
       }
 
       // Mapear status do Mercado Pago para StatusPagamento
-      let novoStatusPagamento: StatusPagamento = StatusPagamento.PENDENTE
 
-      if (pagamento.status === 'approved') {
-        novoStatusPagamento = StatusPagamento.APROVADO
-      }
+      let novoStatusPagamento: StatusPagamento
 
-      if (pagamento.status === 'rejected') {
-        novoStatusPagamento = StatusPagamento.RECUSADO
-      }
+      switch (pagamento.status?.toLowerCase()) {
+        case 'approved':
+          novoStatusPagamento = StatusPagamento.APROVADO
+          break
 
-      if (pagamento.status === 'pending') {
-        novoStatusPagamento = StatusPagamento.PENDENTE
+        case 'rejected':
+          novoStatusPagamento = StatusPagamento.RECUSADO
+          break
+
+        case 'pending':
+        case 'in_process':
+        case 'authorized':
+          novoStatusPagamento = StatusPagamento.PENDENTE
+          break
+
+        default:
+          console.warn(
+            '[WEBHOOK] Status do Mercado Pago não tratado:',
+            pagamento.status,
+          )
+          return res.status(200).json({
+            success: false,
+            message: 'Status ignorado; nenhuma alteração realizada',
+          })
       }
 
       // Atualizar pedido no banco usando externalReference

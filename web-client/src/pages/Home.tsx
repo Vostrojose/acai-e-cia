@@ -335,6 +335,78 @@ export default function Home() {
     if (origem) localStorage.setItem('origemPedido', origem)
   }, [origem])
 
+  useEffect(() => {
+    let ativo = true
+    let consultando = false
+
+    async function recuperarPedido() {
+      const pedidoId = localStorage.getItem('pedidoId')
+
+      if (!pedidoId || !navigator.onLine || consultando) return
+
+      consultando = true
+
+      try {
+        const response = await api.get(`/pedidos/${pedidoId}`)
+
+        if (!ativo) return
+
+        const pedido = response.data?.data
+
+        if (!pedido) {
+          console.warn(
+            'Pedido não retornado pela API. Identificador preservado para recuperação.',
+            pedidoId,
+          )
+          return
+        }
+
+        const statusPagamento = pedido.statusPagamento
+        const statusPedido = pedido.status
+
+        localStorage.setItem('pedidoStatus', statusPedido)
+
+        if (statusPagamento === 'APROVADO') {
+          if (statusPedido === 'ENTREGUE') {
+            localStorage.removeItem('pedidoId')
+            localStorage.removeItem('pedidoStatus')
+            return
+          }
+
+          navigate(`/acompanhamento/${pedidoId}`, { replace: true })
+          return
+        }
+
+        if (statusPedido === 'ENTREGUE' || statusPedido === 'CANCELADO') {
+          localStorage.removeItem('pedidoId')
+          localStorage.removeItem('pedidoStatus')
+          return
+        }
+      } catch (error) {
+        // Falha temporária: preserva o pedido e tenta novamente.
+        console.warn('Não foi possível recuperar o pedido:', error)
+      } finally {
+        consultando = false
+      }
+    }
+
+    const intervalo = window.setInterval(() => {
+      recuperarPedido()
+    }, 5000)
+
+    recuperarPedido()
+
+    window.addEventListener('online', recuperarPedido)
+    window.addEventListener('focus', recuperarPedido)
+
+    return () => {
+      ativo = false
+      window.clearInterval(intervalo)
+      window.removeEventListener('online', recuperarPedido)
+      window.removeEventListener('focus', recuperarPedido)
+    }
+  }, [navigate])
+
   if (loading) return <p style={{ padding: 20 }}>Carregando...</p>
 
   const produtosDisponiveis = produtos.filter((produto) => {

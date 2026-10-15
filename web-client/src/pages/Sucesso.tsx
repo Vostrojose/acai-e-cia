@@ -34,6 +34,8 @@ export default function Sucesso() {
       return
     }
 
+    localStorage.setItem('pedidoId', id)
+
     let cancelado = false
     let timer: ReturnType<typeof setTimeout> | null = null
 

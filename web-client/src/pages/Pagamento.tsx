@@ -11,6 +11,10 @@ export default function Pagamento() {
   useEffect(() => {
     async function criarPagamento() {
       try {
+        if (id) {
+          localStorage.setItem('pedidoId', id)
+        }
+
         const response = await api.post('/pagamento/checkout', {
           pedidoId: id,
         })
