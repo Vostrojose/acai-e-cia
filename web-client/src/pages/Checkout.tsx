@@ -1,12 +1,14 @@
 import { useCart } from '../context/CartContext'
 import api from '../services/api'
-import { useState } from 'react'
 import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
 import '../assets/css/Checkout.css'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export default function Checkout() {
   const { itens } = useCart()
+  const navigate = useNavigate()
 
   const [coordenadas, setCoordenadas] = useState<{
     lat: number
@@ -89,6 +91,65 @@ export default function Checkout() {
       },
     )
   }
+  useEffect(() => {
+    let ativo = true
+    let consultando = false
+
+    async function recuperarPagamento() {
+      const retornoPendente =
+        localStorage.getItem('checkoutRetornoPendente') === 'true'
+
+      const pedidoId = localStorage.getItem('pedidoId')
+
+      if (!retornoPendente || !pedidoId || !navigator.onLine || consultando) {
+        return
+      }
+
+      consultando = true
+
+      try {
+        const response = await api.get(`/pedidos/${pedidoId}`)
+
+        if (!ativo) return
+
+        const pedido = response.data?.data
+
+        if (!pedido) return
+
+        if (pedido.statusPagamento === 'APROVADO') {
+          localStorage.setItem('pedidoStatus', pedido.status)
+          localStorage.removeItem('checkoutRetornoPendente')
+
+          navigate(`/acompanhamento/${pedidoId}`, {
+            replace: true,
+          })
+        }
+      } catch (error) {
+        // Falha temporária: mantém o identificador para tentar novamente.
+        console.warn('Não foi possível recuperar o pedido agora.', error)
+      } finally {
+        consultando = false
+      }
+    }
+
+    const intervalo = window.setInterval(recuperarPagamento, 5000)
+
+    window.addEventListener('focus', recuperarPagamento)
+    window.addEventListener('online', recuperarPagamento)
+    window.addEventListener('pageshow', recuperarPagamento)
+    document.addEventListener('visibilitychange', recuperarPagamento)
+
+    recuperarPagamento()
+
+    return () => {
+      ativo = false
+      window.clearInterval(intervalo)
+      window.removeEventListener('focus', recuperarPagamento)
+      window.removeEventListener('online', recuperarPagamento)
+      window.removeEventListener('pageshow', recuperarPagamento)
+      document.removeEventListener('visibilitychange', recuperarPagamento)
+    }
+  }, [navigate])
 
   async function finalizarPedido() {
     try {
@@ -198,6 +259,7 @@ export default function Checkout() {
       const initPoint = pagamentoResponse?.data?.data?.init_point
 
       if (initPoint) {
+        localStorage.setItem('checkoutRetornoPendente', 'true')
         window.location.href = initPoint
       } else {
         alert('Erro ao iniciar pagamento')
