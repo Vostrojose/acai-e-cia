@@ -134,6 +134,7 @@ export default function Acompanhamento() {
   }
 
   function voltarAoCardapio() {
+    localStorage.removeItem('checkoutRetornoPendente')
     window.location.href = '/m/1'
   }
 

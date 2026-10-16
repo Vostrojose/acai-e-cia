@@ -47,6 +47,9 @@ export default function Home() {
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [loading, setLoading] = useState(true)
   const [pedidosOnlineAtivos, setPedidosOnlineAtivos] = useState(true)
+  const [pedidoEmAndamentoId, setPedidoEmAndamentoId] = useState<string | null>(
+    null,
+  )
 
   const { adicionarItem, itens } = useCart()
   async function carregarStatusPedidosOnline() {
@@ -66,14 +69,6 @@ export default function Home() {
   const [bebidasSugeridas, setBebidasSugeridas] = useState<Produto[]>([])
 
   const totalItens = itens.reduce((total, item) => total + item.quantidade, 0)
-
-  const pedidoIdSalvo = localStorage.getItem('pedidoId')
-  const pedidoStatusSalvo = localStorage.getItem('pedidoStatus')
-
-  const existePedidoEmAndamento =
-    Boolean(pedidoIdSalvo) &&
-    pedidoStatusSalvo !== 'ENTREGUE' &&
-    pedidoStatusSalvo !== 'CANCELADO'
 
   const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(
     null,
@@ -293,6 +288,68 @@ export default function Home() {
 
     abrirSugestaoBebida(produtoSelecionado)
   }
+  useEffect(() => {
+    let ativo = true
+    let consultando = false
+
+    async function verificarPedidoAtivo() {
+      if (consultando) return
+
+      const pedidoId = localStorage.getItem('pedidoId')
+
+      if (!pedidoId || !navigator.onLine) {
+        if (ativo) setPedidoEmAndamentoId(null)
+        return
+      }
+
+      consultando = true
+
+      try {
+        const response = await api.get(`/pedidos/${pedidoId}`)
+        if (!ativo) return
+
+        const pedido = response.data?.data
+
+        if (
+          !pedido ||
+          pedido.status === 'ENTREGUE' ||
+          pedido.status === 'CANCELADO'
+        ) {
+          setPedidoEmAndamentoId(null)
+
+          if (pedido) {
+            localStorage.removeItem('pedidoId')
+            localStorage.removeItem('pedidoStatus')
+            localStorage.removeItem('checkoutRetornoPendente')
+          }
+
+          return
+        }
+
+        setPedidoEmAndamentoId(pedidoId)
+      } catch (error) {
+        if (ativo) setPedidoEmAndamentoId(null)
+
+        console.warn('Não foi possível verificar o pedido.', error)
+      } finally {
+        consultando = false
+      }
+    }
+
+    const intervalo = window.setInterval(verificarPedidoAtivo, 15000)
+
+    window.addEventListener('focus', verificarPedidoAtivo)
+    window.addEventListener('online', verificarPedidoAtivo)
+
+    verificarPedidoAtivo()
+
+    return () => {
+      ativo = false
+      window.clearInterval(intervalo)
+      window.removeEventListener('focus', verificarPedidoAtivo)
+      window.removeEventListener('online', verificarPedidoAtivo)
+    }
+  }, [])
 
   useEffect(() => {
     async function loadProdutos() {
@@ -341,8 +398,12 @@ export default function Home() {
 
     async function recuperarPedido() {
       const pedidoId = localStorage.getItem('pedidoId')
+      const retornoPendente =
+        localStorage.getItem('checkoutRetornoPendente') === 'true'
 
-      if (!pedidoId || !navigator.onLine || consultando) return
+      if (!retornoPendente || !pedidoId || !navigator.onLine || consultando) {
+        return
+      }
 
       consultando = true
 
@@ -370,16 +431,22 @@ export default function Home() {
           if (statusPedido === 'ENTREGUE') {
             localStorage.removeItem('pedidoId')
             localStorage.removeItem('pedidoStatus')
+            localStorage.removeItem('checkoutRetornoPendente')
             return
           }
 
-          navigate(`/acompanhamento/${pedidoId}`, { replace: true })
+          localStorage.removeItem('checkoutRetornoPendente')
+
+          navigate(`/acompanhamento/${pedidoId}`, {
+            replace: true,
+          })
           return
         }
 
         if (statusPedido === 'ENTREGUE' || statusPedido === 'CANCELADO') {
           localStorage.removeItem('pedidoId')
           localStorage.removeItem('pedidoStatus')
+          localStorage.removeItem('checkoutRetornoPendente')
           return
         }
       } catch (error) {
@@ -500,17 +567,15 @@ export default function Home() {
         >
           ≡
         </button>
-        {/*
-        {existePedidoEmAndamento && (
+        {pedidoEmAndamentoId && (
           <button
             className="btn-acompanhar-pedido"
-            onClick={() => navigate(`/acompanhamento/${pedidoIdSalvo}`)}
+            onClick={() => navigate(`/acompanhamento/${pedidoEmAndamentoId}`)}
             title="Acompanhar meu pedido"
           >
-            📡
+            📡 Acompanhar meu pedido
           </button>
         )}
-          */}
       </div>
       {antesDaAbertura && (
         <div
