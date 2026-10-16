@@ -216,7 +216,12 @@ export default function Home() {
 
     if (jaTemBebida) return
 
-    const bebidasDisponiveis = produtosDisponiveis.filter(ehBebida)
+    const bebidasDisponiveis = produtosDisponiveis.filter(
+      (produto) =>
+        ehBebida(produto) &&
+        Number.isFinite(Number(produto.preco)) &&
+        Number(produto.preco) > 0,
+    )
 
     if (bebidasDisponiveis.length === 0) return
 
@@ -229,6 +234,13 @@ export default function Home() {
 
   function adicionarDireto(produto: Produto) {
     if (!pedidosOnlineAtivos || pedidosEncerrados) return
+
+    const preco = Number(produto.preco)
+
+    if (!Number.isFinite(preco) || preco <= 0) {
+      alert('Este produto está sem preço válido e não pode ser adicionado.')
+      return
+    }
 
     const idUnico = gerarIdItem(produto, [])
 
