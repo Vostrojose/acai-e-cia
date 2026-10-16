@@ -567,15 +567,6 @@ export default function Home() {
         >
           ≡
         </button>
-        {pedidoEmAndamentoId && (
-          <button
-            className="btn-acompanhar-pedido"
-            onClick={() => navigate(`/acompanhamento/${pedidoEmAndamentoId}`)}
-            title="Acompanhar meu pedido"
-          >
-            📡 Acompanhar meu pedido
-          </button>
-        )}
       </div>
       {antesDaAbertura && (
         <div

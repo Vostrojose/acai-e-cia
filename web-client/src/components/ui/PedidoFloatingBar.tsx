@@ -13,11 +13,9 @@ export default function PedidoFloatingBar() {
     const atualizarDados = () => {
       const id = localStorage.getItem('pedidoId')
 
-      const statusSalvo =
-        localStorage.getItem('pedidoStatus')
+      const statusSalvo = localStorage.getItem('pedidoStatus')
 
-      const fechado =
-        localStorage.getItem('pedidoPopupFechado')
+      const fechado = localStorage.getItem('pedidoPopupFechado')
 
       setPedidoId(id)
 
@@ -31,10 +29,7 @@ export default function PedidoFloatingBar() {
     window.addEventListener('storage', atualizarDados)
 
     return () => {
-      window.removeEventListener(
-        'storage',
-        atualizarDados,
-      )
+      window.removeEventListener('storage', atualizarDados)
     }
   }, [])
 
@@ -57,16 +52,17 @@ export default function PedidoFloatingBar() {
   }
 
   const fecharPopup = () => {
-    localStorage.setItem(
-      'pedidoPopupFechado',
-      'true',
-    )
+    localStorage.setItem('pedidoPopupFechado', 'true')
 
     setPopupFechado(true)
   }
 
   const abrirPedido = () => {
-    navigate(`/acompanhar/${pedidoId}`)
+    if (!pedidoId) return
+
+    localStorage.removeItem('pedidoPopupFechado')
+
+    navigate(`/acompanhamento/${pedidoId}`)
   }
 
   return (
@@ -90,15 +86,13 @@ export default function PedidoFloatingBar() {
 
         background: 'rgba(20,20,20,0.88)',
 
-        border:
-          '1px solid rgba(255,255,255,0.08)',
+        border: '1px solid rgba(255,255,255,0.08)',
 
         borderRadius: 20,
 
         padding: 16,
 
-        boxShadow:
-          '0 10px 30px rgba(0,0,0,0.35)',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.35)',
 
         color: '#fff',
       }}
