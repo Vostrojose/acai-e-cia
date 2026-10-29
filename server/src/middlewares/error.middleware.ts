@@ -7,8 +7,39 @@ export function errorMiddleware(
   error: Error,
   request: Request,
   response: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
+  const multerError = error as Error & {
+    code?: string
+  }
+
+  if (multerError.name === 'MulterError') {
+    if (multerError.code === 'LIMIT_FILE_SIZE') {
+      logger.warn({
+        message: 'Arquivo excedeu o limite de upload',
+        path: request.path,
+        method: request.method,
+      })
+
+      return response.status(413).json({
+        success: false,
+        error: 'O arquivo excede o limite de 300 MiB.',
+      })
+    }
+
+    logger.warn({
+      message: multerError.message,
+      code: multerError.code,
+      path: request.path,
+      method: request.method,
+    })
+
+    return response.status(400).json({
+      success: false,
+      error:
+        'Não foi possível receber o arquivo. Verifique o formato e o tamanho.',
+    })
+  }
   if (error instanceof ZodError) {
     const formattedErrors = error.issues.map((issue) => issue.message)
 
