@@ -116,7 +116,6 @@ class TVService {
       },
     })
   }
-
   async status() {
     const agora = Date.now()
 
@@ -128,16 +127,14 @@ class TVService {
         criadoEm: 'asc',
       },
     })
-    console.log('AGORA:', new Date())
 
     return tvs.map((tv) => {
-      console.log('--------------------------------')
-      console.log('TV:', tv.codigo)
-      console.log('ULTIMA:', tv.ultimaSync)
-      console.log(
-        'DIFERENÇA(ms):',
-        tv.ultimaSync ? Date.now() - tv.ultimaSync.getTime() : null,
-      )
+      const ultimoContato =
+        tv.ultimoHeartbeat && tv.ultimaSync
+          ? tv.ultimoHeartbeat > tv.ultimaSync
+            ? tv.ultimoHeartbeat
+            : tv.ultimaSync
+          : (tv.ultimoHeartbeat ?? tv.ultimaSync)
 
       return {
         id: tv.id,
@@ -145,8 +142,13 @@ class TVService {
         codigo: tv.codigo,
         playlistId: tv.playlistId,
         playlist: tv.playlist?.nome ?? null,
+
+        // Horários independentes para diagnóstico
+        ultimoHeartbeat: tv.ultimoHeartbeat,
         ultimaSync: tv.ultimaSync,
-        online: !!tv.ultimaSync && agora - tv.ultimaSync.getTime() <= 90_000,
+
+        // Considera a TV online se houve contato nos últimos 90 segundos
+        online: !!ultimoContato && agora - ultimoContato.getTime() <= 90_000,
       }
     })
   }
