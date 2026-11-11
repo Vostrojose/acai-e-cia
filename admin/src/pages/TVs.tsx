@@ -15,6 +15,7 @@ interface TV {
   codigo: string
   ativa: boolean
   playlistId: string | null
+  ultimoHeartbeat: string | null
   ultimaSync: string | null
   online?: boolean
   playlist: Playlist | null
@@ -23,6 +24,7 @@ interface TV {
 interface TVStatus {
   id: string
   online: boolean
+  ultimoHeartbeat: string | null
   ultimaSync: string | null
 }
 
@@ -61,6 +63,7 @@ export default function TVs() {
         return {
           ...tv,
           online: status?.online ?? false,
+          ultimoHeartbeat: status?.ultimoHeartbeat ?? null,
           ultimaSync: status?.ultimaSync ?? null,
         }
       })
@@ -448,36 +451,58 @@ export default function TVs() {
                     {tv.playlist?.nome ?? 'Sem Playlist'}
                   </div>
                 </div>
-              </div>
-
-              <div
-                style={{
-                  background: '#181818',
-                  border: '1px solid #333',
-                  borderRadius: 10,
-                  padding: 12,
-                  marginBottom: 15,
-                }}
-              >
+                {/* Último contato da TV */}
                 <div
                   style={{
-                    fontSize: 12,
-                    opacity: 0.7,
-                    marginBottom: 6,
+                    background: '#181818',
+                    border: '1px solid #333',
+                    borderRadius: 10,
+                    padding: 12,
+                    marginBottom: 15,
                   }}
                 >
-                  Última sincronização
+                  <div
+                    style={{
+                      fontSize: 12,
+                      opacity: 0.7,
+                      marginBottom: 6,
+                    }}
+                  >
+                    Último contato (Heartbeat)
+                  </div>
+
+                  <div style={{ fontWeight: 'bold', color: '#fff' }}>
+                    {tv.ultimoHeartbeat
+                      ? new Date(tv.ultimoHeartbeat).toLocaleString('pt-BR')
+                      : 'Nunca enviou heartbeat'}
+                  </div>
                 </div>
 
+                {/* Última sincronização */}
                 <div
                   style={{
-                    fontWeight: 'bold',
-                    color: '#fff',
+                    background: '#181818',
+                    border: '1px solid #333',
+                    borderRadius: 10,
+                    padding: 12,
+                    marginBottom: 15,
                   }}
                 >
-                  {tv.ultimaSync
-                    ? new Date(tv.ultimaSync).toLocaleString('pt-BR')
-                    : 'Nunca sincronizou'}
+                  <div
+                    style={{
+                      fontSize: 12,
+                      opacity: 0.7,
+                      marginBottom: 6,
+                    }}
+                  >
+                    Última sincronização
+                  </div>
+
+                  <div style={{ fontWeight: 'bold', color: '#fff' }}>
+                    {tv.ultimaSync
+                      ? new Date(tv.ultimaSync).toLocaleString('pt-BR')
+                      : 'Nunca sincronizou'}
+                  </div>
                 </div>
               </div>
 
@@ -570,6 +595,14 @@ export default function TVs() {
               <p>
                 <strong>Status:</strong>{' '}
                 {tv.online ? '🟢 Online' : '🔴 Offline'}
+              </p>
+
+              <p>
+                <strong>Último contato (Heartbeat):</strong>
+                <br />
+                {tv.ultimoHeartbeat
+                  ? new Date(tv.ultimoHeartbeat).toLocaleString('pt-BR')
+                  : 'Nunca enviou heartbeat'}
               </p>
 
               <p>

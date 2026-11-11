@@ -10,6 +10,7 @@ interface TVStatus {
   codigo: string
   playlist: string | null
   online: boolean
+  ultimoHeartbeat: string | null
   ultimaSync: string | null
 }
 
@@ -74,7 +75,7 @@ export default function MonitoramentoTV() {
               marginBottom: 25,
             }}
           >
-             <button style={menuButton} onClick={() => navigate('/cozinha')}>
+            <button style={menuButton} onClick={() => navigate('/cozinha')}>
               👨‍🍳 Cozinha
             </button>
             <button style={menuButton} onClick={() => navigate('/tvs')}>
@@ -88,7 +89,7 @@ export default function MonitoramentoTV() {
             <button style={menuButton} onClick={() => navigate('/propagandas')}>
               📢 Propagandas
             </button>
-            
+
             <button
               style={{
                 ...menuButton,
@@ -192,11 +193,19 @@ export default function MonitoramentoTV() {
             </div>
 
             <p>
-              <strong>Última Sync:</strong>
-
+              <strong>Último contato (Heartbeat):</strong>
               <br />
+              {tv.ultimoHeartbeat
+                ? new Date(tv.ultimoHeartbeat).toLocaleString('pt-BR')
+                : 'Nunca enviou heartbeat'}
+            </p>
 
-              {tv.ultimaSync ? new Date(tv.ultimaSync).toLocaleString() : '-'}
+            <p>
+              <strong>Última sincronização:</strong>
+              <br />
+              {tv.ultimaSync
+                ? new Date(tv.ultimaSync).toLocaleString('pt-BR')
+                : 'Nunca sincronizou'}
             </p>
           </div>
         ))}
