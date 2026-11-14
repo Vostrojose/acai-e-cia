@@ -87,7 +87,6 @@ app.use('/api/tvs', tvRoutes)
 app.use('/api/tv/player', playerRoutes)
 app.use('/api/playlists', playlistItemRoutes)
 
-
 /* =================================
    HEALTH CHECK
 ================================= */

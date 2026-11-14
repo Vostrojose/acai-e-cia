@@ -37,40 +37,40 @@ class TVService {
     })
   }
 
- async heartbeat(dados: HeartbeatDTO) {
-  const { codigo } = dados
+  async heartbeat(dados: HeartbeatDTO) {
+    const { codigo } = dados
 
-  const tv = await prisma.tV.findUnique({
-    where: {
-      codigo,
-    },
-    include: {
-      playlist: true,
-    },
-  })
+    const tv = await prisma.tV.findUnique({
+      where: {
+        codigo,
+      },
+      include: {
+        playlist: true,
+      },
+    })
 
-  if (!tv) {
-    return null
+    if (!tv) {
+      return null
+    }
+
+    return prisma.tV.update({
+      where: {
+        codigo,
+      },
+      data: {
+        ultimoHeartbeat: new Date(),
+
+        tipo: dados.tipo ?? tv.tipo,
+        versaoApp: dados.versaoApp ?? tv.versaoApp,
+        versaoAndroid: dados.versaoAndroid ?? tv.versaoAndroid,
+        fabricante: dados.fabricante ?? tv.fabricante,
+        modelo: dados.modelo ?? tv.modelo,
+      },
+      include: {
+        playlist: true,
+      },
+    })
   }
-
-  return prisma.tV.update({
-    where: {
-      codigo,
-    },
-    data: {
-      ultimoHeartbeat: new Date(),
-
-      tipo: dados.tipo ?? tv.tipo,
-      versaoApp: dados.versaoApp ?? tv.versaoApp,
-      versaoAndroid: dados.versaoAndroid ?? tv.versaoAndroid,
-      fabricante: dados.fabricante ?? tv.fabricante,
-      modelo: dados.modelo ?? tv.modelo,
-    },
-    include: {
-      playlist: true,
-    },
-  })
-}
 
   async buscarPorCodigo(codigo: string) {
     return prisma.tV.findUnique({

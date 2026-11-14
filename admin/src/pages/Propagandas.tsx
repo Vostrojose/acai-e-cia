@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import api from '../services/api'
 
 interface Propaganda {
   id: string
@@ -16,7 +17,6 @@ interface Playlist {
   id: string
   nome: string
 }
-const API_URL = 'https://api.acaiecompanhia.com.br'
 
 export default function Propagandas() {
   const navigate = useNavigate()
@@ -49,8 +49,8 @@ export default function Propagandas() {
   async function carregar() {
     try {
       const [propagandasRes, playlistsRes] = await Promise.all([
-        axios.get(`${API_URL}/api/propagandas`),
-        axios.get(`${API_URL}/api/playlists`),
+        api.get('/propagandas'),
+        api.get('/playlists'),
       ])
 
       setPropagandas(propagandasRes.data.data)
@@ -70,7 +70,7 @@ export default function Propagandas() {
     }
 
     try {
-      await axios.delete(`${API_URL}/api/propagandas/${id}`)
+      await api.delete(`/propagandas/${id}`)
 
       await carregar()
 
@@ -87,9 +87,14 @@ export default function Propagandas() {
   }
 
   async function salvar() {
+    let chaveArquivoGerada: string | null = null
+    let uploadIniciado = false
+    let confirmacaoConcluida = false
+
     try {
       setPublicando(true)
       setProgressoUpload(0)
+
       if (!nome.trim()) {
         alert('Informe o nome da propaganda')
         return
@@ -100,29 +105,77 @@ export default function Propagandas() {
         return
       }
 
-      const formData = new FormData()
+      const tiposPermitidos = [
+        'image/jpeg',
+        'image/png',
+        'image/webp',
+        'image/gif',
+        'image/avif',
+        'image/svg+xml',
+        'video/mp4',
+      ]
 
-      formData.append('arquivo', arquivo)
+      if (!tiposPermitidos.includes(arquivo.type)) {
+        alert('Formato de arquivo não permitido.')
+        return
+      }
 
-      const upload = await axios.post(
-        `${API_URL}/api/propagandas/upload`,
-        formData,
-        {
-          onUploadProgress: (evento) => {
-            if (!evento.total) return
+      const limite = 300 * 1024 * 1024
 
-            const progresso = Math.round((evento.loaded * 100) / evento.total)
+      if (arquivo.size <= 0 || arquivo.size > limite) {
+        alert('O arquivo deve ter até 300 MiB.')
+        return
+      }
 
-            setProgressoUpload(progresso)
-          },
+      // 1. Solicita autorização ao backend
+      const autorizacao = await api.post('/propagandas/upload-url', {
+        contentType: arquivo.type,
+        tamanho: arquivo.size,
+      })
+
+      const {
+        urlUpload,
+        arquivo: chaveArquivo,
+        contentType,
+        tamanho,
+      } = autorizacao.data
+      chaveArquivoGerada = chaveArquivo
+
+      // 2. Envia diretamente ao Cloudflare R2
+      // Usa axios independente para não enviar o JWT ao R2.
+      uploadIniciado = true
+
+      await axios.put(urlUpload, arquivo, {
+        headers: {
+          'Content-Type': arquivo.type,
         },
-      )
+        onUploadProgress: (evento) => {
+          if (!evento.total) return
 
-      await axios.post(`${API_URL}/api/propagandas`, {
+          const progresso = Math.round((evento.loaded * 100) / evento.total)
+
+          setProgressoUpload(progresso)
+        },
+      })
+
+      // 3. Confirma o arquivo no backend
+      const confirmacao = await api.post('/propagandas/confirmar-upload', {
+        arquivo: chaveArquivo,
+        contentType,
+        tamanho,
+      })
+
+      if (!confirmacao.data.success) {
+        throw new Error('Não foi possível confirmar o arquivo no R2.')
+      }
+      confirmacaoConcluida = true
+
+      // 4. Cadastra a propaganda no banco
+      await api.post('/propagandas', {
         nome,
         tipo,
         duracao,
-        arquivo: upload.data.arquivo,
+        arquivo: chaveArquivo,
       })
 
       setNome('')
@@ -134,10 +187,30 @@ export default function Propagandas() {
       await carregar()
 
       mostrarMensagem('Propaganda publicada com sucesso.', 'sucesso')
-    } catch (error) {
-      console.error(error)
+    } catch (error: any) {
+      console.error('ERRO AO PUBLICAR PROPAGANDA:', error)
 
-      mostrarMensagem('Erro ao publicar propaganda.', 'erro')
+      if (chaveArquivoGerada && uploadIniciado && !confirmacaoConcluida) {
+        try {
+          await api.post('/propagandas/cancelar-upload', {
+            arquivo: chaveArquivoGerada,
+          })
+
+          console.log('Upload incompleto removido do R2.')
+        } catch (erroCancelamento) {
+          console.error(
+            'Não foi possível cancelar o upload no R2:',
+            erroCancelamento,
+          )
+        }
+      }
+
+      mostrarMensagem(
+        error?.response?.data?.message ??
+          error?.message ??
+          'Erro ao publicar propaganda.',
+        'erro',
+      )
     } finally {
       setPublicando(false)
       setProgressoUpload(0)
@@ -172,12 +245,9 @@ export default function Propagandas() {
     }
 
     try {
-      await axios.post(
-        `${API_URL}/api/playlists/${playlistSelecionada}/itens`,
-        {
-          propagandaId: propagandaSelecionada.id,
-        },
-      )
+      await api.post(`/playlists/${playlistSelecionada}/itens`, {
+        propagandaId: propagandaSelecionada.id,
+      })
 
       mostrarMensagem('Propaganda adicionada à playlist.', 'sucesso')
 

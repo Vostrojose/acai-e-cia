@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
-
-const API_URL = 'https://api.acaiecompanhia.com.br'
+import api from '../services/api'
 
 interface Playlist {
   id: string
@@ -48,9 +46,9 @@ export default function TVs() {
   async function carregar() {
     try {
       const [tvsRes, playlistsRes, statusRes] = await Promise.all([
-        axios.get(`${API_URL}/api/tvs`),
-        axios.get(`${API_URL}/api/playlists`),
-        axios.get(`${API_URL}/api/tvs/status`),
+        api.get('/tvs'),
+        api.get('/playlists'),
+        api.get('/tvs/status'),
       ])
 
       const statusMap = new Map<string, TVStatus>(
@@ -99,7 +97,7 @@ export default function TVs() {
     try {
       if (!id) return
 
-      await axios.put(`${API_URL}/api/tvs/${id}`, {
+      await api.put(`/tvs/${id}`, {
         nome,
         codigo,
         playlistId: playlistId || null,

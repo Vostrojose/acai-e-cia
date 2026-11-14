@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import api from '../services/api'
 
-const API_URL = 'https://api.acaiecompanhia.com.br'
 
 interface Playlist {
 id: string
@@ -24,9 +23,7 @@ const [nome, setNome] = useState('')
 
 async function carregar() {
 try {
-const response = await axios.get(
-`${API_URL}/api/playlists`,
-)
+const response = await api.get('/playlists')
 
 
   setPlaylists(response.data.data)
@@ -48,12 +45,9 @@ return
 }
 
 
-  await axios.post(
-    `${API_URL}/api/playlists`,
-    {
+  await api.post('/playlists', {
       nome,
-    },
-  )
+    })
 
   setNome('')
 

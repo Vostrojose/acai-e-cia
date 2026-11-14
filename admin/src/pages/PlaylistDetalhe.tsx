@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import axios from 'axios'
-
-const API_URL = 'https://api.acaiecompanhia.com.br'
+import api from '../services/api'
 
 interface Playlist {
   id: string
@@ -42,9 +40,9 @@ export default function PlaylistDetalhe() {
   async function carregar() {
     try {
       const [playlistRes, propagandaRes, itensRes] = await Promise.all([
-        axios.get(`${API_URL}/api/playlists/${id}`),
-        axios.get(`${API_URL}/api/propagandas`),
-        axios.get(`${API_URL}/api/playlists/${id}/itens`),
+        api.get(`/playlists/${id}`),
+        api.get('/propagandas'),
+        api.get(`/playlists/${id}/itens`),
       ])
 
       setPlaylist(playlistRes.data.data)
@@ -61,7 +59,7 @@ export default function PlaylistDetalhe() {
 
   async function adicionar(propagandaId: string) {
     try {
-      await axios.post(`${API_URL}/api/playlists/${id}/itens`, {
+      await api.post(`/playlists/${id}/itens`, {
         propagandaId,
       })
 
@@ -74,7 +72,7 @@ export default function PlaylistDetalhe() {
 
   async function remover(itemId: string) {
     try {
-      await axios.delete(`${API_URL}/api/playlists/${id}/itens/${itemId}`)
+      await api.delete(`/playlists/${id}/itens/${itemId}`)
 
       await carregar()
     } catch (error) {
@@ -86,40 +84,26 @@ export default function PlaylistDetalhe() {
   async function mover(index: number, direcao: 'up' | 'down') {
     const novosItens = [...itens]
 
-    const novoIndex =
-      direcao === 'up'
-        ? index - 1
-        : index + 1
+    const novoIndex = direcao === 'up' ? index - 1 : index + 1
 
-    if (
-      novoIndex < 0 ||
-      novoIndex >= novosItens.length
-    ) {
+    if (novoIndex < 0 || novoIndex >= novosItens.length) {
       return
     }
 
-    ;[
-      novosItens[index],
-      novosItens[novoIndex],
-    ] = [
+    ;[novosItens[index], novosItens[novoIndex]] = [
       novosItens[novoIndex],
       novosItens[index],
     ]
 
-    const payload = novosItens.map(
-      (item, idx) => ({
-        id: item.id,
-        ordem: idx + 1,
-      }),
-    )
+    const payload = novosItens.map((item, idx) => ({
+      id: item.id,
+      ordem: idx + 1,
+    }))
 
     try {
-      await axios.put(
-        `${API_URL}/api/playlists/${id}/reordenar`,
-        {
-          itens: payload,
-        },
-      )
+      await api.put(`/playlists/${id}/reordenar`, {
+        itens: payload,
+      })
 
       await carregar()
     } catch (error) {
@@ -163,17 +147,11 @@ export default function PlaylistDetalhe() {
               marginBottom: 25,
             }}
           >
-            <button
-              style={menuButton}
-              onClick={() => navigate('/cozinha')}
-            >
+            <button style={menuButton} onClick={() => navigate('/cozinha')}>
               👨‍🍳 Cozinha
             </button>
 
-            <button
-              style={menuButton}
-              onClick={() => navigate('/tvs')}
-            >
+            <button style={menuButton} onClick={() => navigate('/tvs')}>
               📺 TVs
             </button>
 
@@ -187,18 +165,13 @@ export default function PlaylistDetalhe() {
               🎞️ Playlists
             </button>
 
-            <button
-              style={menuButton}
-              onClick={() => navigate('/propagandas')}
-            >
+            <button style={menuButton} onClick={() => navigate('/propagandas')}>
               📢 Propagandas
             </button>
 
             <button
               style={menuButton}
-              onClick={() =>
-                navigate('/monitoramento-tv')
-              }
+              onClick={() => navigate('/monitoramento-tv')}
             >
               📡 Monitoramento
             </button>
@@ -227,19 +200,16 @@ export default function PlaylistDetalhe() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns:
-            '1fr 1fr',
+          gridTemplateColumns: '1fr 1fr',
           gap: 20,
         }}
       >
         <div
           style={{
-            background:
-              'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
+            background: 'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
             borderRadius: 16,
             padding: 20,
-            border:
-              '1px solid rgba(255,255,255,.08)',
+            border: '1px solid rgba(255,255,255,.08)',
           }}
         >
           <h2>Propagandas Disponíveis</h2>
@@ -252,22 +222,15 @@ export default function PlaylistDetalhe() {
                 borderRadius: 12,
                 padding: 15,
                 marginBottom: 10,
-                border:
-                  '1px solid rgba(255,255,255,.08)',
+                border: '1px solid rgba(255,255,255,.08)',
               }}
             >
-              <strong>
-                {propaganda.nome}
-              </strong>
+              <strong>{propaganda.nome}</strong>
 
-              <p>
-                Tipo: {propaganda.tipo}
-              </p>
+              <p>Tipo: {propaganda.tipo}</p>
 
               <button
-                onClick={() =>
-                  adicionar(propaganda.id)
-                }
+                onClick={() => adicionar(propaganda.id)}
                 style={botaoPrincipal}
               >
                 Adicionar
@@ -278,12 +241,10 @@ export default function PlaylistDetalhe() {
 
         <div
           style={{
-            background:
-              'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
+            background: 'linear-gradient(135deg,#1e1e1e,#2a2a2a)',
             borderRadius: 16,
             padding: 20,
-            border:
-              '1px solid rgba(255,255,255,.08)',
+            border: '1px solid rgba(255,255,255,.08)',
           }}
         >
           <h2>Itens da Playlist</h2>
@@ -296,17 +257,12 @@ export default function PlaylistDetalhe() {
                 borderRadius: 12,
                 padding: 15,
                 marginBottom: 10,
-                border:
-                  '1px solid rgba(255,255,255,.08)',
+                border: '1px solid rgba(255,255,255,.08)',
               }}
             >
-              <strong>
-                {item.propaganda.nome}
-              </strong>
+              <strong>{item.propaganda.nome}</strong>
 
-              <p>
-                Ordem: {item.ordem}
-              </p>
+              <p>Ordem: {item.ordem}</p>
 
               <div
                 style={{
@@ -316,27 +272,21 @@ export default function PlaylistDetalhe() {
                 }}
               >
                 <button
-                  onClick={() =>
-                    mover(index, 'up')
-                  }
+                  onClick={() => mover(index, 'up')}
                   style={botaoSecundario}
                 >
                   ⬆
                 </button>
 
                 <button
-                  onClick={() =>
-                    mover(index, 'down')
-                  }
+                  onClick={() => mover(index, 'down')}
                   style={botaoSecundario}
                 >
                   ⬇
                 </button>
 
                 <button
-                  onClick={() =>
-                    remover(item.id)
-                  }
+                  onClick={() => remover(item.id)}
                   style={{
                     ...botaoSecundario,
                     borderColor: '#e53935',

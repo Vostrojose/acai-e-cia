@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
-
-const API_URL = 'https://api.acaiecompanhia.com.br'
+import api from '../services/api'
 
 interface TVStatus {
   id: string
@@ -20,7 +18,7 @@ export default function MonitoramentoTV() {
 
   async function carregar() {
     try {
-      const response = await axios.get(`${API_URL}/api/tvs/status`)
+      const response = await api.get('/tvs/status')
 
       setTvs(response.data.data)
     } catch (error) {
