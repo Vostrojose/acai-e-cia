@@ -4,7 +4,7 @@ import r2Service from '../services/r2.service'
 import path from 'path'
 import { randomUUID } from 'crypto'
 
-const LIMITE_UPLOAD = 300 * 1024 * 1024
+const LIMITE_UPLOAD = 1024 * 1024 * 1024
 
 const TIPOS_PERMITIDOS = [
   'image/jpeg',
@@ -162,7 +162,7 @@ class PropagandaController {
       ) {
         return res.status(400).json({
           success: false,
-          message: 'Tamanho de arquivo inválido ou superior a 300 MiB',
+          message: 'Tamanho de arquivo inválido ou superior a 1 GiB',
         })
       }
 

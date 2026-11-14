@@ -120,10 +120,10 @@ export default function Propagandas() {
         return
       }
 
-      const limite = 300 * 1024 * 1024
+      const limite = 1024 * 1024 * 1024
 
       if (arquivo.size <= 0 || arquivo.size > limite) {
-        alert('O arquivo deve ter até 300 MiB.')
+        alert('O arquivo deve ter até 1 GiB.')
         return
       }
 
@@ -518,7 +518,7 @@ export default function Propagandas() {
                 opacity: 0.6,
               }}
             >
-              Máximo recomendado: 300 MB
+              Máximo recomendado: 1 GiB
             </small>
           </label>
 

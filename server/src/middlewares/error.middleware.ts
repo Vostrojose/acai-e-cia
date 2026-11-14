@@ -23,7 +23,7 @@ export function errorMiddleware(
 
       return response.status(413).json({
         success: false,
-        error: 'O arquivo excede o limite de 300 MiB.',
+        error: 'O arquivo excede o limite de 1 GiB.',
       })
     }
 

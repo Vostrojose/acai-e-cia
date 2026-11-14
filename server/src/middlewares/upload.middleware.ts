@@ -41,6 +41,6 @@ export const uploadPropaganda = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 300 * 1024 * 1024, // 300 MiB
+    fileSize: 1024 * 1024 * 1024, // 1 GiB
   },
 })
