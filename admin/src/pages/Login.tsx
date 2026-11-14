@@ -18,7 +18,7 @@ export default function Login() {
         email,
         senha
       })
-      sessionStorage.setItem("token", res.data.token)
+      sessionStorage.setItem("token", res.data.data.token)
 
       navigate("/", { replace: true })
 
